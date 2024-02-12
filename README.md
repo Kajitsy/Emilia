@@ -11,4 +11,4 @@
 - Библиотека PyTorch с поддержкой CUDA `pip install torch --index-url https://download.pytorch.org/whl/cu118'`
 - Библиотека SoundDevice `pip install sounddevice`
 - Библиотека для перевода сообщений `pip install gpytranslate`, а затем библиотека для преобразования чисел в слова `pip install num2words`
-- <иблиотека Whisper Mic `pip install whisper-mic`
+- Библиотека WhisperMic `pip install whisper-mic`
