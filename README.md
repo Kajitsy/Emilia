@@ -1,5 +1,7 @@
 # Неактуальный GUI для [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
 
+UPD 26.03.24: занимаюсь обновлением
+
 На данный момент вы можете использовать лишь одну версию от оригинала, но этого вполне достаточно для этой версии
 Хотите использовать голос от ElevenLabs? Вам [сюда](https://github.com/jofizcd/Soul-of-Waifu), хых
 
