@@ -7,7 +7,11 @@
 
 Хотите использовать голос от ElevenLabs? Вам [сюда](https://github.com/jofizcd/Soul-of-Waifu), хых
 # Что нужно для использования?
-- Python, библиотеки к нему можно установить с помощью команды `pip install -r requirements.txt` через консоль запущенную в папке проекта
+- Python
+- Библиотеки:
+  - `pip install torch --index-url https://download.pytorch.org/whl/cu118`
+  - `pip install git+https://codeberg.org/kaiyga/CharacterAITestfork.git@main#egg=characterai`
+  - `pip install speechrecognition sounddevice gpytranslate num2words websockets`
 - Аккаунт на [old.character.ai](https://old.character.ai/) 
 - API ключ сервиса: Открывайте DevTools -> Хранилище -> Локальное хранилище -> https://old.character.ai -> char_token -> Копируйте значение value и вставляете в ID клиента
 - ID персонажа: Открывайте чат с нужным вам персонажем -> Из URL-адреса копируйте значение после https://old.character.ai/chat2?char= (если там будет что-то по типу &source=recent-chats, то это копировать не нужно)
