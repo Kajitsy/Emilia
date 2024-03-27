@@ -6,3 +6,4 @@ speechrecognition
 sounddevice
 gpytranslate
 num2words
+websockets
