@@ -1,5 +1,6 @@
 # GUI для [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
 ### Сейчас это единственная рабочая версия, ни [оригинал](https://github.com/jofizcd/Soul-of-Waifu) ни [lite-версия](https://github.com/Kajitsy/Soul-of-Waifu-Fork/tree/lite) не работают
+### Интеграции с Twitch здесь нет и скорее всего не будет
 
 На данный момент текстовая версия недоступна, возможно появится в будущем, но крайне не обещаю 
 
