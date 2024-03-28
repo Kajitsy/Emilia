@@ -6,6 +6,7 @@ import time
 import re
 import json
 import requests
+import sys
 import sounddevice as sd
 from gpytranslate import Translator
 from characterai import PyAsyncCAI
@@ -51,35 +52,39 @@ def download_russian_pt(progressbar, progress_label):
     progressbar['value'] = 0
     setup_window.update_idletasks()
 
-def load_config(char_entry, client_entry, speaker_entry):
+def load_config(char_entry, client_entry, speaker_entry, dialog_entry):
     if os.path.exists('config.json'):
         with open('config.json', 'r') as config_file:
             config = json.load(config_file)
             char_entry.insert(0, config.get('char', ''))
             client_entry.insert(0, config.get('client', ''))
             speaker_entry.insert(0, config.get('speaker', ''))
-            global char, client, speaker
+            dialog_entry.insert(0, config.get('dialog', ''))
+            global char, client, speaker, dialog
             char = char_entry.get()
             client = client_entry.get()
             speaker = speaker_entry.get()
+            dialog = dialog_entry.get()
 
 
-def setup_config(char_entry, client_entry, speaker_entry):
+def setup_config(char_entry, client_entry, speaker_entry, dialog_entry):
     global char, client, speaker
     char = char_entry.get()
     client = client_entry.get()
     speaker = speaker_entry.get()
-
+    dialog = dialog_entry.get()
     config = {
         "char": char,
         "client": client,
-        "speaker": speaker
+        "speaker": speaker,
+        "dialog": dialog
     }
 
     with open('config.json', 'w') as config_file:
         json.dump(config, config_file)
 
-    messagebox.showinfo("Сообщение", "Конфигурация сохранена в config.json")
+    messagebox.showinfo("Сообщение", "Конфигурация сохранена в config.json\nТребуется перезапуск")
+    sys.exit("Сохранение конфигурации")
 
 def show_conversation_window():
     global character_label, user_label
@@ -93,6 +98,8 @@ def show_conversation_window():
     character_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 
 def start_main():
+    if dialog == "Да":
+        show_conversation_window()
     global main_thread
     main_thread = threading.Thread(target=lambda: asyncio.run(main()))
     main_thread.start()
@@ -102,19 +109,29 @@ async def main():
         recognizer = sr.Recognizer()
         with sr.Microphone() as source:
             translation_label.config(text="Говорите...")
-            user_label.config(text="Говорите...")
+            if dialog == "Да":
+                user_label.config(text="Говорите...")
+            elif dialog == "Нет":
+                print("Пользователь: Говорите...")
             audio = recognizer.listen(source)
         try:
             msg1 = recognizer.recognize_google(audio, language="ru-RU")
         except sr.UnknownValueError:
             translation_label.config(text="Скажите ещё раз...")
-            user_label.config(text="Скажите ещё раз...")
+            if dialog == "Да":
+                user_label.config(text="Скажите ещё раз...")
+            elif dialog == "Нет":
+                print("Пользователь: Скажите ещё раз...")
             continue
         chat = await PyAsyncCAI(client).chat2.get_chat(char)
         author = {'author_id': chat['chats'][0]['creator_id']}
-        user_label.config(text="Вы: " + msg1)
+        if dialog == "Да":
+            user_label.config(text="Пользователь: " + msg1)
+        elif dialog == "Нет":
+            print("Пользователь: " + msg1)
         translation_label.config(text="Ответ: генерация...")
-        character_label.config(text="Ответ: генерация...")
+        if dialog == "Да":
+            character_label.config(text="Ответ: генерация...")
         async with PyAsyncCAI(client).connect() as chat2:
             data = await chat2.send_message(
                 char, chat['chats'][0]['chat_id'],
@@ -130,9 +147,11 @@ async def main():
                                 sample_rate=sample_rate,
                                 put_accent=put_accent,
                                 put_yo=put_yo)
-        print(f"Ответ: {nums}")
         translation_label.config(text="Ответ: " + translation.text)
-        character_label.config(text="Ответ: " + translation.text)
+        if dialog == "Да":
+            character_label.config(text="Ответ: " + translation.text)
+        elif dialog == "Нет":
+            print("Ответ: " + translation.text)
         sd.play(audio, sample_rate)
         time.sleep(len(audio - 5) / sample_rate)
         sd.stop()
@@ -140,14 +159,14 @@ async def main():
 def run_script():
     global setup_window, translation_label
     setup_window = tk.Tk()
-    setup_window.title("Настройка конфигурации")
+    setup_window.title("Настройка")
 
     char_label = tk.Label(setup_window, text="ID персонажа:")
     char_label.grid(row=0, column=0)
     char_entry = tk.Entry(setup_window)
     char_entry.grid(row=0, column=1)
 
-    client_label = tk.Label(setup_window, text="ID клиента:")
+    client_label = tk.Label(setup_window, text="Токен клиента:")
     client_label.grid(row=1, column=0)
     client_entry = tk.Entry(setup_window)
     client_entry.grid(row=1, column=1)
@@ -157,27 +176,32 @@ def run_script():
     speaker_entry = tk.Entry(setup_window)
     speaker_entry.grid(row=2, column=1)
 
-    load_config(char_entry, client_entry, speaker_entry)  
+    dialog_label = tk.Label(setup_window, text="Показать диалог(Да/Нет):")
+    dialog_label.grid(row=3, column=0)
+    dialog_entry = tk.Entry(setup_window)
+    dialog_entry.grid(row=3, column=1)
 
-    save_button = tk.Button(setup_window, text="Сохранить", command=lambda: setup_config(char_entry, client_entry, speaker_entry))
-    save_button.grid(row=3, columnspan=2)
+    load_config(char_entry, client_entry, speaker_entry, dialog_entry)  
+
+    save_button = tk.Button(setup_window, text="Сохранить", command=lambda: setup_config(char_entry, client_entry, speaker_entry, dialog_entry))
+    save_button.grid(row=4, columnspan=2)
 
     start_button = tk.Button(setup_window, text="Запустить", command=start_main)
-    start_button.grid(row=4, columnspan=2)
+    start_button.grid(row=5, columnspan=2)
 
     show_dialog_button = tk.Button(setup_window, text="Показать диалог", command=lambda: show_conversation_window())
-    show_dialog_button.grid(row=5, columnspan=2)
+    show_dialog_button.grid(row=6, columnspan=2)
 
     progress_label = tk.Label(setup_window, text="")
-    progress_label.grid(row=6, columnspan=2)
+    progress_label.grid(row=7, columnspan=2)
 
     progressbar = ttk.Progressbar(setup_window, orient='horizontal', length=200, mode='determinate')
-    progressbar.grid(row=7, columnspan=2)
+    progressbar.grid(row=8, columnspan=2)
 
     threading.Thread(target=lambda: download_russian_pt(progressbar, progress_label)).start()
 
     translation_label = tk.Label(setup_window, text="")
-    translation_label.grid(row=8, columnspan=2)
+    translation_label.grid(row=9, columnspan=2)
 
     setup_window.mainloop()
 
