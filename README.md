@@ -1,22 +1,17 @@
-# GUI для [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
-### Сейчас это единственная рабочая версия, ни [оригинал](https://github.com/jofizcd/Soul-of-Waifu) ни [lite-версия](https://github.com/Kajitsy/Soul-of-Waifu-Fork/tree/lite) не работают
-### Интеграции с Twitch здесь нет и скорее всего не будет
-
-На данный момент текстовая версия недоступна, возможно появится в будущем, но крайне не обещаю 
+# Emilia - это графический интерфейс для [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
 
 Простенький интерфейс, пишите свои идеи либо в [дискорд создателя](https://discord.gg/6UvYzBKCZK) т.к. я там есть, либо в Issues 
 
 Хотите использовать голос от ElevenLabs? Вам [сюда](https://github.com/jofizcd/Soul-of-Waifu), хых
 # Что нужно для использования?
-- Python
+- Установленный Python 
 - Библиотеки:
   - `pip install torch --index-url https://download.pytorch.org/whl/cu118`
   - `pip install git+https://codeberg.org/kaiyga/CharacterAITestfork.git@main#egg=characterai`
-  - `pip install speechrecognition sounddevice gpytranslate num2words websockets`
+  - `pip install speechrecognition sounddevice gpytranslate num2words websockets PyQt6`
 - Аккаунт на [old.character.ai](https://old.character.ai/) 
 - API ключ сервиса: Открывайте DevTools -> Хранилище -> Локальное хранилище -> https://old.character.ai -> char_token -> Копируйте значение value и вставляете в ID клиента
 - ID персонажа: Открывайте чат с нужным вам персонажем -> Из URL-адреса копируйте значение после https://old.character.ai/chat2?char= (если там будет что-то по типу &source=recent-chats, то это копировать не нужно)
-- Голос выбирается [отсюда](https://github.com/snakers4/silero-models?tab=readme-ov-file#v4), из строки с ID `v4_ru`
 
 # Отличия версий
 <table>
@@ -48,8 +43,8 @@
       <td>:negative_squared_cross_mark:</td>
     </tr>
     <tr>
-      <td rowspan="1">GUI</td>
-      <td>:negative_squared_cross_mark:</td>
+      <td rowspan="1">Emilia</td>
+      <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
       <td>:negative_squared_cross_mark:</td>
