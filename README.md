@@ -20,7 +20,7 @@
   <thead>
     <tr>
       <th rowspan="2">Версия</th>
-      <th colspan="6">Возможности</th>
+      <th colspan="7">Возможности</th>
       <th colspan="1">Работает?</th>
     </tr>
     <tr>
@@ -30,6 +30,7 @@
       <th>Озвучка ElevenLabs</th>
       <th>Графический интерфейс</th>
       <th>Консольный интерфейс</th>
+      <th>Gemini 1.5</th>
       <th></th>
     </tr>
   </thead>
@@ -43,6 +44,7 @@
       <td>:negative_squared_cross_mark:</td>
       <td>:white_check_mark:</td>
       <td>:negative_squared_cross_mark:</td>
+      <td>:negative_squared_cross_mark:</td>
     </tr>
     <tr>
       <td rowspan="1">Emilia</td>
@@ -52,6 +54,17 @@
       <td>:negative_squared_cross_mark:</td>
       <td>:white_check_mark:</td>
       <td>:negative_squared_cross_mark:</td>
+      <td>:negative_squared_cross_mark:</td>
+      <td>:white_check_mark:</td>
+    <tr>
+      <td rowspan="1">Emilia Pre</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:negative_squared_cross_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:negative_squared_cross_mark:</td>
+      <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
     </tr>
       <td rowspan="1">Lite</td>
@@ -61,6 +74,7 @@
       <td>:negative_squared_cross_mark:</td>
       <td>:negative_squared_cross_mark:</td>
       <td>:white_check_mark:</td>
+      <td>:negative_squared_cross_mark:</td>
       <td>:negative_squared_cross_mark:</td>
   </tbody>
 </table>
