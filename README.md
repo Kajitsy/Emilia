@@ -1,5 +1,7 @@
 # Emilia - это графический интерфейс для [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
 
+[Скачать последний релиз](https://github.com/Kajitsy/Soul-of-Waifu-Fork/archive/refs/tags/2.0.0.zip)
+
 Простенький интерфейс, пишите свои идеи либо в [дискорд создателя](https://discord.gg/6UvYzBKCZK) т.к. я там есть, либо в Issues 
 
 Хотите использовать голос от ElevenLabs? Вам [сюда](https://github.com/jofizcd/Soul-of-Waifu), хых
