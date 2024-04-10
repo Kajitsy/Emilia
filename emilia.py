@@ -14,20 +14,30 @@ import speech_recognition as sr
 from num2words import num2words
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QPixmap
+import google.generativeai as genai
 
-version = "2.0"
+version = "pre2.1"
 local_file = 'russian.pt'
 device = torch.device('cuda')
 sample_rate = 48000
 put_accent = True
 put_yo = True
-debugmode = False
+devmode = "false"
 
 def numbers_to_words(text):
     def _conv_num(match):
         return num2words(int(match.group()), lang='ru')
     return re.sub(r'\b\d+\b', _conv_num, text)
 
+if os.path.exists('config.json'):
+    with open('config.json', 'r') as config_file:
+        config = json.load(config_file)
+        global aitype
+        aitype = config.get('aitype', '')
+        if aitype != "charai":
+            aitype = "gemini"
+        else:
+            aitype = "charai"
 class EmiliaGUI(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -36,18 +46,23 @@ class EmiliaGUI(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
         global tstart_button, user_aiinput, vstart_button, visibletextmode, visiblevoicemode, issues
-
-        char_label = QLabel("ID персонажа:")
-        self.layout.addWidget(char_label)
-        self.char_entry = QLineEdit()
-        self.layout.addWidget(self.char_entry)
-        self.char_entry.setPlaceholderText("ID...")
-
-        client_label = QLabel("Токен клиента:")
-        self.layout.addWidget(client_label)
-        self.client_entry = QLineEdit()
-        self.layout.addWidget(self.client_entry)
-        self.client_entry.setPlaceholderText("Токен...")
+        if aitype == "gemini":
+            token_label = QLabel("Gemini Token:")
+            self.layout.addWidget(token_label)
+            self.token_entry = QLineEdit()
+            self.layout.addWidget(self.token_entry)
+            self.token_entry.setPlaceholderText("Ваш Gemini токен...")
+        else:
+            char_label = QLabel("ID персонажа:")
+            self.layout.addWidget(char_label)
+            self.char_entry = QLineEdit()
+            self.layout.addWidget(self.char_entry)
+            self.char_entry.setPlaceholderText("ID...")
+            client_label = QLabel("Токен клиента:")
+            self.layout.addWidget(client_label)
+            self.client_entry = QLineEdit()
+            self.layout.addWidget(self.client_entry)
+            self.client_entry.setPlaceholderText("Токен...")
 
         speaker_label = QLabel("Голос:")
         self.layout.addWidget(speaker_label)
@@ -58,7 +73,10 @@ class EmiliaGUI(QMainWindow):
         self.load_config()
 
         save_button = QPushButton("Сохранить")
-        save_button.clicked.connect(lambda: self.setup_config(self.char_entry, self.client_entry, self.speaker_entry))
+        if aitype == "charai":
+            save_button.clicked.connect(lambda: self.charsetupconfig(self.char_entry, self.client_entry, self.speaker_entry))
+        else: 
+            save_button.clicked.connect(lambda: self.geminisetupconfig(self.token_entry, self.speaker_entry))
         self.layout.addWidget(save_button)
 
         vstart_button = QPushButton("Запустить")
@@ -87,7 +105,7 @@ class EmiliaGUI(QMainWindow):
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
-        menubar.addMenu('                                                     ')
+        menubar.addMenu('                                               ')
         ver_menu = menubar.addMenu('&Версия: ' + version)
 
         issues = QAction(QIcon('github.png'), '&Сообщить об ошибке', self)
@@ -104,6 +122,21 @@ class EmiliaGUI(QMainWindow):
         visiblevoicemode = QAction('&Активировать голосовой режим', self)
         visiblevoicemode.setEnabled(False)
         emi_menu.addAction(visiblevoicemode)
+
+        usegemini = QAction('&Использовать Gemini', self)
+        usegemini.triggered.connect(lambda: self.geminiuse(self.speaker_entry))
+        emi_menu.addAction(usegemini)
+
+        usecharai = QAction('&Использовать Character.AI', self)
+        usecharai.triggered.connect(lambda: self.charaiuse(self.speaker_entry))
+        emi_menu.addAction(usecharai)
+
+        if aitype == "charai":
+            usecharai.setVisible(False)
+            usegemini.setVisible(True)
+        else:
+            usegemini.setVisible(False)
+            usecharai.setVisible(True)
 
         visibletextmode.triggered.connect(self.hidetext)
         visiblevoicemode.triggered.connect(self.hidevoice)
@@ -128,16 +161,87 @@ class EmiliaGUI(QMainWindow):
         user_aiinput.setVisible(True)
         visiblevoicemode.setEnabled(True)
 
+    def geminiuse(self, speaker_entry):
+        global aitype
+        aitype = "gemini"
+        config = {
+            "speaker": speaker_entry.text(),
+            "aitype": aitype
+        }
+        with open('config.json', 'w') as config_file:
+            json.dump(config, config_file)
+        msg = QMessageBox()
+        msg.setWindowTitle("Требуется перезапуск")
+        msg.setWindowIcon(QIcon('emilia.png'))
+        pixmap = QPixmap('emilia.png').scaled(64, 64)
+        msg.setIconPixmap(pixmap)
+        text = "Конфигурация сохранена в config.json\nТребуется перезапуск"
+        msg.setText(text)
+        msg.exec()
+        self.central_widget.setLayout(self.layout)
+        sys.exit("Сохранение конфигурации")
+
+    def charaiuse(self, speaker_entry):
+        global aitype
+        aitype = "charai"
+        config = {
+            "speaker": speaker_entry.text(),
+            "aitype": aitype
+        }
+        with open('config.json', 'w') as config_file:
+            json.dump(config, config_file)
+        self.central_widget.setLayout(self.layout)
+        msg = QMessageBox()
+        msg.setWindowTitle("Требуется перезапуск")
+        msg.setWindowIcon(QIcon('emilia.png'))
+        pixmap = QPixmap('emilia.png').scaled(64, 64)
+        msg.setIconPixmap(pixmap)
+        text = "Конфигурация сохранена в config.json\nТребуется перезапуск"
+        msg.setText(text)
+        msg.exec()
+        sys.exit("Сохранение конфигурации")
+
     def about(self):
         msg = QMessageBox()
         msg.setWindowTitle("Об Emilia")
         msg.setWindowIcon(QIcon('emilia.png'))
         pixmap = QPixmap('emilia.png').scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>. На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Soul-of-Waifu-Fork'>GitHub</a>"
+        whatsnew = "Что нового в " + version + ": <br>  • Изменён код, очевидно ж <br>   • Добавлена возможность общения с Google Gemini 1.5 Pro"
+        otherversions = "<br><br><a href='https://github.com/Kajitsy/Soul-of-Waifu-Fork/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>"
+        text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Soul-of-Waifu-Fork'>GitHub</a><br><br>" + whatsnew + otherversions
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)
+
+    def reading_chat_history(self):
+      with open('chat_history.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+      return data
+
+    def writing_chat_history(self, text):
+        try:
+            with open('chat_history.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError:
+             data = {}
+
+        data.update(text)
+
+        with open('chat_history.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    def chating(self, textinchat):
+        model = genai.GenerativeModel('gemini-pro')
+        chat = model.start_chat(history=[])
+        # chat.send_message(first_message) #Это функция из будущего.
+        if devmode == "True":
+            chat.send_message("Вот наша с тобой история чата: " + self.reading_chat_history())
+        for chunk in chat.send_message(textinchat):
+            continue
+        return chunk.text
 
     async def main(self):
         while True:
@@ -150,16 +254,23 @@ class EmiliaGUI(QMainWindow):
             except sr.UnknownValueError:
                 self.user_input.setText("Скажите ещё раз...")
                 continue
-            self.ai_output.setText("Ответ: генерация...")
-            chat = await PyAsyncCAI(client).chat2.get_chat(char)
-            author = {'author_id': chat['chats'][0]['creator_id']}
             self.user_input.setText("Пользователь: " + msg1)
-            async with PyAsyncCAI(client).connect() as chat2:
-                data = await chat2.send_message(
-                    char, chat['chats'][0]['chat_id'],
-                    msg1, author
-                )
-            textil = data['turn']['candidates'][0]['raw_content']
+            if devmode == "true":
+                self.writing_chat_history({"Пользователь: ": msg1})
+            self.ai_output.setText("Ответ: генерация...")
+            if aitype == "charai":
+                chat = await PyAsyncCAI(client).chat2.get_chat(char)
+                author = {'author_id': chat['chats'][0]['creator_id']}
+                async with PyAsyncCAI(client).connect() as chat2:
+                    data = await chat2.send_message(
+                        char, chat['chats'][0]['chat_id'],
+                        msg1, author
+                    )
+                textil = data['turn']['candidates'][0]['raw_content']
+            else:
+                textil = self.chating(msg1)
+            if devmode == "true":
+                self.writing_chat_history({"Gemini: ": textil})
             translation = await Translator().translate(textil, targetlang="ru")
             nums = numbers_to_words(translation.text)
             model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
@@ -175,17 +286,25 @@ class EmiliaGUI(QMainWindow):
             sd.stop()
         
     async def maintext(self):
+        print(devmode)
         self.user_input.setText("Пользователь: ")
         msg1 = user_aiinput.text()
-        chat = await PyAsyncCAI(client).chat2.get_chat(char)
-        author = {'author_id': chat['chats'][0]['creator_id']}
+        if devmode == "true":
+            self.writing_chat_history({"Пользователь: ": msg1})
         self.ai_output.setText("Ответ: генерация...")
-        async with PyAsyncCAI(client).connect() as chat2:
-            data = await chat2.send_message(
-                char, chat['chats'][0]['chat_id'],
-                msg1, author
-            )
-        textil = data['turn']['candidates'][0]['raw_content']
+        if aitype == "charai":
+            chat = await PyAsyncCAI(client).chat2.get_chat(char)
+            author = {'author_id': chat['chats'][0]['creator_id']}
+            async with PyAsyncCAI(client).connect() as chat2:
+                data = await chat2.send_message(
+                    char, chat['chats'][0]['chat_id'],
+                    msg1, author
+                )
+            textil = data['turn']['candidates'][0]['raw_content']
+        else:
+            textil = self.chating(msg1)
+        if devmode == "true":
+            self.writing_chat_history({"Gemini: ": textil})
         translation = await Translator().translate(textil, targetlang="ru")
         nums = numbers_to_words(translation.text)
         model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
@@ -212,37 +331,66 @@ class EmiliaGUI(QMainWindow):
             threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
 
     def load_config(self):
-        if debugmode:
-            print("Настройки загружены")
+        global speaker, char, client, token
+        if aitype == "charai":
+            if os.path.exists('charaiconfig.json'):
+                with open('charaiconfig.json', 'r') as config_file:
+                    config = json.load(config_file)
+                    char = config.get('char', '')
+                    client = config.get('client', '')
+                    self.char_entry.setText(char)
+                    self.client_entry.setText(client)
+        else:
+            if os.path.exists('geminiconfig.json'):
+                with open('geminiconfig.json', 'r') as config_file:
+                    config = json.load(config_file)
+                    token = config.get('token', '')
+                    self.token_entry.setText(token)
+                    genai.configure(api_key=token)
         if os.path.exists('config.json'):
             with open('config.json', 'r') as config_file:
                 config = json.load(config_file)
-                self.char_entry.setText(config.get('char', ''))
-                self.client_entry.setText(config.get('client', ''))
-                self.speaker_entry.setText(config.get('speaker', ''))
-                global char, client, speaker
-                char = config.get('char', '')
-                client = config.get('client', '')
                 speaker = config.get('speaker', '')
+                self.speaker_entry.setText(speaker)
 
-    def setup_config(self, char_entry, client_entry, speaker_entry):
-        if debugmode:
-            print("Настройки сохранены")
-        global char, client, speaker
+    def charsetupconfig(self, char_entry, client_entry, speaker_entry):
+        global char, client
         char = char_entry.text()
         client = client_entry.text()
-        speaker = speaker_entry.text()
         config = {
             "char": char,
-            "client": client,
-            "speaker": speaker
+            "client": client
+        }
+
+        with open('charaiconfig.json', 'w') as config_file:
+            json.dump(config, config_file)
+        self.globalsetupconfig(speaker_entry)
+
+    def geminisetupconfig(self, token_entry, speaker_entry):
+        global token, aitype
+        token = token_entry.text()
+        config = {
+            "token": token_entry.text()
+        }
+        with open('geminiconfig.json', 'w') as config_file:
+            json.dump(config, config_file)
+        self.globalsetupconfig(speaker_entry)
+        genai.configure(api_key=token)
+
+    def globalsetupconfig(self, speaker_entry):
+        global speaker, aitype
+        speaker = speaker_entry.text()
+        config = {
+            "speaker": speaker,
+            "aitype": aitype
         }
 
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file)
 
     def debugfun(self):
-        global version
+        global version, devmode
+        devmode = "true"
         version = "Debug"
         self.setWindowTitle("Emilia Debug")
         msg = QMessageBox()
@@ -255,6 +403,7 @@ class EmiliaGUI(QMainWindow):
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)
+        self.writing_chat_history({"Пользователь: " : "Да"})
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
