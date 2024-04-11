@@ -8,15 +8,21 @@ import json
 import sys
 import webbrowser
 import sounddevice as sd
+import google.generativeai as genai
+import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import PyAsyncCAI
-import speech_recognition as sr
 from num2words import num2words
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
 from PyQt6.QtGui import QIcon, QAction, QPixmap
-import google.generativeai as genai
 
-version = "pre2.1"
+ver = "2.1"
+build = "241104"
+pre = "True"
+if pre == "True":
+    version = "pre" + ver
+else:
+    version = ver
 local_file = 'russian.pt'
 device = torch.device('cuda')
 sample_rate = 48000
@@ -29,15 +35,33 @@ def numbers_to_words(text):
         return num2words(int(match.group()), lang='ru')
     return re.sub(r'\b\d+\b', _conv_num, text)
 
-if os.path.exists('config.json'):
+
+global aitype
+if os.path.exists('config.json'): #Определяет какой сервис использовать
     with open('config.json', 'r') as config_file:
         config = json.load(config_file)
-        global aitype
         aitype = config.get('aitype', '')
         if aitype != "charai":
             aitype = "gemini"
         else:
             aitype = "charai"
+        theme = config.get('theme', '')
+        if theme != "dark":
+            guitheme = 'windowsvista'
+        else:
+            guitheme = 'Fusion'
+            
+else:
+    aitype = "charai"
+
+if pre == "True":
+    emiliaicon = './images/premilia.png'
+else:
+    emiliaicon = './images/emilia.png'
+githubicon = './images/github.png'
+googleicon = './images/google.png'
+charaiicon = './images/charai.png'
+
 class EmiliaGUI(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -105,16 +129,27 @@ class EmiliaGUI(QMainWindow):
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
-        menubar.addMenu('                                               ')
+        if theme != "dark":
+            spacer = menubar.addMenu('                                               ')
+        else:
+            spacer = menubar.addMenu('                                                 ')
+        spacer.setEnabled(False)
         ver_menu = menubar.addMenu('&Версия: ' + version)
 
-        issues = QAction(QIcon('github.png'), '&Сообщить об ошибке', self)
+        issues = QAction(QIcon(githubicon), '&Сообщить об ошибке', self)
         issues.triggered.connect(self.issuesopen)
         emi_menu.addAction(issues)
 
-        debug = QAction(QIcon('github.png'), '&Debug', self)
+        debug = QAction(QIcon('./images/emilia.png'), '&Debug', self)
         debug.triggered.connect(self.debugfun)
         ver_menu.addAction(debug)
+
+        changethemeaction = QAction('&Сменить тему', self)
+        if theme == "dark":
+            changethemeaction.triggered.connect(lambda: self.change_theme("white"))
+        else:
+            changethemeaction.triggered.connect(lambda: self.change_theme("dark"))
+        emi_menu.addAction(changethemeaction)
 
         visibletextmode = QAction('&Активировать текстовый режим', self)
         emi_menu.addAction(visibletextmode)
@@ -123,31 +158,38 @@ class EmiliaGUI(QMainWindow):
         visiblevoicemode.setEnabled(False)
         emi_menu.addAction(visiblevoicemode)
 
-        usegemini = QAction('&Использовать Gemini', self)
-        usegemini.triggered.connect(lambda: self.geminiuse(self.speaker_entry))
-        emi_menu.addAction(usegemini)
+        serviceselect = QMenu('&Смена ИИ-сервиса', self)
+        emi_menu.addMenu(serviceselect)
 
-        usecharai = QAction('&Использовать Character.AI', self)
+        usegemini = QAction(QIcon(googleicon), '&Использовать Gemini', self)
+        usegemini.triggered.connect(lambda: self.geminiuse(self.speaker_entry))
+        serviceselect.addAction(usegemini)
+
+        usecharai = QAction(QIcon(charaiicon), '&Использовать Character.AI', self)
         usecharai.triggered.connect(lambda: self.charaiuse(self.speaker_entry))
-        emi_menu.addAction(usecharai)
+        serviceselect.addAction(usecharai)
 
         if aitype == "charai":
-            usecharai.setVisible(False)
-            usegemini.setVisible(True)
+            usecharai.setEnabled(False)
+            usegemini.setEnabled(True)
         else:
-            usegemini.setVisible(False)
-            usecharai.setVisible(True)
-
+            usegemini.setEnabled(False)
+            usecharai.setEnabled(True)
+        
         visibletextmode.triggered.connect(self.hidetext)
         visiblevoicemode.triggered.connect(self.hidevoice)
-        aboutemi = QAction(QIcon('emilia.png'), '&Об Emilia', self)
+        aboutemi = QAction(QIcon(emiliaicon), '&Об Emilia', self)
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
 
     def issuesopen(self):
-        webbrowser.open("https://github.com/Kajitsy/Soul-of-Waifu-Fork/issues")
+        if devmode == "true":
+            print("GitHub открыт")
+        webbrowser.open("https://github.com/Kajitsy/Emilia/issues")
 
     def hidevoice(self):
+        if devmode == "true":
+            print("Используется голосовой режим")
         tstart_button.setVisible(False)
         user_aiinput.setVisible(False)
         visiblevoicemode.setEnabled(False)
@@ -155,6 +197,8 @@ class EmiliaGUI(QMainWindow):
         visibletextmode.setEnabled(True)
 
     def hidetext(self):
+        if devmode == "true":
+            print("Используется текстовый режим")
         vstart_button.setVisible(False)
         visibletextmode.setEnabled(False)
         tstart_button.setVisible(True)
@@ -162,6 +206,8 @@ class EmiliaGUI(QMainWindow):
         visiblevoicemode.setEnabled(True)
 
     def geminiuse(self, speaker_entry):
+        if devmode == "true":
+            print("Используется Gemini")
         global aitype
         aitype = "gemini"
         config = {
@@ -170,18 +216,15 @@ class EmiliaGUI(QMainWindow):
         }
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file)
-        msg = QMessageBox()
-        msg.setWindowTitle("Требуется перезапуск")
-        msg.setWindowIcon(QIcon('emilia.png'))
-        pixmap = QPixmap('emilia.png').scaled(64, 64)
-        msg.setIconPixmap(pixmap)
-        text = "Конфигурация сохранена в config.json\nТребуется перезапуск"
-        msg.setText(text)
-        msg.exec()
-        self.central_widget.setLayout(self.layout)
-        sys.exit("Сохранение конфигурации")
+        if devmode != "true":
+            self.restartneed("Сервис изменён на Gemini!\nТребуется перезапуск")
+            sys.exit("Изменение сервиса...")
+        else:
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def charaiuse(self, speaker_entry):
+        if devmode == "true":
+            print("Используется Char.AI")
         global aitype
         aitype = "charai"
         config = {
@@ -190,36 +233,62 @@ class EmiliaGUI(QMainWindow):
         }
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file)
-        self.central_widget.setLayout(self.layout)
-        msg = QMessageBox()
-        msg.setWindowTitle("Требуется перезапуск")
-        msg.setWindowIcon(QIcon('emilia.png'))
-        pixmap = QPixmap('emilia.png').scaled(64, 64)
-        msg.setIconPixmap(pixmap)
-        text = "Конфигурация сохранена в config.json\nТребуется перезапуск"
-        msg.setText(text)
-        msg.exec()
-        sys.exit("Сохранение конфигурации")
+        if devmode != "true":
+            self.restartneed("Сервис изменён на Character.AI!\nТребуется перезапуск")
+            sys.exit("Изменение сервиса...")
+        else:
+            os.execv(sys.executable, ['python'] + sys.argv)
+
+    def change_theme(self, theme):
+        if devmode == "true":
+            print("Тема изменена на " + theme)
+        try:
+            with open('config.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError:
+             data = {}
+
+        data.update({"theme": theme})
+
+        with open('config.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        if devmode != "true":
+            self.restartneed("Тема изменена!\nТребуется перезапуск")
+            sys.exit("Смена темы...")
+        else:
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def about(self):
+        if devmode == "true":
+            print("Открыто окно 'Об Emilia'")
         msg = QMessageBox()
-        msg.setWindowTitle("Об Emilia")
-        msg.setWindowIcon(QIcon('emilia.png'))
-        pixmap = QPixmap('emilia.png').scaled(64, 64)
+        if pre == "True":
+            msg.setWindowTitle("Об Emilia " + build)
+        else:
+            msg.setWindowTitle("Об Emilia")
+        msg.setWindowIcon(QIcon(emiliaicon))
+        pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        whatsnew = "Что нового в " + version + ": <br>  • Изменён код, очевидно ж <br>   • Добавлена возможность общения с Google Gemini 1.5 Pro"
-        otherversions = "<br><br><a href='https://github.com/Kajitsy/Soul-of-Waifu-Fork/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>"
-        text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Soul-of-Waifu-Fork'>GitHub</a><br><br>" + whatsnew + otherversions
+        whatsnew = "Что нового в " + version + ": <br>• Проект на GitHub переименован с Soul-Of-Waifu-Work на Emilia <br>• Добавлена возможность общения с Google Gemini 1.5 Pro<br>• Добавлена тёмная тема"
+        otherversions = "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>"
+        text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a><br><br>" + whatsnew + otherversions
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)
 
     def reading_chat_history(self):
+      if devmode == "true":
+            print("Прочтение истории чата")
       with open('chat_history.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
       return data
 
     def writing_chat_history(self, text):
+        if devmode == "true":
+            print("Запись истории чата")
         try:
             with open('chat_history.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -232,8 +301,10 @@ class EmiliaGUI(QMainWindow):
 
         with open('chat_history.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-
+    
     def chating(self, textinchat):
+        if devmode == "true":
+            print("Генерация ответа Gemini")
         model = genai.GenerativeModel('gemini-pro')
         chat = model.start_chat(history=[])
         # chat.send_message(first_message) #Это функция из будущего.
@@ -244,6 +315,8 @@ class EmiliaGUI(QMainWindow):
         return chunk.text
 
     async def main(self):
+        if devmode == "true":
+            print("Запуск в голосовом режиме")
         while True:
             recognizer = sr.Recognizer()
             with sr.Microphone() as source:
@@ -286,7 +359,8 @@ class EmiliaGUI(QMainWindow):
             sd.stop()
         
     async def maintext(self):
-        print(devmode)
+        if devmode == "true":
+            print("Запуск в текстовом режиме")
         self.user_input.setText("Пользователь: ")
         msg1 = user_aiinput.text()
         if devmode == "true":
@@ -331,6 +405,8 @@ class EmiliaGUI(QMainWindow):
             threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
 
     def load_config(self):
+        if devmode == "true":
+            print("Конфиг загружен")
         global speaker, char, client, token
         if aitype == "charai":
             if os.path.exists('charaiconfig.json'):
@@ -354,6 +430,8 @@ class EmiliaGUI(QMainWindow):
                 self.speaker_entry.setText(speaker)
 
     def charsetupconfig(self, char_entry, client_entry, speaker_entry):
+        if devmode == "true":
+            print("Конфиг Char.AI сохранён")
         global char, client
         char = char_entry.text()
         client = client_entry.text()
@@ -367,6 +445,8 @@ class EmiliaGUI(QMainWindow):
         self.globalsetupconfig(speaker_entry)
 
     def geminisetupconfig(self, token_entry, speaker_entry):
+        if devmode == "true":
+            print("Конфиг Gemini сохранён")
         global token, aitype
         token = token_entry.text()
         config = {
@@ -378,26 +458,39 @@ class EmiliaGUI(QMainWindow):
         genai.configure(api_key=token)
 
     def globalsetupconfig(self, speaker_entry):
+        if devmode == "true":
+            print("Общий конфиг сохранён")
         global speaker, aitype
         speaker = speaker_entry.text()
         config = {
             "speaker": speaker,
-            "aitype": aitype
+            "aitype": aitype,
+            "theme": theme
         }
 
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file)
 
+    def restartneed(self, text):
+        if devmode == "true":
+            print("Открыто окно 'Требуется перезапуск с текстом '" + text)
+        msg = QMessageBox()
+        msg.setWindowTitle("Требуется перезапуск")
+        msg.setWindowIcon(QIcon(emiliaicon))
+        msg.setText(text)
+        msg.exec()
+        self.central_widget.setLayout(self.layout)
+    
     def debugfun(self):
         global version, devmode
         devmode = "true"
         version = "Debug"
         self.setWindowTitle("Emilia Debug")
         msg = QMessageBox()
-        msg.setStyleSheet("QMessageBox {background-color: red;}")
+        msg.setStyleSheet("QMessageBox {background-color: red; text-color}")
         msg.setWindowTitle("Emilia Error")
-        msg.setWindowIcon(QIcon('emilia.png'))
-        pixmap = QPixmap('emilia.png').scaled(64, 64)
+        msg.setWindowIcon(QIcon(emiliaicon))
+        pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
         text = "Зачем ты здесь что-то ищешь?\nПонимаешь что здесь ничего нет?\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nНет?"
         msg.setText(text)
@@ -407,9 +500,9 @@ class EmiliaGUI(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # app.setStyle('Fusion') #если нужна тёмная тема
+    app.setStyle(guitheme) #если нужна тёмная тема
     window = EmiliaGUI()
     window.setFixedWidth(300)
-    window.setWindowIcon(QIcon("emilia.png"))
+    window.setWindowIcon(QIcon(emiliaicon))
     window.show()
     sys.exit(app.exec())
