@@ -67,14 +67,5 @@
       <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
     </tr>
-      <td rowspan="1">Lite</td>
-      <td>:white_check_mark:</td>
-      <td>:white_check_mark:</td>
-      <td>:white_check_mark:</td>
-      <td>:negative_squared_cross_mark:</td>
-      <td>:negative_squared_cross_mark:</td>
-      <td>:white_check_mark:</td>
-      <td>:negative_squared_cross_mark:</td>
-      <td>:negative_squared_cross_mark:</td>
   </tbody>
 </table>
