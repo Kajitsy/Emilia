@@ -11,13 +11,13 @@ import sounddevice as sd
 import google.generativeai as genai
 import speech_recognition as sr
 from gpytranslate import Translator
-from characterai import PyAsyncCAI
+from characterai import aiocai, sendCode, authUser
 from num2words import num2words
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
 from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 ver = "2.1"
-build = "241104"
+build = "241204"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -144,6 +144,10 @@ class EmiliaGUI(QMainWindow):
         debug.triggered.connect(self.debugfun)
         ver_menu.addAction(debug)
 
+        debug = QAction(QIcon('./images/emilia.png'), '&Получить Char.AI токен', self)
+        debug.triggered.connect(lambda: self.gettoken())
+        emi_menu.addAction(debug)
+
         changethemeaction = QAction('&Сменить тему', self)
         if theme == "dark":
             changethemeaction.triggered.connect(lambda: self.change_theme("white"))
@@ -181,6 +185,14 @@ class EmiliaGUI(QMainWindow):
         aboutemi = QAction(QIcon(emiliaicon), '&Об Emilia', self)
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
+
+    def gettoken(self):
+        self.restartneed("Функция была добавлена относительно недавно и поэтому не готова.\nПожалуйста, закройте это окно и переключитесь на консоль :)")
+        email  = input('Введите вам E-mail: ')
+        sendCode(email)
+        link = input('Письмо отправлено на вашу почту\nСкопируйте и вставьте ссылку из него: ')
+        token = authUser(link, email)
+        print(f'Ваш токен: {token}')
 
     def issuesopen(self):
         if devmode == "true":
@@ -332,19 +344,16 @@ class EmiliaGUI(QMainWindow):
                 self.writing_chat_history({"Пользователь: ": msg1})
             self.ai_output.setText("Ответ: генерация...")
             if aitype == "charai":
-                chat = await PyAsyncCAI(client).chat2.get_chat(char)
-                author = {'author_id': chat['chats'][0]['creator_id']}
-                async with PyAsyncCAI(client).connect() as chat2:
-                    data = await chat2.send_message(
-                        char, chat['chats'][0]['chat_id'],
-                        msg1, author
-                    )
-                textil = data['turn']['candidates'][0]['raw_content']
+                token = aiocai.Client(client)
+                chatid = await token.get_chat(char)
+                async with await token.connect() as chat:
+                    messagenotext = await chat.send_message(char, chatid.chat_id, msg1)
+                    message = messagenotext.text
             else:
-                textil = self.chating(msg1)
+                message = self.chating(msg1)
             if devmode == "true":
-                self.writing_chat_history({"Gemini: ": textil})
-            translation = await Translator().translate(textil, targetlang="ru")
+                self.writing_chat_history({"AI: ": message})
+            translation = await Translator().translate(message, targetlang="ru")
             nums = numbers_to_words(translation.text)
             model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
             model.to(device)
@@ -367,19 +376,16 @@ class EmiliaGUI(QMainWindow):
             self.writing_chat_history({"Пользователь: ": msg1})
         self.ai_output.setText("Ответ: генерация...")
         if aitype == "charai":
-            chat = await PyAsyncCAI(client).chat2.get_chat(char)
-            author = {'author_id': chat['chats'][0]['creator_id']}
-            async with PyAsyncCAI(client).connect() as chat2:
-                data = await chat2.send_message(
-                    char, chat['chats'][0]['chat_id'],
-                    msg1, author
-                )
-            textil = data['turn']['candidates'][0]['raw_content']
+            token = aiocai.Client(client)
+            chatid = await token.get_chat(char)
+            async with await token.connect() as chat:
+                messagenotext = await chat.send_message(char, chatid.chat_id, msg1)
+                message = messagenotext.text
         else:
-            textil = self.chating(msg1)
+            message = self.chating(msg1)
         if devmode == "true":
-            self.writing_chat_history({"Gemini: ": textil})
-        translation = await Translator().translate(textil, targetlang="ru")
+            self.writing_chat_history({"AI: ": message})
+        translation = await Translator().translate(message, targetlang="ru")
         nums = numbers_to_words(translation.text)
         model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
         model.to(device)
@@ -472,8 +478,6 @@ class EmiliaGUI(QMainWindow):
             json.dump(config, config_file)
 
     def restartneed(self, text):
-        if devmode == "true":
-            print("Открыто окно 'Требуется перезапуск с текстом '" + text)
         msg = QMessageBox()
         msg.setWindowTitle("Требуется перезапуск")
         msg.setWindowIcon(QIcon(emiliaicon))
