@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushB
 from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 ver = "2.1"
-build = "241204"
+build = "241304"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -36,31 +36,35 @@ def numbers_to_words(text):
     return re.sub(r'\b\d+\b', _conv_num, text)
 
 
-global aitype
-if os.path.exists('config.json'): #Определяет какой сервис использовать
+if os.path.exists('config.json'):
     with open('config.json', 'r') as config_file:
         config = json.load(config_file)
         aitype = config.get('aitype', '')
-        if aitype != "charai":
+        if aitype == "gemini":
             aitype = "gemini"
         else:
             aitype = "charai"
         theme = config.get('theme', '')
-        if theme != "dark":
-            guitheme = 'windowsvista'
-        else:
+        if theme == "dark":
             guitheme = 'Fusion'
-            
+        else:
+            guitheme = 'windowsvista'
 else:
+    guitheme = 'windowsvista'
     aitype = "charai"
-
+#Иконки
 if pre == "True":
     emiliaicon = './images/premilia.png'
 else:
     emiliaicon = './images/emilia.png'
-githubicon = './images/github.png'
 googleicon = './images/google.png'
 charaiicon = './images/charai.png'
+if guitheme == 'Fusion':
+    themeicon = './images/sun.png'
+    githubicon = './images/github_white.png'
+else:
+    themeicon = './images/moon.png'
+    githubicon = './images/github.png'
 
 class EmiliaGUI(QMainWindow):
     def __init__(self):
@@ -129,7 +133,7 @@ class EmiliaGUI(QMainWindow):
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
-        if theme != "dark":
+        if guitheme == 'Fusion':
             spacer = menubar.addMenu('                                               ')
         else:
             spacer = menubar.addMenu('                                                 ')
@@ -144,12 +148,12 @@ class EmiliaGUI(QMainWindow):
         debug.triggered.connect(self.debugfun)
         ver_menu.addAction(debug)
 
-        debug = QAction(QIcon('./images/emilia.png'), '&Получить Char.AI токен', self)
-        debug.triggered.connect(lambda: self.gettoken())
-        emi_menu.addAction(debug)
+        getcharaitoken = QAction(QIcon(charaiicon), '&Получить Char.AI токен', self)
+        getcharaitoken.triggered.connect(lambda: self.gettoken())
+        emi_menu.addAction(getcharaitoken)
 
-        changethemeaction = QAction('&Сменить тему', self)
-        if theme == "dark":
+        changethemeaction = QAction(QIcon(themeicon), '&Сменить тему', self)
+        if guitheme == 'Fusion':
             changethemeaction.triggered.connect(lambda: self.change_theme("white"))
         else:
             changethemeaction.triggered.connect(lambda: self.change_theme("dark"))
@@ -224,15 +228,12 @@ class EmiliaGUI(QMainWindow):
         aitype = "gemini"
         config = {
             "speaker": speaker_entry.text(),
+            "theme": theme,
             "aitype": aitype
         }
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file)
-        if devmode != "true":
-            self.restartneed("Сервис изменён на Gemini!\nТребуется перезапуск")
-            sys.exit("Изменение сервиса...")
-        else:
-            os.execv(sys.executable, ['python'] + sys.argv)
+        os.execv(sys.executable, ['python'] + sys.argv)
 
     def charaiuse(self, speaker_entry):
         if devmode == "true":
@@ -241,15 +242,12 @@ class EmiliaGUI(QMainWindow):
         aitype = "charai"
         config = {
             "speaker": speaker_entry.text(),
+            "theme": theme,
             "aitype": aitype
         }
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file)
-        if devmode != "true":
-            self.restartneed("Сервис изменён на Character.AI!\nТребуется перезапуск")
-            sys.exit("Изменение сервиса...")
-        else:
-            os.execv(sys.executable, ['python'] + sys.argv)
+        os.execv(sys.executable, ['python'] + sys.argv)
 
     def change_theme(self, theme):
         if devmode == "true":
@@ -261,17 +259,10 @@ class EmiliaGUI(QMainWindow):
             data = {}
         except json.JSONDecodeError:
              data = {}
-
         data.update({"theme": theme})
-
         with open('config.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        
-        if devmode != "true":
-            self.restartneed("Тема изменена!\nТребуется перезапуск")
-            sys.exit("Смена темы...")
-        else:
-            os.execv(sys.executable, ['python'] + sys.argv)
+        os.execv(sys.executable, ['python'] + sys.argv)
 
     def about(self):
         if devmode == "true":
@@ -504,7 +495,7 @@ class EmiliaGUI(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle(guitheme) #если нужна тёмная тема
+    app.setStyle(guitheme)
     window = EmiliaGUI()
     window.setFixedWidth(300)
     window.setWindowIcon(QIcon(emiliaicon))
