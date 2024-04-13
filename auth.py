@@ -85,8 +85,6 @@ class EmiliaGUI(QMainWindow):
         emi_menu.addAction(aboutemi)
 
     def setconfig(self, token):
-        if devmode == "true":
-            print("Запись истории чата")
         try:
             with open('charaiconfig.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)

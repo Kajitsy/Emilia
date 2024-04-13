@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushB
 from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 ver = "2.1"
-build = "241304.1"
+build = "241304.2"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -52,6 +52,7 @@ if os.path.exists('config.json'):
             guitheme = 'windowsvista'
 else:
     guitheme = 'windowsvista'
+    theme = "white"
     aitype = "charai"
 #Иконки
 if pre == "True":
