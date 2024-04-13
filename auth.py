@@ -128,7 +128,7 @@ class EmiliaGUI(QMainWindow):
         msg.setWindowIcon(QIcon(emiliaicon))
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        whatsnew = "Что нового в " + version + ": <br>• Проект на GitHub переименован с Soul-Of-Waifu-Work на Emilia <br>• Добавлена возможность общения с Google Gemini 1.5 Pro<br>• Добавлена тёмная тема<br>• Добавлена возможность получения токена без необходимости искать его в DevTools"
+        whatsnew = "Что нового в " + version + ": <br> • Проект на GitHub переименован с Soul-Of-Waifu-Work на Emilia.<br>• Добавлена возможность общения с Google Gemini 1.5 Pro, а это значит и новая библиотека `pip install google-generativeai`<br>• Добавлена тёмная тема<br>• Новые иконки<br>• Возможность получить токен Character.AI по электронной почте прямо из приложения, что значит что вам не придётся искать его в DevTools<br>• Переход на <a href='httpas://github.com/kramcat/CharacterAI/releases/tag/v1.0.0a1'>новую версию</a> библиотеки Character AI<br>• • Пожалуйста, удалите старую версию `pip uninstall characterai` и установите из репозитория `pip install characterai`<br>• Прочие улучшения и исправление ошибок..."
         otherversions = "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>"
         text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a><br><br>" + whatsnew + otherversions
         msg.setText(text)
