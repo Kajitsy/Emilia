@@ -19,7 +19,7 @@ from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 ver = "2.1"
 build = "241304.2"
-pre = "True"
+pre = "False"
 if pre == "True":
     version = "pre" + ver
 else:
@@ -136,9 +136,9 @@ class EmiliaGUI(QMainWindow):
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
         if guitheme == 'windowsvista':
-            spacer = menubar.addMenu('                                               ')
+            spacer = menubar.addMenu('                                                     ')
         else:
-            spacer = menubar.addMenu('                                                 ')
+            spacer = menubar.addMenu('                                                       ')
         spacer.setEnabled(False)
         ver_menu = menubar.addMenu('&Версия: ' + version)
 

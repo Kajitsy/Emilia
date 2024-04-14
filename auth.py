@@ -8,7 +8,7 @@ from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 ver = "2.1"
 build = "241304.1"
-pre = "True"
+pre = "False"
 if pre == "True":
     version = "pre" + ver
 else:
@@ -71,7 +71,10 @@ class EmiliaGUI(QMainWindow):
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
-        spacer = menubar.addMenu('                                               ')
+        if guitheme == 'windowsvista':
+            spacer = menubar.addMenu('                                                     ')
+        else:
+            spacer = menubar.addMenu('                                                       ')
         spacer.setEnabled(False)
         ver_menu = menubar.addMenu('&Версия: ' + version)
         ver_menu.setEnabled(False)
