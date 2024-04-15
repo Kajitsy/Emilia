@@ -9,7 +9,7 @@
 - Установленный Python 
 - Библиотеки:
   - `pip install torch --index-url https://download.pytorch.org/whl/cu118`
-  - `pip install PyQt6 speechrecognition sounddevice gpytranslate num2words websockets characterai google-generativeai pyaudio setuptools`
+  - `pip install PyQt6 speechrecognition sounddevice gpytranslate num2words websockets characterai google-generativeai pyaudio setuptools numpy`
 - Аккаунт на [character.ai](https://character.ai/) 
 - API ключ сервиса: с версии 2.1 можно получить через программу 
 - ID персонажа: Открывайте чат с нужным вам персонажем -> Из URL-адреса копируйте значение после https://character.ai/chat/
