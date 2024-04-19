@@ -2,3 +2,4 @@ config.json
 geminiconfig.json
 charaiconfig.json
 chat_history.json
+data.json

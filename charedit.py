@@ -2,8 +2,7 @@ import os
 import json
 import sys
 import webbrowser
-from characterai import sendCode, authUser
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QPixmap
 
 ver = "2.1.1"
@@ -39,41 +38,39 @@ else:
 class EmiliaGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Emilia: Getting a Token")
+        self.setWindowTitle("Emilia: Character Editor")
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
-        global link_label, gettoken_button, link_entry, email_label, email_entry, getlink_button
-        email_label = QLabel("Ваша электронная почта:")
-        self.layout.addWidget(email_label)
-        email_entry = QLineEdit()
-        self.layout.addWidget(email_entry)
-        email_entry.setPlaceholderText("example@example.com")
+        global name_label, name_entry, id_label, id_entry
 
-        getlink_button = QPushButton("Отправить письмо с ссылкой")
-        getlink_button.clicked.connect(lambda: self.getlink(email_entry.text()))
-        self.layout.addWidget(getlink_button)
+        name_label = QLabel("Имя персонажа:")
+        self.layout.addWidget(name_label)
+        name_entry = QLineEdit()
+        name_entry.setPlaceholderText("Emilia...")
+        self.layout.addWidget(name_entry)
 
-        link_label = QLabel("Ссылка с почты:")
-        self.layout.addWidget(link_label)
-        link_entry = QLineEdit()
-        self.layout.addWidget(link_entry)
-        link_entry.setPlaceholderText("https...")
+        id_label = QLabel("ID персонажа:")
+        self.layout.addWidget(id_label)
+        id_entry = QLineEdit()
+        id_entry.setPlaceholderText("ID...")
+        self.layout.addWidget(id_entry)
 
-        gettoken_button = QPushButton("Получить токен")
-        gettoken_button.clicked.connect(lambda: self.gettoken(email_entry.text(), link_entry.text()))
-        self.layout.addWidget(gettoken_button)
-        link_label.setVisible(False)
-        link_entry.setVisible(False)
-        gettoken_button.setVisible(False)
+        addchar_button = QPushButton("Добавить персонажа")
+        addchar_button.clicked.connect(lambda: self.addchar(name_entry.text(), id_entry.text()))
+        self.layout.addWidget(addchar_button)
+
+        delchar_button = QPushButton("Удалить персонажа")
+        delchar_button.clicked.connect(lambda: self.delchar(name_entry.text()))
+        self.layout.addWidget(delchar_button)
 
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
         if guitheme == 'windowsvista':
-            spacer = menubar.addMenu('                                                     ')
+            spacer = menubar.addMenu('                                            ')
         else:
-            spacer = menubar.addMenu('                                                       ')
+            spacer = menubar.addMenu('                                              ')
         spacer.setEnabled(False)
         ver_menu = menubar.addMenu('&Версия: ' + version)
         ver_menu.setEnabled(False)
@@ -86,35 +83,43 @@ class EmiliaGUI(QMainWindow):
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
 
-    def setconfig(self, token):
+    def addchar(self, name, char):
         try:
-            with open('charaiconfig.json', 'r', encoding='utf-8') as f:
+            with open('data.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except FileNotFoundError:
             data = {}
         except json.JSONDecodeError:
              data = {}
-
-        data.update({"client": token})
-
-        with open('charaiconfig.json', 'w', encoding='utf-8') as f:
+        data.update({name: {"char": char}})
+        with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-
-    def getlink(self, email):
-        sendCode(email)
-        link_label.setVisible(True)
-        link_entry.setVisible(True)
-        gettoken_button.setVisible(True)
         
-    def gettoken(self, email, link):
-        token = authUser(link, email)
-        link_label.setVisible(False)
-        link_entry.setVisible(False)
-        gettoken_button.setVisible(False)
-        email_entry.setVisible(False)
-        getlink_button.setVisible(False)
-        email_label.setText("Ваш токен: \n" + token + "\nЕсли что он уже сохранён в charaiconfig.json")
-        self.setconfig(token)
+    def delchar(self, name):
+        try:
+            with open('data.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError:
+             data = {}
+        if name in data:
+            del data[name]
+            with open('data.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        else:
+            msg = QMessageBox()
+            if pre == "True":
+                msg.setWindowTitle("ОШИБКА " + build)
+            else:
+                msg.setWindowTitle("ОШИБКА")
+            msg.setWindowIcon(QIcon(emiliaicon))
+            pixmap = QPixmap(emiliaicon).scaled(64, 64)
+            msg.setIconPixmap(pixmap)
+            text = "Твоего персонажа в коде нет"
+            msg.setText(text)
+            msg.exec()
+            self.central_widget.setLayout(self.layout)
 
     def issuesopen(self):
         webbrowser.open("https://github.com/Kajitsy/Emilia/issues")
