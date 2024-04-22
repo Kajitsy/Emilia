@@ -4,9 +4,27 @@ import sys
 import webbrowser
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PyQt6.QtCore import QLocale
+
+locale = QLocale.system().name()
+def load_translations(filename):
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Translation file not found: {filename}")
+        return {}
+
+def tr(context, text):
+    if context in translations and text in translations[context]:
+        return translations[context][text]
+    else:
+        return text 
+
+translations = load_translations(f"locales/{locale}.json")
 
 ver = "2.1.1"
-build = "241904"
+build = "242204"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -44,23 +62,23 @@ class EmiliaGUI(QMainWindow):
         self.layout = QVBoxLayout()
         global name_label, name_entry, id_label, id_entry
 
-        name_label = QLabel("Имя персонажа:")
+        name_label = QLabel(tr("CharEditor", "Character Name:"))
         self.layout.addWidget(name_label)
         name_entry = QLineEdit()
         name_entry.setPlaceholderText("Emilia...")
         self.layout.addWidget(name_entry)
 
-        id_label = QLabel("ID персонажа:")
+        id_label = QLabel(tr("MainWindow", "Character ID:"))
         self.layout.addWidget(id_label)
         id_entry = QLineEdit()
         id_entry.setPlaceholderText("ID...")
         self.layout.addWidget(id_entry)
 
-        addchar_button = QPushButton("Добавить персонажа")
+        addchar_button = QPushButton(tr("CharEditor", "Add a character"))
         addchar_button.clicked.connect(lambda: self.addchar(name_entry.text(), id_entry.text()))
         self.layout.addWidget(addchar_button)
 
-        delchar_button = QPushButton("Удалить персонажа")
+        delchar_button = QPushButton(tr("CharEditor", "Delete a character"))
         delchar_button.clicked.connect(lambda: self.delchar(name_entry.text()))
         self.layout.addWidget(delchar_button)
 
@@ -72,14 +90,14 @@ class EmiliaGUI(QMainWindow):
         else:
             spacer = menubar.addMenu('                                              ')
         spacer.setEnabled(False)
-        ver_menu = menubar.addMenu('&Версия: ' + version)
+        ver_menu = menubar.addMenu(tr("MainWindow", '&Version: ') + version)
         ver_menu.setEnabled(False)
 
-        issues = QAction(QIcon(githubicon), '&Сообщить об ошибке', self)
+        issues = QAction(QIcon(githubicon), tr("MainWindow", '&Report a bug'), self)
         issues.triggered.connect(self.issuesopen)
         emi_menu.addAction(issues)
         
-        aboutemi = QAction(QIcon(emiliaicon), '&Об Emilia', self)
+        aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", '&About Emilia'), self)
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
 
@@ -110,13 +128,13 @@ class EmiliaGUI(QMainWindow):
         else:
             msg = QMessageBox()
             if pre == "True":
-                msg.setWindowTitle("ОШИБКА " + build)
-            else:
-                msg.setWindowTitle("ОШИБКА")
+                msg.setWindowTitle(tr("CharEditor", "ERROR ") + build)
+            else:   
+                msg.setWindowTitle(tr("CharEditor", "ERROR "))
             msg.setWindowIcon(QIcon(emiliaicon))
             pixmap = QPixmap(emiliaicon).scaled(64, 64)
             msg.setIconPixmap(pixmap)
-            text = "Твоего персонажа в коде нет"
+            text = tr("CharEditor", "Your character is not in the code")
             msg.setText(text)
             msg.exec()
             self.central_widget.setLayout(self.layout)
@@ -127,16 +145,16 @@ class EmiliaGUI(QMainWindow):
     def about(self):
         msg = QMessageBox()
         if pre == "True":
-            msg.setWindowTitle("Об Emilia " + build)
+            msg.setWindowTitle(tr("About", "About Emilia ") + build)
         else:
-            msg.setWindowTitle("Об Emilia")
+            msg.setWindowTitle(tr("About", "About Emilia "))
         msg.setWindowIcon(QIcon(emiliaicon))
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        language = "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>, от автора, ага да)"
-        whatsnew = "<br><br>Новое в " + version + ": <br>• Прочие улучшения и исправление ошибок..."
-        otherversions = "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>"
-        text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>" + language + whatsnew + otherversions
+        language = tr("About", "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)")
+        whatsnew = tr("About", "<br><br>New in ") + version + tr("About", ": <br>• Other improvements and bug fixes...")
+        otherversions = tr("About", "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>")
+        text = tr("About", "Emilia is an open source project that is a graphical interface for <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> At the moment you are using the ") + version + tr("About", " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>") + language + whatsnew + otherversions
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)

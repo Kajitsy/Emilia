@@ -8,23 +8,60 @@ import json
 import sys
 import subprocess
 import webbrowser
+import datetime
 import sounddevice as sd
 import google.generativeai as genai
 import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import aiocai
 from num2words import num2words
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
+from PyQt6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
 from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PyQt6.QtCore import QLocale
+
+locale = QLocale.system().name()
+
+if not os.path.exists('voice.pt'):
+    if locale == "ru_RU":
+        print("Идёт загрузка модели SileroTTS RU")
+        print("")
+        torch.hub.download_url_to_file('https://models.silero.ai/models/tts/ru/v4_ru.pt',
+                                    "voice.pt")
+        print("_____________________________________________________")
+        print("ГОТОВО, ПРОСТИТЕ")
+    else:
+        print("The SileroTTS EN model is being loaded")
+        print("")
+        torch.hub.download_url_to_file('https://models.silero.ai/models/tts/en/v3_en.pt',
+                                    "voice.pt")
+        print("_____________________________________________________")
+        print("DONE, SORRY")
+
+
+def load_translations(filename):
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Translation file not found: {filename}")
+        return {}
+
+def tr(context, text):
+    if context in translations and text in translations[context]:
+        return translations[context][text]
+    else:
+        return text 
+
+translations = load_translations(f"locales/{locale}.json")
 
 ver = "2.1.1"
-build = "241904"
+build = "242204"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
 else:
     version = ver
-local_file = 'russian.pt'
+local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
 put_yo = True
@@ -32,7 +69,10 @@ devmode = "false"
 
 def numbers_to_words(text):
     def _conv_num(match):
-        return num2words(int(match.group()), lang='ru')
+        if locale == "ru_RU":
+            return num2words(int(match.group()), lang='ru')
+        else:
+            return num2words(int(match.group()), lang='en')
     return re.sub(r'\b\d+\b', _conv_num, text)
 
 if os.path.exists('config.json'):
@@ -86,35 +126,39 @@ class EmiliaGUI(QMainWindow):
             self.layout.addWidget(token_label)
             self.token_entry = QLineEdit()
             self.layout.addWidget(self.token_entry)
-            self.token_entry.setPlaceholderText("Ваш Gemini токен...")
+            self.token_entry.setPlaceholderText(tr("MainWindow", "Gemini Token..."))
         elif aitype == "charai":
-            char_label = QLabel("ID персонажа:")
-            self.layout.addWidget(char_label)
+            hlayout = QHBoxLayout()
+            char_label = QLabel(tr("MainWindow", "Character ID:"))
+            char_label.setWordWrap(True)
+            hlayout.addWidget(char_label)
             self.char_entry = QLineEdit()
-            self.layout.addWidget(self.char_entry)
+            hlayout.addWidget(self.char_entry)
             self.char_entry.setPlaceholderText("ID...")
-            client_label = QLabel("Токен клиента:")
-            self.layout.addWidget(client_label)
+            client_label = QLabel(tr("MainWindow", "Client Token:"))
+            client_label.setWordWrap(True)
+            hlayout.addWidget(client_label)
             self.client_entry = QLineEdit()
-            self.layout.addWidget(self.client_entry)
-            self.client_entry.setPlaceholderText("Токен...")
+            hlayout.addWidget(self.client_entry)
+            self.client_entry.setPlaceholderText(tr("MainWindow", "Token..."))
+            self.layout.addLayout(hlayout)
 
-        speaker_label = QLabel("Голос:")
+        speaker_label = QLabel(tr("MainWindow", "Voice:"))
         self.layout.addWidget(speaker_label)
         self.speaker_entry = QLineEdit()
         self.layout.addWidget(self.speaker_entry)
-        self.speaker_entry.setPlaceholderText("aidar, baya, kseniya, xenia, eugene или же random")
+        self.speaker_entry.setPlaceholderText(tr("MainWindow", "en_0, en_1, ..., en_117 or random"))
 
         self.load_config()
 
-        save_button = QPushButton("Сохранить")
+        save_button = QPushButton(tr("MainWindow", "Save"))
         if aitype == "charai":
             save_button.clicked.connect(lambda: self.charsetupconfig(self.char_entry, self.client_entry, self.speaker_entry))
         elif aitype == "gemini": 
             save_button.clicked.connect(lambda: self.geminisetupconfig(self.token_entry, self.speaker_entry))
         self.layout.addWidget(save_button)
 
-        vstart_button = QPushButton("Запустить")
+        vstart_button = QPushButton(tr("MainWindow", "Start"))
         vstart_button.clicked.connect(lambda: self.start_main("voice"))
         self.layout.addWidget(vstart_button)
 
@@ -123,11 +167,11 @@ class EmiliaGUI(QMainWindow):
         self.layout.addWidget(self.user_input)
         
         user_aiinput = QLineEdit()
-        user_aiinput.setPlaceholderText("Прежде чем жать кнопку ниже...")
+        user_aiinput.setPlaceholderText(tr("MainWindow", "Before pressing the button below..."))
         self.layout.addWidget(user_aiinput)
         user_aiinput.setVisible(False)
 
-        tstart_button = QPushButton("Запустить в текстовом режиме")
+        tstart_button = QPushButton(tr("MainWindow", "Start in Text Mode"))
         tstart_button.clicked.connect(lambda: self.start_main("text"))
         self.layout.addWidget(tstart_button)
         tstart_button.setVisible(False)
@@ -144,51 +188,51 @@ class EmiliaGUI(QMainWindow):
         else:
             spacer = menubar.addMenu('                                              ')
         spacer.setEnabled(False)
-        ver_menu = menubar.addMenu('&Версия: ' + version)
+        ver_menu = menubar.addMenu(tr("MainWindow", '&Version: ') + version)
 
         debug = QAction(QIcon('./images/emilia.png'), '&Debug', self)
         debug.triggered.connect(self.debugfun)
         ver_menu.addAction(debug)
 
         if aitype == "charai":
-            getcharaitoken = QAction(QIcon(charaiicon), '&Получить токен', self)
+            getcharaitoken = QAction(QIcon(charaiicon), tr("MainWindow", '&Get Token'), self)
         elif aitype == "gemini":
-            getcharaitoken = QAction(QIcon(googleicon), '&Получить токен', self)
+            getcharaitoken = QAction(QIcon(googleicon), tr("MainWindow", '&Get Token'), self)
         getcharaitoken.triggered.connect(lambda: self.gettoken())
 
-        changethemeaction = QAction(QIcon(themeicon), '&Сменить тему', self)
+        changethemeaction = QAction(QIcon(themeicon), tr("MainWindow", '&Change Theme'), self)
         if guitheme == 'Fusion':
             changethemeaction.triggered.connect(lambda: self.change_theme("white"))
         else:
             changethemeaction.triggered.connect(lambda: self.change_theme("dark"))
         emi_menu.addAction(changethemeaction)
 
-        visibletextmode = QAction('&Активировать текстовый режим', self)
+        visibletextmode = QAction(tr("MainWindow", '&Use Text Mode'), self)
         emi_menu.addAction(visibletextmode)
 
-        visiblevoicemode = QAction('&Активировать голосовой режим', self)
+        visiblevoicemode = QAction(tr("MainWindow", '&Use Voice Mode'), self)
         emi_menu.addAction(visiblevoicemode)
         visiblevoicemode.setVisible(False)
 
-        deviceselect = QMenu('&Устройство для генерации озвучки', self)
+        deviceselect = QMenu(tr("MainWindow", '&Voice generation device'), self)
         emi_menu.addMenu(deviceselect)
 
-        usecpumode = QAction('&Использовать процессор', self)
+        usecpumode = QAction(tr("MainWindow", '&Use CPU'), self)
         usecpumode.triggered.connect(lambda: self.devicechange('cpu'))
         deviceselect.addAction(usecpumode)
 
-        usegpumode = QAction('&Использовать видеокарту', self)
+        usegpumode = QAction(tr("MainWindow", '&Use GPU'), self)
         usegpumode.triggered.connect(lambda: self.devicechange('cuda'))
         deviceselect.addAction(usegpumode)
 
-        serviceselect = QMenu('&Смена ИИ-сервиса', self)
+        serviceselect = QMenu(tr("MainWindow", '&Change of AI service'), self)
         emi_menu.addMenu(serviceselect)
 
-        usegemini = QAction(QIcon(googleicon), '&Использовать Gemini', self)
+        usegemini = QAction(QIcon(googleicon), tr("MainWindow", '&Use Gemini'), self)
         usegemini.triggered.connect(lambda: self.geminiuse(self.speaker_entry))
         serviceselect.addAction(usegemini)
 
-        usecharai = QAction(QIcon(charaiicon), '&Использовать Character.AI', self)
+        usecharai = QAction(QIcon(charaiicon), tr("MainWindow", '&Use Character AI'), self)
         usecharai.triggered.connect(lambda: self.charaiuse(self.speaker_entry))
         serviceselect.addAction(usecharai)
 
@@ -196,9 +240,9 @@ class EmiliaGUI(QMainWindow):
             emi_menu.addAction(getcharaitoken)
             usecharai.setEnabled(False)
             usegemini.setEnabled(True)
-            charselect = QMenu('&Выбор персонажа', self)
+            charselect = QMenu(tr("MainWindow", '&Character Choice'), self)
             emi_menu.addMenu(charselect)
-            chareditopen = QAction('&Открыть редактор персожаней', self)
+            chareditopen = QAction(tr("MainWindow", '&Open character editor'), self)
             chareditopen.triggered.connect(lambda: subprocess.call(["python", "charedit.py"]))
             charselect.addAction(chareditopen)
             if os.path.exists('config.json'):
@@ -225,11 +269,11 @@ class EmiliaGUI(QMainWindow):
         visibletextmode.triggered.connect(lambda: self.modehide("voice"))
         visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
 
-        issues = QAction(QIcon(githubicon), '&Сообщить об ошибке', self)
+        issues = QAction(QIcon(githubicon), tr("MainWindow", '&Report a bug'), self)
         issues.triggered.connect(self.issuesopen)
         emi_menu.addAction(issues)
 
-        aboutemi = QAction(QIcon(emiliaicon), '&Об Emilia', self)
+        aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", '&About Emilia'), self)
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
 
@@ -304,16 +348,16 @@ class EmiliaGUI(QMainWindow):
     def about(self):
         msg = QMessageBox()
         if pre == "True":
-            msg.setWindowTitle("Об Emilia " + build)
+            msg.setWindowTitle(tr("About", "About Emilia ") + build)
         else:
-            msg.setWindowTitle("Об Emilia")
+            msg.setWindowTitle(tr("About", "About Emilia "))
         msg.setWindowIcon(QIcon(emiliaicon))
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        language = "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>, от автора, ага да)"
-        whatsnew = "<br><br>Новое в " + version + ": <br>• Прочие улучшения и исправление ошибок..."
-        otherversions = "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>"
-        text = "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию " + version + ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>" + language + whatsnew + otherversions
+        language = tr("About", "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)")
+        whatsnew = tr("About", "<br><br>New in ") + version + tr("About", ": <br>• Other improvements and bug fixes...")
+        otherversions = tr("About", "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>")
+        text = tr("About", "Emilia is an open source project that is a graphical interface for <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> At the moment you are using the ") + version + tr("About", " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>") + language + whatsnew + otherversions
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)
@@ -331,8 +375,8 @@ class EmiliaGUI(QMainWindow):
             data = {}
         except json.JSONDecodeError:
              data = {}
-
-        data.update(text)
+        dtime = "%m-%d %H:%M:%S"
+        data.update(datetime.datetime.now().strftime(dtime) + text)
 
         with open('chat_history.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -349,15 +393,15 @@ class EmiliaGUI(QMainWindow):
         while True:
             recognizer = sr.Recognizer()
             with sr.Microphone() as source:
-                self.user_input.setText("Пользователь: Говорите...")
+                self.user_input.setText(tr("Main", "User: Speak up..."))
                 audio = recognizer.listen(source)
             try:
                 msg1 = recognizer.recognize_google(audio, language="ru-RU")
             except sr.UnknownValueError:
-                self.user_input.setText("Скажите ещё раз...")
+                self.user_input.setText(tr("Main", "Say it again..."))
                 continue
-            self.user_input.setText("Пользователь: " + msg1)
-            self.ai_output.setText("Ответ: генерация...")
+            self.user_input.setText(tr("Main", "User: ") + msg1)
+            self.ai_output.setText(tr("Main", "Waifu: generation..."))
             if aitype == "charai":
                 token = aiocai.Client(client)
                 chatid = await token.get_chat(char)
@@ -366,10 +410,13 @@ class EmiliaGUI(QMainWindow):
                     message = messagenotext.text
             elif aitype == "gemini":
                 message = self.chating(msg1)
-                self.writing_chat_history({"Пользователь: ": msg1})
+                self.writing_chat_history({"User: ": msg1})
                 self.writing_chat_history({"AI: ": message})
-            translation = await Translator().translate(message, targetlang="ru")
-            nums = numbers_to_words(translation.text)
+            if locale == "ru_RU":
+                translation = await Translator().translate(message, targetlang="ru")
+                nums = numbers_to_words(translation.text)
+            else:
+                nums = numbers_to_words(message.text)
             model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
             model.to(device)
             audio = model.apply_tts(text=nums,
@@ -377,15 +424,15 @@ class EmiliaGUI(QMainWindow):
                                     sample_rate=sample_rate,
                                     put_accent=put_accent,
                                     put_yo=put_yo)
-            self.ai_output.setText("Ответ: " + translation.text)
+            self.ai_output.setText(tr("Main", "Waifu: ") + translation.text)
             sd.play(audio, sample_rate)
             time.sleep(len(audio - 5) / sample_rate)
             sd.stop()
         
     async def maintext(self):
-        self.user_input.setText("Пользователь: ")
+        self.user_input.setText(tr("Main", "User: "))
         msg1 = user_aiinput.text()
-        self.ai_output.setText("Ответ: генерация...")
+        self.ai_output.setText(tr("Main", "Waifu: generation..."))
         if aitype == "charai":
             token = aiocai.Client(client)
             chatid = await token.get_chat(char)
@@ -394,9 +441,13 @@ class EmiliaGUI(QMainWindow):
                 message = messagenotext.text
         elif aitype == "gemini":
             message = self.chating(msg1)
-            self.writing_chat_history({"Пользователь: ": msg1})
+            self.writing_chat_history({"User: ": msg1})
             self.writing_chat_history({"AI: ": message})
-        translation = await Translator().translate(message, targetlang="ru")
+        if locale == "ru_RU":
+            translation = await Translator().translate(message, targetlang="ru")
+            nums = numbers_to_words(translation.text)
+        else:
+            nums = numbers_to_words(message.text)
         nums = numbers_to_words(translation.text)
         model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
         model.to(device)
@@ -405,7 +456,7 @@ class EmiliaGUI(QMainWindow):
                                 sample_rate=sample_rate,
                                 put_accent=put_accent,
                                 put_yo=put_yo)
-        self.ai_output.setText("Ответ: " + translation.text)
+        self.ai_output.setText(tr("Main", "Waifu: ") + translation.text)
         sd.play(audio, sample_rate)
         time.sleep(len(audio - 5) / sample_rate)
         sd.stop()
@@ -493,17 +544,17 @@ class EmiliaGUI(QMainWindow):
         msg.setWindowIcon(QIcon(emiliaicon))
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        text = "Зачем ты здесь что-то ищешь?\nПонимаешь что здесь ничего нет?\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nНет?"
+        text = tr("Debug", "Why are you looking for something here?\nDo you understand that there is nothing here?") + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNo?\n" + locale
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)
-        self.writing_chat_history({"Пользователь: " : "Да"})
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle(guitheme)
     window = EmiliaGUI()
     window.setFixedWidth(300)
+    window.setMinimumHeight(250)
     window.setWindowIcon(QIcon(emiliaicon))
     window.show()
     sys.exit(app.exec())

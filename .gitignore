@@ -3,3 +3,5 @@ geminiconfig.json
 charaiconfig.json
 chat_history.json
 data.json
+voice.pt
+/__pycache__
