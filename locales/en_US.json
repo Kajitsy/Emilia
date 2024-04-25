@@ -1,0 +1,77 @@
+{
+    "MainWindow": {
+      "start": "Start",
+      "starttext": "Start in Text Mode",
+      "textmodeinput": "Before pressing the button below...",
+      "geminitoken": "Gemini Token:",
+      "charactertoken": "Client Token:",
+      "characterid": "Character ID:",
+      "token": "Token...",
+      "voice": "Voice:",
+      "voices": "en_0, en_1, ..., en_117 or random",
+      "save": "Save",
+      "version": "&Version: ",
+      "gettoken": "&Get Token",
+      "customcolors": "&Change Colors",
+      "changetheme": "&Change Theme",
+      "usetextmode": "&Use Text Mode",
+      "usevoicemode": "&Use Voice Mode",
+      "voicegendevice": "&Voice generation device",
+      "usecpu": "&Use CPU",
+      "usegpu": "&Use GPU",
+      "changeai": "Change of AI service",
+      "usegemini": "&Use Gemini",
+      "usecharacterai": "&Use Character AI",
+      "charchoice": "&Character Choice",
+      "openchareditor": "Open character editor",
+      "BUUUG": "&Report a bug",
+      "spacerwin": "         ",
+      "spacer": "           ",
+      "aboutemi": "&About Emilia "
+    },
+    "About": {
+      "aboutemi": "About Emilia ",
+      "languagefrom": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)",
+      "newin": "<br><br>New in ",
+      "whatsnew": ": <br>• Other improvements and bug fixes...",
+      "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
+      "emiopenproject": "Emilia is an open source project that is a graphical interface for <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> At the moment you are using the ",
+      "usever": " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
+    },
+    "Main": {
+      "speakup": "User: Speak up...",
+      "sayagain": "User: Say it again...",
+      "user": "User: ",
+      "emigen": "Waifu: generation...",
+      "emimessage": "Waifu: ",
+      "sendchating": "Here's our chat history: "
+    },
+    "Debug": {
+      "debig": "Why are you looking for something here?\nDo you understand that there is nothing here?"
+    },
+    "GetToken": {
+      "youremail": "Your email:",
+      "sendemail": "Send an email with a link",
+      "linkfromemail": "Link from the email:",
+      "gettoken": "Get token",
+      "yourtoken": "Your token: \n",
+      "saveincharaiconfig": "\nIf anything, it has already been saved in charaiconfig.json"
+    },
+    "CharEditor": {
+      "charname": "Character Name:",
+      "addchar": "Add a character",
+      "delchar": "Delete a character",
+      "error": "ERROR ",
+      "notavchar": "Your character is not in the code"
+    },
+    "EmiCustom": {
+      "backcolor": "Background Color:",
+      "pickbackcolor": "Pick Background Color",
+      "buttonbackcolor": "Button Colors:",
+      "pickbuttonbackcolor": "Pick Button Background Color",
+      "pickbuttontextcolor": "Pick Button Text Color",
+      "labelcolor": "Text Color:",
+      "picktextcolor": "Pick Text Color",
+      "ALLRESET": "RESET ALL"
+      }
+  }

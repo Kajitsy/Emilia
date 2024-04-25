@@ -3,7 +3,7 @@ import json
 import sys
 import webbrowser
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
-from PyQt6.QtGui import QIcon, QAction, QPixmap
+from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
 from PyQt6.QtCore import QLocale
 
 locale = QLocale.system().name()
@@ -12,8 +12,8 @@ def load_translations(filename):
         with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Translation file not found: {filename}")
-        return {}
+        with open("locales/en_US.json", "r", encoding="utf-8") as f:
+            return json.load(f)
 
 def tr(context, text):
     if context in translations and text in translations[context]:
@@ -24,7 +24,7 @@ def tr(context, text):
 translations = load_translations(f"locales/{locale}.json")
 
 ver = "2.1.1"
-build = "242204"
+build = "242504"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -39,8 +39,16 @@ if os.path.exists('config.json'):
             guitheme = 'Fusion'
         else:
             guitheme = 'windowsvista'
+        backcolor = config.get('backgroundcolor', "")
+        buttoncolor = config.get('buttoncolor', "")
+        buttontextcolor = config.get('buttontextcolor', "")
+        labelcolor = config.get('labelcolor', "")
 else:
     guitheme = 'windowsvista'
+    backcolor = ""
+    buttoncolor = ""
+    buttontextcolor = ""
+    labelcolor = ""
 
 #Иконки
 if pre == "True":
@@ -62,44 +70,109 @@ class EmiliaGUI(QMainWindow):
         self.layout = QVBoxLayout()
         global name_label, name_entry, id_label, id_entry
 
-        name_label = QLabel(tr("CharEditor", "Character Name:"))
+        name_label = QLabel(tr("CharEditor", "charname"))
         self.layout.addWidget(name_label)
         name_entry = QLineEdit()
         name_entry.setPlaceholderText("Emilia...")
         self.layout.addWidget(name_entry)
 
-        id_label = QLabel(tr("MainWindow", "Character ID:"))
+        id_label = QLabel(tr("MainWindow", "characterid"))
         self.layout.addWidget(id_label)
         id_entry = QLineEdit()
         id_entry.setPlaceholderText("ID...")
         self.layout.addWidget(id_entry)
 
-        addchar_button = QPushButton(tr("CharEditor", "Add a character"))
+        addchar_button = QPushButton(tr("CharEditor", "addchar"))
         addchar_button.clicked.connect(lambda: self.addchar(name_entry.text(), id_entry.text()))
         self.layout.addWidget(addchar_button)
 
-        delchar_button = QPushButton(tr("CharEditor", "Delete a character"))
+        delchar_button = QPushButton(tr("CharEditor", "delchar"))
         delchar_button.clicked.connect(lambda: self.delchar(name_entry.text()))
         self.layout.addWidget(delchar_button)
+
+        if backcolor != "":
+            self.set_background_color(QColor(backcolor))
+        if buttoncolor != "":
+            self.set_button_color(QColor(buttoncolor))
+        if labelcolor != "":
+            self.set_label_color(QColor(labelcolor))
+        if buttontextcolor != "":
+            self.set_button_text_color(QColor(buttontextcolor))
 
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
+        charselect = menubar.addMenu(tr("MainWindow", 'charchoice'))
+        if os.path.exists('config.json'):
+            def create_action(key, value):
+                def action_func():
+                    self.open_json(value['char'], value)
+                action = QAction(f'&{key}', self)
+                action.triggered.connect(action_func)
+                return action
+            try:
+                with open('data.json', 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+            except FileNotFoundError:
+                data = {}
+            except json.JSONDecodeError:
+                data = {}
+            for key, value in data.items():
+                action = create_action(key, value)
+                charselect.addAction(action)
         if guitheme == 'windowsvista':
-            spacer = menubar.addMenu('                                            ')
+            spacer = menubar.addMenu(tr("MainWindow", "spacerwin"))
         else:
-            spacer = menubar.addMenu('                                              ')
+            spacer = menubar.addMenu(tr("MainWindow", "spacer"))
         spacer.setEnabled(False)
-        ver_menu = menubar.addMenu(tr("MainWindow", '&Version: ') + version)
+        ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
         ver_menu.setEnabled(False)
 
-        issues = QAction(QIcon(githubicon), tr("MainWindow", '&Report a bug'), self)
+        issues = QAction(QIcon(githubicon), tr("MainWindow", 'BUUUG'), self)
         issues.triggered.connect(self.issuesopen)
         emi_menu.addAction(issues)
         
-        aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", '&About Emilia'), self)
+        aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", 'aboutemi'), self)
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
+
+    def open_json(self, value, value2):
+        global char
+        char = value
+        name_entry.setText(value)
+        id_entry.setText(value)
+
+    def set_background_color(self, color):
+        palette = self.palette()
+        palette.setColor(QPalette.ColorRole.Window, color)
+        self.setPalette(palette)
+
+    def set_button_text_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_label_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QLabel {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
 
     def addchar(self, name, char):
         try:
@@ -128,13 +201,13 @@ class EmiliaGUI(QMainWindow):
         else:
             msg = QMessageBox()
             if pre == "True":
-                msg.setWindowTitle(tr("CharEditor", "ERROR ") + build)
+                msg.setWindowTitle(tr("CharEditor", "error") + build)
             else:   
-                msg.setWindowTitle(tr("CharEditor", "ERROR "))
+                msg.setWindowTitle(tr("CharEditor", "error"))
             msg.setWindowIcon(QIcon(emiliaicon))
             pixmap = QPixmap(emiliaicon).scaled(64, 64)
             msg.setIconPixmap(pixmap)
-            text = tr("CharEditor", "Your character is not in the code")
+            text = tr("CharEditor", "notavchar")
             msg.setText(text)
             msg.exec()
             self.central_widget.setLayout(self.layout)
@@ -145,16 +218,16 @@ class EmiliaGUI(QMainWindow):
     def about(self):
         msg = QMessageBox()
         if pre == "True":
-            msg.setWindowTitle(tr("About", "About Emilia ") + build)
+            msg.setWindowTitle(tr("About", "aboutemi") + build)
         else:
-            msg.setWindowTitle(tr("About", "About Emilia "))
+            msg.setWindowTitle(tr("About", "aboutemi"))
         msg.setWindowIcon(QIcon(emiliaicon))
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
-        language = tr("About", "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)")
-        whatsnew = tr("About", "<br><br>New in ") + version + tr("About", ": <br>• Other improvements and bug fixes...")
-        otherversions = tr("About", "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>")
-        text = tr("About", "Emilia is an open source project that is a graphical interface for <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> At the moment you are using the ") + version + tr("About", " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>") + language + whatsnew + otherversions
+        language = tr("About", "languagefrom")
+        whatsnew = tr("About", "newin") + version + tr("About", "whatsnew")
+        otherversions = tr("About", "viewallreleases")
+        text = tr("About", "emiopenproject") + version + tr("About", "usever") + language + whatsnew + otherversions
         msg.setText(text)
         msg.exec()
         self.central_widget.setLayout(self.layout)
