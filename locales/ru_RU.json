@@ -20,13 +20,19 @@
       "usecpu": "&Использовать процессор",
       "usegpu": "&Использовать видеокарту",
       "changeai": "Смена ИИ-сервиса",
+      "noncriterror": "Возникла ошибка, но код продолжаться может ",
+      "criterror": "Возникла ошибка, код продолжаться не может ",
+      "inputdevice": "Устройства ввода",
+      "outputdevice": "Устройства вывода",
       "usegemini": "&Использовать Gemini",
       "usecharacterai": "&Использовать Character AI",
       "charchoice": "&Выбрать персонажа",
       "openchareditor": "Открыть редактор персонажей",
       "BUUUG": "&Сообщить об ошибке",
-      "spacerwin": " ",
-      "spacer": "   ",
+      "spacerwincharai": " ",
+      "spacerwingemini": "                                            ",
+      "spacerfusioncharai": "   ",
+      "spacerfusiongemini": "                                              ",
       "aboutemi": "&Об Emilia "
     },
     "About": {
@@ -73,5 +79,9 @@
       "labelcolor": "Цвет текста:",
       "picktextcolor": "Выбрать цвет текста",
       "ALLRESET": "Сбросить ВСЁ"
+    },
+    "Errors": {
+      "Gemini 400": "Ваше местоположение не позволяет использовать Gemini :(",
+      "nonvoice": "Пожалуйста, введите нужный голос"
     }
   }

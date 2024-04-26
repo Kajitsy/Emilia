@@ -20,13 +20,19 @@
       "usecpu": "&Use CPU",
       "usegpu": "&Use GPU",
       "changeai": "Change of AI service",
+      "noncriterror": "An error has occurred, but the code can continue ",
+      "criterror": "An error has occurred, the code cannot continue ",
+      "inputdevice": "Input devices",
+      "outputdevice": "Output devices",
       "usegemini": "&Use Gemini",
       "usecharacterai": "&Use Character AI",
       "charchoice": "&Character Choice",
       "openchareditor": "Open character editor",
       "BUUUG": "&Report a bug",
-      "spacerwin": "         ",
-      "spacer": "           ",
+      "spacerwincharai": "        ",
+      "spacerwingemini": "                                            ",
+      "spacerfusioncharai": "           ",
+      "spacerfusiongemini": "                                              ",
       "aboutemi": "&About Emilia "
     },
     "About": {
@@ -73,5 +79,9 @@
       "labelcolor": "Text Color:",
       "picktextcolor": "Pick Text Color",
       "ALLRESET": "RESET ALL"
+      },
+      "Errors": {
+        "Gemini 400": "Your location does not allow you to use Gemini :(",
+        "nonvoice": "Please enter the required voice"
       }
   }

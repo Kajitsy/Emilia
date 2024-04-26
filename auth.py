@@ -25,7 +25,7 @@ def tr(context, text):
 
 translations = load_translations(f"locales/{locale}.json")
 ver = "2.1.1"
-build = "242504"
+build = "242604"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -106,9 +106,9 @@ class EmiliaGUI(QMainWindow):
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
         if guitheme == 'windowsvista':
-            spacer = menubar.addMenu(tr("MainWindow", "spacerwin"))
+            spacer = menubar.addMenu(tr("MainWindow", "spacerwingemini"))
         else:
-            spacer = menubar.addMenu(tr("MainWindow", "spacer"))
+            spacer = menubar.addMenu(tr("MainWindow", "spacerfusiongemini"))
         spacer.setEnabled(False)
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
         ver_menu.setEnabled(False)

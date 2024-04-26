@@ -24,7 +24,7 @@ def tr(context, text):
 translations = load_translations(f"locales/{locale}.json")
 
 ver = "2.1.1"
-build = "242504"
+build = "242604"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -68,7 +68,7 @@ class EmiliaGUI(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
-        global name_label, name_entry, id_label, id_entry
+        global name_label, name_entry, id_label, id_entry, voice_entry, voice_label
 
         name_label = QLabel(tr("CharEditor", "charname"))
         self.layout.addWidget(name_label)
@@ -82,8 +82,14 @@ class EmiliaGUI(QMainWindow):
         id_entry.setPlaceholderText("ID...")
         self.layout.addWidget(id_entry)
 
+        voice_label = QLabel(tr("MainWindow", "voice"))
+        self.layout.addWidget(voice_label)
+        voice_entry = QLineEdit()
+        voice_entry.setPlaceholderText(tr("MainWindow", "voices"))
+        self.layout.addWidget(voice_entry)
+
         addchar_button = QPushButton(tr("CharEditor", "addchar"))
-        addchar_button.clicked.connect(lambda: self.addchar(name_entry.text(), id_entry.text()))
+        addchar_button.clicked.connect(lambda: self.addchar(name_entry.text(), id_entry.text(), voice_entry.text()))
         self.layout.addWidget(addchar_button)
 
         delchar_button = QPushButton(tr("CharEditor", "delchar"))
@@ -106,7 +112,7 @@ class EmiliaGUI(QMainWindow):
         if os.path.exists('config.json'):
             def create_action(key, value):
                 def action_func():
-                    self.open_json(value['char'], value)
+                    self.open_json(value['name'], value['char'], value['voice'])
                 action = QAction(f'&{key}', self)
                 action.triggered.connect(action_func)
                 return action
@@ -121,9 +127,9 @@ class EmiliaGUI(QMainWindow):
                 action = create_action(key, value)
                 charselect.addAction(action)
         if guitheme == 'windowsvista':
-            spacer = menubar.addMenu(tr("MainWindow", "spacerwin"))
+            spacer = menubar.addMenu(tr("MainWindow", "spacerwincharai"))
         else:
-            spacer = menubar.addMenu(tr("MainWindow", "spacer"))
+            spacer = menubar.addMenu(tr("MainWindow", "spacerfusioncharai"))
         spacer.setEnabled(False)
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
         ver_menu.setEnabled(False)
@@ -136,11 +142,10 @@ class EmiliaGUI(QMainWindow):
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
 
-    def open_json(self, value, value2):
-        global char
-        char = value
+    def open_json(self, value, value2, pup):
         name_entry.setText(value)
-        id_entry.setText(value)
+        id_entry.setText(value2)
+        voice_entry.setText(pup)
 
     def set_background_color(self, color):
         palette = self.palette()
@@ -174,7 +179,7 @@ class EmiliaGUI(QMainWindow):
         """
         self.setStyleSheet(current_style_sheet + new_style_sheet)
 
-    def addchar(self, name, char):
+    def addchar(self, name, char, voice):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -182,7 +187,7 @@ class EmiliaGUI(QMainWindow):
             data = {}
         except json.JSONDecodeError:
              data = {}
-        data.update({name: {"char": char}})
+        data.update({name: {"name": name,"char": char, "voice": voice}})
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         
@@ -205,8 +210,6 @@ class EmiliaGUI(QMainWindow):
             else:   
                 msg.setWindowTitle(tr("CharEditor", "error"))
             msg.setWindowIcon(QIcon(emiliaicon))
-            pixmap = QPixmap(emiliaicon).scaled(64, 64)
-            msg.setIconPixmap(pixmap)
             text = tr("CharEditor", "notavchar")
             msg.setText(text)
             msg.exec()

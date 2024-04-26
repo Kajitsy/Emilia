@@ -56,7 +56,7 @@ def tr(context, text):
 translations = load_translations(f"locales/{locale}.json")
 
 ver = "2.1.1"
-build = "242504"
+build = "242604"
 pre = "True"
 if pre == "True":
     version = "pre" + ver
@@ -69,12 +69,28 @@ put_yo = True
 devmode = "false"
 
 def numbers_to_words(text):
-    def _conv_num(match):
-        if locale == "ru_RU":
-            return num2words(int(match.group()), lang='ru')
-        else:
-            return num2words(int(match.group()), lang='en')
-    return re.sub(r'\b\d+\b', _conv_num, text)
+    try:
+        def _conv_num(match):
+            if locale == "ru_RU":
+                return num2words(int(match.group()), lang='ru')
+            else:
+                return num2words(int(match.group()), lang='en')
+        return re.sub(r'\b\d+\b', _conv_num, text)
+    except Exception as e:
+        print(tr("MainWinow", 'noncriterror') + {e})
+        return text
+
+def writeconfig(config, value, pup):
+        try:
+            with open(config, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError:
+             data = {}
+        data.update({value: pup})
+        with open(config, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
 if os.path.exists('config.json'):
     with open('config.json', 'r') as config_file:
@@ -107,7 +123,7 @@ else:
     buttoncolor = ""
     buttontextcolor = ""
     labelcolor = ""
-device = torch.device(devicefortorch)
+gendevice = torch.device(devicefortorch)
 #Иконки
 if pre == "True":
     emiliaicon = './images/premilia.png'
@@ -124,6 +140,7 @@ else:
 
 class BackgroundEditor(QWidget):
     def __init__(self, main_window):
+        
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Customization")
@@ -165,44 +182,32 @@ class BackgroundEditor(QWidget):
         self.current_button_color = QColor("#ffffff") 
         self.current_label_color = QColor("#000000") 
 
-    def writeconfig(self, value, pup):
-        try:
-            with open('config.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        data.update({value: pup})
-        with open('config.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
     def choose_color(self):
         color = QColorDialog.getColor(self.current_color, self)
         self.main_window.set_background_color(color) 
-        self.writeconfig("backgroundcolor", color.name())
+        writeconfig('config.json', "backgroundcolor", color.name())
 
     def choose_button_color(self):
         color1 = QColorDialog.getColor(self.current_button_color, self)
         self.main_window.set_button_color(color1)
-        self.writeconfig("buttoncolor", color1.name())
+        writeconfig('config.json', "buttoncolor", color1.name())
 
     def choose_button_text_color(self):
         color3 = QColorDialog.getColor(self.current_button_color, self)
         self.main_window.set_button_text_color(color3)
-        self.writeconfig("buttontextcolor", color3.name())
+        writeconfig('config.json', "buttontextcolor", color3.name())
 
     def choose_label_color(self):
         color2 = QColorDialog.getColor(self.current_label_color, self)
         self.main_window.set_label_color(color2)
-        self.writeconfig("labelcolor", color2.name())
+        writeconfig('config.json', "labelcolor", color2.name())
 
     def allreset(self):
         self.main_window.styles_reset()
-        self.writeconfig("backgroundcolor", "")
-        self.writeconfig("labelcolor", "")
-        self.writeconfig("buttontextcolor", "")
-        self.writeconfig("buttoncolor", "")
+        writeconfig('config.json', "backgroundcolor", "")
+        writeconfig('config.json', "labelcolor", "")
+        writeconfig('config.json', "buttontextcolor", "")
+        writeconfig('config.json', "buttoncolor", "")
 
 class EmiliaGUI(QMainWindow):
     def __init__(self):
@@ -238,6 +243,9 @@ class EmiliaGUI(QMainWindow):
         self.speaker_entry = QLineEdit()
         self.layout.addWidget(self.speaker_entry)
         self.speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
+
+        self.microphone = ""
+        self.selected_device_index = ""
 
         self.load_config()
         if backcolor != "":
@@ -289,6 +297,11 @@ class EmiliaGUI(QMainWindow):
         getcharaitoken.triggered.connect(lambda: self.gettoken())
 
         changethemeaction = QAction(QIcon(themeicon), tr("MainWindow", 'changetheme'), self)
+
+        open_background_editor_action = QAction(tr("MainWindow", 'customcolors'), self)
+        open_background_editor_action.triggered.connect(self.open_background_editor)
+        emi_menu.addAction(open_background_editor_action)
+
         if guitheme == 'Fusion':
             changethemeaction.triggered.connect(lambda: self.change_theme("white"))
         else:
@@ -313,6 +326,32 @@ class EmiliaGUI(QMainWindow):
         usegpumode.triggered.connect(lambda: self.devicechange('cuda'))
         deviceselect.addAction(usegpumode)
 
+        self.recognizer = sr.Recognizer()
+        self.mic_list = [
+            mic_name for mic_name in sr.Microphone.list_microphone_names()
+            if any(keyword in mic_name.lower() for keyword in ["microphone", "mic", "input"])
+        ]
+
+        mic_menu = emi_menu.addMenu(tr("MainWindow", 'inputdevice'))
+
+        for index, mic_name in enumerate(self.mic_list):
+            action = QAction(mic_name, self)
+            action.triggered.connect(lambda checked, i=index: self.set_microphone(i))
+            mic_menu.addAction(action)
+
+        outputdeviceselect = QMenu(tr("MainWindow", 'outputdevice'), self)
+        emi_menu.addMenu(outputdeviceselect)
+
+        self.unique_devices = {}
+        for dev in sd.query_devices():
+            if dev["max_output_channels"] > 0 and dev["name"] not in self.unique_devices:
+                self.unique_devices[dev["name"]] = dev
+
+        for index, (name, device) in enumerate(self.unique_devices.items()):
+            action = QAction(name, self)
+            action.triggered.connect(lambda checked, i=index: self.set_output_device(i))
+            outputdeviceselect.addAction(action)
+
         serviceselect = QMenu(tr("MainWindow", 'changeai'), self)
         emi_menu.addMenu(serviceselect)
 
@@ -335,7 +374,7 @@ class EmiliaGUI(QMainWindow):
             if os.path.exists('config.json'):
                 def create_action(key, value):
                     def action_func():
-                        self.open_json(value['char'])
+                        self.open_json(value['char'], value['voice'])
                     action = QAction(f'&{key}', self)
                     action.triggered.connect(action_func)
                     return action
@@ -353,10 +392,14 @@ class EmiliaGUI(QMainWindow):
             usegemini.setEnabled(False)
             usecharai.setEnabled(True)
 
-        if guitheme == 'windowsvista':
-            spacer = menubar.addMenu(tr("MainWindow", "spacerwin"))
-        else:
-            spacer = menubar.addMenu(tr("MainWindow", "spacer"))
+        if guitheme == 'windowsvista' and aitype == "charai":
+            spacer = menubar.addMenu(tr("MainWindow", "spacerwincharai"))
+        elif guitheme == 'windowsvista' and aitype == "gemini":
+            spacer = menubar.addMenu(tr("MainWindow", "spacerwingemini"))
+        elif guitheme == 'Fusion' and aitype == "charai":
+            spacer = menubar.addMenu(tr("MainWindow", "spacerfusioncharai"))
+        elif guitheme == 'Fusion' and aitype == "gemini":
+            spacer = menubar.addMenu(tr("MainWindow", "spacerfusiongemini"))
         spacer.setEnabled(False)
 
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
@@ -367,10 +410,6 @@ class EmiliaGUI(QMainWindow):
         visibletextmode.triggered.connect(lambda: self.modehide("voice"))
         visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
 
-        open_background_editor_action = QAction(tr("MainWindow", 'customcolors'), self)
-        open_background_editor_action.triggered.connect(self.open_background_editor)
-
-        emi_menu.addAction(open_background_editor_action)
         issues = QAction(QIcon(githubicon), tr("MainWindow", 'BUUUG'), self)
         issues.triggered.connect(self.issuesopen)
         emi_menu.addAction(issues)
@@ -378,6 +417,15 @@ class EmiliaGUI(QMainWindow):
         aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", 'aboutemi'), self)
         aboutemi.triggered.connect(self.about)
         emi_menu.addAction(aboutemi)
+
+    def set_microphone(self, index):
+        self.microphone = sr.Microphone(device_index=index)
+        print(f"Выбран микрофон: {self.mic_list[index]}")
+
+    def set_output_device(self, index):
+        device = list(self.unique_devices.values())[index]
+        sd.default.device = device["index"]
+        self.selected_device_index = index
 
     def open_background_editor(self):
         self.background_editor = BackgroundEditor(self)
@@ -420,24 +468,17 @@ class EmiliaGUI(QMainWindow):
     def styles_reset(self):
         self.setStyleSheet("")
 
-    def open_json(self, value):
-        global char
+    def open_json(self, value, pup):
+        global char, speaker
         char = value
-        self.char_entry.setText(value)
+        speaker = pup
+        self.char_entry.setText(char)
+        self.speaker_entry.setText(speaker)
     
     def devicechange(self, device):
         global devicefortorch
         devicefortorch = device
-        try:
-            with open('config.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        data.update({"devicefortorch": device})
-        with open('config.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        writeconfig('config.json', "devicefortorch", device)
 
     def gettoken(self):
         if aitype == "charai":
@@ -476,16 +517,7 @@ class EmiliaGUI(QMainWindow):
         os.execv(sys.executable, ['python'] + sys.argv)
 
     def change_theme(self, theme):
-        try:
-            with open('config.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        data.update({"theme": theme})
-        with open('config.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        writeconfig('config.json', "theme", theme)
         os.execv(sys.executable, ['python'] + sys.argv)
 
     def about(self):
@@ -519,7 +551,7 @@ class EmiliaGUI(QMainWindow):
         except json.JSONDecodeError:
              data = {}
         dtime = "%m-%d %H:%M:%S"
-        data.update(datetime.datetime.now().strftime(dtime) + text)
+        data.update({datetime.datetime.now().strftime(dtime): text})
 
         with open('chat_history.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -527,7 +559,7 @@ class EmiliaGUI(QMainWindow):
     def chating(self, textinchat):
         model = genai.GenerativeModel('gemini-pro')
         chat = model.start_chat(history=[])
-        chat.send_message(tr("Main", "sendchating") + self.reading_chat_history())
+        chat.send_message(f"Here's our chat history: {self.reading_chat_history()}")
         for chunk in chat.send_message(textinchat):
             continue
         return chunk.text
@@ -535,11 +567,18 @@ class EmiliaGUI(QMainWindow):
     async def main(self):
         while True:
             recognizer = sr.Recognizer()
-            with sr.Microphone() as source:
-                self.user_input.setText(tr("Main", "speakup"))
-                audio = recognizer.listen(source)
+            self.user_input.setText(tr("Main", "speakup"))
+            if self.microphone != "":
+                with self.microphone as source:
+                    audio = recognizer.listen(source)
+            else: 
+                with sr.Microphone() as source:
+                    audio = recognizer.listen(source)
             try:
-                msg1 = recognizer.recognize_google(audio, language="ru-RU")
+                if locale == "ru_RU":
+                    msg1 = recognizer.recognize_google(audio, language="ru-RU")
+                else:
+                    msg1 = recognizer.recognize_google(audio, language="en-US")
             except sr.UnknownValueError:
                 self.user_input.setText(tr("Main", "sayagain"))
                 continue
@@ -552,23 +591,31 @@ class EmiliaGUI(QMainWindow):
                     messagenotext = await chat.send_message(char, chatid.chat_id, msg1)
                     message = messagenotext.text
             elif aitype == "gemini":
-                message = self.chating(msg1)
-                self.writing_chat_history({"User: ": msg1})
-                self.writing_chat_history({"AI: ": message})
+                try:
+                    message = self.chating(msg1)
+                    self.writing_chat_history(f"User: {msg1}")
+                    self.writing_chat_history(f"AI: {message}")
+                except Exception as e:
+                    if e.code == 400 and "User location is not supported" in e.message:
+                        self.ai_output.setText(tr("Errors", 'Gemini 400'))
             if locale == "ru_RU":
                 translation = await Translator().translate(message, targetlang="ru")
                 nums = numbers_to_words(translation.text)
             else:
                 nums = numbers_to_words(message.text)
             model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
-            model.to(device)
+            model.to(gendevice)
             audio = model.apply_tts(text=nums,
                                     speaker=speaker,
                                     sample_rate=sample_rate,
                                     put_accent=put_accent,
                                     put_yo=put_yo)
             self.ai_output.setText(tr("Main", "emimessage") + translation.text)
-            sd.play(audio, sample_rate)
+            if self.selected_device_index != "":
+                device = list(self.unique_devices.values())[self.selected_device_index]
+                sd.play(audio, sample_rate, device=device["index"])
+            else: 
+                sd.play(audio, sample_rate)
             time.sleep(len(audio - 5) / sample_rate)
             sd.stop()
         
@@ -583,9 +630,13 @@ class EmiliaGUI(QMainWindow):
                 messagenotext = await chat.send_message(char, chatid.chat_id, msg1)
                 message = messagenotext.text
         elif aitype == "gemini":
-            message = self.chating(msg1)
-            self.writing_chat_history({"User: ": msg1})
-            self.writing_chat_history({"AI: ": message})
+            try:
+                message = self.chating(msg1)
+                self.writing_chat_history(f"User: {msg1}")
+                self.writing_chat_history(f"AI: {message}")
+            except Exception as e:
+                if e.code == 400 and "User location is not supported" in e.message:
+                    self.ai_output.setText(tr("Errors", 'Gemini 400'))
         if locale == "ru_RU":
             translation = await Translator().translate(message, targetlang="ru")
             nums = numbers_to_words(translation.text)
@@ -593,27 +644,34 @@ class EmiliaGUI(QMainWindow):
             nums = numbers_to_words(message.text)
         nums = numbers_to_words(translation.text)
         model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
-        model.to(device)
+        model.to(gendevice)
         audio = model.apply_tts(text=nums,
                                 speaker=speaker,
                                 sample_rate=sample_rate,
                                 put_accent=put_accent,
                                 put_yo=put_yo)
         self.ai_output.setText(tr("Main", "emimessage") + translation.text)
-        sd.play(audio, sample_rate)
+        if self.selected_device_index != "":
+            device = list(self.unique_devices.values())[self.selected_device_index]
+            sd.play(audio, sample_rate, device=device["index"])
+        else: 
+            sd.play(audio, sample_rate)
         time.sleep(len(audio - 5) / sample_rate)
         sd.stop()
 
     def start_main(self, mode):
-        if mode == "voice":
-            threading.Thread(target=lambda: asyncio.run(self.main())).start()
-            for i in range(self.layout.count()):
-                widget = self.layout.itemAt(i).widget()
-                widget.setVisible(False)
-                self.user_input.setVisible(True)
-                self.ai_output.setVisible(True)
-        elif mode == "text":
-            threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
+        if self.speaker_entry == "":
+            self.ai_output.setText(tr("Errors", "nonvoice"))
+        else:
+            if mode == "voice":
+                threading.Thread(target=lambda: asyncio.run(self.main())).start()
+                for i in range(self.layout.count()):
+                    widget = self.layout.itemAt(i).widget()
+                    widget.setVisible(False)
+                    self.user_input.setVisible(True)
+                    self.ai_output.setVisible(True)
+            elif mode == "text":
+                threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
 
     def load_config(self):
         global speaker, char, client, token, devicefortorch
@@ -643,38 +701,24 @@ class EmiliaGUI(QMainWindow):
         global char, client
         char = char_entry.text()
         client = client_entry.text()
-        config = {
-            "char": char,
-            "client": client
-        }
-
-        with open('charaiconfig.json', 'w') as config_file:
-            json.dump(config, config_file)
+        writeconfig('charaiconfig', "char", char)
+        writeconfig('charaiconfig', "client", client)
         self.globalsetupconfig(speaker_entry)
 
     def geminisetupconfig(self, token_entry, speaker_entry):
         global token, aitype
         token = token_entry.text()
-        config = {
-            "token": token
-        }
-        with open('geminiconfig.json', 'w') as config_file:
-            json.dump(config, config_file)
+        writeconfig('geminiconfig.json', "token", token)
         self.globalsetupconfig(speaker_entry)
         genai.configure(api_key=token)
 
     def globalsetupconfig(self, speaker_entry):
         global speaker, aitype, devicefortorch
         speaker = speaker_entry.text()
-        config = {
-            "speaker": speaker,
-            "aitype": aitype,
-            "theme": theme,
-            "devicefortorch": devicefortorch
-        }
-
-        with open('config.json', 'w') as config_file:
-            json.dump(config, config_file)
+        writeconfig('config.json', "speaker", speaker)
+        writeconfig('config.json', "aitype", aitype)
+        writeconfig('config.json', "theme", theme)
+        writeconfig('config.json', "devicefortorch", devicefortorch)
     
     def debugfun(self):
         global version, devmode
