@@ -21,10 +21,8 @@ def tr(context, text):
     else:
         return text 
 
-translations = load_translations(f"locales/{locale}.json")
-
-ver = "2.1.1"
-build = "242604"
+ver = "2.1.2"
+build = "242804"
 pre = "False"
 if pre == "True":
     version = "pre" + ver
@@ -43,12 +41,16 @@ if os.path.exists('config.json'):
         buttoncolor = config.get('buttoncolor', "")
         buttontextcolor = config.get('buttontextcolor', "")
         labelcolor = config.get('labelcolor', "")
+        lang = config.get('language', locale)
 else:
     guitheme = 'windowsvista'
     backcolor = ""
     buttoncolor = ""
     buttontextcolor = ""
     labelcolor = ""
+    lang = locale
+
+translations = load_translations(f"locales/{lang}.json")
 
 #Иконки
 if pre == "True":

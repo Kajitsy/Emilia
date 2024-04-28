@@ -21,23 +21,6 @@ from PyQt6.QtCore import QLocale
 
 locale = QLocale.system().name()
 
-if not os.path.exists('voice.pt'):
-    if locale == "ru_RU":
-        print("Идёт загрузка модели SileroTTS RU")
-        print("")
-        torch.hub.download_url_to_file('https://models.silero.ai/models/tts/ru/v4_ru.pt',
-                                    "voice.pt")
-        print("_____________________________________________________")
-        print("ГОТОВО, ПРОСТИТЕ")
-    else:
-        print("The SileroTTS EN model is being loaded")
-        print("")
-        torch.hub.download_url_to_file('https://models.silero.ai/models/tts/en/v3_en.pt',
-                                    "voice.pt")
-        print("_____________________________________________________")
-        print("DONE, SORRY")
-
-
 def load_translations(filename):
     try:
         with open(filename, "r", encoding="utf-8") as f:
@@ -53,10 +36,8 @@ def tr(context, text):
     else:
         return text 
 
-translations = load_translations(f"locales/{locale}.json")
-
-ver = "2.1.1"
-build = "242604"
+ver = "2.1.2"
+build = "242804"
 pre = "False"
 if pre == "True":
     version = "pre" + ver
@@ -67,18 +48,6 @@ sample_rate = 48000
 put_accent = True
 put_yo = True
 devmode = "false"
-
-def numbers_to_words(text):
-    try:
-        def _conv_num(match):
-            if locale == "ru_RU":
-                return num2words(int(match.group()), lang='ru')
-            else:
-                return num2words(int(match.group()), lang='en')
-        return re.sub(r'\b\d+\b', _conv_num, text)
-    except Exception as e:
-        print(tr("MainWinow", 'noncriterror') + {e})
-        return text
 
 def writeconfig(config, value, pup):
         try:
@@ -109,6 +78,7 @@ if os.path.exists('config.json'):
         buttoncolor = config.get('buttoncolor', "")
         buttontextcolor = config.get('buttontextcolor', "")
         labelcolor = config.get('labelcolor', "")
+        lang = config.get('language', locale)
         deviceft = config.get('devicefortorch', '')
         if deviceft == "cpu":
             devicefortorch = deviceft
@@ -123,6 +93,9 @@ else:
     buttoncolor = ""
     buttontextcolor = ""
     labelcolor = ""
+    lang = locale
+
+translations = load_translations(f"locales/{lang}.json")
 gendevice = torch.device(devicefortorch)
 #Иконки
 if pre == "True":
@@ -137,6 +110,38 @@ if guitheme == 'Fusion':
 else:
     themeicon = './images/moon.png'
     githubicon = './images/github.png'
+
+if not os.path.exists('voice.pt'):
+    if lang == "ru_RU":
+        print("Идёт загрузка модели SileroTTS RU")
+        print("")
+        try:
+            torch.hub.download_url_to_file('https://models.silero.ai/models/tts/ru/v4_ru.pt', "voice.pt")
+        except:
+            torch.hub.download_url_to_file('https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/tts_models/v4_ru.pt', "voice.pt")
+        print("_____________________________________________________")
+        print("ГОТОВО, ПРОСТИТЕ")
+    else:
+        print("The SileroTTS EN model is being loaded")
+        print("")
+        try:
+            torch.hub.download_url_to_file('https://models.silero.ai/models/tts/en/v3_en.pt', "voice.pt")
+        except:
+            torch.hub.download_url_to_file('https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/tts_models/v3_en.pt', "voice.pt")
+        print("_____________________________________________________")
+        print("DONE, SORRY")
+
+def numbers_to_words(text):
+    try:
+        def _conv_num(match):
+            if lang == "ru_RU":
+                return num2words(int(match.group()), lang='ru')
+            else:
+                return num2words(int(match.group()), lang='en')
+        return re.sub(r'\b\d+\b', _conv_num, text)
+    except Exception as e:
+        print(tr("MainWinow", 'noncriterror') + {e})
+        return text
 
 class BackgroundEditor(QWidget):
     def __init__(self, main_window):
@@ -352,6 +357,13 @@ class EmiliaGUI(QMainWindow):
             action.triggered.connect(lambda checked, i=index: self.set_output_device(i))
             outputdeviceselect.addAction(action)
 
+        changelanguage = QAction(tr("MainWindow", 'changelanguage'), self)
+        if lang == "en_US" or lang == "":
+            changelanguage.triggered.connect(lambda: self.geminiuse(self.langchange("ru_RU")))
+        elif lang == "ru_RU":
+            changelanguage.triggered.connect(lambda: self.geminiuse(self.langchange("en_US")))
+        emi_menu.addAction(changelanguage)
+
         serviceselect = QMenu(tr("MainWindow", 'changeai'), self)
         emi_menu.addMenu(serviceselect)
 
@@ -480,6 +492,11 @@ class EmiliaGUI(QMainWindow):
         devicefortorch = device
         writeconfig('config.json', "devicefortorch", device)
 
+    def langchange(self, lang):
+        writeconfig('config.json', "language", lang)
+        os.remove("voice.pt")
+        os.execv(sys.executable, ['python'] + sys.argv)
+
     def gettoken(self):
         if aitype == "charai":
             subprocess.call(["python", "auth.py"])
@@ -575,7 +592,7 @@ class EmiliaGUI(QMainWindow):
                 with sr.Microphone() as source:
                     audio = recognizer.listen(source)
             try:
-                if locale == "ru_RU":
+                if lang == "ru_RU":
                     msg1 = recognizer.recognize_google(audio, language="ru-RU")
                 else:
                     msg1 = recognizer.recognize_google(audio, language="en-US")
@@ -598,7 +615,7 @@ class EmiliaGUI(QMainWindow):
                 except Exception as e:
                     if e.code == 400 and "User location is not supported" in e.message:
                         self.ai_output.setText(tr("Errors", 'Gemini 400'))
-            if locale == "ru_RU":
+            if lang == "ru_RU":
                 translation = await Translator().translate(message, targetlang="ru")
                 nums = numbers_to_words(translation.text)
             else:
@@ -637,7 +654,7 @@ class EmiliaGUI(QMainWindow):
             except Exception as e:
                 if e.code == 400 and "User location is not supported" in e.message:
                     self.ai_output.setText(tr("Errors", 'Gemini 400'))
-        if locale == "ru_RU":
+        if lang == "ru_RU":
             translation = await Translator().translate(message, targetlang="ru")
             nums = numbers_to_words(translation.text)
         else:
