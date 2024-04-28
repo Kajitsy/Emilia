@@ -26,7 +26,7 @@ def tr(context, text):
 translations = load_translations(f"locales/{locale}.json")
 ver = "2.1.1"
 build = "242604"
-pre = "True"
+pre = "False"
 if pre == "True":
     version = "pre" + ver
 else:

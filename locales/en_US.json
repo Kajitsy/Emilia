@@ -29,17 +29,17 @@
       "charchoice": "&Character Choice",
       "openchareditor": "Open character editor",
       "BUUUG": "&Report a bug",
-      "spacerwincharai": "        ",
-      "spacerwingemini": "                                            ",
-      "spacerfusioncharai": "           ",
-      "spacerfusiongemini": "                                              ",
+      "spacerwincharai": "              ",
+      "spacerwingemini": "                                                  ",
+      "spacerfusioncharai": "                 ",
+      "spacerfusiongemini": "                                                    ",
       "aboutemi": "&About Emilia "
     },
     "About": {
       "aboutemi": "About Emilia ",
       "languagefrom": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)",
       "newin": "<br><br>New in ",
-      "whatsnew": ": <br>• Other improvements and bug fixes...",
+      "whatsnew": ": <br>• The character editor! <br>• • Select a character -> Open the character editor <br> The window allows you to create a preset for a character, namely his ID and his voice• • Choose a character -> Character <br> Allows you to select a character, clicking will change the ID and voice <br><br>• The ability to select an input and output device! <br>• • Emilia -> Input Devices -> The one you need <br> Installs the microphone/virtual cable used in Emilia <br>• • Emilia -> Output devices-> The one you need <br> Installs the speaker/virtual cable used in Emilia <br><br>• Color changes! <br>• • Emilia -> Change colors <br> A new feature that allows you to change the background color, background color and button text, and just change the text color <br><br>• Now you can choose the device on which the voice will be generated, namely the video card (CUDA) or the processor (CPU)<br>• The principle of the 'Get token' function has been changed, now if you want to use Gemini, then clicking on this item will open a page with the receipt of the API Token<br>• Localization into English!<br>• • Now, if you have a non-Russian interface installed, then everything will be in English, the voice and character will also be in English<br><br>• Other improvements and bug fixes...",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
       "emiopenproject": "Emilia is an open source project that is a graphical interface for <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> At the moment you are using the ",
       "usever": " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
