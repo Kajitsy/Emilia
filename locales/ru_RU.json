@@ -30,20 +30,18 @@
       "openchareditor": "Открыть редактор персонажей",
       "changelanguage": "Сменить язык",
       "BUUUG": "&Сообщить об ошибке",
-      "spacerwincharai": "       ",
-      "spacerwingemini": "                                                  ",
-      "spacerfusioncharai": "         ",
-      "spacerfusiongemini": "                                                    ",
+      "spacerwincharai": "",
+      "spacerwingemini": "                                         ",
       "aboutemi": "&Об Emilia "
     },
     "About": {
       "aboutemi": "Об Emilia ",
       "languagefrom": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>, от автора, ага да)",
       "newin": "<br><br>Новое в ",
-      "whatsnew": ": <br>• Смена языка через интерфейс, да, в прошлом релизе лень было делать <br>• Багфиксы, да",
+      "whatsnew": ": <br>• Mica Effect",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
       "emiopenproject": "Emilia - проект с открытым исходным кодом, являющийся графическим интерфейсом для <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> На данный момент вы используете версию ",
-      "usever": ", и она полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
+      "usever": ""
     },
     "Main": {
       "speakup": "Пользователь: Говорите...",

@@ -4,7 +4,7 @@ import sys
 import webbrowser
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
-from PyQt6.QtCore import QLocale
+from PySide6.QtCore import QLocale
 
 locale = QLocale.system().name()
 def load_translations(filename):
@@ -21,29 +21,19 @@ def tr(context, text):
     else:
         return text 
 
-ver = "2.1.2"
-build = "242804"
-pre = "False"
-if pre == "True":
-    version = "pre" + ver
-else:
-    version = ver
+build = "243004"
+version = f"exc{build}"
+pre = "True"
 
 if os.path.exists('config.json'):
     with open('config.json', 'r') as config_file:
         config = json.load(config_file)
-        theme = config.get('theme', '')
-        if theme == "dark":
-            guitheme = 'Fusion'
-        else:
-            guitheme = 'windowsvista'
         backcolor = config.get('backgroundcolor', "")
         buttoncolor = config.get('buttoncolor', "")
         buttontextcolor = config.get('buttontextcolor', "")
         labelcolor = config.get('labelcolor', "")
         lang = config.get('language', locale)
 else:
-    guitheme = 'windowsvista'
     backcolor = ""
     buttoncolor = ""
     buttontextcolor = ""
@@ -58,10 +48,7 @@ if pre == "True":
 else:
     emiliaicon = './images/emilia.png'
 
-if guitheme == 'Fusion':
-    githubicon = './images/github_white.png'
-else:
-    githubicon = './images/github.png'
+githubicon = './images/github.png'
 
 class EmiliaGUI(QMainWindow):
     def __init__(self):
@@ -128,11 +115,10 @@ class EmiliaGUI(QMainWindow):
             for key, value in data.items():
                 action = create_action(key, value)
                 charselect.addAction(action)
-        if guitheme == 'windowsvista':
-            spacer = menubar.addMenu(tr("MainWindow", "spacerwincharai"))
-        else:
-            spacer = menubar.addMenu(tr("MainWindow", "spacerfusioncharai"))
+
+        spacer = menubar.addMenu(tr("MainWindow", "spacerwincharai"))
         spacer.setEnabled(False)
+
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
         ver_menu.setEnabled(False)
 
@@ -239,7 +225,7 @@ class EmiliaGUI(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle(guitheme)
+    app.setStyle('Fusion')
     window = EmiliaGUI()
     window.setFixedWidth(300)
     window.setWindowIcon(QIcon(emiliaicon))

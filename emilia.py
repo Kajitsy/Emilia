@@ -15,9 +15,20 @@ import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import aiocai
 from num2words import num2words
-from PyQt6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QColorDialog, QFileDialog
-from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
-from PyQt6.QtCore import QLocale
+from PySide6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
+from PySide6.QtGui import QIcon, QAction, QPixmap
+from PySide6.QtCore import QLocale, Qt
+from win32mica import ApplyMica, MicaStyle, MicaTheme
+
+## Изменить тему со светлой на тёмную либо наоборот
+def micatheme(self):
+    self.setAttribute(Qt.WA_TranslucentBackground)
+    ApplyMica(self.winId(), MicaTheme.LIGHT, MicaStyle.DEFAULT) ##Светлая тема
+    # ApplyMica(self.winId(), MicaTheme.DARK, MicaStyle.DEFAULT) ##Тёмная тема
+
+
+
+
 
 locale = QLocale.system().name()
 
@@ -36,13 +47,9 @@ def tr(context, text):
     else:
         return text 
 
-ver = "2.1.2"
-build = "242804"
-pre = "False"
-if pre == "True":
-    version = "pre" + ver
-else:
-    version = ver
+build = "243004"
+version = f"exc{build}"
+pre = "True"
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -70,10 +77,6 @@ if os.path.exists('config.json'):
         else:
             aitype = "charai"
         theme = config.get('theme', '')
-        if theme == "dark":
-            guitheme = 'Fusion'
-        else:
-            guitheme = 'windowsvista'
         backcolor = config.get('backgroundcolor', "")
         buttoncolor = config.get('buttoncolor', "")
         buttontextcolor = config.get('buttontextcolor', "")
@@ -104,12 +107,7 @@ else:
     emiliaicon = './images/emilia.png'
 googleicon = './images/google.png'
 charaiicon = './images/charai.png'
-if guitheme == 'Fusion':
-    themeicon = './images/sun.png'
-    githubicon = './images/github_white.png'
-else:
-    themeicon = './images/moon.png'
-    githubicon = './images/github.png'
+githubicon = './images/github.png'
 
 if not os.path.exists('voice.pt'):
     if lang == "ru_RU":
@@ -143,81 +141,11 @@ def numbers_to_words(text):
         print(tr("MainWinow", 'noncriterror') + {e})
         return text
 
-class BackgroundEditor(QWidget):
-    def __init__(self, main_window):
-        
-        super().__init__()
-        self.setWindowIcon(QIcon(emiliaicon))
-        self.setWindowTitle("Emilia: Customization")
-        self.setFixedWidth(100)
-        self.setMinimumHeight(100)
-        self.main_window = main_window
-
-        self.color_label = QLabel(tr("EmiCustom","backcolor"))
-        self.color_button = QPushButton(tr("EmiCustom", "pickbackcolor"))
-        self.color_button.clicked.connect(self.choose_color)
-
-        self.button_color_label = QLabel(tr("EmiCustom", "buttonbackcolor"))
-        self.button_text_color_button = QPushButton(tr("EmiCustom", "pickbuttonbackcolor"))
-        self.button_text_color_button.clicked.connect(self.choose_button_color)
-        self.button_color_button = QPushButton(tr("EmiCustom", "pickbuttontextcolor"))
-        self.button_color_button.clicked.connect(self.choose_button_text_color)
-
-        self.label_color_label = QLabel(tr("EmiCustom", "labelcolor"))
-        self.label_color_button = QPushButton(tr("EmiCustom", "picktextcolor"))
-        self.label_color_button.clicked.connect(self.choose_label_color)
-
-        self.label_all_reset = QLabel(" ")
-        self.button_all_reset = QPushButton(tr("EmiCustom", "ALLRESET"))
-        self.button_all_reset.clicked.connect(self.allreset)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.button_color_label)
-        layout.addWidget(self.button_color_button)
-        layout.addWidget(self.button_text_color_button)
-        layout.addWidget(self.label_color_label)
-        layout.addWidget(self.label_color_button)
-        layout.addWidget(self.color_label)
-        layout.addWidget(self.color_button)
-        layout.addWidget(self.label_all_reset)
-        layout.addWidget(self.button_all_reset)
-        self.setLayout(layout)
-
-        self.current_color = QColor("#ffffff")
-        self.current_button_color = QColor("#ffffff") 
-        self.current_label_color = QColor("#000000") 
-
-    def choose_color(self):
-        color = QColorDialog.getColor(self.current_color, self)
-        self.main_window.set_background_color(color) 
-        writeconfig('config.json', "backgroundcolor", color.name())
-
-    def choose_button_color(self):
-        color1 = QColorDialog.getColor(self.current_button_color, self)
-        self.main_window.set_button_color(color1)
-        writeconfig('config.json', "buttoncolor", color1.name())
-
-    def choose_button_text_color(self):
-        color3 = QColorDialog.getColor(self.current_button_color, self)
-        self.main_window.set_button_text_color(color3)
-        writeconfig('config.json', "buttontextcolor", color3.name())
-
-    def choose_label_color(self):
-        color2 = QColorDialog.getColor(self.current_label_color, self)
-        self.main_window.set_label_color(color2)
-        writeconfig('config.json', "labelcolor", color2.name())
-
-    def allreset(self):
-        self.main_window.styles_reset()
-        writeconfig('config.json', "backgroundcolor", "")
-        writeconfig('config.json', "labelcolor", "")
-        writeconfig('config.json', "buttontextcolor", "")
-        writeconfig('config.json', "buttoncolor", "")
-
 class EmiliaGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Emilia")
+        micatheme(self)
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
@@ -226,26 +154,31 @@ class EmiliaGUI(QMainWindow):
             token_label = QLabel(tr("MainWindow", "geminitoken"))
             self.layout.addWidget(token_label)
             self.token_entry = QLineEdit()
-            self.layout.addWidget(self.token_entry)
+            self.token_entry.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
             self.token_entry.setPlaceholderText(tr("MainWindow", "token"))
+            self.layout.addWidget(self.token_entry)
         elif aitype == "charai":
             hlayout = QHBoxLayout()
             char_label = QLabel(tr("MainWindow", "characterid"))
+            char_label.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
             char_label.setWordWrap(True)
             hlayout.addWidget(char_label)
             self.char_entry = QLineEdit()
             hlayout.addWidget(self.char_entry)
             self.char_entry.setPlaceholderText("ID...")
+            self.char_entry.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
             client_label = QLabel(tr("MainWindow", "charactertoken"))
             client_label.setWordWrap(True)
             hlayout.addWidget(client_label)
             self.client_entry = QLineEdit()
             hlayout.addWidget(self.client_entry)
             self.client_entry.setPlaceholderText(tr("MainWindow", "token"))
+            self.client_entry.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
             self.layout.addLayout(hlayout)
         speaker_label = QLabel(tr("MainWindow", "voice"))
         self.layout.addWidget(speaker_label)
         self.speaker_entry = QLineEdit()
+        self.speaker_entry.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
         self.layout.addWidget(self.speaker_entry)
         self.speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
 
@@ -253,24 +186,18 @@ class EmiliaGUI(QMainWindow):
         self.selected_device_index = ""
 
         self.load_config()
-        if backcolor != "":
-            self.set_background_color(QColor(backcolor))
-        if buttoncolor != "":
-            self.set_button_color(QColor(buttoncolor))
-        if labelcolor != "":
-            self.set_label_color(QColor(labelcolor))
-        if buttontextcolor != "":
-            self.set_button_text_color(QColor(buttontextcolor))
 
         save_button = QPushButton(tr("MainWindow", "save"))
         if aitype == "charai":
             save_button.clicked.connect(lambda: self.charsetupconfig(self.char_entry, self.client_entry, self.speaker_entry))
         elif aitype == "gemini": 
             save_button.clicked.connect(lambda: self.geminisetupconfig(self.token_entry, self.speaker_entry))
+        save_button.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
         self.layout.addWidget(save_button)
 
         vstart_button = QPushButton(tr("MainWindow", "start"))
         vstart_button.clicked.connect(lambda: self.start_main("voice"))
+        vstart_button.setStyleSheet("background: transparent; border: transparent; padding: 5px;")
         self.layout.addWidget(vstart_button)
 
         self.user_input = QLabel("")
@@ -300,18 +227,6 @@ class EmiliaGUI(QMainWindow):
         elif aitype == "gemini":
             getcharaitoken = QAction(QIcon(googleicon), tr("MainWindow", 'gettoken'), self)
         getcharaitoken.triggered.connect(lambda: self.gettoken())
-
-        changethemeaction = QAction(QIcon(themeicon), tr("MainWindow", 'changetheme'), self)
-
-        open_background_editor_action = QAction(tr("MainWindow", 'customcolors'), self)
-        open_background_editor_action.triggered.connect(self.open_background_editor)
-        emi_menu.addAction(open_background_editor_action)
-
-        if guitheme == 'Fusion':
-            changethemeaction.triggered.connect(lambda: self.change_theme("white"))
-        else:
-            changethemeaction.triggered.connect(lambda: self.change_theme("dark"))
-        emi_menu.addAction(changethemeaction)
 
         visibletextmode = QAction(tr("MainWindow", 'usetextmode'), self)
         emi_menu.addAction(visibletextmode)
@@ -404,20 +319,14 @@ class EmiliaGUI(QMainWindow):
             usegemini.setEnabled(False)
             usecharai.setEnabled(True)
 
-        if guitheme == 'windowsvista' and aitype == "charai":
+        if aitype == "charai":
             spacer = menubar.addMenu(tr("MainWindow", "spacerwincharai"))
-        elif guitheme == 'windowsvista' and aitype == "gemini":
+        elif aitype == "gemini":
             spacer = menubar.addMenu(tr("MainWindow", "spacerwingemini"))
-        elif guitheme == 'Fusion' and aitype == "charai":
-            spacer = menubar.addMenu(tr("MainWindow", "spacerfusioncharai"))
-        elif guitheme == 'Fusion' and aitype == "gemini":
-            spacer = menubar.addMenu(tr("MainWindow", "spacerfusiongemini"))
         spacer.setEnabled(False)
 
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
-        debug = QAction(QIcon('./images/emilia.png'), '&Debug', self)
-        debug.triggered.connect(self.debugfun)
-        ver_menu.addAction(debug)
+        ver_menu.setEnabled(False)
 
         visibletextmode.triggered.connect(lambda: self.modehide("voice"))
         visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
@@ -438,47 +347,6 @@ class EmiliaGUI(QMainWindow):
         device = list(self.unique_devices.values())[index]
         sd.default.device = device["index"]
         self.selected_device_index = index
-
-    def open_background_editor(self):
-        self.background_editor = BackgroundEditor(self)
-        self.background_editor.setFixedWidth(200)
-        self.background_editor.setMinimumHeight(100)
-        self.background_editor.show()
-
-    def set_background_color(self, color):
-        palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, color)
-        self.setPalette(palette)
-
-    def set_button_text_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QPushButton {{
-                color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
-
-    def set_button_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QPushButton {{
-                background-color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
-
-    def set_label_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QLabel {{
-                color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
-
-    def styles_reset(self):
-        self.setStyleSheet("")
 
     def open_json(self, value, pup):
         global char, speaker
@@ -533,12 +401,9 @@ class EmiliaGUI(QMainWindow):
         self.globalsetupconfig(speaker_entry)
         os.execv(sys.executable, ['python'] + sys.argv)
 
-    def change_theme(self, theme):
-        writeconfig('config.json', "theme", theme)
-        os.execv(sys.executable, ['python'] + sys.argv)
-
     def about(self):
         msg = QMessageBox()
+        micatheme(msg)
         if pre == "True":
             msg.setWindowTitle(tr("About", "aboutemi") + build)
         else:
@@ -718,8 +583,8 @@ class EmiliaGUI(QMainWindow):
         global char, client
         char = char_entry.text()
         client = client_entry.text()
-        writeconfig('charaiconfig', "char", char)
-        writeconfig('charaiconfig', "client", client)
+        writeconfig('charaiconfig.json', "char", char)
+        writeconfig('charaiconfig.json', "client", client)
         self.globalsetupconfig(speaker_entry)
 
     def geminisetupconfig(self, token_entry, speaker_entry):
@@ -736,26 +601,10 @@ class EmiliaGUI(QMainWindow):
         writeconfig('config.json', "aitype", aitype)
         writeconfig('config.json', "theme", theme)
         writeconfig('config.json', "devicefortorch", devicefortorch)
-    
-    def debugfun(self):
-        global version, devmode
-        devmode = "true"
-        version = "Debug"
-        self.setWindowTitle("Emilia Debug")
-        msg = QMessageBox()
-        msg.setStyleSheet("QMessageBox {background-color: red; text-color}")
-        msg.setWindowTitle("Emilia Error")
-        msg.setWindowIcon(QIcon(emiliaicon))
-        pixmap = QPixmap(emiliaicon).scaled(64, 64)
-        msg.setIconPixmap(pixmap)
-        text = tr("Debug", "debig") + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNo?\n" + locale
-        msg.setText(text)
-        msg.exec()
-        self.central_widget.setLayout(self.layout)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle(guitheme)
+    app.setStyle('Fusion')
     window = EmiliaGUI()
     window.setFixedWidth(300)
     window.setMinimumHeight(250)

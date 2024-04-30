@@ -23,13 +23,9 @@ def tr(context, text):
     else:
         return text 
 
-ver = "2.1.2"
-build = "242804"
-pre = "False"
-if pre == "True":
-    version = "pre" + ver
-else:
-    version = ver
+build = "243004"
+version = f"exc{build}"
+pre = "True"
 
 if os.path.exists('config.json'):
     with open('config.json', 'r') as config_file:
@@ -111,7 +107,7 @@ class EmiliaGUI(QMainWindow):
         if guitheme == 'windowsvista':
             spacer = menubar.addMenu(tr("MainWindow", "spacerwingemini"))
         else:
-            spacer = menubar.addMenu(tr("MainWindow", "spacerfusiongemini"))
+            spacer = menubar.addMenu(tr("MainWindow", "spacerwingemini"))
         spacer.setEnabled(False)
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
         ver_menu.setEnabled(False)
@@ -208,7 +204,7 @@ class EmiliaGUI(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle(guitheme)
+    app.setStyle('Fusion')
     window = EmiliaGUI()
     window.setFixedWidth(300)
     window.setWindowIcon(QIcon(emiliaicon))
