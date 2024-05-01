@@ -23,8 +23,8 @@ def tr(context, text):
     else:
         return text 
 
-ver = "2.1.2"
-build = "242804"
+ver = "2.1.3"
+build = "240105"
 pre = "False"
 if pre == "True":
     version = "pre" + ver

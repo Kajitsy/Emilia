@@ -22,8 +22,8 @@
       "changeai": "Change of AI service",
       "noncriterror": "An error has occurred, but the code can continue ",
       "criterror": "An error has occurred, the code cannot continue ",
-      "inputdevice": "Input devices",
-      "outputdevice": "Output devices",
+      "inputdevice": "Input device",
+      "outputdevice": "Output device",
       "usegemini": "&Use Gemini",
       "usecharacterai": "&Use Character AI",
       "charchoice": "&Character Choice",
@@ -40,9 +40,9 @@
       "aboutemi": "About Emilia ",
       "languagefrom": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)",
       "newin": "<br><br>New in ",
-      "whatsnew": ": <br>• Changing the language through the interface, yes, in the last release it was too lazy to do <br>• Bugfixes, yes",
+      "whatsnew": ": <br>• Menu Emilia has been reduced <br>• New icons <br>• Bugfixes",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
-      "emiopenproject": "Emilia is an open source project that is a graphical interface for <a href='https://github.com/jofizcd/Soul-of-Waifu'>Soul of Waifu</a>.<br> At the moment you are using the ",
+      "emiopenproject": "Emilia is an open source project that allows you to talk to your favorite Waifu.<br> At the moment you are using the ",
       "usever": " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
     },
     "Main": {

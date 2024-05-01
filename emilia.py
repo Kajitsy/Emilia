@@ -15,7 +15,7 @@ import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import aiocai
 from num2words import num2words
-from PyQt6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QColorDialog, QFileDialog
+from PyQt6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QColorDialog
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
 from PyQt6.QtCore import QLocale
 
@@ -36,8 +36,8 @@ def tr(context, text):
     else:
         return text 
 
-ver = "2.1.2"
-build = "242804"
+ver = "2.1.3"
+build = "240105"
 pre = "False"
 if pre == "True":
     version = "pre" + ver
@@ -107,9 +107,19 @@ charaiicon = './images/charai.png'
 if guitheme == 'Fusion':
     themeicon = './images/sun.png'
     githubicon = './images/github_white.png'
+    paletteicon = './images/palette_white.png'
+    changelang = './images/change_language_white.png'
+    keyboardicon = './images/keyboard_white.png'
+    inputicon = './images/input_white.png'
+    charediticon = './images/open_char_editor_white.png'
 else:
     themeicon = './images/moon.png'
     githubicon = './images/github.png'
+    paletteicon = './images/palette.png'
+    changelang = './images/change_language.png'
+    keyboardicon = './images/keyboard.png'
+    inputicon = './images/input.png'
+    charediticon = './images/open_char_editor.png'
 
 if not os.path.exists('voice.pt'):
     if lang == "ru_RU":
@@ -294,6 +304,7 @@ class EmiliaGUI(QMainWindow):
         self.central_widget.setLayout(self.layout)
         menubar = self.menuBar()
         emi_menu = menubar.addMenu('&Emilia')
+        guichange = QMenu(tr("MainWindow", 'guichange'), self)
 
         if aitype == "charai":
             getcharaitoken = QAction(QIcon(charaiicon), tr("MainWindow", 'gettoken'), self)
@@ -301,51 +312,44 @@ class EmiliaGUI(QMainWindow):
             getcharaitoken = QAction(QIcon(googleicon), tr("MainWindow", 'gettoken'), self)
         getcharaitoken.triggered.connect(lambda: self.gettoken())
 
-        changethemeaction = QAction(QIcon(themeicon), tr("MainWindow", 'changetheme'), self)
-
-        open_background_editor_action = QAction(tr("MainWindow", 'customcolors'), self)
+        open_background_editor_action = QAction(QIcon(paletteicon) ,tr("MainWindow", 'customcolors'), self)
         open_background_editor_action.triggered.connect(self.open_background_editor)
-        emi_menu.addAction(open_background_editor_action)
 
+        changethemeaction = QAction(QIcon(themeicon), tr("MainWindow", 'changetheme'), self)
         if guitheme == 'Fusion':
             changethemeaction.triggered.connect(lambda: self.change_theme("white"))
         else:
             changethemeaction.triggered.connect(lambda: self.change_theme("dark"))
-        emi_menu.addAction(changethemeaction)
 
-        visibletextmode = QAction(tr("MainWindow", 'usetextmode'), self)
-        emi_menu.addAction(visibletextmode)
-
-        visiblevoicemode = QAction(tr("MainWindow", 'usevoicemode'), self)
-        emi_menu.addAction(visiblevoicemode)
+        visibletextmode = QAction(QIcon(keyboardicon), tr("MainWindow", 'usetextmode'), self)
+        
+        visiblevoicemode = QAction(QIcon(inputicon), tr("MainWindow", 'usevoicemode'), self)
         visiblevoicemode.setVisible(False)
 
+        devicesselector = QMenu(tr("MainWindow", 'devicesselector'), self)
+
         deviceselect = QMenu(tr("MainWindow", 'voicegendevice'), self)
-        emi_menu.addMenu(deviceselect)
 
         usecpumode = QAction(tr("MainWindow", 'usecpu'), self)
         usecpumode.triggered.connect(lambda: self.devicechange('cpu'))
-        deviceselect.addAction(usecpumode)
 
         usegpumode = QAction(tr("MainWindow", 'usegpu'), self)
         usegpumode.triggered.connect(lambda: self.devicechange('cuda'))
-        deviceselect.addAction(usegpumode)
-
+        
         self.recognizer = sr.Recognizer()
         self.mic_list = [
             mic_name for mic_name in sr.Microphone.list_microphone_names()
             if any(keyword in mic_name.lower() for keyword in ["microphone", "mic", "input"])
         ]
 
-        mic_menu = emi_menu.addMenu(tr("MainWindow", 'inputdevice'))
+        inputdeviceselect = QMenu(tr("MainWindow", 'inputdevice'), self)
 
         for index, mic_name in enumerate(self.mic_list):
             action = QAction(mic_name, self)
             action.triggered.connect(lambda checked, i=index: self.set_microphone(i))
-            mic_menu.addAction(action)
+            inputdeviceselect.addAction(action)
 
         outputdeviceselect = QMenu(tr("MainWindow", 'outputdevice'), self)
-        emi_menu.addMenu(outputdeviceselect)
 
         self.unique_devices = {}
         for dev in sd.query_devices():
@@ -357,30 +361,26 @@ class EmiliaGUI(QMainWindow):
             action.triggered.connect(lambda checked, i=index: self.set_output_device(i))
             outputdeviceselect.addAction(action)
 
-        changelanguage = QAction(tr("MainWindow", 'changelanguage'), self)
+        changelanguage = QAction(QIcon(changelang), tr("MainWindow", 'changelanguage'), self)
         if lang == "en_US" or lang == "":
             changelanguage.triggered.connect(lambda: self.geminiuse(self.langchange("ru_RU")))
         elif lang == "ru_RU":
             changelanguage.triggered.connect(lambda: self.geminiuse(self.langchange("en_US")))
-        emi_menu.addAction(changelanguage)
-
+        
         serviceselect = QMenu(tr("MainWindow", 'changeai'), self)
-        emi_menu.addMenu(serviceselect)
 
         usegemini = QAction(QIcon(googleicon), tr("MainWindow", 'usegemini'), self)
         usegemini.triggered.connect(lambda: self.geminiuse(self.speaker_entry))
-        serviceselect.addAction(usegemini)
-
+        
         usecharai = QAction(QIcon(charaiicon), tr("MainWindow", 'usecharacterai'), self)
         usecharai.triggered.connect(lambda: self.charaiuse(self.speaker_entry))
-        serviceselect.addAction(usecharai)
 
         if aitype == "charai":
             emi_menu.addAction(getcharaitoken)
             usecharai.setEnabled(False)
             usegemini.setEnabled(True)
             charselect = menubar.addMenu(tr("MainWindow", 'charchoice'))
-            chareditopen = QAction(tr("MainWindow", 'openchareditor'), self)
+            chareditopen = QAction(QIcon(charediticon), tr("MainWindow", 'openchareditor'), self)
             chareditopen.triggered.connect(lambda: subprocess.call(["python", "charedit.py"]))
             charselect.addAction(chareditopen)
             if os.path.exists('config.json'):
@@ -413,26 +413,37 @@ class EmiliaGUI(QMainWindow):
         elif guitheme == 'Fusion' and aitype == "gemini":
             spacer = menubar.addMenu(tr("MainWindow", "spacerfusiongemini"))
         spacer.setEnabled(False)
-
         ver_menu = menubar.addMenu(tr("MainWindow", 'version') + version)
-        debug = QAction(QIcon('./images/emilia.png'), '&Debug', self)
-        debug.triggered.connect(self.debugfun)
-        ver_menu.addAction(debug)
-
+        
         visibletextmode.triggered.connect(lambda: self.modehide("voice"))
         visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
 
         issues = QAction(QIcon(githubicon), tr("MainWindow", 'BUUUG'), self)
         issues.triggered.connect(self.issuesopen)
-        emi_menu.addAction(issues)
-
+        
         aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", 'aboutemi'), self)
         aboutemi.triggered.connect(self.about)
-        emi_menu.addAction(aboutemi)
+
+        emi_menu.addAction(visibletextmode)
+        emi_menu.addAction(visiblevoicemode)
+        emi_menu.addMenu(guichange)
+        guichange.addAction(open_background_editor_action)
+        guichange.addAction(changethemeaction)
+        guichange.addAction(changelanguage)
+        deviceselect.addAction(usegpumode)
+        deviceselect.addAction(usecpumode)
+        emi_menu.addMenu(devicesselector)
+        devicesselector.addMenu(deviceselect)
+        devicesselector.addMenu(outputdeviceselect)
+        devicesselector.addMenu(inputdeviceselect)
+        emi_menu.addMenu(serviceselect)
+        serviceselect.addAction(usecharai)
+        serviceselect.addAction(usegemini)
+        ver_menu.addAction(issues)
+        ver_menu.addAction(aboutemi)
 
     def set_microphone(self, index):
         self.microphone = sr.Microphone(device_index=index)
-        print(f"Выбран микрофон: {self.mic_list[index]}")
 
     def set_output_device(self, index):
         device = list(self.unique_devices.values())[index]
@@ -718,8 +729,8 @@ class EmiliaGUI(QMainWindow):
         global char, client
         char = char_entry.text()
         client = client_entry.text()
-        writeconfig('charaiconfig', "char", char)
-        writeconfig('charaiconfig', "client", client)
+        writeconfig('charaiconfig.json', "char", char)
+        writeconfig('charaiconfig.json', "client", client)
         self.globalsetupconfig(speaker_entry)
 
     def geminisetupconfig(self, token_entry, speaker_entry):
@@ -736,22 +747,6 @@ class EmiliaGUI(QMainWindow):
         writeconfig('config.json', "aitype", aitype)
         writeconfig('config.json', "theme", theme)
         writeconfig('config.json', "devicefortorch", devicefortorch)
-    
-    def debugfun(self):
-        global version, devmode
-        devmode = "true"
-        version = "Debug"
-        self.setWindowTitle("Emilia Debug")
-        msg = QMessageBox()
-        msg.setStyleSheet("QMessageBox {background-color: red; text-color}")
-        msg.setWindowTitle("Emilia Error")
-        msg.setWindowIcon(QIcon(emiliaicon))
-        pixmap = QPixmap(emiliaicon).scaled(64, 64)
-        msg.setIconPixmap(pixmap)
-        text = tr("Debug", "debig") + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNo?\n" + locale
-        msg.setText(text)
-        msg.exec()
-        self.central_widget.setLayout(self.layout)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
