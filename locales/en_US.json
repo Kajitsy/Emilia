@@ -19,6 +19,8 @@
       "voicegendevice": "&Voice generation device",
       "usecpu": "&Use CPU",
       "usegpu": "&Use GPU",
+      "guichange": "&Change Interface",
+      "devicesselector": "&Device Selection",
       "changeai": "Change of AI service",
       "noncriterror": "An error has occurred, but the code can continue ",
       "criterror": "An error has occurred, the code cannot continue ",
@@ -30,17 +32,17 @@
       "openchareditor": "Open character editor",
       "changelanguage": "Change the language",
       "BUUUG": "&Report a bug",
-      "spacerwincharai": "              ",
-      "spacerwingemini": "                                                  ",
-      "spacerfusioncharai": "                 ",
-      "spacerfusiongemini": "                                                    ",
+      "spacerwincharai": "            ",
+      "spacerwingemini": "                                                ",
+      "spacerfusioncharai": "               ",
+      "spacerfusiongemini": "                                                  ",
       "aboutemi": "&About Emilia "
     },
     "About": {
       "aboutemi": "About Emilia ",
       "languagefrom": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>, from the author, yeah yeah)",
       "newin": "<br><br>New in ",
-      "whatsnew": ": <br>• Menu Emilia has been reduced <br>• New icons <br>• Bugfixes",
+      "whatsnew": ": <br>• There will be no list of changes until release.",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
       "emiopenproject": "Emilia is an open source project that allows you to talk to your favorite Waifu.<br> At the moment you are using the ",
       "usever": " version, and it is completely free of charge for <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
@@ -82,7 +84,9 @@
       "ALLRESET": "RESET ALL"
       },
       "Errors": {
+        "Label": "Error",
         "Gemini 400": "Your location does not allow you to use Gemini :(",
-        "nonvoice": "Please enter the required voice"
+        "nonvoice": "Please enter the required voice",
+        "other": "Hmm, an unknown error occurred:\n"
       }
   }

@@ -3,7 +3,7 @@
       "start": "Запустить",
       "starttext": "Запустить в текстовом режиме",
       "textmodeinput": "Прежде чем жать кнопку ниже...",
-      "geminitoken": "Ваш Gemini токен...",
+      "geminitoken": "Ваш Gemini токен:",
       "charactertoken": "Токен клиента:",
       "characterid": "ID персонажа:",
       "token": "Токен...",
@@ -32,17 +32,17 @@
       "openchareditor": "Открыть редактор персонажей",
       "changelanguage": "Сменить язык",
       "BUUUG": "&Сообщить об ошибке",
-      "spacerwincharai": "       ",
-      "spacerwingemini": "                                                  ",
-      "spacerfusioncharai": "         ",
-      "spacerfusiongemini": "                                                    ",
+      "spacerwincharai": "     ",
+      "spacerwingemini": "                                                ",
+      "spacerfusioncharai": "       ",
+      "spacerfusiongemini": "                                                  ",
       "aboutemi": "&Об Emilia "
     },
     "About": {
       "aboutemi": "Об Emilia ",
       "languagefrom": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>, от автора, ага да)",
       "newin": "<br><br>Новое в ",
-      "whatsnew": ": <br>• Уменьшено меню Emilia <br>• Новые иконки <br>• Около багфиксы",
+      "whatsnew": ": <br>• Списка изменений не будет до релиза.",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
       "emiopenproject": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
       "usever": " которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
@@ -84,7 +84,9 @@
       "ALLRESET": "Сбросить ВСЁ"
     },
     "Errors": {
+      "Label": "Ошибка",
       "Gemini 400": "Ваше местоположение не позволяет использовать Gemini :(",
-      "nonvoice": "Пожалуйста, введите нужный голос"
+      "nonvoice": "Пожалуйста, введите нужный голос",
+      "other": "Хм, возникла неизвестная ошибка:\n"
     }
   }
