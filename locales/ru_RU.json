@@ -32,6 +32,8 @@
       "openchareditor": "Открыть редактор персонажей",
       "changelanguage": "Сменить язык",
       "BUUUG": "&Сообщить об ошибке",
+      "enableautoupdate": "&Включить автообновления",
+      "disableautoupdate": "&Выключить автообновления",
       "spacerwincharai": "     ",
       "spacerwingemini": "                                                ",
       "spacerfusioncharai": "       ",
@@ -55,9 +57,6 @@
       "emimessage": "Вайфу: ",
       "sendchating": "Вот наша с тобой история чата: "
     },
-    "Debug": {
-      "debig": "Зачем ты здесь что-то ищешь?\nпонимаешь что здесь ничего нет?"
-    },
     "GetToken": {
       "youremail": "Ваша электронная почта:",
       "sendemail": "Отправить письмо с ссылкой",
@@ -73,20 +72,17 @@
       "error": "ОШИБКА, ПОПРОБУЙТЕ ЕЩЁ РАЗ ",
       "notavchar": "Твоего персонажа в коде нет"
     },
-    "EmiCustom": {
-      "backcolor": "Цвет фона:",
-      "pickbackcolor": "Выбрать цвет фона",
-      "buttonbackcolor": "Цвета кнопок:",
-      "pickbuttonbackcolor": "Выбрать цвет фона для кнопок",
-      "pickbuttontextcolor": "Выбрать цвет текста на кнопках",
-      "labelcolor": "Цвет текста:",
-      "picktextcolor": "Выбрать цвет текста",
-      "ALLRESET": "Сбросить ВСЁ"
+    "AutoUpdate": {
+      "upgradeto": "Обновление до",
+      "emiliaupdated": "Emilia обновлена до Build"
     },
     "Errors": {
       "Label": "Ошибка",
       "Gemini 400": "Ваше местоположение не позволяет использовать Gemini :(",
       "nonvoice": "Пожалуйста, введите нужный голос",
-      "other": "Хм, возникла неизвестная ошибка:\n"
+      "other": "Хм, возникла неизвестная ошибка:\n",
+      "UpdateCheckError": "Ошибка при проверке обновлений:",
+      "UpdateDownloadError": "Ошибка при загрузке обновления:",
+      "BadZipFile": "Ошибка при распаковке архива:"
     }
   }

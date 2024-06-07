@@ -32,6 +32,8 @@
       "openchareditor": "Open character editor",
       "changelanguage": "Change the language",
       "BUUUG": "&Report a bug",
+      "enableautoupdate": "&Enable autoupdates",
+      "disableautoupdate": "&Disable autoupdates",
       "spacerwincharai": "            ",
       "spacerwingemini": "                                                ",
       "spacerfusioncharai": "               ",
@@ -55,9 +57,6 @@
       "emimessage": "Waifu: ",
       "sendchating": "Here's our chat history: "
     },
-    "Debug": {
-      "debig": "Why are you looking for something here?\nDo you understand that there is nothing here?"
-    },
     "GetToken": {
       "youremail": "Your email:",
       "sendemail": "Send an email with a link",
@@ -72,21 +71,19 @@
       "delchar": "Delete a character",
       "error": "ERROR ",
       "notavchar": "Your character is not in the code"
+    },    
+    "AutoUpdate": {
+      "upgradeto": "Upgrade to Build",
+      "emiliaupdated": "Emilia updated to Build"
     },
-    "EmiCustom": {
-      "backcolor": "Background Color:",
-      "pickbackcolor": "Pick Background Color",
-      "buttonbackcolor": "Button Colors:",
-      "pickbuttonbackcolor": "Pick Button Background Color",
-      "pickbuttontextcolor": "Pick Button Text Color",
-      "labelcolor": "Text Color:",
-      "picktextcolor": "Pick Text Color",
-      "ALLRESET": "RESET ALL"
-      },
-      "Errors": {
+    "Errors": {
         "Label": "Error",
         "Gemini 400": "Your location does not allow you to use Gemini :(",
         "nonvoice": "Please enter the required voice",
-        "other": "Hmm, an unknown error occurred:\n"
+        "other": "Hmm, an unknown error occurred:\n",
+        "UpdateCheckError": "Error checking for updates:",
+        "UpdateDownloadError": "Error downloading update:",
+        "BadZipFile": "Error when unpacking archive:"
+
       }
   }

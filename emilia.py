@@ -3,6 +3,7 @@ import asyncio
 import threading
 import torch
 import time
+import zipfile, requests
 import re
 import json
 import sys
@@ -19,7 +20,7 @@ from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
 from PyQt6.QtCore import QLocale
 
 ver = "2.2"
-build = "240506"
+build = "240706"
 pre = True
 if pre == True:
     version = "pre" + ver
@@ -30,16 +31,16 @@ sample_rate = 48000
 put_accent = True
 put_yo = True
 
-def writeconfig(config, value, pup):
+def writeconfig(variable, value, configfile = 'config.json'):
         try:
-            with open(config, 'r', encoding='utf-8') as f:
+            with open(configfile, 'r', encoding='utf-8') as f:
                 data = json.load(f)
         except FileNotFoundError:
             data = {}
         except json.JSONDecodeError:
              data = {}
-        data.update({value: pup})
-        with open(config, 'w', encoding='utf-8') as f:
+        data.update({variable: value})
+        with open(configfile, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
 def getconfig(value, def_value = "", configfile = 'config.json'):
@@ -51,6 +52,7 @@ def getconfig(value, def_value = "", configfile = 'config.json'):
         return def_value
         
 # Global Variables
+autoupdate_enable = getconfig('autoupdate_enable', 'True')
 lang = getconfig('language', QLocale.system().name())
 aitype = getconfig('aitype', 'charai')
 theme = getconfig('theme')
@@ -72,17 +74,13 @@ googleicon = './images/google.png'
 charaiicon = './images/charai.png'
 refreshicon = './images/refresh.png'
 if theme == 'Fusion':
-    themeicon = './images/sun.png'
     githubicon = './images/github_white.png'
-    paletteicon = './images/palette_white.png'
     changelang = './images/change_language_white.png'
     keyboardicon = './images/keyboard_white.png'
     inputicon = './images/input_white.png'
     charediticon = './images/open_char_editor_white.png'
 else:
-    themeicon = './images/moon.png'
     githubicon = './images/github.png'
-    paletteicon = './images/palette.png'
     changelang = './images/change_language.png'
     keyboardicon = './images/keyboard.png'
     inputicon = './images/input.png'
@@ -136,6 +134,57 @@ def tr(context, text):
         return text 
 
 translations = load_translations(f"locales/{lang}.json")
+
+class AutoUpdate():
+    def check_for_updates(self):
+        try:
+            response = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/autoupdate.json")
+            response.raise_for_status()
+            updates = response.json()
+
+            if pre == True:
+                if "latest_prerealease" in updates:
+                    latest_prerealease = updates["latest_prerealease"]
+                    if int(latest_prerealease["build"]) > build:
+                        self.download_and_update_script(latest_prerealease["url"], latest_prerealease["build"])
+                        return
+                if "latest_release" in updates:
+                    latest_release = updates["latest_release"]
+                    if int(latest_release["build"]) > build:
+                        self.download_and_update_script(latest_release["url"], latest_release["build"])
+                        return
+            else:
+                if "latest_release" in updates:
+                    latest_release = updates["latest_release"]
+                    if int(latest_release["build"]) > build:
+                        self.download_and_update_script(latest_release["url"], latest_release["build"])
+                        return
+        except requests.exceptions.RequestException as e:
+            print(f"{tr('Errors', 'UpdateCheckError')} {e}")
+            writeconfig('autoupdate_enable', 'False')
+
+    def download_and_update_script(self, url, build):
+        print(tr('AutoUpdate', 'upgradeto'))
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            with open(f"Emilia_{build}.zip", "wb") as f:
+                f.write(response.content)
+
+            with zipfile.ZipFile(f"Emilia_{build}.zip", "r") as zip_ref:
+                zip_ref.extractall(".") 
+
+            os.remove(f"Emilia_{build}.zip")
+
+            print(f"{tr('AutoUpdate', 'emiliaupdated')} {build}!")
+            os.execv(sys.executable, ['python'] + sys.argv)
+        except requests.exceptions.RequestException as e:
+            print(f"{tr('Errors', 'UpdateDownloadError')} {e}")
+            writeconfig('autoupdate_enable', 'False')
+        except zipfile.BadZipFile as e:
+            print(f"{tr('Errors', 'BadZipFile')} {e}")
+            writeconfig('autoupdate_enable', 'False')
 
 class FirstLaunch(QMainWindow):
     def __init__(self):
@@ -204,11 +253,11 @@ class FirstLaunch(QMainWindow):
         self.relaunch_button2.clicked.connect(lambda: self.afterentervoice())
 
     def afterentervoice(self):
-        writeconfig('config.json', 'speaker', self.voiceentry.text())
+        writeconfig('speaker', self.voiceentry.text())
         os.execv(sys.executable, ['python'] + sys.argv)
 
     def entervoice(self):
-        writeconfig('geminiconfig.json', 'token', self.geminiapikey.text())
+        writeconfig('token', self.geminiapikey.text(), 'geminiconfig.json')
         self.first_launch_notification_label.setText("Enter the name of the desired voice")
         self.gemapikeyready_button.setVisible(False)
         self.layout.addWidget(self.voiceentry)
@@ -223,7 +272,7 @@ class FirstLaunch(QMainWindow):
         self.character_editor.show()
 
     def use_gemini(self):
-        writeconfig('config.json', 'aitype', 'gemini')
+        writeconfig('aitype', 'gemini')
         self.first_launch_notification_label.setText("Get the API key in an open browser window and enter it here")
         webbrowser.open("https://aistudio.google.com/app/apikey")
         self.characterai_button.setVisible(False)
@@ -232,7 +281,7 @@ class FirstLaunch(QMainWindow):
         self.layout.addWidget(self.gemapikeyready_button)
 
     def use_characterai(self):
-        writeconfig('config.json', 'aitype', 'charai')
+        writeconfig('aitype', 'charai')
         self.first_launch_notification_label.setText("Receive the token in the window that opens")
         self.characterai_button.setVisible(False)
         self.gemini_button.setVisible(False)
@@ -247,7 +296,7 @@ class FirstLaunch(QMainWindow):
         self.layout.addLayout(self.sphlayout)
 
     def first_launch_button_no(self):
-        writeconfig('config.json', 'aitype', 'charai')
+        writeconfig('aitype', 'charai')
         os.execv(sys.executable, ['python'] + sys.argv)
 
 class CharacterEditor(QWidget):
@@ -367,10 +416,6 @@ class EmiliaAuth(QWidget):
         layout.addWidget(self.gettoken_button)
         self.setLayout(layout)
 
-        self.current_color = QColor("#ffffff")
-        self.current_button_color = QColor("#ffffff") 
-        self.current_label_color = QColor("#000000") 
-
     def getlink(self):
         sendCode(self.email_entry.text())
         self.link_label.setVisible(True)
@@ -386,7 +431,7 @@ class EmiliaAuth(QWidget):
             self.email_entry.setVisible(False)
             self.getlink_button.setVisible(False)
             self.email_label.setText(tr("GetToken", "yourtoken") + token + tr("GetToken", "saveincharaiconfig"))
-            writeconfig('charaiconfig.json', 'client', token)
+            writeconfig('client', token, 'charaiconfig.json')
         except {Exception} as e:
             msg = QMessageBox()
             msg.setWindowTitle(tr("Errors", "Label"))
@@ -394,76 +439,6 @@ class EmiliaAuth(QWidget):
             text = tr("Errors", "other") + e
             msg.setText(text)
             msg.exec()
-
-class BackgroundEditor(QWidget):
-    def __init__(self, main_window):
-        super().__init__()
-        self.setWindowIcon(QIcon(emiliaicon))
-        self.setWindowTitle("Emilia: Customization")
-        self.setFixedWidth(200)
-        self.setMinimumHeight(100)
-        self.main_window = main_window
-
-        self.color_label = QLabel(tr("EmiCustom","backcolor"))
-        self.color_button = QPushButton(tr("EmiCustom", "pickbackcolor"))
-        self.color_button.clicked.connect(self.choose_color)
-
-        self.button_color_label = QLabel(tr("EmiCustom", "buttonbackcolor"))
-        self.button_text_color_button = QPushButton(tr("EmiCustom", "pickbuttonbackcolor"))
-        self.button_text_color_button.clicked.connect(self.choose_button_color)
-        self.button_color_button = QPushButton(tr("EmiCustom", "pickbuttontextcolor"))
-        self.button_color_button.clicked.connect(self.choose_button_text_color)
-
-        self.label_color_label = QLabel(tr("EmiCustom", "labelcolor"))
-        self.label_color_button = QPushButton(tr("EmiCustom", "picktextcolor"))
-        self.label_color_button.clicked.connect(self.choose_label_color)
-
-        self.label_all_reset = QLabel(" ")
-        self.button_all_reset = QPushButton(tr("EmiCustom", "ALLRESET"))
-        self.button_all_reset.clicked.connect(self.allreset)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.button_color_label)
-        layout.addWidget(self.button_color_button)
-        layout.addWidget(self.button_text_color_button)
-        layout.addWidget(self.label_color_label)
-        layout.addWidget(self.label_color_button)
-        layout.addWidget(self.color_label)
-        layout.addWidget(self.color_button)
-        layout.addWidget(self.label_all_reset)
-        layout.addWidget(self.button_all_reset)
-        self.setLayout(layout)
-
-        self.current_color = QColor("#ffffff")
-        self.current_button_color = QColor("#ffffff") 
-        self.current_label_color = QColor("#000000") 
-
-    def choose_color(self):
-        color = QColorDialog.getColor(self.current_color, self)
-        self.main_window.set_background_color(color) 
-        writeconfig('config.json', "backgroundcolor", color.name())
-
-    def choose_button_color(self):
-        color1 = QColorDialog.getColor(self.current_button_color, self)
-        self.main_window.set_button_color(color1)
-        writeconfig('config.json', "buttoncolor", color1.name())
-
-    def choose_button_text_color(self):
-        color3 = QColorDialog.getColor(self.current_button_color, self)
-        self.main_window.set_button_text_color(color3)
-        writeconfig('config.json', "buttontextcolor", color3.name())
-
-    def choose_label_color(self):
-        color2 = QColorDialog.getColor(self.current_label_color, self)
-        self.main_window.set_label_color(color2)
-        writeconfig('config.json', "labelcolor", color2.name())
-
-    def allreset(self):
-        self.main_window.styles_reset()
-        writeconfig('config.json', "backgroundcolor", "")
-        writeconfig('config.json', "labelcolor", "")
-        writeconfig('config.json', "buttontextcolor", "")
-        writeconfig('config.json', "buttoncolor", "")
 
 class Emilia(QMainWindow):
     def __init__(self):
@@ -572,10 +547,7 @@ class Emilia(QMainWindow):
             self.getcharaitoken = QAction(QIcon(googleicon), tr("MainWindow", 'gettoken'), self)
         self.getcharaitoken.triggered.connect(lambda: self.gettoken())
 
-        self.open_background_editor_action = QAction(QIcon(paletteicon) ,tr("MainWindow", 'customcolors'), self)
-        self.open_background_editor_action.triggered.connect(lambda: BackgroundEditor.show())
-
-        self.changethemeaction = QAction(QIcon(themeicon), tr("MainWindow", 'changetheme'), self)
+        self.changethemeaction = QAction(tr("MainWindow", 'changetheme'), self)
         if theme == 'Fusion':
             self.changethemeaction.triggered.connect(lambda: self.change_theme('windowsvista'))
         else:
@@ -669,6 +641,13 @@ class Emilia(QMainWindow):
         self.visibletextmode.triggered.connect(lambda: self.modehide("voice"))
         self.visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
 
+        if autoupdate_enable == "True":
+            self.disableautoupdate = QAction(QIcon(refreshicon), tr("MainWindow", 'disableautoupdate'), self)
+            self.disableautoupdate.triggered.connect(lambda: writeconfig('autoupdate_enable', 'False'))
+        else:
+            self.disableautoupdate = QAction(QIcon(refreshicon), tr("MainWindow", 'enableautoupdate'), self)
+            self.disableautoupdate.triggered.connect(lambda: writeconfig('autoupdate_enable', 'True'))
+
         self.issues = QAction(QIcon(githubicon), tr("MainWindow", 'BUUUG'), self)
         self.issues.triggered.connect(self.issuesopen)
         
@@ -678,7 +657,6 @@ class Emilia(QMainWindow):
         self.emi_menu.addAction(self.visibletextmode)
         self.emi_menu.addAction(self.visiblevoicemode)
         self.emi_menu.addMenu(self.guichange)
-        self.guichange.addAction(self.open_background_editor_action)
         self.guichange.addAction(self.changethemeaction)
         self.guichange.addAction(self.changelanguage)
         self.deviceselect.addAction(self.usegpumode)
@@ -690,6 +668,7 @@ class Emilia(QMainWindow):
         self.emi_menu.addMenu(self.serviceselect)
         self.serviceselect.addAction(self.usecharai)
         self.serviceselect.addAction(self.usegemini)
+        self.ver_menu.addAction(self.disableautoupdate)
         self.ver_menu.addAction(self.issues)
         self.ver_menu.addAction(self.aboutemi)
 
@@ -759,10 +738,10 @@ class Emilia(QMainWindow):
         self.setStyleSheet("")
     
     def devicechange(self, device):
-        writeconfig('config.json', "devicefortorch", device)
+        writeconfig('devicefortorch', device)
 
     def langchange(self, lang):
-        writeconfig('config.json', "language", lang)
+        writeconfig('language', lang)
         os.remove("voice.pt")
         os.execv(sys.executable, ['python'] + sys.argv)
 
@@ -791,16 +770,36 @@ class Emilia(QMainWindow):
             self.user_aiinput.setVisible(True)   
 
     def geminiuse(self):
-        writeconfig('config.json', 'aitype', 'gemini')
+        writeconfig('aitype', 'gemini')
         os.execv(sys.executable, ['python'] + sys.argv)
 
     def charaiuse(self):
-        writeconfig('config.json', 'aitype', 'charai')
+        writeconfig('aitype', 'charai')
         os.execv(sys.executable, ['python'] + sys.argv)
 
     def change_theme(self, theme):
-        writeconfig('config.json', "theme", theme)
-        os.execv(sys.executable, ['python'] + sys.argv)
+        if theme == 'windowsvista':
+            githubicon = './images/github.png'
+            changelang = './images/change_language.png'
+            keyboardicon = './images/keyboard.png'
+            inputicon = './images/input.png'
+            charediticon = './images/open_char_editor.png'
+            self.setStyle('Fusion')
+            writeconfig('theme', 'Fusion')
+        else:
+            githubicon = './images/github_white.png'
+            changelang = './images/change_language_white.png'
+            keyboardicon = './images/keyboard_white.png'
+            inputicon = './images/input_white.png'
+            charediticon = './images/open_char_editor_white.png'
+            self.setStyle('windowsvista')
+            writeconfig('theme', 'windowsvista')
+        self.visibletextmode.setIcon(QIcon(keyboardicon))
+        self.visiblevoicemode.setIcon(QIcon(inputicon))
+        self.changelanguage.setIcon(QIcon(changelang))
+        self.issues.setIcon(QIcon(githubicon))
+        if aitype == 'charai':
+            self.chareditopen.setIcon(QIcon(charediticon))
 
     def about(self):
         msg = QMessageBox()
@@ -958,17 +957,19 @@ class Emilia(QMainWindow):
                 threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
 
     def charsetupconfig(self):
-        writeconfig('charaiconfig.json', "char", self.char_entry.text())
-        writeconfig('charaiconfig.json', "client", self.client_entry.text())
-        writeconfig('config.json', "speaker", self.speaker_entry.text())
+        writeconfig('char', self.char_entry.text(), 'charaiconfig.json')
+        writeconfig('client', self.client_entry.text(), 'charaiconfig.json')
+        writeconfig('speaker', self.speaker_entry.text())
 
     def geminisetupconfig(self):
         token = self.token_entry.text()
-        writeconfig('geminiconfig.json', "token", token)
-        writeconfig('config.json', "speaker", self.speaker_entry.text())
+        writeconfig('token', token, 'geminiconfig.json')
+        writeconfig('speaker', self.speaker_entry.text())
         genai.configure(api_key=token)
 
 if __name__ == "__main__":
+    if autoupdate_enable == "True":
+        AutoUpdate().check_for_updates()
     app = QApplication(sys.argv)
     app.setStyle(theme)
     if not os.path.exists('config.json'):
