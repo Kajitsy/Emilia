@@ -1,6 +1,14 @@
-import pyvts
+import pyvts, asyncio, os, json
 
-class EMC():
+def getconfig(value, def_value, configfile = 'emotesconfig.json'):
+    if os.path.exists(configfile):
+        with open(configfile, 'r') as configfile:
+            config = json.load(configfile)
+            return config.get(value, def_value)
+    else:
+        return def_value
+
+class EEC():
     """
     EMC - Emilia Emotes Core
     """
@@ -17,6 +25,7 @@ class EMC():
         """
         Подключение к Vtube Studio
         """
+
         await self.myvts.connect()
         try:
             await self.myvts.read_token()
@@ -26,18 +35,19 @@ class EMC():
             await self.myvts.write_token()
             await self.myvts.request_authenticate()
 
-    async def CustomParameter(self, name, value=0, min=-100, max=100):
+    async def AddCustomParameter(self, name, value=0, min=-100, max=100):
         """
         Лучше всего использовать для создания параметров плагина\n
 
         CustomParameter("EmiEyeX", -100, 100, 0)
         """
+
         try:
             await self.myvts.request(
                 self.myvts.vts_request.requestCustomParameter(name, min, max, value)
             )
         except:
-            await EMC().vtubeconnect()
+            await self.VTubeConnect()
             await self.myvts.request(
                 self.myvts.vts_request.requestCustomParameter(name, min, max, value)
             )
@@ -48,28 +58,34 @@ class EMC():
 
         SetCustomParameters(["EmiEyeX", "EmiEyeY"], [50, 50])
         """
+
         try:
             await self.myvts.request(
                 self.myvts.vts_request.requestSetMultiParameterValue(names, values)
             )
         except:
-            await EMC().vtubeconnect()
+            await self.VTubeConnect()
             await self.myvts.request(
                 self.myvts.vts_request.requestSetMultiParameterValue(names, values)
             )
 
-    async def GetParameterValue(self, name):
+    async def AddVariables(self):
         """
-        Нужно для получение значения переменной в VTube Studio\n
+        Создаёт все нужные переменные
+        """
 
-        GetParameterValue("EmiEyeX")
-        """
-        try:
-            await self.myvts.request(
-                self.myvts.vts_request.requestParameterValue(name)
-            )
-        except:
-            await EMC().vtubeconnect()
-            await self.myvts.request(
-                self.myvts.vts_request.requestParameterValue(name)
-            )
+        addparam = self.AddCustomParameter
+        await addparam("EmiFaceAngleX")
+        await addparam("EmiFaceAngleY")
+        await addparam("EmiFaceAngleZ")
+        await addparam("EmiEyeOpenLeft")
+        await addparam("EmiEyeOpenRight")
+        await addparam("EmiEyeX")
+        await addparam("EmiEyeY")
+        await addparam("EmiMountSmile")
+        await addparam("EmiMountX")
+
+class Emotes():
+    """
+    Все эмоции здесь
+    """
