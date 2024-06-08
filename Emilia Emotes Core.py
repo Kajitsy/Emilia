@@ -1,22 +1,5 @@
-import time
-
 import pyvts, asyncio, os, json, random
 
-def getconfig2(emote, configfile = 'Emotes.json'):
-    with open(configfile, "r") as f:
-        emotes_data = json.load(f)
-    listening_data = emotes_data[emote]
-    rndm = EEC().RandomBetween
-
-    # Перебираем параметры и вычисляем значения
-    for parameter_name, parameter_value in listening_data.items():
-
-        value = eval(parameter_value)
-
-        # Используем значение для установки параметра в VTube Studio
-        # ...
-
-        # Пример использования значения:
 class EEC():
     """
     EMC - Emilia Emotes Core
@@ -149,9 +132,3 @@ class EEC():
                     )
                 )
             await self.myvts.close()
-
-asyncio.run(EEC().UseEmote("Listening"))
-time.sleep(2)
-asyncio.run(EEC().UseEmote("Thinks"))
-time.sleep(2)
-asyncio.run(EEC().UseEmote("Says"))
