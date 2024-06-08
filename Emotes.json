@@ -1,0 +1,35 @@
+{
+    "Listening": {
+        "EmiEyeX": "rndm(75, 90)",
+        "EmiEyeY": "rndm(60, 80)",
+        "EmiMountSmile": "rndm(49, 55)",
+        "EmiFaceAngleX": "rndm(35, 40)",
+        "EmiFaceAngleY": "50",
+        "EmiFaceAngleZ": "rndm(48, 52)",
+        "EyesOpen": "rndm(49,51)"
+    },
+    "Thinks": {
+        "EmiEyeX": "rndm(65, 75)",
+        "EmiEyeY": "rndm(17, 20)",
+        "EmiMountSmile": "rndm(52, 60)",
+        "EmiFaceAngleX": "rndm(30, 35)",
+        "EmiFaceAngleY": "rndm(25, 35)",
+        "EmiFaceAngleZ": "rndm(48, 52)",
+        "EyesOpen": "rndm(20, 25)"
+    },
+    "Says": {
+        "EmiEyeX": "50",
+        "EmiEyeY": "50",
+        "EmiMountSmile": "rndm(60, 80)",
+        "EmiFaceAngleX": "rndm(45, 55)",
+        "EmiFaceAngleY": "rndm(48, 52)",
+        "EyesOpen": "rndm(50, 60)"
+    },
+    "AfterSays": {
+        "EmiMountSmile": "rndm(70, 90)",
+        "EmiFaceAngleX": "rndm(45, 55)",
+        "EmiFaceAngleY": "rndm(48, 52)",
+        "EmiFaceAngleZ": "rndm(45, 55)",
+        "EyesOpen": "0"
+    }
+}
