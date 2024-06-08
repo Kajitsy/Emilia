@@ -15,12 +15,12 @@ import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import aiocai, sendCode, authUser
 from num2words import num2words
-from PyQt6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QColorDialog
+from PyQt6.QtWidgets import QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
 from PyQt6.QtCore import QLocale
 
 ver = "2.2"
-build = "240706"
+build = "20240608"
 pre = True
 if pre == True:
     version = "pre" + ver
@@ -50,7 +50,7 @@ def getconfig(value, def_value = "", configfile = 'config.json'):
             return config.get(value, def_value)
     else:
         return def_value
-        
+
 # Global Variables
 autoupdate_enable = getconfig('autoupdate_enable', 'True')
 lang = getconfig('language', QLocale.system().name())
@@ -131,7 +131,7 @@ def tr(context, text):
     if context in translations and text in translations[context]:
         return translations[context][text]
     else:
-        return text 
+        return text
 
 translations = load_translations(f"locales/{lang}.json")
 
@@ -145,18 +145,18 @@ class AutoUpdate():
             if pre == True:
                 if "latest_prerealease" in updates:
                     latest_prerealease = updates["latest_prerealease"]
-                    if int(latest_prerealease["build"]) > build:
+                    if int(latest_prerealease["build"]) > int(build):
                         self.download_and_update_script(latest_prerealease["url"], latest_prerealease["build"])
                         return
                 if "latest_release" in updates:
                     latest_release = updates["latest_release"]
-                    if int(latest_release["build"]) > build:
+                    if int(latest_release["build"]) > int(build):
                         self.download_and_update_script(latest_release["url"], latest_release["build"])
                         return
             else:
                 if "latest_release" in updates:
                     latest_release = updates["latest_release"]
-                    if int(latest_release["build"]) > build:
+                    if int(latest_release["build"]) > int(build):
                         self.download_and_update_script(latest_release["url"], latest_release["build"])
                         return
         except requests.exceptions.RequestException as e:
@@ -173,7 +173,7 @@ class AutoUpdate():
                 f.write(response.content)
 
             with zipfile.ZipFile(f"Emilia_{build}.zip", "r") as zip_ref:
-                zip_ref.extractall(".") 
+                zip_ref.extractall(".")
 
             os.remove(f"Emilia_{build}.zip")
 
@@ -197,13 +197,15 @@ class FirstLaunch(QMainWindow):
         self.layout = QVBoxLayout()
 
         # First Page
-        self.first_launch_notification_label = QLabel("Oh, this is your first time launching Emilia, let's set it up?")
+        self.first_launch_notification_label = QLabel(tr('FirstLaunch', 'first_launch_notification_label'))
+        if pre:
+            self.first_launch_notification_label.setText(f"{self.first_launch_notification_label.text()}\n{tr('FirstLaunch', 'pre_first_launch_notification_label')}")
         self.first_launch_notification_label.setWordWrap(True)
 
-        self.first_launch_notification_button_yes = QPushButton("GOOOOOOOO")
+        self.first_launch_notification_button_yes = QPushButton(tr('FirstLaunch', 'first_launch_notification_button_yes'))
         self.first_launch_notification_button_yes.clicked.connect(lambda: self.second_page())
 
-        self.first_launch_notification_button_no = QPushButton("Nooo!")
+        self.first_launch_notification_button_no = QPushButton(tr('FirstLaunch', 'first_launch_notification_button_no'))
         self.first_launch_notification_button_no.clicked.connect(lambda: self.first_launch_button_no())
 
         fphlayout = QHBoxLayout()
@@ -212,13 +214,13 @@ class FirstLaunch(QMainWindow):
 
         self.layout.addWidget(self.first_launch_notification_label)
         self.layout.addLayout(fphlayout)
-        
+
         # Second Page
 
-        self.characterai_button = QPushButton("Use Character.AI")
+        self.characterai_button = QPushButton(tr('FirstLaunch', 'characterai_button'))
         self.characterai_button.clicked.connect(lambda: self.use_characterai())
 
-        self.gemini_button = QPushButton("Use Gemini")
+        self.gemini_button = QPushButton(tr('FirstLaunch', 'gemini_button'))
         self.gemini_button.clicked.connect(lambda: self.use_gemini())
 
         self.sphlayout = QHBoxLayout()
@@ -226,23 +228,20 @@ class FirstLaunch(QMainWindow):
         self.sphlayout.addWidget(self.gemini_button)
 
         # Use Char.AI
-        self.ready_button = QPushButton("Ready!")
+
+        self.ready_button = QPushButton(tr('FirstLaunch', 'ready_button'))
         self.ready_button.clicked.connect(lambda: self.enterscharaidata())
 
         # Use Gemini
 
         self.geminiapikey = QLineEdit()
 
-        self.gemapikeyready_button = QPushButton("Ready!")
+        self.gemapikeyready_button = QPushButton(tr('FirstLaunch', 'ready_button'))
         self.gemapikeyready_button.clicked.connect(lambda: self.entervoice())
 
         # Enter CharAI Data
-        self.relaunch_button = QPushButton("Relaunch!")
+        self.relaunch_button = QPushButton(tr('FirstLaunch', 'relaunch_button'))
         self.relaunch_button.clicked.connect(lambda: os.execv(sys.executable, ['python'] + sys.argv))
-
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.central_widget.setLayout(self.layout)
 
         # Enter Voice
 
@@ -252,6 +251,10 @@ class FirstLaunch(QMainWindow):
         self.relaunch_button2 = QPushButton("Relaunch!")
         self.relaunch_button2.clicked.connect(lambda: self.afterentervoice())
 
+
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.central_widget.setLayout(self.layout)
     def afterentervoice(self):
         writeconfig('speaker', self.voiceentry.text())
         os.execv(sys.executable, ['python'] + sys.argv)
@@ -264,7 +267,7 @@ class FirstLaunch(QMainWindow):
         self.layout.addWidget(self.relaunch_button2)
 
     def enterscharaidata(self):
-        self.first_launch_notification_label.setText("Set up your first character in the window that opens")
+        self.first_launch_notification_label.setText(tr('FirstLaunch', 'enterscharaidata'))
         self.ready_button.setVisible(False)
         self.geminiapikey.setVisible(False)
         self.layout.addWidget(self.relaunch_button)
@@ -273,7 +276,7 @@ class FirstLaunch(QMainWindow):
 
     def use_gemini(self):
         writeconfig('aitype', 'gemini')
-        self.first_launch_notification_label.setText("Get the API key in an open browser window and enter it here")
+        self.first_launch_notification_label.setText(tr('FirstLaunch', 'use_gemini'))
         webbrowser.open("https://aistudio.google.com/app/apikey")
         self.characterai_button.setVisible(False)
         self.gemini_button.setVisible(False)
@@ -282,15 +285,15 @@ class FirstLaunch(QMainWindow):
 
     def use_characterai(self):
         writeconfig('aitype', 'charai')
-        self.first_launch_notification_label.setText("Receive the token in the window that opens")
+        self.first_launch_notification_label.setText(tr('FirstLaunch', 'use_characterai'))
         self.characterai_button.setVisible(False)
         self.gemini_button.setVisible(False)
         self.layout.addWidget(self.ready_button)
         self.auth_window = EmiliaAuth()
         self.auth_window.show()
-        
+
     def second_page(self):
-        self.first_launch_notification_label.setText("Choose the AI you want to use")
+        self.first_launch_notification_label.setText(tr('FirstLaunch', 'second_page'))
         self.first_launch_notification_button_yes.setVisible(False)
         self.first_launch_notification_button_no.setVisible(False)
         self.layout.addLayout(self.sphlayout)
@@ -355,7 +358,7 @@ class CharacterEditor(QWidget):
         data.update({self.name_entry.text(): {"name": self.name_entry.text(), "char": self.id_entry.text(), "voice": self.voice_entry.text()}})
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        
+
     def delchar(self):
         name = self.name_entry.text()
         try:
@@ -373,7 +376,7 @@ class CharacterEditor(QWidget):
             msg = QMessageBox()
             if pre == True:
                 msg.setWindowTitle(tr("CharEditor", "error") + build)
-            else:   
+            else:
                 msg.setWindowTitle(tr("CharEditor", "error"))
             msg.setWindowIcon(QIcon(emiliaicon))
             text = tr("CharEditor", "notavchar")
@@ -421,7 +424,7 @@ class EmiliaAuth(QWidget):
         self.link_label.setVisible(True)
         self.link_entry.setVisible(True)
         self.gettoken_button.setVisible(True)
-        
+
     def gettoken(self):
         try:
             token = authUser(self.link_entry.text(), self.email_entry.text())
@@ -451,10 +454,10 @@ class Emilia(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         layout = QVBoxLayout()
-        
+
         if aitype == "gemini":
             self.token_label = QLabel(tr("MainWindow", "geminitoken"))
-            
+
             self.token_entry = QLineEdit()
             self.token_entry.setPlaceholderText(tr("MainWindow", "token"))
             self.token_entry.setText(getconfig('token', configfile='geminiconfig.json'))
@@ -506,7 +509,7 @@ class Emilia(QMainWindow):
         self.save_button = QPushButton(tr("MainWindow", "save"))
         if aitype == "charai":
             self.save_button.clicked.connect(lambda: self.charsetupconfig())
-        elif aitype == "gemini": 
+        elif aitype == "gemini":
             self.save_button.clicked.connect(lambda: self.geminisetupconfig())
 
         self.vstart_button = QPushButton(tr("MainWindow", "start"))
@@ -514,7 +517,7 @@ class Emilia(QMainWindow):
 
         self.user_input = QLabel("")
         self.user_input.setWordWrap(True)
-        
+
         self.user_aiinput = QLineEdit()
         self.user_aiinput.setPlaceholderText(tr("MainWindow", "textmodeinput"))
         self.user_aiinput.setVisible(False)
@@ -548,14 +551,13 @@ class Emilia(QMainWindow):
         self.getcharaitoken.triggered.connect(lambda: self.gettoken())
 
         self.changethemeaction = QAction(tr("MainWindow", 'changetheme'), self)
-        if theme == 'Fusion':
-            self.changethemeaction.triggered.connect(lambda: self.change_theme('windowsvista'))
-        else:
-            self.changethemeaction.triggered.connect(lambda: self.change_theme('Fusion'))
+        self.changethemeaction.triggered.connect(lambda: self.change_theme())
 
         self.visibletextmode = QAction(QIcon(keyboardicon), tr("MainWindow", 'usetextmode'), self)
-        
+        self.visibletextmode.triggered.connect(lambda: self.modehide("voice"))
+
         self.visiblevoicemode = QAction(QIcon(inputicon), tr("MainWindow", 'usevoicemode'), self)
+        self.visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
         self.visiblevoicemode.setVisible(False)
 
         self.devicesselector = QMenu(tr("MainWindow", 'devicesselector'), self)
@@ -567,7 +569,7 @@ class Emilia(QMainWindow):
 
         self.usegpumode = QAction(tr("MainWindow", 'usegpu'), self)
         self.usegpumode.triggered.connect(lambda: self.devicechange('cuda'))
-        
+
         self.recognizer = sr.Recognizer()
         self.mic_list = [
             mic_name for mic_name in sr.Microphone.list_microphone_names()
@@ -598,12 +600,12 @@ class Emilia(QMainWindow):
             self.changelanguage.triggered.connect(lambda: self.langchange("ru_RU"))
         elif lang == "ru_RU":
             self.changelanguage.triggered.connect(lambda: self.langchange("en_US"))
-        
+
         self.serviceselect = QMenu(tr("MainWindow", 'changeai'), self)
 
         self.usegemini = QAction(QIcon(googleicon), tr("MainWindow", 'usegemini'), self)
         self.usegemini.triggered.connect(lambda: self.geminiuse())
-        
+
         self.usecharai = QAction(QIcon(charaiicon), tr("MainWindow", 'usecharacterai'), self)
         self.usecharai.triggered.connect(lambda: self.charaiuse())
 
@@ -637,9 +639,6 @@ class Emilia(QMainWindow):
             self.spacer = self.menubar.addMenu(tr("MainWindow", "spacerfusiongemini"))
         self.spacer.setEnabled(False)
         self.ver_menu = self.menubar.addMenu(tr("MainWindow", 'version') + version)
-        
-        self.visibletextmode.triggered.connect(lambda: self.modehide("voice"))
-        self.visiblevoicemode.triggered.connect(lambda: self.modehide("text"))
 
         if autoupdate_enable == "True":
             self.disableautoupdate = QAction(QIcon(refreshicon), tr("MainWindow", 'disableautoupdate'), self)
@@ -650,7 +649,7 @@ class Emilia(QMainWindow):
 
         self.issues = QAction(QIcon(githubicon), tr("MainWindow", 'BUUUG'), self)
         self.issues.triggered.connect(self.issuesopen)
-        
+
         self.aboutemi = QAction(QIcon(emiliaicon), tr("MainWindow", 'aboutemi'), self)
         self.aboutemi.triggered.connect(self.about)
 
@@ -736,7 +735,7 @@ class Emilia(QMainWindow):
 
     def styles_reset(self):
         self.setStyleSheet("")
-    
+
     def devicechange(self, device):
         writeconfig('devicefortorch', device)
 
@@ -767,7 +766,7 @@ class Emilia(QMainWindow):
             self.visiblevoicemode.setVisible(True)
             self.vstart_button.setVisible(False)
             self.tstart_button.setVisible(True)
-            self.user_aiinput.setVisible(True)   
+            self.user_aiinput.setVisible(True)
 
     def geminiuse(self):
         writeconfig('aitype', 'gemini')
@@ -777,7 +776,7 @@ class Emilia(QMainWindow):
         writeconfig('aitype', 'charai')
         os.execv(sys.executable, ['python'] + sys.argv)
 
-    def change_theme(self, theme):
+    def change_theme(self):
         if theme == 'windowsvista':
             githubicon = './images/github.png'
             changelang = './images/change_language.png'
@@ -835,7 +834,7 @@ class Emilia(QMainWindow):
 
         with open('chat_history.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-    
+
     def chating(self, textinchat):
         model = genai.GenerativeModel('gemini-pro')
         chat = model.start_chat(history=[])
@@ -851,7 +850,7 @@ class Emilia(QMainWindow):
             if self.microphone != "":
                 with self.microphone as source:
                     audio = recognizer.listen(source)
-            else: 
+            else:
                 with sr.Microphone() as source:
                     audio = recognizer.listen(source)
             try:
@@ -894,11 +893,11 @@ class Emilia(QMainWindow):
             if self.selected_device_index != "":
                 device = list(self.unique_devices.values())[self.selected_device_index]
                 sd.play(audio, sample_rate, device=device["index"])
-            else: 
+            else:
                 sd.play(audio, sample_rate)
             time.sleep(len(audio - 5) / sample_rate)
             sd.stop()
-        
+
     async def maintext(self):
         if self.user_aiinput.text() == "":
             self.user_aiinput.setText("It's actually empty here")
@@ -937,7 +936,7 @@ class Emilia(QMainWindow):
             if self.selected_device_index != "":
                 device = list(self.unique_devices.values())[self.selected_device_index]
                 sd.play(audio, sample_rate, device=device["index"])
-            else: 
+            else:
                 sd.play(audio, sample_rate)
             time.sleep(len(audio - 5) / sample_rate)
             sd.stop()
@@ -968,7 +967,7 @@ class Emilia(QMainWindow):
         genai.configure(api_key=token)
 
 if __name__ == "__main__":
-    if autoupdate_enable == "True":
+    if autoupdate_enable != "False":
         AutoUpdate().check_for_updates()
     app = QApplication(sys.argv)
     app.setStyle(theme)

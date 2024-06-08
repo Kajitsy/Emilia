@@ -1,13 +1,22 @@
-import pyvts, asyncio, os, json
+import time
 
-def getconfig(value, def_value, configfile = 'emotesconfig.json'):
-    if os.path.exists(configfile):
-        with open(configfile, 'r') as configfile:
-            config = json.load(configfile)
-            return config.get(value, def_value)
-    else:
-        return def_value
+import pyvts, asyncio, os, json, random
 
+def getconfig2(emote, configfile = 'Emotes.json'):
+    with open(configfile, "r") as f:
+        emotes_data = json.load(f)
+    listening_data = emotes_data[emote]
+    rndm = EEC().RandomBetween
+
+    # Перебираем параметры и вычисляем значения
+    for parameter_name, parameter_value in listening_data.items():
+
+        value = eval(parameter_value)
+
+        # Используем значение для установки параметра в VTube Studio
+        # ...
+
+        # Пример использования значения:
 class EEC():
     """
     EMC - Emilia Emotes Core
@@ -34,10 +43,11 @@ class EEC():
             await self.myvts.request_authenticate_token()
             await self.myvts.write_token()
             await self.myvts.request_authenticate()
+        self.myvts.load_icon("./images/emilia.png")
 
-    async def AddCustomParameter(self, name, value=0, min=-100, max=100):
+    async def SetCustomParameter(self, name, value=50, min=-100, max=100):
         """
-        Лучше всего использовать для создания параметров плагина\n
+        Лучше всего использовать для создания параметров плагина
 
         CustomParameter("EmiEyeX", -100, 100, 0)
         """
@@ -51,41 +61,97 @@ class EEC():
             await self.myvts.request(
                 self.myvts.vts_request.requestCustomParameter(name, min, max, value)
             )
+        await self.myvts.close()
 
-    async def SetCustomParameters(self, names, values):
+    async def DelCustomParameter(self, name):
         """
-        Управляет значениями сразу нескольких переменных\n
+        Лучше всего использовать для создания параметров плагина
 
-        SetCustomParameters(["EmiEyeX", "EmiEyeY"], [50, 50])
+        CustomParameter("EmiEyeX", -100, 100, 0)
         """
 
         try:
             await self.myvts.request(
-                self.myvts.vts_request.requestSetMultiParameterValue(names, values)
+                self.myvts.vts_request.requestDeleteCustomParameter(name)
             )
         except:
             await self.VTubeConnect()
             await self.myvts.request(
-                self.myvts.vts_request.requestSetMultiParameterValue(names, values)
+                self.myvts.vts_request.requestDeleteCustomParameter(name)
             )
+        await self.myvts.close()
+
+    def RandomBetween(self, a, b):
+        """
+        Просто случайное число, не более.
+
+        RandomBetween(-90, -75)
+        """
+        return random.randint(a, b)
 
     async def AddVariables(self):
         """
         Создаёт все нужные переменные
         """
 
-        addparam = self.AddCustomParameter
-        await addparam("EmiFaceAngleX")
-        await addparam("EmiFaceAngleY")
-        await addparam("EmiFaceAngleZ")
-        await addparam("EmiEyeOpenLeft")
-        await addparam("EmiEyeOpenRight")
-        await addparam("EmiEyeX")
-        await addparam("EmiEyeY")
-        await addparam("EmiMountSmile")
-        await addparam("EmiMountX")
+        parameters = ["EmiFaceAngleX", "EmiFaceAngleY", "EmiFaceAngleZ",
+                      "EmiEyeOpenLeft", "EmiEyeOpenRight",
+                      "EmiEyeX", "EmiEyeY", "EmiMountSmile", "EmiMountX"]
+        for param in parameters:
+            await self.SetCustomParameter(param)
 
-class Emotes():
-    """
-    Все эмоции здесь
-    """
+    async def DelVariables(self):
+        """
+        Удаляет все нужные переменные
+        """
+
+        parameters = ["EmiFaceAngleX", "EmiFaceAngleY", "EmiFaceAngleZ",
+                      "EmiEyeOpenLeft", "EmiEyeOpenRight",
+                      "EmiEyeX", "EmiEyeY", "EmiMountSmile", "EmiMountX"]
+        for param in parameters:
+            await self.DelCustomParameter(param)
+
+    async def UseEmote(self, emote):
+            """
+            Управляет значениями переменных, беря их и их значение из Emotes.json
+            """
+            def getemotes(emote):
+                with open("Emotes.json", "r") as f:
+                    emotes_data = json.load(f)
+                emote_data = emotes_data[emote]
+                return emote_data
+
+            emote_data = getemotes(emote)
+            rndm = EEC().RandomBetween
+            names = []
+            values = []
+            for parameter_name, parameter_value in emote_data.items():
+                if parameter_name == "EyesOpen":
+                    eyesopen_value = eval(parameter_value)
+                    values.append(eyesopen_value)
+                    values.append(eyesopen_value)
+                    names.append("EmiEyeOpenRight")
+                    names.append("EmiEyeOpenLeft")
+                else:
+                    names.append(parameter_name)
+                    value = eval(parameter_value)
+                    values.append(value)
+
+            await self.VTubeConnect()
+            for i, name in enumerate(names):
+                value = values[i]
+                await self.myvts.request(
+                    self.myvts.vts_request.requestCustomParameter(
+                        parameter=name,
+                        min=0,
+                        max=100,
+                        default_value=value
+                    )
+                )
+            await self.myvts.close()
+
+asyncio.run(EEC().UseEmote("Listening"))
+time.sleep(2)
+asyncio.run(EEC().UseEmote("Thinks"))
+time.sleep(2)
+asyncio.run(EEC().UseEmote("Says"))

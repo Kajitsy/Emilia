@@ -1,4 +1,19 @@
 {
+    "FirstLaunch": {
+      "first_launch_notification_label": "Oh, this is your first time launching Emilia, let's set it up?",
+      "pre_first_launch_notification_label": "Please note that you are using the pre-release version of Emilia, please report any errors found on GitHub",
+      "first_launch_notification_button_yes": "Gooo!",
+      "first_launch_notification_button_no": "I suggest to refuse",
+      "second_page": "Choose the AI you want to use",
+      "use_characterai": "Receive the token in the window that opens",
+      "use_gemini": "Get the API key in an open browser window and enter it here",
+      "enterscharaidata": "Set up your first character in the window that opens",
+      "entervoice": "Enter the name of the desired voice",
+      "characterai_button": "Character.AI",
+      "gemini_button": "Google Gemini",
+      "ready_button": "Ready!",
+      "relaunch_button": "Relaunch!"
+    },
     "MainWindow": {
       "start": "Start",
       "starttext": "Start in Text Mode",
