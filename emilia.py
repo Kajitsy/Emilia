@@ -19,12 +19,12 @@ import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import aiocai, sendCode, authUser
 from num2words import num2words
-from PyQt6.QtWidgets import QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
+from PyQt6.QtWidgets import QStyleFactory, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
 from PyQt6.QtCore import QLocale
 
 ver = "2.2"
-build = "20240609"
+build = "20240612"
 pre = True
 if pre == True:
     version = "pre" + ver
@@ -59,13 +59,12 @@ def getconfig(value, def_value = "", configfile = 'config.json'):
 autoupdate_enable = getconfig('autoupdate_enable', 'True')
 lang = getconfig('language', QLocale.system().name())
 aitype = getconfig('aitype', 'charai')
-vtubeenable = getconfig('vtubeenable', "False")
-torchdevice = getconfig('devicefortorch', 'cuda')
-theme = getconfig('theme')
-if theme == "dark":
-    theme = 'Fusion'
+cuda_avalable = torch.cuda.is_available()
+if cuda_avalable == True:
+    torchdevice = getconfig('devicefortorch', 'cuda')
 else:
-    theme = 'windowsvista'
+    torchdevice = getconfig('devicefortorch', 'cpu')
+theme = getconfig('theme', 'windowsvista')
 backcolor = getconfig('backgroundcolor')
 buttoncolor = getconfig('buttoncolor')
 buttontextcolor = getconfig('buttontextcolor')
@@ -81,13 +80,10 @@ charaiicon = './images/charai.png'
 refreshicon = './images/refresh.png'
 if theme == 'Fusion':
     githubicon = './images/github_white.png'
-    changelang = './images/change_language_white.png'
     keyboardicon = './images/keyboard_white.png'
-    inputicon = './images/input_white.png'
     charediticon = './images/open_char_editor_white.png'
 else:
     githubicon = './images/github.png'
-    changelang = './images/change_language.png'
     keyboardicon = './images/keyboard.png'
     inputicon = './images/input.png'
     charediticon = './images/open_char_editor.png'
@@ -323,16 +319,17 @@ class OptionWindow(QWidget):
         self.setWindowIcon(QIcon(emiliaicon))
         self.setFixedWidth(225)
         self.setMinimumHeight(150)
+        self.trl = "OptionsWindow"
 
         layout = QVBoxLayout()
 
         autoupdatelayout = QHBoxLayout()
         self.autoupdate = QCheckBox()
-        if autoupdate_enable == "True":
+        if getconfig('autoupdate_enable', 'True') == "True":
             self.autoupdate.setChecked(True)
         self.autoupdate.stateChanged.connect(self.autoupdatechange)
 
-        autoupdatelayout.addWidget(QLabel("Auto Update"))
+        autoupdatelayout.addWidget(QLabel(tr(self.trl, 'autoupdate')))
         autoupdatelayout.addWidget(self.autoupdate)
         layout.addLayout(autoupdatelayout)
 
@@ -344,7 +341,7 @@ class OptionWindow(QWidget):
             self.languagechange.addItems(["English", "Russian"])
         self.languagechange.currentTextChanged.connect(lambda: self.langchange())
 
-        langlayout.addWidget(QLabel("Select Language"))
+        langlayout.addWidget(QLabel(tr(self.trl, 'languagechange')))
         langlayout.addWidget(self.languagechange)
         layout.addLayout(langlayout)
 
@@ -357,28 +354,40 @@ class OptionWindow(QWidget):
             self.aitypechange.addItems(["Google Gemini", "Character.AI"])
         self.aitypechange.currentTextChanged.connect(lambda: self.aichange())
 
+        aitypelayout.addWidget(QLabel(tr(self.trl, 'aitypechange')))
+        aitypelayout.addWidget(self.aitypechange)
+        layout.addLayout(aitypelayout)
+
 
         torchdevicelayout = QHBoxLayout()
         self.torchdeviceselect = QComboBox()
         if torchdevice == "cuda":
             self.torchdeviceselect.addItems(["GPU", "CPU"])
+        elif cuda_avalable != True:
+            self.torchdeviceselect.addItems(["GPU"])
         elif torchdevice == "cpu":
             self.torchdeviceselect.addItems(["CPU", "GPU"])
         self.torchdeviceselect.currentTextChanged.connect(lambda: self.torchdevicechange())
 
-        torchdevicelayout.addWidget(QLabel("Voice generation device: "))
+        self.torchdeviceselectlabel = QLabel(tr(self.trl, 'torchdeviceselect'))
+        self.torchdeviceselectlabel.setWordWrap(True)
+
+        torchdevicelayout.addWidget(self.torchdeviceselectlabel)
         torchdevicelayout.addWidget(self.torchdeviceselect)
         layout.addLayout(torchdevicelayout)
 
 
         vtubelayout = QHBoxLayout()
         self.vtubecheck = QCheckBox()
-        if vtubeenable == "True":
+        if getconfig('vtubeenable', 'True') == "True":
             self.vtubecheck.setChecked(True)
         self.vtubecheck.stateChanged.connect(self.vtubechange)
+        self.vtubewiki = QPushButton("Wiki")
+        self.vtubewiki.clicked.connect(lambda: webbrowser.open("https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8"))
 
         vtubelayout.addWidget(QLabel("VTube Model"))
         vtubelayout.addWidget(self.vtubecheck)
+        vtubelayout.addWidget(self.vtubewiki)
         layout.addLayout(vtubelayout)
 
         self.setLayout(layout)
@@ -491,18 +500,18 @@ class FirstLaunch(QMainWindow):
         self.voiceentry = QLineEdit()
         self.voiceentry.setPlaceholderText(tr('MainWindow', 'voices'))
 
-        self.voiceready_button = QPushButton("Relaunch!")
+        self.voiceready_button = QPushButton(tr('FirstLaunch', 'ready_button'))
         self.voiceready_button.clicked.connect(lambda: self.afterentervoice())
 
         # Page with Additional features
 
-        self.usevtubemodel = QCheckBox("Use VTube Model")
+        self.usevtubemodel = QCheckBox(tr('FirstLaunch', 'usevtubemodel'))
         self.usevtubemodel.stateChanged.connect(self.usesvtubemodel)
 
-        self.enableautoupdate = QCheckBox("Enable Auto Update")
+        self.enableautoupdate = QCheckBox(tr('FirstLaunch', 'enableautoupdate'))
         self.enableautoupdate.stateChanged.connect(self.enablesautoupdate)
 
-        self.relaunch_button2 = QPushButton("Relaunch!")
+        self.relaunch_button2 = QPushButton(tr('FirstLaunch', 'relaunch_button'))
         self.relaunch_button2.clicked.connect(lambda: os.execv(sys.executable, ['python'] + sys.argv))
 
         self.central_widget = QWidget()
@@ -734,7 +743,7 @@ class Emilia(QMainWindow):
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
         if aitype == "gemini":
             self.token_label = QLabel(tr("MainWindow", "geminitoken"))
@@ -743,8 +752,8 @@ class Emilia(QMainWindow):
             self.token_entry.setPlaceholderText(tr("MainWindow", "token"))
             self.token_entry.setText(getconfig('token', configfile='geminiconfig.json'))
 
-            layout.addWidget(self.token_label)
-            layout.addWidget(self.token_entry)
+            self.layout.addWidget(self.token_label)
+            self.layout.addWidget(self.token_entry)
 
             genai.configure(api_key=self.token_entry.text())
         elif aitype == "charai":
@@ -769,7 +778,7 @@ class Emilia(QMainWindow):
             hlayout.addWidget(self.client_label)
             hlayout.addWidget(self.client_entry)
 
-            layout.addLayout(hlayout)
+            self.layout.addLayout(hlayout)
         self.speaker_label = QLabel(tr("MainWindow", "voice"))
         self.speaker_entry = QLineEdit()
         self.speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
@@ -810,15 +819,15 @@ class Emilia(QMainWindow):
         self.ai_output = QLabel("")
         self.ai_output.setWordWrap(True)
 
-        layout.addWidget(self.speaker_label)
-        layout.addWidget(self.speaker_entry)
-        layout.addWidget(self.save_button)
-        layout.addWidget(self.vstart_button)
-        layout.addWidget(self.user_input)
-        layout.addWidget(self.user_aiinput)
-        layout.addWidget(self.tstart_button)
-        layout.addWidget(self.ai_output)
-        self.central_widget.setLayout(layout)
+        self.layout.addWidget(self.speaker_label)
+        self.layout.addWidget(self.speaker_entry)
+        self.layout.addWidget(self.save_button)
+        self.layout.addWidget(self.vstart_button)
+        self.layout.addWidget(self.user_input)
+        self.layout.addWidget(self.user_aiinput)
+        self.layout.addWidget(self.tstart_button)
+        self.layout.addWidget(self.ai_output)
+        self.central_widget.setLayout(self.layout)
 
         # MenuBar
         self.menubar = self.menuBar()
@@ -833,7 +842,7 @@ class Emilia(QMainWindow):
         self.changethemeaction = QAction(tr("MainWindow", 'changetheme'), self)
         self.changethemeaction.triggered.connect(lambda: self.change_theme())
 
-        self.optionsopenaction = QAction("Options")
+        self.optionsopenaction = QAction(tr("MainWindow", "optionsopenaction"))
         self.optionsopenaction.triggered.connect(lambda: self.optionsopen())
 
         self.visibletextmode = QAction(QIcon(keyboardicon), tr("MainWindow", 'usetextmode'), self)
@@ -911,26 +920,6 @@ class Emilia(QMainWindow):
     def optionsopen(self):
         window = OptionWindow()
         window.show()
-
-    def autoupdatechange(self, value):
-        self.disableautoupdate.triggered.disconnect()
-        if value == "True":
-            self.disableautoupdate.setText(tr("MainWindow", 'disableautoupdate'))
-            self.disableautoupdate.triggered.connect(lambda: self.autoupdatechange("False"))
-        else:
-            self.disableautoupdate.setText(tr("MainWindow", 'enableautoupdate'))
-            self.disableautoupdate.triggered.connect(lambda: self.autoupdatechange("True"))
-        writeconfig('autoupdate_enable', value)
-
-    def vtubechange(self, value):
-        self.changevtube.triggered.disconnect()
-        if value == "True":
-            self.changevtube.setText(tr("MainWindow", 'vtubedisable'))
-            self.changevtube.triggered.connect(lambda: self.vtubechange("False"))
-        else:
-            self.changevtube.setText(tr("MainWindow", 'vtubeenable'))
-            self.changevtube.triggered.connect(lambda: self.vtubechange("True"))
-        writeconfig('vtubeenable', value)
 
     def addcharsinmenubar(self):
         if os.path.exists('config.json'):
@@ -1038,25 +1027,23 @@ class Emilia(QMainWindow):
         os.execv(sys.executable, ['python'] + sys.argv)
 
     def change_theme(self):
-        if theme == 'windowsvista':
+        app = QApplication.instance()
+        if getconfig('theme', 'windowsvista') == 'windowsvista':
             githubicon = './images/github.png'
-            changelang = './images/change_language.png'
             keyboardicon = './images/keyboard.png'
             inputicon = './images/input.png'
             charediticon = './images/open_char_editor.png'
-            self.setStyle('Fusion')
+            app.setStyle('Fusion')
             writeconfig('theme', 'Fusion')
         else:
             githubicon = './images/github_white.png'
-            changelang = './images/change_language_white.png'
             keyboardicon = './images/keyboard_white.png'
             inputicon = './images/input_white.png'
             charediticon = './images/open_char_editor_white.png'
-            self.setStyle('windowsvista')
+            app.setStyle('windowsvista')
             writeconfig('theme', 'windowsvista')
         self.visibletextmode.setIcon(QIcon(keyboardicon))
         self.visiblevoicemode.setIcon(QIcon(inputicon))
-        self.changelanguage.setIcon(QIcon(changelang))
         self.issues.setIcon(QIcon(githubicon))
         if aitype == 'charai':
             self.chareditopen.setIcon(QIcon(charediticon))
@@ -1128,6 +1115,7 @@ class Emilia(QMainWindow):
             return text
 
     async def main(self):
+        vtubeenable = ('vtubeenable', "False")
         while True:
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
@@ -1139,6 +1127,7 @@ class Emilia(QMainWindow):
             else:
                 with sr.Microphone() as source:
                     audio = recognizer.listen(source)
+                    sr.adjust_for_ambient_noise(source)
             try:
                 if lang == "ru_RU":
                     msg1 = recognizer.recognize_google(audio, language="ru-RU")
@@ -1187,6 +1176,7 @@ class Emilia(QMainWindow):
                 await EEC().UseEmote("AfterSays")
 
     async def maintext(self):
+        vtubeenable = getconfig('vtubeenable', "False")
         if self.user_aiinput.text() == "":
             self.user_aiinput.setText("It's actually empty here")
         else:
@@ -1235,9 +1225,20 @@ class Emilia(QMainWindow):
         else:
             if mode == "voice":
                 threading.Thread(target=lambda: asyncio.run(self.main())).start()
-                for i in range(self.layout.count()):
-                    widget = self.layout.itemAt(i).widget()
-                    widget.setVisible(False)
+                if aitype == 'charai':
+                    self.char_label.setVisible(False)
+                    self.char_entry.setVisible(False)
+                    self.client_label.setVisible(False)
+                    self.client_entry.setVisible(False)
+                elif aitype == 'gemini':
+                    self.token_entry.setVisible(False)
+                    self.token_label.setVisible(False)
+                self.speaker_label.setVisible(False)
+                self.speaker_entry.setVisible(False)
+                self.save_button.setVisible(False)
+                self.vstart_button.setVisible(False)
+                self.tstart_button.setVisible(False)
+                self.user_aiinput.setVisible(False)
                 self.user_input.setVisible(True)
                 self.ai_output.setVisible(True)
             elif mode == "text":
@@ -1263,7 +1264,7 @@ if __name__ == "__main__":
         window = FirstLaunch()
     else:
         window = Emilia()
-    if vtubeenable == "True":
+    if getconfig('vtubeenable', "False") == "True":
         asyncio.run(EEC().VTubeConnect())
     window.show()
     sys.exit(app.exec())
