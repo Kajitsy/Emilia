@@ -5,3 +5,4 @@ chat_history.json
 data.json
 voice.pt
 /__pycache__
+/.idea
