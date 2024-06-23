@@ -2,7 +2,7 @@
 
 [Скачать последний релиз](https://github.com/Kajitsy/Emilia/releases/latest)
 
-Простенький интерфейс, пишите свои идеи либо в [дискорд создателя Soul of Waifu](https://discord.gg/6UvYzBKCZK) т.к. я там есть, либо в Issues 
+Простенький интерфейс, пишите свои идеи/проблемы в [дискорд создателя Soul of Waifu](https://discord.gg/6UvYzBKCZK) т.к. я там есть или в Issues 
 
 Хотите использовать ElevenLabs? Вам следует дождаться нового релиза [Soul of Waifu](https://github.com/jofizcd/Soul-of-Waifu), либо использовать [мой форк](https://github.com/Kajitsy/Soul-of-Waifu)
 <br>
