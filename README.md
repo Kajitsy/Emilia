@@ -9,7 +9,7 @@
 Либо же ждать добавления в Emilia...
 
 # Что нужно для использования?
-1. Для установки Emilia необходим Python, как минимум 3.10
+1. Для установки Emilia нужен Python 3.10
 2. Скачайте Emilia.zip со страницы [последнего релиза](https://github.com/Kajitsy/Emilia/releases/latest)
 3. Установите все необходимые библиотеки <br>`pip install torch --index-url https://download.pytorch.org/whl/cu118` <br> `pip install PyQt6 speechrecognition sounddevice gpytranslate num2words websockets characterai google-generativeai pyaudio setuptools numpy`
 
