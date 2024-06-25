@@ -84,7 +84,7 @@ else:
     keyboardicon = './images/keyboard.png'
     inputicon = './images/input.png'
     charediticon = './images/open_char_editor.png'
-
+print("(｡･∀･)ﾉﾞ")
 if not os.path.exists('voice.pt'):
     if lang == "ru_RU":
         print("Идёт загрузка модели SileroTTS RU")
@@ -308,7 +308,7 @@ class AutoUpdate():
             print(f"{tr('Errors', 'BadZipFile')} {e}")
             writeconfig('autoupdate_enable', 'False')
 
-class OptionWindow(QWidget):
+class OptionsWindow(QWidget):
     def __init__(self, mainwindow):
         super().__init__()
         self.setWindowTitle("Emilia: Options")
@@ -333,7 +333,7 @@ class OptionWindow(QWidget):
 
         langlayout = QHBoxLayout()
         self.languagechange = QComboBox()
-        self.languagechange.addItems(["English", "Russian"])
+        self.languagechange.addItems([tr(self.trl, 'langselEN'), tr(self.trl, 'langselRU')])
         if lang == "ru_RU":
             self.languagechange.setCurrentIndex(1)
         self.languagechange.currentTextChanged.connect(lambda: self.langchange())
@@ -377,20 +377,20 @@ class OptionWindow(QWidget):
             self.themechange.setCurrentIndex(0)
         self.themechange.currentTextChanged.connect(lambda: self.changetheme())
 
-        themelayout.addWidget(QLabel("Select Theme"))
+        themelayout.addWidget(QLabel(tr(self.trl, "selecttheme")))
         themelayout.addWidget(self.themechange)
         layout.addLayout(themelayout)
 
 
         iconcolorlayout = QHBoxLayout()
         self.iconcolorchange = QComboBox()
-        self.iconcolorchange.addItems(["White", "Black"])
+        self.iconcolorchange.addItems([tr(self.trl, 'whitecolor'), tr(self.trl, 'blackcolor')])
         iconcolor = getconfig('iconcolor', 'white')
         if iconcolor == 'black':
             self.iconcolorchange.setCurrentIndex(1)
         self.iconcolorchange.currentTextChanged.connect(lambda: self.changeiconcolor())
 
-        iconcolorlayout.addWidget(QLabel("Select Icon Color"))
+        iconcolorlayout.addWidget(QLabel(tr(self.trl, "selecticoncolor")))
         iconcolorlayout.addWidget(self.iconcolorchange)
         layout.addLayout(iconcolorlayout)
 
@@ -811,13 +811,11 @@ class Emilia(QMainWindow):
             self.token_entry = QLineEdit()
             self.token_entry.setPlaceholderText(tr("MainWindow", "token"))
             self.token_entry.textChanged.connect(lambda: writeconfig("token", self.token_entry.text(), "geminiconfig.json"))
-            self.token_entry.textChanged.connect(lambda: genai.configure(api_key=self.token_entry.text()))
             self.token_entry.setText(getconfig('token', configfile='geminiconfig.json'))
 
             hlayout.addWidget(self.token_label)
             hlayout.addWidget(self.token_entry)
 
-            genai.configure(api_key=self.token_entry.text())
         elif aitype == "charai":
             hlayout = QHBoxLayout()
 
@@ -937,7 +935,7 @@ class Emilia(QMainWindow):
             self.chareditopen = QAction(QIcon(charediticon), tr("MainWindow", 'openchareditor'), self)
             self.chareditopen.triggered.connect(lambda: CharacterEditor().show())
 
-            self.charrefreshlist = QAction(QIcon(refreshicon), "Refresh Characters")
+            self.charrefreshlist = QAction(QIcon(refreshicon), tr("MainWindow", "refreshcharacters"))
             self.charrefreshlist.triggered.connect(lambda: self.addcharsinmenubar())
 
             self.charselect.addAction(self.chareditopen)
@@ -957,7 +955,7 @@ class Emilia(QMainWindow):
         self.emi_menu.addMenu(self.inputdeviceselect)
 
     def optionsopen(self):
-        window = OptionWindow(self)
+        window = OptionsWindow(self)
         window.show()
 
     def addcharsinmenubar(self):
@@ -1072,25 +1070,6 @@ class Emilia(QMainWindow):
         msg.setText(text)
         msg.exec()
 
-    def reading_chat_history(self):
-      with open('chat_history.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-      return data
-
-    def writing_chat_history(self, text):
-        try:
-            with open('chat_history.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        dtime = "%m-%d %H:%M:%S"
-        data.update({datetime.datetime.now().strftime(dtime): text})
-
-        with open('chat_history.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
     def silero_tts(self, text):
         model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
         model.to(torch.device(torchdevice))
@@ -1101,22 +1080,10 @@ class Emilia(QMainWindow):
                                 put_yo=put_yo)
         return audio
 
-    def chating(self, textinchat):
-        model = genai.GenerativeModel('gemini-pro')
-        chat = model.start_chat(history=[])
-        chat.send_message(f"Here's our chat history: {self.reading_chat_history()}")
-        for chunk in chat.send_message(textinchat):
-            continue
-        return chunk.text
-
     def numbers_to_words(self, text):
         try:
             def _conv_num(match):
-                if lang == "ru_RU":
-                    return num2words(int(match.group()), lang='ru')
-                else:
-                    return num2words(int(match.group()), lang='en')
-
+                return num2words(int(match.group()), lang=lang)
             return re.sub(r'\b\d+\b', _conv_num, text)
         except Exception as e:
             print(tr("MainWinow", 'noncriterror') + {e})
@@ -1126,108 +1093,129 @@ class Emilia(QMainWindow):
         vtubeenable = ('vtubeenable', "False")
         self.layout.addWidget(self.user_input)
         self.layout.addWidget(self.ai_output)
+        if aitype == "charai":
+            token = aiocai.Client(self.client_entry.text())
+            character = self.char_entry.text()
+            try:
+                chatid = await token.get_chat(character)
+            except:
+                Account = await token.get_me()
+                chatid = await token.new_chat(character, Account.id)
+            persona = await token.get_persona(character)
+            username = f"{Account.name}: "
+            ai = f"{persona.name}: "
+        elif aitype == "gemini":
+            genai.configure(api_key=self.token_entry.text())
+            model = genai.GenerativeModel('gemini-pro')
+            chat = model.start_chat(history=[])
+            username = tr("Main", "user")
+            ai = "Gemini: "
         while True:
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
             recognizer = sr.Recognizer()
-            self.user_input.setText(tr("Main", "speakup"))
+            self.user_input.setText(username + tr("Main", "speakup"))
             if self.microphone != "":
                 with self.microphone as source:
                     audio = recognizer.listen(source)
             else:
                 with sr.Microphone() as source:
                     audio = recognizer.listen(source)
-                    sr.adjust_for_ambient_noise(source)
             try:
-                if lang == "ru_RU":
-                    msg1 = recognizer.recognize_google(audio, language="ru-RU")
-                else:
-                    msg1 = recognizer.recognize_google(audio, language="en-US")
+                msg1 = recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
             except sr.UnknownValueError:
-                self.user_input.setText(tr("Main", "sayagain"))
+                self.user_input.setText(username + tr("Main", "sayagain"))
                 continue
-            self.user_input.setText(tr("Main", "user") + msg1)
-            self.ai_output.setText(tr("Main", "emigen"))
+            self.user_input.setText(username + tr("Main", "user") + msg1)
+            self.ai_output.setText(ai + tr("Main", "emigen"))
             if vtubeenable == "True":
                 await EEC().UseEmote("Thinks")
             if aitype == "charai":
-                token = aiocai.Client(self.client_entry.text())
-                chatid = await token.get_chat(self.char_entry.text())
                 async with await token.connect() as chat:
-                    messagenotext = await chat.send_message(self.char_entry.text(), chatid.chat_id, msg1)
+                    messagenotext = await chat.send_message(character, chatid.chat_id, msg1)
                     message = messagenotext.text
             elif aitype == "gemini":
                 try:
-                    message = self.chating(msg1)
-                    self.writing_chat_history(f"User: {msg1}")
-                    self.writing_chat_history(f"AI: {message}")
+                    for chunk in chat.send_message(msg1):
+                        continue
+                    message = chunk.text
                 except Exception as e:
                     if e.code == 400 and "User location is not supported" in e.message:
                         self.ai_output.setText(tr("Errors", 'Gemini 400'))
-            if lang == "ru_RU":
-                translation = await Translator().translate(message, targetlang="ru")
-                nums = self.numbers_to_words(translation.text)
-            else:
-                nums = self.numbers_to_words(message.text)
+            translation = await Translator().translate(message, targetlang="ru" if lang == "ru_RU" else "en")
+            nums = self.numbers_to_words(translation.text)
             if vtubeenable == "True":
                 await EEC().UseEmote("VoiceGen")
-            self.ai_output.setText(tr("Main", "emimessage") + translation.text)
+            self.ai_output.setText(ai + translation.text)
             if vtubeenable == "True":
                 await EEC().UseEmote("Says")
-            audio = self.silero_tts(nums)
-            if self.selected_device_index != "":
-                device = list(self.unique_devices.values())[self.selected_device_index]
-                sd.play(audio, sample_rate, device=device["index"])
-            else:
-                sd.play(audio, sample_rate)
-            time.sleep(len(audio - 5) / sample_rate)
-            sd.stop()
+            try:
+                audio = self.silero_tts(nums)
+                device = list(self.unique_devices.values())[
+                    self.selected_device_index] if self.selected_device_index != "" else None
+                sd.play(audio, sample_rate, device=device["index"] if device else None)
+                time.sleep(len(audio - 5) / sample_rate)
+                sd.stop()
+            except Exception as e:
+                print(tr('Errors', 'other') + e)
+                continue
             if vtubeenable == "True":
                 await EEC().UseEmote("AfterSays")
 
     async def maintext(self):
-        vtubeenable = getconfig('vtubeenable', "False")
-        self.layout.addWidget(self.user_input)
-        self.layout.addWidget(self.ai_output)
-        if self.user_aiinput.text() == "":
-            self.user_aiinput.setText("It's actually empty here")
+        if self.user_aiinput.text() == "" or self.user_aiinput.text() == tr("MainWindow", "butemptyhere"):
+            self.user_aiinput.setText(tr("MainWindow", "butemptyhere"))
         else:
-            if vtubeenable == "True":
-                await EEC().UseEmote("Thinks")
-            self.user_input.setText(tr("Main", "user"))
-            msg1 = self.user_aiinput.text()
-            self.ai_output.setText(tr("Main", "emigen"))
+            vtubeenable = getconfig('vtubeenable', "False")
+            self.layout.addWidget(self.ai_output)
             if aitype == "charai":
                 token = aiocai.Client(self.client_entry.text())
-                chatid = await token.get_chat(self.char_entry.text())
+                character = self.char_entry.text()
+                try:
+                    chatid = await token.get_chat(character)
+                except:
+                    Account = await token.get_me()
+                    chatid = await token.new_chat(character, Account.id)
+                persona = await token.get_persona(character)
+                ai = f"{persona.name}: "
+            elif aitype == "gemini":
+                genai.configure(api_key=self.token_entry.text())
+                model = genai.GenerativeModel('gemini-pro')
+                chat = model.start_chat(history=[])
+                ai = "Gemini: "
+            if vtubeenable == "True":
+                await EEC().UseEmote("Thinks")
+            msg1 = self.user_aiinput.text()
+            self.ai_output.setText(ai + tr("Main", "emigen"))
+            if aitype == "charai":
                 async with await token.connect() as chat:
-                    messagenotext = await chat.send_message(self.char_entry.text(), chatid.chat_id, msg1)
+                    messagenotext = await chat.send_message(character, chatid.chat_id, msg1)
                     message = messagenotext.text
             elif aitype == "gemini":
                 try:
-                    message = self.chating(msg1)
-                    self.writing_chat_history(f"User: {msg1}")
-                    self.writing_chat_history(f"AI: {message}")
+                    for chunk in chat.send_message(msg1):
+                        continue
+                    message = chunk.text
                 except Exception as e:
                     if e.code == 400 and "User location is not supported" in e.message:
                         self.ai_output.setText(tr("Errors", 'Gemini 400'))
-            if lang == "ru_RU":
-                translation = await Translator().translate(message, targetlang="ru")
-                nums = self.numbers_to_words(translation.text)
-            else:
-                nums = self.numbers_to_words(message.text)
+            translation = await Translator().translate(message, targetlang="ru" if lang == "ru_RU" else "en")
+            nums = self.numbers_to_words(translation.text)
             if vtubeenable == "True":
                 await EEC().UseEmote("VoiceGen")
             audio = self.silero_tts(nums)
-            self.ai_output.setText(tr("Main", "emimessage") + translation.text)
-            await EEC().UseEmote("Says")
-            if self.selected_device_index != "":
-                device = list(self.unique_devices.values())[self.selected_device_index]
-                sd.play(audio, sample_rate, device=device["index"])
-            else:
-                sd.play(audio, sample_rate)
-            time.sleep(len(audio - 5) / sample_rate)
-            sd.stop()
+            self.ai_output.setText(ai + translation.text)
+            if vtubeenable == "True":
+                await EEC().UseEmote("Says")
+            try:
+                audio = self.silero_tts(nums)
+                device = list(self.unique_devices.values())[
+                    self.selected_device_index] if self.selected_device_index != "" else None
+                sd.play(audio, sample_rate, device=device["index"] if device else None)
+                time.sleep(len(audio - 5) / sample_rate)
+                sd.stop()
+            except Exception as e:
+                print(tr('Errors', 'other') + e)
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
 
@@ -1247,10 +1235,10 @@ class Emilia(QMainWindow):
                     self.token_label.setVisible(False)
                 self.speaker_label.setVisible(False)
                 self.speaker_entry.setVisible(False)
-                self.save_button.setVisible(False)
                 self.vstart_button.setVisible(False)
                 self.tstart_button.setVisible(False)
                 self.user_aiinput.setVisible(False)
+                self.menubar.setVisible(False)
                 self.user_input.setVisible(True)
                 self.ai_output.setVisible(True)
             elif mode == "text":

@@ -28,6 +28,7 @@
       "voices": "aidar, baya, kseniya, xenia, eugene или же random",
       "gettoken": "&Получить токен",
       "usetextmode": "&Активировать текстовый режим",
+      "butemptyhere": "Но ведь здесь пусто",
       "usevoicemode": "&Активировать голосовой режим",
       "devicesselector": "&Выбор устройств",
       "noncriterror": "Возникла ошибка, но код продолжаться может ",
@@ -36,29 +37,24 @@
       "outputdevice": "Устройство вывода",
       "charchoice": "&Выбрать персонажа",
       "openchareditor": "Открыть редактор персонажей",
+      "refreshcharacters": "Обновить список",
       "optionsopenaction": "Параметры",
-      "spacerwincharai": "     ",
-      "spacerwingemini": "                                                ",
-      "spacerfusioncharai": "       ",
-      "spacerfusiongemini": "                                                  ",
       "aboutemi": "&Об Emilia "
     },
     "About": {
       "aboutemi": "Об Emilia ",
-      "languagefrom": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>, от автора, ага да)",
+      "languagefrom": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
       "newin": "<br><br>Новое в ",
-      "whatsnew": ": <br>• Списка изменений не будет до релиза.",
+      "whatsnew": ": <br>• Экран первого запуска, простая первоначальная настройка ^_^<br>• Автоматические обновления, ну, по названию и так понятно, но при желании их можно отключить<br>• Emilia: Options, большинство настроек перемещено именно сюда<br>• VTube Model, лучше прочтите <a href='https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8'здесь</a><br>• Окна получения получения токена Character.AI и Редактор персонажей теперь являются QWidget, что должно ускорить их открытие<br>• Новая тема windows11, доступна разумеется только на Windows 11 и выше<br>• А ну ещё куча исправлений, добавлений и прочего\n",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
       "emiopenproject": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
-      "usever": " которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a>"
+      "usever": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
     },
     "Main": {
-      "speakup": "Пользователь: Говорите...",
+      "speakup": "Говорите...",
       "sayagain": "Скажите ещё раз...",
       "user": "Пользователь: ",
-      "emigen": "Вайфу: генерация...",
-      "emimessage": "Вайфу: ",
-      "sendchating": "Вот наша с тобой история чата: "
+      "emigen": "Генерация..."
     },
     "GetToken": {
       "youremail": "Ваша электронная почта:",
@@ -83,11 +79,17 @@
       "torchdeviceselect": "Устройство генерации голоса: ",
       "aitypechange": "Выберите ИИ",
       "languagechange": "Выберите язык",
-      "autoupdate": "Автоматические обновления"
+      "langselEN": "Английский",
+      "langselRU": "Русский",
+      "autoupdate": "Автоматические обновления",
+      "selecticoncolor": "Выберите цвет иконок",
+      "whitecolor": "Белый",
+      "blackcolor": "Чёрный",
+      "selecttheme": "Выберите тему"
     },
     "Errors": {
       "Label": "Ошибка",
-      "Gemini 400": "Ваше местоположение не позволяет использовать Gemini :(",
+      "Gemini 400": "Ваше местоположение не позволяет использовать Gemini :(<br>Но вы можете использовать <a href='https://www.comss.ru/page.php?id=7315'>данный днс</a> ;)",
       "nonvoice": "Пожалуйста, введите нужный голос",
       "other": "Хм, возникла неизвестная ошибка:\n",
       "UpdateCheckError": "Ошибка при проверке обновлений:",
