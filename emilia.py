@@ -286,7 +286,7 @@ class AutoUpdate():
             writeconfig('autoupdate_enable', 'False')
 
     def download_and_update_script(self, url, build):
-        print(tr('AutoUpdate', 'upgradeto') + " " +build)
+        print(f"{tr('AutoUpdate', 'upgradeto')} + {build}")
         try:
             response = requests.get(url)
             response.raise_for_status()
