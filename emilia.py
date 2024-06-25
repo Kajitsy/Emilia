@@ -25,7 +25,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2"
-build = "20240621"
+build = "20240625"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -1096,10 +1096,10 @@ class Emilia(QMainWindow):
         if aitype == "charai":
             token = aiocai.Client(self.client_entry.text())
             character = self.char_entry.text()
+            Account = await token.get_me()
             try:
                 chatid = await token.get_chat(character)
             except:
-                Account = await token.get_me()
                 chatid = await token.new_chat(character, Account.id)
             persona = await token.get_persona(character)
             username = f"{Account.name}: "
@@ -1126,7 +1126,7 @@ class Emilia(QMainWindow):
             except sr.UnknownValueError:
                 self.user_input.setText(username + tr("Main", "sayagain"))
                 continue
-            self.user_input.setText(username + tr("Main", "user") + msg1)
+            self.user_input.setText(username + msg1)
             self.ai_output.setText(ai + tr("Main", "emigen"))
             if vtubeenable == "True":
                 await EEC().UseEmote("Thinks")
