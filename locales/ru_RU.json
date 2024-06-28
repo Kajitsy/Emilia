@@ -76,7 +76,7 @@
       "emiliaupdated": "Emilia обновлена до Build"
     },
     "OptionsWindow": {
-      "torchdeviceselect": "Устройство генерации голоса: ",
+      "torchdeviceselect": "Устройство генерации голоса",
       "aitypechange": "Выберите ИИ",
       "languagechange": "Выберите язык",
       "langselEN": "Английский",
@@ -85,7 +85,13 @@
       "selecticoncolor": "Выберите цвет иконок",
       "whitecolor": "Белый",
       "blackcolor": "Чёрный",
-      "selecttheme": "Выберите тему"
+      "selecttheme": "Выберите тему",
+      "pickbackgroundcolor": "Выбрать цвет фона",
+      "picktextcolor": "Выбрать цвет текста",
+      "button": "Цвета кнопок",
+      "pickbuttonbackgroundcolor": "Выбрать цвет фона",
+      "pickbuttontextcolor": "Выбрать цвет текста",
+      "reset": "Сбросить"
     },
     "Errors": {
       "Label": "Ошибка",

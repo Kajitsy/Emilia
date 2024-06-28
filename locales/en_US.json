@@ -76,7 +76,7 @@
       "emiliaupdated": "Emilia updated to Build"
     },
     "OptionsWindow": {
-      "torchdeviceselect": "Voice generation device:",
+      "torchdeviceselect": "Voice generation device",
       "aitypechange": "Select AI",
       "languagechange": "Select language",
       "langselEN": "English",
@@ -85,7 +85,13 @@
       "selecticoncolor": "Select Icon Color",
       "whitecolor": "White",
       "blackcolor": "Black",
-      "selecttheme": "Select Theme"
+      "selecttheme": "Select Theme",
+      "pickbackgroundcolor": "Pick background color",
+      "picktextcolor": "Pick text color",
+      "button": "Button Colors",
+      "pickbuttonbackgroundcolor": "Pick background color",
+      "pickbuttontextcolor": "Pick text color",
+      "reset": "Reset"
     },
     "Errors": {
         "Label": "Error",

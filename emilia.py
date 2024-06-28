@@ -18,14 +18,14 @@ import speech_recognition as sr
 from gpytranslate import Translator
 from characterai import aiocai, sendCode, authUser
 from num2words import num2words
-from PyQt6.QtWidgets import QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
-from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPalette
-from PyQt6.QtCore import QLocale
+from PyQt6.QtWidgets import QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
+from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
+from PyQt6.QtCore import QLocale, Qt
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2"
-build = "20240625"
+build = "20240628"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -62,7 +62,7 @@ if cuda_avalable == True:
 else:
     torchdevice = getconfig('devicefortorch', 'cpu')
 theme = getconfig('theme', 'windowsvista')
-iconcolor = getconfig('iconcolor', 'white')
+iconcolor = getconfig('iconcolor', 'black')
 backcolor = getconfig('backgroundcolor')
 buttoncolor = getconfig('buttoncolor')
 buttontextcolor = getconfig('buttontextcolor')
@@ -270,18 +270,13 @@ class AutoUpdate():
                     if int(latest_prerealease["build"]) > int(build):
                         self.download_and_update_script(latest_prerealease["url"], latest_prerealease["build"])
                         return
-                if "latest_release" in updates:
-                    latest_release = updates["latest_release"]
-                    if int(latest_release["build"]) > int(build):
-                        self.download_and_update_script(latest_release["url"], latest_release["build"])
-                        return
             else:
                 if "latest_release" in updates:
                     latest_release = updates["latest_release"]
                     if int(latest_release["build"]) > int(build):
                         self.download_and_update_script(latest_release["url"], latest_release["build"])
                         return
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             print(f"{tr('Errors', 'UpdateCheckError')} {e}")
             writeconfig('autoupdate_enable', 'False')
 
@@ -313,12 +308,15 @@ class OptionsWindow(QWidget):
         super().__init__()
         self.setWindowTitle("Emilia: Options")
         self.setWindowIcon(QIcon(emiliaicon))
-        self.setFixedWidth(225)
+        self.setFixedWidth(450)
         self.setMinimumHeight(150)
         self.trl = "OptionsWindow"
 
         self.mainwindow = mainwindow
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
+
+        firsthalf = QVBoxLayout()
+        secondhalf = QVBoxLayout()
 
         autoupdatelayout = QHBoxLayout()
         self.autoupdate = QCheckBox()
@@ -328,7 +326,7 @@ class OptionsWindow(QWidget):
 
         autoupdatelayout.addWidget(QLabel(tr(self.trl, 'autoupdate')))
         autoupdatelayout.addWidget(self.autoupdate)
-        layout.addLayout(autoupdatelayout)
+        firsthalf.addLayout(autoupdatelayout)
 
 
         langlayout = QHBoxLayout()
@@ -340,7 +338,7 @@ class OptionsWindow(QWidget):
 
         langlayout.addWidget(QLabel(tr(self.trl, 'languagechange')))
         langlayout.addWidget(self.languagechange)
-        layout.addLayout(langlayout)
+        firsthalf.addLayout(langlayout)
 
 
         aitypelayout = QHBoxLayout()
@@ -354,7 +352,38 @@ class OptionsWindow(QWidget):
 
         aitypelayout.addWidget(QLabel(tr(self.trl, 'aitypechange')))
         aitypelayout.addWidget(self.aitypechange)
-        layout.addLayout(aitypelayout)
+        firsthalf.addLayout(aitypelayout)
+
+
+        torchdevicelayout = QHBoxLayout()
+        self.torchdeviceselect = QComboBox()
+        self.torchdeviceselect.addItems(["GPU", "CPU"])
+        if cuda_avalable != True:
+            self.torchdeviceselect.addItems(["GPU"])
+        elif torchdevice == "cpu":
+            self.torchdeviceselect.setCurrentIndex(2)
+        self.torchdeviceselect.currentTextChanged.connect(lambda: self.torchdevicechange())
+
+        self.torchdeviceselectlabel = QLabel(tr(self.trl, 'torchdeviceselect'))
+        self.torchdeviceselectlabel.setWordWrap(True)
+
+        torchdevicelayout.addWidget(self.torchdeviceselectlabel)
+        torchdevicelayout.addWidget(self.torchdeviceselect)
+        firsthalf.addLayout(torchdevicelayout)
+
+
+        vtubelayout = QHBoxLayout()
+        self.vtubecheck = QCheckBox()
+        if getconfig('vtubeenable', 'True') == "True":
+            self.vtubecheck.setChecked(True)
+        self.vtubecheck.stateChanged.connect(self.vtubechange)
+        self.vtubewiki = QPushButton("Wiki")
+        self.vtubewiki.clicked.connect(lambda: webbrowser.open("https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8"))
+
+        vtubelayout.addWidget(QLabel("VTube Model"))
+        vtubelayout.addWidget(self.vtubecheck)
+        vtubelayout.addWidget(self.vtubewiki)
+        firsthalf.addLayout(vtubelayout)
 
 
         try:
@@ -379,7 +408,7 @@ class OptionsWindow(QWidget):
 
         themelayout.addWidget(QLabel(tr(self.trl, "selecttheme")))
         themelayout.addWidget(self.themechange)
-        layout.addLayout(themelayout)
+        secondhalf.addLayout(themelayout)
 
 
         iconcolorlayout = QHBoxLayout()
@@ -392,44 +421,75 @@ class OptionsWindow(QWidget):
 
         iconcolorlayout.addWidget(QLabel(tr(self.trl, "selecticoncolor")))
         iconcolorlayout.addWidget(self.iconcolorchange)
-        layout.addLayout(iconcolorlayout)
+        secondhalf.addLayout(iconcolorlayout)
 
 
-        torchdevicelayout = QHBoxLayout()
-        self.torchdeviceselect = QComboBox()
-        self.torchdeviceselect.addItems(["GPU", "CPU"])
-        if cuda_avalable != True:
-            self.torchdeviceselect.addItems(["GPU"])
-        elif torchdevice == "cpu":
-            self.torchdeviceselect.setCurrentIndex(2)
-        self.torchdeviceselect.currentTextChanged.connect(lambda: self.torchdevicechange())
+        backgroundlayout = QHBoxLayout()
+        self.pickbackground_button = QPushButton(tr(self.trl, "pickbackgroundcolor"))
+        self.pickbackground_button.clicked.connect(self.pick_background_color)
 
-        self.torchdeviceselectlabel = QLabel(tr(self.trl, 'torchdeviceselect'))
-        self.torchdeviceselectlabel.setWordWrap(True)
-
-        torchdevicelayout.addWidget(self.torchdeviceselectlabel)
-        torchdevicelayout.addWidget(self.torchdeviceselect)
-        layout.addLayout(torchdevicelayout)
+        backgroundlayout.addWidget(self.pickbackground_button)
+        secondhalf.addLayout(backgroundlayout)
 
 
-        vtubelayout = QHBoxLayout()
-        self.vtubecheck = QCheckBox()
-        if getconfig('vtubeenable', 'True') == "True":
-            self.vtubecheck.setChecked(True)
-        self.vtubecheck.stateChanged.connect(self.vtubechange)
-        self.vtubewiki = QPushButton("Wiki")
-        self.vtubewiki.clicked.connect(lambda: webbrowser.open("https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8"))
+        textcolor = QHBoxLayout()
+        self.picktext_button = QPushButton(tr(self.trl, "picktextcolor"))
+        self.picktext_button.clicked.connect(self.pick_text_color)
 
-        vtubelayout.addWidget(QLabel("VTube Model"))
-        vtubelayout.addWidget(self.vtubecheck)
-        vtubelayout.addWidget(self.vtubewiki)
-        layout.addLayout(vtubelayout)
+        textcolor.addWidget(self.picktext_button)
+        secondhalf.addLayout(textcolor)
 
+
+        fullbuttoncolorslayout = QVBoxLayout()
+        buttoncolorslayout = QHBoxLayout()
+        self.button_label = QLabel(tr(self.trl, "button"))
+        self.pickbutton_button = QPushButton(tr(self.trl, "pickbuttonbackgroundcolor"))
+        self.pickbutton_button.clicked.connect(self.pick_button_color)
+        self.pickbuttontext_button = QPushButton(tr(self.trl, "pickbuttontextcolor"))
+        self.pickbuttontext_button.clicked.connect(self.pick_button_text_color)
+
+        fullbuttoncolorslayout.addWidget(self.button_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        buttoncolorslayout.addWidget(self.pickbutton_button)
+        buttoncolorslayout.addWidget(self.pickbuttontext_button)
+        fullbuttoncolorslayout.addLayout(buttoncolorslayout)
+        secondhalf.addLayout(fullbuttoncolorslayout)
+
+
+        self.reset_button = QPushButton(tr(self.trl, "reset"))
+        self.reset_button.clicked.connect(self.allreset)
+        secondhalf.addWidget(self.reset_button)
+
+        layout.addLayout(firsthalf)
+        layout.addLayout(secondhalf)
         self.setLayout(layout)
+
+        self.current_color = QColor("#ffffff")
+        self.current_button_color = QColor("#ffffff") 
+        self.current_label_color = QColor("#000000")
+
+        self.backcolor = getconfig('backgroundcolor')
+        self.buttoncolor = getconfig('buttoncolor')
+        self.buttontextcolor = getconfig('buttontextcolor')
+        self.labelcolor = getconfig('labelcolor')
+        if self.backcolor != "":
+            self.set_background_color(QColor(self.backcolor))
+        if self.buttoncolor != "":
+            self.set_button_color(QColor(self.buttoncolor))
+        if self.labelcolor != "":
+            self.set_label_color(QColor(self.labelcolor))
+        if self.buttontextcolor != "":
+            self.set_button_text_color(QColor(self.buttontextcolor))
 
     def vtubechange(self, state):
         if state == 2:
             writeconfig('vtubeenable', "True")
+            msg = QMessageBox()
+            msg.setStyleSheet(self.styleSheet())
+            msg.setWindowTitle("Emilia")
+            msg.setWindowIcon(QIcon(emiliaicon))
+            text = "Attention, using Emilia together with the VTube model can greatly slow down the generation of responses"
+            msg.setText(text)
+            msg.exec()
         else:
             writeconfig('vtubeenable', "False")
 
@@ -492,6 +552,96 @@ class OptionsWindow(QWidget):
             writeconfig('language', "ru_RU")
         print("Restart required")
         os.execv(sys.executable, ['python'] + sys.argv)
+
+    def pick_background_color(self):
+        color = QColorDialog.getColor(self.current_color, self)
+        self.mainwindow.set_background_color(color) 
+        self.set_background_color(color)
+        writeconfig('backgroundcolor', color.name())
+
+    def pick_button_color(self):
+        color = QColorDialog.getColor(self.current_button_color, self)
+        self.mainwindow.set_button_color(color)
+        self.set_button_color(color)
+        writeconfig('buttoncolor', color.name())
+
+    def pick_button_text_color(self):
+        color = QColorDialog.getColor(self.current_button_color, self)
+        self.mainwindow.set_button_text_color(color)
+        self.set_button_text_color(color)
+        writeconfig('buttontextcolor', color.name())
+
+    def pick_text_color(self):
+        color = QColorDialog.getColor(self.current_label_color, self)
+        self.mainwindow.set_label_color(color)
+        self.set_label_color(color)
+        writeconfig('labelcolor', color.name())
+
+    def allreset(self):
+        ltheme = "windowsvista"
+        app = QApplication.instance()
+        app.setStyle(ltheme)
+        keyboardicon = './images/keyboard.png'
+        inputicon = './images/input.png'
+        charediticon = './images/open_char_editor.png'
+        self.mainwindow.visibletextmode.setIcon(QIcon(keyboardicon))
+        self.mainwindow.visiblevoicemode.setIcon(QIcon(inputicon))
+        if aitype == 'charai':
+            self.mainwindow.chareditopen.setIcon(QIcon(charediticon))
+        self.mainwindow.styles_reset()
+        self.styles_reset()
+        self.themechange.setCurrentIndex(1)
+        self.iconcolorchange.setCurrentIndex(1)
+        writeconfig("backgroundcolor", "")
+        writeconfig("labelcolor", "")
+        writeconfig("buttontextcolor", "")
+        writeconfig("buttoncolor", "")
+        writeconfig('iconcolor', 'black')
+        writeconfig('theme', ltheme)
+
+    def set_background_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QWidget {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_text_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_label_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QWidget {{
+                color: {color.name()};
+            }}
+        """
+        new_style_sheet2 = f"""
+            QLineEdit {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
+
+    def styles_reset(self):
+        self.setStyleSheet("")
 
 class FirstLaunch(QMainWindow):
     def __init__(self):
@@ -584,12 +734,6 @@ class FirstLaunch(QMainWindow):
     def usesvtubemodel(self, state):
         if state == 2:
             writeconfig('vtubeenable', "True")
-            msg = QMessageBox()
-            msg.setWindowTitle("Emilia")
-            msg.setWindowIcon(QIcon(emiliaicon))
-            text = "Attention, using Emilia together with the VTube model can greatly slow down the generation of responses"
-            msg.setText(text)
-            msg.exec()
         else:
             writeconfig('vtubeenable', "False")
 
@@ -674,14 +818,6 @@ class CharacterEditor(QWidget):
         self.delchar_button = QPushButton(tr("CharEditor", "delchar"))
         self.delchar_button.clicked.connect(lambda: self.delchar())
 
-        if backcolor != "":
-            self.set_background_color(QColor(backcolor))
-        if buttoncolor != "":
-            self.set_button_color(QColor(buttoncolor))
-        if labelcolor != "":
-            self.set_label_color(QColor(labelcolor))
-        if buttontextcolor != "":
-            self.set_button_text_color(QColor(buttontextcolor))
 
         layout = QVBoxLayout()
         layout.addWidget(self.name_label)
@@ -693,6 +829,19 @@ class CharacterEditor(QWidget):
         layout.addWidget(self.addchar_button)
         layout.addWidget(self.delchar_button)
         self.setLayout(layout)
+    
+        self.backcolor = getconfig('backgroundcolor')
+        self.buttoncolor = getconfig('buttoncolor')
+        self.buttontextcolor = getconfig('buttontextcolor')
+        self.labelcolor = getconfig('labelcolor')
+        if self.backcolor != "":
+            self.set_background_color(QColor(self.backcolor))
+        if self.buttoncolor != "":
+            self.set_button_color(QColor(self.buttoncolor))
+        if self.labelcolor != "":
+            self.set_label_color(QColor(self.labelcolor))
+        if self.buttontextcolor != "":
+            self.set_button_text_color(QColor(self.buttontextcolor))
 
     def addchar(self):
         try:
@@ -721,6 +870,7 @@ class CharacterEditor(QWidget):
                 json.dump(data, f, ensure_ascii=False, indent=4)
         else:
             msg = QMessageBox()
+            msg.setStyleSheet(self.styleSheet())
             if pre == True:
                 msg.setWindowTitle(tr("CharEditor", "error") + build)
             else:
@@ -729,7 +879,50 @@ class CharacterEditor(QWidget):
             text = tr("CharEditor", "notavchar")
             msg.setText(text)
             msg.exec()
-            self.central_widget.setLayout(self.layout)
+    
+    def set_background_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QWidget {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_text_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_label_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QWidget {{
+                color: {color.name()};
+            }}
+        """
+        new_style_sheet2 = f"""
+            QLineEdit {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
+
+    def styles_reset(self):
+        self.setStyleSheet("")
 
 class EmiliaAuth(QWidget):
     def __init__(self):
@@ -766,6 +959,19 @@ class EmiliaAuth(QWidget):
         layout.addWidget(self.gettoken_button)
         self.setLayout(layout)
 
+        self.backcolor = getconfig('backgroundcolor')
+        self.buttoncolor = getconfig('buttoncolor')
+        self.buttontextcolor = getconfig('buttontextcolor')
+        self.labelcolor = getconfig('labelcolor')
+        if self.backcolor != "":
+            self.set_background_color(QColor(self.backcolor))
+        if self.buttoncolor != "":
+            self.set_button_color(QColor(self.buttoncolor))
+        if self.labelcolor != "":
+            self.set_label_color(QColor(self.labelcolor))
+        if self.buttontextcolor != "":
+            self.set_button_text_color(QColor(self.buttontextcolor))
+
     def getlink(self):
         sendCode(self.email_entry.text())
         self.link_label.setVisible(True)
@@ -784,11 +990,56 @@ class EmiliaAuth(QWidget):
             writeconfig('client', token, 'charaiconfig.json')
         except {Exception} as e:
             msg = QMessageBox()
+            msg.setStyleSheet(self.styleSheet())
             msg.setWindowTitle(tr("Errors", "Label"))
             msg.setWindowIcon(QIcon(emiliaicon))
             text = tr("Errors", "other") + e
             msg.setText(text)
             msg.exec()
+
+    def set_background_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QWidget {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_text_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_button_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QPushButton {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
+
+    def set_label_color(self, color):
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QWidget {{
+                color: {color.name()};
+            }}
+        """
+        new_style_sheet2 = f"""
+            QLineEdit {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
+
+    def styles_reset(self):
+        self.setStyleSheet("")
 
 class Emilia(QMainWindow):
     def __init__(self):
@@ -989,9 +1240,13 @@ class Emilia(QMainWindow):
         self.selected_device_index = index
 
     def set_background_color(self, color):
-        palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, color)
-        self.setPalette(palette)
+        current_style_sheet = self.styleSheet()
+        new_style_sheet = f"""
+            QMainWindow {{
+                background-color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet)
 
     def set_button_text_color(self, color):
         current_style_sheet = self.styleSheet()
@@ -1018,7 +1273,12 @@ class Emilia(QMainWindow):
                 color: {color.name()};
             }}
         """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
+        new_style_sheet2 = f"""
+            QLineEdit {{
+                color: {color.name()};
+            }}
+        """
+        self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
 
     def styles_reset(self):
         self.setStyleSheet("")
@@ -1060,6 +1320,7 @@ class Emilia(QMainWindow):
             msg.setWindowTitle(tr("About", "aboutemi") + build)
         else:
             msg.setWindowTitle(tr("About", "aboutemi"))
+        msg.setStyleSheet(self.styleSheet())
         msg.setWindowIcon(QIcon(emiliaicon))
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
         msg.setIconPixmap(pixmap)
@@ -1090,7 +1351,7 @@ class Emilia(QMainWindow):
             return text
 
     async def main(self):
-        vtubeenable = ('vtubeenable', "False")
+        vtubeenable = getconfig('vtubeenable', "False")
         self.layout.addWidget(self.user_input)
         self.layout.addWidget(self.ai_output)
         if aitype == "charai":
