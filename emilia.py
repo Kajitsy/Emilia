@@ -25,8 +25,8 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2"
-build = "20240628"
-pre = True
+build = "20240630"
+pre = False
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -53,7 +53,7 @@ def getconfig(value, def_value = "", configfile = 'config.json'):
         return def_value
 
 # Global Variables
-autoupdate_enable = getconfig('autoupdate_enable', 'True')
+autoupdate_enable = getconfig('autoupdate_enable', 'False')
 lang = getconfig('language', QLocale.system().name())
 aitype = getconfig('aitype', 'charai')
 cuda_avalable = torch.cuda.is_available()
@@ -109,7 +109,6 @@ def load_translations(filename):
         with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Translation file not found: {filename}\nUsing en_US.json")
         with open("locales/en_US.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
@@ -320,7 +319,7 @@ class OptionsWindow(QWidget):
 
         autoupdatelayout = QHBoxLayout()
         self.autoupdate = QCheckBox()
-        if getconfig('autoupdate_enable', 'True') == "True":
+        if getconfig('autoupdate_enable', 'False') == "True":
             self.autoupdate.setChecked(True)
         self.autoupdate.stateChanged.connect(self.autoupdatechange)
 
@@ -374,7 +373,7 @@ class OptionsWindow(QWidget):
 
         vtubelayout = QHBoxLayout()
         self.vtubecheck = QCheckBox()
-        if getconfig('vtubeenable', 'True') == "True":
+        if getconfig('vtubeenable', 'False') == "True":
             self.vtubecheck.setChecked(True)
         self.vtubecheck.stateChanged.connect(self.vtubechange)
         self.vtubewiki = QPushButton("Wiki")
@@ -800,34 +799,47 @@ class CharacterEditor(QWidget):
         self.setWindowTitle("Emilia: Character Editor")
         self.setFixedWidth(300)
 
-        self.name_label = QLabel(tr("CharEditor", "charname"))
+        layout = QVBoxLayout()
+
+        name_layout = QHBoxLayout()
         self.name_entry = QLineEdit()
         self.name_entry.setPlaceholderText("Emilia...")
 
-        self.id_label = QLabel(tr("MainWindow", "characterid"))
+        name_layout.addWidget(QLabel(tr("CharEditor", "charname")))
+        name_layout.addWidget(self.name_entry)
+        layout.addLayout(name_layout)
+
+
+        id_layout = QHBoxLayout()
         self.id_entry = QLineEdit()
         self.id_entry.setPlaceholderText("ID...")
 
-        self.voice_label = QLabel(tr("MainWindow", "voice"))
+        id_layout.addWidget(QLabel(tr("MainWindow", "characterid")))
+        id_layout.addWidget(self.id_entry)
+        layout.addLayout(id_layout)
+
+
+        voice_layout = QHBoxLayout()
         self.voice_entry = QLineEdit()
         self.voice_entry.setPlaceholderText(tr("MainWindow", "voices"))
+        self.voice_entry.setToolTip(tr("MainWindow", "voices"))
 
+        voice_layout.addWidget(QLabel(tr("MainWindow", "voice")))
+        voice_layout.addWidget(self.voice_entry)
+        layout.addLayout(voice_layout)
+
+
+        buttons_layout = QHBoxLayout()
         self.addchar_button = QPushButton(tr("CharEditor", "addchar"))
         self.addchar_button.clicked.connect(lambda: self.addchar())
 
         self.delchar_button = QPushButton(tr("CharEditor", "delchar"))
         self.delchar_button.clicked.connect(lambda: self.delchar())
 
+        buttons_layout.addWidget(self.addchar_button)
+        buttons_layout.addWidget(self.delchar_button)
+        layout.addLayout(buttons_layout)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.name_label)
-        layout.addWidget(self.name_entry)
-        layout.addWidget(self.id_label)
-        layout.addWidget(self.id_entry)
-        layout.addWidget(self.voice_label)
-        layout.addWidget(self.voice_entry)
-        layout.addWidget(self.addchar_button)
-        layout.addWidget(self.delchar_button)
         self.setLayout(layout)
     
         self.backcolor = getconfig('backgroundcolor')
@@ -932,32 +944,35 @@ class EmiliaAuth(QWidget):
         self.setFixedWidth(300)
         self.setMinimumHeight(100)
 
+        self.layout = QVBoxLayout()
+
+        email_layout = QHBoxLayout()
         self.email_label = QLabel(tr("GetToken","youremail"))
         self.email_entry = QLineEdit()
         self.email_entry.setPlaceholderText("example@example.com")
 
+        email_layout.addWidget(self.email_label)
+        email_layout.addWidget(self.email_entry)
+        self.layout.addLayout(email_layout)
+
+
         self.getlink_button = QPushButton(tr("GetToken", "sendemail"))
         self.getlink_button.clicked.connect(lambda: self.getlink())
+        self.layout.addWidget(self.getlink_button)
 
+        self.link_layout = QHBoxLayout()
         self.link_label = QLabel(tr("GetToken", "linkfromemail"))
         self.link_entry = QLineEdit()
         self.link_entry.setPlaceholderText("https...")
 
+        self.link_layout.addWidget(self.link_label)
+        self.link_layout.addWidget(self.link_entry)
+        
+
         self.gettoken_button = QPushButton(tr("GetToken", "gettoken"))
         self.gettoken_button.clicked.connect(lambda: self.gettoken())
-
-        self.link_label.setVisible(False)
-        self.link_entry.setVisible(False)
-        self.gettoken_button.setVisible(False)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.email_label)
-        layout.addWidget(self.email_entry)
-        layout.addWidget(self.getlink_button)
-        layout.addWidget(self.link_label)
-        layout.addWidget(self.link_entry)
-        layout.addWidget(self.gettoken_button)
-        self.setLayout(layout)
+        
+        self.setLayout(self.layout)
 
         self.backcolor = getconfig('backgroundcolor')
         self.buttoncolor = getconfig('buttoncolor')
@@ -974,9 +989,8 @@ class EmiliaAuth(QWidget):
 
     def getlink(self):
         sendCode(self.email_entry.text())
-        self.link_label.setVisible(True)
-        self.link_entry.setVisible(True)
-        self.gettoken_button.setVisible(True)
+        self.layout.addLayout(self.link_layout)
+        self.layout.addWidget(self.gettoken_button)
 
     def gettoken(self):
         try:
@@ -988,7 +1002,7 @@ class EmiliaAuth(QWidget):
             self.getlink_button.setVisible(False)
             self.email_label.setText(tr("GetToken", "yourtoken") + token + tr("GetToken", "saveincharaiconfig"))
             writeconfig('client', token, 'charaiconfig.json')
-        except {Exception} as e:
+        except Exception as e:
             msg = QMessageBox()
             msg.setStyleSheet(self.styleSheet())
             msg.setWindowTitle(tr("Errors", "Label"))
@@ -1097,6 +1111,7 @@ class Emilia(QMainWindow):
         self.speaker_entry = QLineEdit()
         self.speaker_entry.textChanged.connect(lambda: writeconfig("speaker", self.speaker_entry.text()))
         self.speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
+        self.speaker_entry.setToolTip(tr("MainWindow", "voices"))
         self.speaker_entry.setText(getconfig('speaker'))
         self.speaker_layout.addWidget(self.speaker_label)
         self.speaker_layout.addWidget(self.speaker_entry)
