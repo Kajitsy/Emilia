@@ -13,6 +13,7 @@
       "gemini_button": "Google Gemini",
       "usevtubemodel": "Использовать VTube модель",
       "enableautoupdate": "Включить автоматические обновления",
+      "ShowMoreFeatures": "Обратите внимание на дополнительные функции Emilia",
       "ready_button": "Готово!",
       "relaunch_button": "Перезапустить!"
     },
@@ -20,17 +21,18 @@
       "start": "Запустить",
       "starttext": "Запустить в текстовом режиме",
       "textmodeinput": "Прежде чем жать кнопку ниже...",
-      "geminitoken": "Ваш Gemini токен:",
-      "charactertoken": "Токен клиента:",
-      "characterid": "ID персонажа:",
+      "geminitoken": "Ваш Gemini токен",
+      "charactertoken": "Токен клиента",
+      "characterid": "ID персонажа",
       "token": "Токен...",
       "voice": "Голос:",
+      "voiceid": "ID голоса",
+      "voiceidtooltip": "Можете оставить пустым,\nбудет использоваться встроенный голос персонажа",
       "voices": "aidar, baya, kseniya, xenia, eugene или же random",
       "gettoken": "&Получить токен",
       "usetextmode": "&Активировать текстовый режим",
       "butemptyhere": "Но ведь здесь пусто",
       "usevoicemode": "&Активировать голосовой режим",
-      "devicesselector": "&Выбор устройств",
       "noncriterror": "Возникла ошибка, но код продолжаться может ",
       "criterror": "Возникла ошибка, код продолжаться не может ",
       "inputdevice": "Устройство ввода",
@@ -45,7 +47,7 @@
       "aboutemi": "Об Emilia ",
       "languagefrom": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
       "newin": "<br><br>Новое в ",
-      "whatsnew": ": <br>• Экран первого запуска, простая первоначальная настройка ^_^<br>• Автоматические обновления, ну, по названию и так понятно, но при желании их можно отключить<br>• Emilia: Options, большинство настроек перемещено именно сюда<br>• VTube Model, лучше прочтите <a href='https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8'здесь</a><br>• Окна получения получения токена Character.AI и Редактор персонажей теперь являются QWidget, что должно ускорить их открытие<br>• Новая тема windows11, доступна разумеется только на Windows 11 и выше<br>• А ну ещё куча исправлений, добавлений и прочего\n",
+      "whatsnew": ": <br>• Теперь Вы можете использовать голоса от Character.AI, смена есть в параметрах (В будущем это появится в <a href='https://github.com/jofizcd/Soul-of-Waifu'> Soul of Waifu</a>) <br>• Можете вставлять ссылки на персонажей, без необходимости что-то там специальное копировать <br>• Различные исправления и визуальные исправления конечно же",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
       "emiopenproject": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
       "usever": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
@@ -69,14 +71,22 @@
       "addchar": "Добавить персонажа",
       "delchar": "Удалить персонажа",
       "error": "ОШИБКА, ПОПРОБУЙТЕ ЕЩЁ РАЗ ",
-      "notavchar": "Твоего персонажа в коде нет"
+      "notavchar": "Твоего персонажа в коде нет",
+      "yourchar": "Ваш персонаж по имени ",
+      "withid": " с айди ",
+      "withvoice": " и голосом ",
+      "added": " успешно добавлен!",
+      "characteradded": "Персонаж добавлен!"
     },
     "AutoUpdate": {
       "upgradeto": "Обновление до",
       "emiliaupdated": "Emilia обновлена до Build"
     },
     "OptionsWindow": {
+      "ttsselect": "Выберите TTS",
+      "charaivoices": "Голоса Character.AI",
       "torchdeviceselect": "Устройство генерации голоса",
+      "torchdeviceselectnotavalable": "Настройка недоступна, потому что TTS это не Silero TTS",
       "aitypechange": "Выберите ИИ",
       "languagechange": "Выберите язык",
       "langselEN": "Английский",
@@ -89,8 +99,6 @@
       "pickbackgroundcolor": "Выбрать цвет фона",
       "picktextcolor": "Выбрать цвет текста",
       "button": "Цвета кнопок",
-      "pickbuttonbackgroundcolor": "Выбрать цвет фона",
-      "pickbuttontextcolor": "Выбрать цвет текста",
       "reset": "Сбросить"
     },
     "Errors": {
@@ -102,4 +110,4 @@
       "UpdateDownloadError": "Ошибка при загрузке обновления:",
       "BadZipFile": "Ошибка при распаковке архива:"
     }
-  }
+}

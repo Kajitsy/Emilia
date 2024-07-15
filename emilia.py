@@ -1,32 +1,40 @@
-import os
-import asyncio
-import winreg
-import threading
-import torch
-import time
-import zipfile, requests
-import re
-import json
-import sys
-import webbrowser
-import ctypes
-import pyvts, random
-import warnings
-import sounddevice as sd
-import google.generativeai as genai
-import speech_recognition as sr
-from gpytranslate import Translator
-from characterai import aiocai, sendCode, authUser
-from num2words import num2words
-from PyQt6.QtWidgets import QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
-from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
-from PyQt6.QtCore import QLocale, Qt
+try:
+    import io
+    import os
+    import asyncio
+    import winreg
+    import threading
+    import torch
+    import time
+    import zipfile
+    import requests
+    import re
+    import json
+    import sys
+    import webbrowser
+    import ctypes
+    import pyvts
+    import random
+    import warnings
+    import sounddevice as sd
+    import soundfile as sf
+    import google.generativeai as genai
+    import speech_recognition as sr
+    from gpytranslate import Translator
+    from characterai import aiocai, sendCode, authUser, authGuest
+    from num2words import num2words
+    from PyQt6.QtWidgets import QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu
+    from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
+    from PyQt6.QtCore import QLocale, Qt
+except:
+    import os
+    os.system("install.bat")
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2"
-build = "20240630"
-pre = False
+version = "2.2.1"
+build = "20240716"
+pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -56,6 +64,7 @@ def getconfig(value, def_value = "", configfile = 'config.json'):
 autoupdate_enable = getconfig('autoupdate_enable', 'False')
 lang = getconfig('language', QLocale.system().name())
 aitype = getconfig('aitype', 'charai')
+tts = getconfig('tts', 'silerotts')
 cuda_avalable = torch.cuda.is_available()
 if cuda_avalable == True:
     torchdevice = getconfig('devicefortorch', 'cuda')
@@ -93,7 +102,6 @@ if not os.path.exists('voice.pt'):
             torch.hub.download_url_to_file('https://models.silero.ai/models/tts/ru/v4_ru.pt', "voice.pt")
         except:
             torch.hub.download_url_to_file('https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/tts_models/v4_ru.pt', "voice.pt")
-        print("_____________________________________________________")
     else:
         print("The SileroTTS EN model is being loaded")
         print("")
@@ -101,7 +109,7 @@ if not os.path.exists('voice.pt'):
             torch.hub.download_url_to_file('https://models.silero.ai/models/tts/en/v3_en.pt', "voice.pt")
         except:
             torch.hub.download_url_to_file('https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/tts_models/v3_en.pt', "voice.pt")
-        print("_____________________________________________________")
+    print("_____________________________________________________")
     print("(*^▽^*)")
 
 def load_translations(filename):
@@ -294,7 +302,7 @@ class AutoUpdate():
             os.remove(f"Emilia_{build}.zip")
 
             print(f"{tr('AutoUpdate', 'emiliaupdated')} {build}!")
-            os.execv(sys.executable, ['python'] + sys.argv)
+            os.system("install.bat")
         except requests.exceptions.RequestException as e:
             print(f"{tr('Errors', 'UpdateDownloadError')} {e}")
             writeconfig('autoupdate_enable', 'False')
@@ -315,6 +323,7 @@ class OptionsWindow(QWidget):
         layout = QHBoxLayout()
 
         firsthalf = QVBoxLayout()
+        self.firsthalf = firsthalf
         secondhalf = QVBoxLayout()
 
         autoupdatelayout = QHBoxLayout()
@@ -343,9 +352,7 @@ class OptionsWindow(QWidget):
         aitypelayout = QHBoxLayout()
         self.aitypechange = QComboBox()
         self.aitypechange.addItems(["Character.AI", "Google Gemini"])
-        if getconfig("aitype", "charai") == "charai":
-            self.aitypechange.setCurrentIndex(0)
-        elif getconfig("aitype", "charai") == "gemini":
+        if getconfig("aitype", "charai") == "gemini":
             self.aitypechange.setCurrentIndex(1)
         self.aitypechange.currentTextChanged.connect(lambda: self.aichange())
 
@@ -354,7 +361,23 @@ class OptionsWindow(QWidget):
         firsthalf.addLayout(aitypelayout)
 
 
-        torchdevicelayout = QHBoxLayout()
+        ttslayout = QHBoxLayout()
+        self.ttsselect = QComboBox()
+        self.ttsselect.addItem("Silero TTS")
+        if aitype == "charai":
+            self.ttsselect.addItem(tr(self.trl, 'charaivoices'))
+        if getconfig("tts", "silerotts") == "charai":
+            self.ttsselect.setCurrentIndex(1)
+        self.ttsselect.currentTextChanged.connect(lambda: self.ttschange())
+
+        self.ttslabel = QLabel(tr(self.trl, 'ttsselect'))
+        self.ttslabel.setWordWrap(True)
+
+        ttslayout.addWidget(self.ttslabel)
+        ttslayout.addWidget(self.ttsselect)
+        firsthalf.addLayout(ttslayout)
+
+        self.torchdevicelayout = QHBoxLayout()
         self.torchdeviceselect = QComboBox()
         self.torchdeviceselect.addItems(["GPU", "CPU"])
         if cuda_avalable != True:
@@ -362,13 +385,14 @@ class OptionsWindow(QWidget):
         elif torchdevice == "cpu":
             self.torchdeviceselect.setCurrentIndex(2)
         self.torchdeviceselect.currentTextChanged.connect(lambda: self.torchdevicechange())
-
+        
         self.torchdeviceselectlabel = QLabel(tr(self.trl, 'torchdeviceselect'))
         self.torchdeviceselectlabel.setWordWrap(True)
 
-        torchdevicelayout.addWidget(self.torchdeviceselectlabel)
-        torchdevicelayout.addWidget(self.torchdeviceselect)
-        firsthalf.addLayout(torchdevicelayout)
+        self.torchdevicelayout.addWidget(self.torchdeviceselectlabel)
+        self.torchdevicelayout.addWidget(self.torchdeviceselect)
+        if getconfig('tts', 'silerotts') == "silerotts":
+            firsthalf.addLayout(self.torchdevicelayout)
 
 
         vtubelayout = QHBoxLayout()
@@ -442,9 +466,9 @@ class OptionsWindow(QWidget):
         fullbuttoncolorslayout = QVBoxLayout()
         buttoncolorslayout = QHBoxLayout()
         self.button_label = QLabel(tr(self.trl, "button"))
-        self.pickbutton_button = QPushButton(tr(self.trl, "pickbuttonbackgroundcolor"))
+        self.pickbutton_button = QPushButton(tr(self.trl, "pickbackgroundcolor"))
         self.pickbutton_button.clicked.connect(self.pick_button_color)
-        self.pickbuttontext_button = QPushButton(tr(self.trl, "pickbuttontextcolor"))
+        self.pickbuttontext_button = QPushButton(tr(self.trl, "picktextcolor"))
         self.pickbuttontext_button.clicked.connect(self.pick_button_text_color)
 
         fullbuttoncolorslayout.addWidget(self.button_label, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -497,6 +521,30 @@ class OptionsWindow(QWidget):
             writeconfig('autoupdate_enable', "True")
         else:
             writeconfig('autoupdate_enable', "False")
+
+    def ttschange(self):
+        value = self.ttsselect.currentIndex()
+        if value == 0:
+            tts = "silerotts"
+            self.torchdeviceselect.setVisible(True)
+            self.torchdeviceselectlabel.setVisible(True)
+            self.mainwindow.voice_label.setText(tr("MainWindow", "voice"))
+            self.mainwindow.voice_entry.setToolTip(tr("MainWindow", "voices"))
+            self.mainwindow.voice_entry.setPlaceholderText(tr("MainWindow", "voices"))
+            self.mainwindow.voice_entry.textChanged.disconnect()
+            self.mainwindow.voice_entry.textChanged.connect(lambda: writeconfig("speaker", self.mainwindow.voice_entry.text()))
+            self.mainwindow.voice_entry.setText(getconfig('speaker'))
+        elif value == 1:
+            tts = "charai"
+            self.torchdeviceselect.setVisible(False)
+            self.torchdeviceselectlabel.setVisible(False)
+            self.mainwindow.voice_label.setText(tr("MainWindow", "voiceid"))
+            self.mainwindow.voice_entry.setToolTip("")
+            self.mainwindow.voice_entry.setPlaceholderText("")
+            self.mainwindow.voice_entry.textChanged.disconnect()
+            self.mainwindow.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.mainwindow.partrm("https://character.ai/?voiceId=", self.mainwindow.voice_entry.text()), "charaiconfig.json"))
+            self.mainwindow.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
+        writeconfig('tts', tts)
 
     def torchdevicechange(self):
         value = self.torchdeviceselect.currentIndex()
@@ -737,7 +785,8 @@ class FirstLaunch(QMainWindow):
             writeconfig('vtubeenable', "False")
 
     def ShowMoreFeatures(self):
-        self.first_launch_notification_label.setText("Pay attention to the additional functions of Emilia")
+        self.setMinimumHeight(150)
+        self.first_launch_notification_label.setText(tr('FirstLaunch', 'ShowMoreFeatures'))
         self.CharAIDataready_button.setVisible(False)
         self.voiceready_button.setVisible(False)
         self.voiceentry.setVisible(False)
@@ -751,7 +800,7 @@ class FirstLaunch(QMainWindow):
 
     def entervoice(self):
         writeconfig('token', self.geminiapikey.text(), 'geminiconfig.json')
-        self.first_launch_notification_label.setText("Enter the name of the desired voice")
+        self.first_launch_notification_label.setText(tr('FirstLaunch', 'entervoice'))
         self.gemapikeyready_button.setVisible(False)
         self.layout.addWidget(self.voiceentry)
         self.layout.addWidget(self.voiceready_button)
@@ -801,14 +850,6 @@ class CharacterEditor(QWidget):
 
         layout = QVBoxLayout()
 
-        name_layout = QHBoxLayout()
-        self.name_entry = QLineEdit()
-        self.name_entry.setPlaceholderText("Emilia...")
-
-        name_layout.addWidget(QLabel(tr("CharEditor", "charname")))
-        name_layout.addWidget(self.name_entry)
-        layout.addLayout(name_layout)
-
 
         id_layout = QHBoxLayout()
         self.id_entry = QLineEdit()
@@ -831,7 +872,7 @@ class CharacterEditor(QWidget):
 
         buttons_layout = QHBoxLayout()
         self.addchar_button = QPushButton(tr("CharEditor", "addchar"))
-        self.addchar_button.clicked.connect(lambda: self.addchar())
+        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
 
         self.delchar_button = QPushButton(tr("CharEditor", "delchar"))
         self.delchar_button.clicked.connect(lambda: self.delchar())
@@ -842,6 +883,7 @@ class CharacterEditor(QWidget):
 
         self.setLayout(layout)
     
+
         self.backcolor = getconfig('backgroundcolor')
         self.buttoncolor = getconfig('buttoncolor')
         self.buttontextcolor = getconfig('buttontextcolor')
@@ -854,8 +896,9 @@ class CharacterEditor(QWidget):
             self.set_label_color(QColor(self.labelcolor))
         if self.buttontextcolor != "":
             self.set_button_text_color(QColor(self.buttontextcolor))
+    
 
-    def addchar(self):
+    async def addchar(self):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -863,12 +906,30 @@ class CharacterEditor(QWidget):
             data = {}
         except json.JSONDecodeError:
              data = {}
-        data.update({self.name_entry.text(): {"name": self.name_entry.text(), "char": self.id_entry.text(), "voice": self.voice_entry.text()}})
+        if getconfig('client', configfile='charaiconfig.json') == "":
+            token = aiocai.Client(authGuest())
+        else:
+            token = aiocai.Client(getconfig('client', configfile='charaiconfig.json'))
+        charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
+        char = await token.get_persona(charid)
+        data.update({charid: {"name": char.name, "char": charid, "voice": self.voice_entry.text()}})
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
+        msg = QMessageBox()
+        msg.setWindowTitle(tr('CharEditor', 'characteradded'))
+        msg.setStyleSheet(self.styleSheet())
+        response = requests.get(f"https://characterai.io/i/80/static/avatars/{char.avatar_file_name}?webp=true&anim=0")
+        pixmap = QPixmap()
+        pixmap.loadFromData(response.content)
+        msg.setWindowIcon(QIcon(pixmap))
+        msg.setIconPixmap(pixmap)
+        text = tr('CharEditor', 'yourchar') + char.name + tr('CharEditor', 'withid') + charid + tr('CharEditor', 'withvoice') + self.voice_entry.text() + tr('CharEditor', 'added')
+        msg.setText(text)
+        msg.exec()
+
     def delchar(self):
-        name = self.name_entry.text()
+        charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -876,17 +937,14 @@ class CharacterEditor(QWidget):
             data = {}
         except json.JSONDecodeError:
              data = {}
-        if name in data:
-            del data[name]
+        if charid in data:
+            del data[charid]
             with open('data.json', 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
         else:
             msg = QMessageBox()
             msg.setStyleSheet(self.styleSheet())
-            if pre == True:
-                msg.setWindowTitle(tr("CharEditor", "error") + build)
-            else:
-                msg.setWindowTitle(tr("CharEditor", "error"))
+            msg.setWindowTitle(tr("CharEditor", "error"))
             msg.setWindowIcon(QIcon(emiliaicon))
             text = tr("CharEditor", "notavchar")
             msg.setText(text)
@@ -1007,7 +1065,7 @@ class EmiliaAuth(QWidget):
             msg.setStyleSheet(self.styleSheet())
             msg.setWindowTitle(tr("Errors", "Label"))
             msg.setWindowIcon(QIcon(emiliaicon))
-            text = tr("Errors", "other") + e
+            text = tr("Errors", "other") + str(e)
             msg.setText(text)
             msg.exec()
 
@@ -1089,7 +1147,7 @@ class Emilia(QMainWindow):
 
             self.char_entry = QLineEdit()
             self.char_entry.setPlaceholderText("ID...")
-            self.char_entry.textChanged.connect(lambda: writeconfig("char", self.char_entry.text(), "charaiconfig.json"))
+            self.char_entry.textChanged.connect(lambda: writeconfig("char", self.char_entry.text().replace("https://character.ai/chat/", ""), "charaiconfig.json"))
             self.char_entry.setText(getconfig('char', configfile='charaiconfig.json'))
 
             self.client_label = QLabel(tr("MainWindow", "charactertoken"))
@@ -1106,15 +1164,21 @@ class Emilia(QMainWindow):
             hlayout.addWidget(self.client_entry)
         self.layout.addLayout(hlayout)
 
-        self.speaker_layout = QHBoxLayout()
-        self.speaker_label = QLabel(tr("MainWindow", "voice"))
-        self.speaker_entry = QLineEdit()
-        self.speaker_entry.textChanged.connect(lambda: writeconfig("speaker", self.speaker_entry.text()))
-        self.speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
-        self.speaker_entry.setToolTip(tr("MainWindow", "voices"))
-        self.speaker_entry.setText(getconfig('speaker'))
-        self.speaker_layout.addWidget(self.speaker_label)
-        self.speaker_layout.addWidget(self.speaker_entry)
+        self.voice_layout = QHBoxLayout()
+        self.voice_entry = QLineEdit()
+        self.voice_label = QLabel()
+        if tts == "silerotts":
+            self.voice_label.setText(tr("MainWindow", "voice"))
+            self.voice_entry.setToolTip(tr("MainWindow", "voices"))
+            self.voice_entry.setPlaceholderText(tr("MainWindow", "voices"))
+            self.voice_entry.textChanged.connect(lambda: writeconfig("speaker", self.voice_entry.text()))
+            self.voice_entry.setText(getconfig('speaker'))
+        elif tts == "charai":
+            self.voice_label.setText(tr("MainWindow", "voiceid"))
+            self.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.voice_entry.text().replace("https://character.ai/?voiceId=", ""), "charaiconfig.json"))
+            self.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
+        self.voice_layout.addWidget(self.voice_label)
+        self.voice_layout.addWidget(self.voice_entry)
 
         self.microphone = ""
         self.selected_device_index = ""
@@ -1143,7 +1207,7 @@ class Emilia(QMainWindow):
         self.ai_output = QLabel("")
         self.ai_output.setWordWrap(True)
 
-        self.layout.addLayout(self.speaker_layout)
+        self.layout.addLayout(self.voice_layout)
         self.layout.addWidget(self.vstart_button)
         self.layout.addWidget(self.user_aiinput)
         self.layout.addWidget(self.tstart_button)
@@ -1217,8 +1281,8 @@ class Emilia(QMainWindow):
         self.emi_menu.addAction(self.visiblevoicemode)
         self.emi_menu.addAction(self.optionsopenaction)
         self.emi_menu.addAction(self.aboutemi)
-        self.emi_menu.addMenu(self.outputdeviceselect)
         self.emi_menu.addMenu(self.inputdeviceselect)
+        self.emi_menu.addMenu(self.outputdeviceselect)
 
     def optionsopen(self):
         window = OptionsWindow(self)
@@ -1228,11 +1292,11 @@ class Emilia(QMainWindow):
         if os.path.exists('config.json'):
             def open_json(char, speaker):
                 self.char_entry.setText(char)
-                self.speaker_entry.setText(speaker)
+                self.voice_entry.setText(speaker)
             def create_action(key, value):
                 def action_func():
                     open_json(value['char'], value['voice'])
-                action = QAction(f'&{key}', self)
+                action = QAction(value['name'], self)
                 action.triggered.connect(action_func)
                 return action
             try:
@@ -1350,11 +1414,43 @@ class Emilia(QMainWindow):
         model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
         model.to(torch.device(torchdevice))
         audio = model.apply_tts(text=text,
-                                speaker=self.speaker_entry.text(),
+                                speaker=self.voice_entry.text(),
                                 sample_rate=sample_rate,
                                 put_accent=put_accent,
                                 put_yo=put_yo)
         return audio
+    
+    async def charai_tts(self, message):
+        data = {
+            'candidateId': re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1),
+            'roomId': message.turn_key.chat_id,
+            'turnId': message.turn_key.turn_id,
+            'voiceId': self.voice_entry.text().replace("https://character.ai/chat/", ""),
+            'voiceQuery': message.name
+        }
+        headers = {
+                "Content-Type": 'application/json',
+                "Authorization": f'Token {self.client_entry.text()}'
+            }
+        response = requests.post('https://neo.character.ai/multimodal/api/v1/memo/replay', data=json.dumps(data), headers=headers)
+        if response.status_code == 200:
+            voice = response.json()
+            link = voice["replayUrl"]
+            download = requests.get(link, stream=True)
+            if download.status_code == 200:
+                audio_bytes = io.BytesIO(download.content)
+                audio_array, samplerate = sf.read(audio_bytes)
+                return audio_array, samplerate
+        else:
+            print("Character.AI TTS Error\nUsing SileroTTS with random voice")
+            model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
+            model.to(torch.device(torchdevice))
+            audio = model.apply_tts(text=message.text,
+                                    speaker="random",
+                                    sample_rate=sample_rate,
+                                    put_accent=put_accent,
+                                    put_yo=put_yo)
+            return audio, sample_rate
 
     def numbers_to_words(self, text):
         try:
@@ -1367,11 +1463,12 @@ class Emilia(QMainWindow):
 
     async def main(self):
         vtubeenable = getconfig('vtubeenable', "False")
+        tts = getconfig('tts', 'silerotts')
         self.layout.addWidget(self.user_input)
         self.layout.addWidget(self.ai_output)
         if aitype == "charai":
             token = aiocai.Client(self.client_entry.text())
-            character = self.char_entry.text()
+            character = self.char_entry.text().replace("https://character.ai/chat/", "")
             Account = await token.get_me()
             try:
                 chatid = await token.get_chat(character)
@@ -1391,17 +1488,18 @@ class Emilia(QMainWindow):
                 await EEC().UseEmote("Listening")
             recognizer = sr.Recognizer()
             self.user_input.setText(username + tr("Main", "speakup"))
-            if self.microphone != "":
-                with self.microphone as source:
-                    audio = recognizer.listen(source)
-            else:
-                with sr.Microphone() as source:
-                    audio = recognizer.listen(source)
-            try:
-                msg1 = recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
-            except sr.UnknownValueError:
-                self.user_input.setText(username + tr("Main", "sayagain"))
-                continue
+            while True:
+                if self.microphone != "":
+                    with self.microphone as source:
+                        audio = recognizer.listen(source)
+                else:
+                    with sr.Microphone() as source:
+                        audio = recognizer.listen(source)
+                try:
+                    msg1 = recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
+                    break
+                except sr.UnknownValueError:
+                    self.user_input.setText(username + tr("Main", "sayagain"))
             self.user_input.setText(username + msg1)
             self.ai_output.setText(ai + tr("Main", "emigen"))
             if vtubeenable == "True":
@@ -1426,14 +1524,17 @@ class Emilia(QMainWindow):
             if vtubeenable == "True":
                 await EEC().UseEmote("Says")
             try:
-                audio = self.silero_tts(nums)
+                if tts == 'charai' and aitype == 'charai':
+                    audio, sample_rate = await self.charai_tts(messagenotext)
+                else:
+                    audio = self.silero_tts(nums)
                 device = list(self.unique_devices.values())[
                     self.selected_device_index] if self.selected_device_index != "" else None
                 sd.play(audio, sample_rate, device=device["index"] if device else None)
                 time.sleep(len(audio - 5) / sample_rate)
                 sd.stop()
             except Exception as e:
-                print(tr('Errors', 'other') + e)
+                print(tr('Errors', 'other') + str(e))
                 continue
             if vtubeenable == "True":
                 await EEC().UseEmote("AfterSays")
@@ -1446,7 +1547,7 @@ class Emilia(QMainWindow):
             self.layout.addWidget(self.ai_output)
             if aitype == "charai":
                 token = aiocai.Client(self.client_entry.text())
-                character = self.char_entry.text()
+                character = self.char_entry.text().replace("https://character.ai/chat/", "")
                 try:
                     chatid = await token.get_chat(character)
                 except:
@@ -1479,7 +1580,6 @@ class Emilia(QMainWindow):
             nums = self.numbers_to_words(translation.text)
             if vtubeenable == "True":
                 await EEC().UseEmote("VoiceGen")
-            audio = self.silero_tts(nums)
             self.ai_output.setText(ai + translation.text)
             if vtubeenable == "True":
                 await EEC().UseEmote("Says")
@@ -1491,12 +1591,13 @@ class Emilia(QMainWindow):
                 time.sleep(len(audio - 5) / sample_rate)
                 sd.stop()
             except Exception as e:
-                print(tr('Errors', 'other') + e)
+                print(tr('Errors', 'other') + str(e))
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
 
     def start_main(self, mode):
-        if self.speaker_entry == "":
+        if self.voice_entry.text() == "" and tts != 'charai':
+            self.ai_output.setVisible(True)
             self.ai_output.setText(tr("Errors", "nonvoice"))
         else:
             if mode == "voice":
@@ -1509,27 +1610,15 @@ class Emilia(QMainWindow):
                 elif aitype == 'gemini':
                     self.token_entry.setVisible(False)
                     self.token_label.setVisible(False)
-                self.speaker_label.setVisible(False)
-                self.speaker_entry.setVisible(False)
+                self.voice_label.setVisible(False)
+                self.voice_entry.setVisible(False)
                 self.vstart_button.setVisible(False)
                 self.tstart_button.setVisible(False)
                 self.user_aiinput.setVisible(False)
                 self.menubar.setVisible(False)
                 self.user_input.setVisible(True)
-                self.ai_output.setVisible(True)
             elif mode == "text":
                 threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
-
-    def charsetupconfig(self):
-        writeconfig('char', self.char_entry.text(), 'charaiconfig.json')
-        writeconfig('client', self.client_entry.text(), 'charaiconfig.json')
-        writeconfig('speaker', self.speaker_entry.text())
-
-    def geminisetupconfig(self):
-        token = self.token_entry.text()
-        writeconfig('token', token, 'geminiconfig.json')
-        writeconfig('speaker', self.speaker_entry.text())
-        genai.configure(api_key=token)
 
 if __name__ == "__main__":
     if autoupdate_enable != "False":

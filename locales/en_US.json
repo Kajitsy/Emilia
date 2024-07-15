@@ -13,6 +13,7 @@
       "gemini_button": "Google Gemini",
       "usevtubemodel": "Use VTube model",
       "enableautoupdate": "Enable automatic updates",
+      "ShowMoreFeatures": "Pay attention to the additional functions of Emilia",
       "ready_button": "Ready!",
       "relaunch_button": "Relaunch!"
     },
@@ -20,17 +21,18 @@
       "start": "Start",
       "starttext": "Start in Text Mode",
       "textmodeinput": "Before pressing the button below...",
-      "geminitoken": "Gemini Token:",
-      "charactertoken": "Client Token:",
-      "characterid": "Character ID:",
+      "geminitoken": "Gemini Token",
+      "charactertoken": "Client Token",
+      "characterid": "Character ID",
       "token": "Token...",
       "voice": "Voice:",
+      "voiceid": "Voice ID",
+      "voiceidtooltip": "You can leave it empty,\nThe built-in voice of the character will be used",
       "voices": "en_0, en_1, ..., en_117 or random",
       "gettoken": "&Get Token",
       "usetextmode": "&Use Text Mode",
       "butemptyhere": "But it's empty here",
       "usevoicemode": "&Use Voice Mode",
-      "devicesselector": "&Device Selection",
       "noncriterror": "An error has occurred, but the code can continue ",
       "criterror": "An error has occurred, the code cannot continue ",
       "inputdevice": "Input device",
@@ -45,7 +47,7 @@
       "aboutemi": "About Emilia ",
       "languagefrom": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
       "newin": "<br><br>New in ",
-      "whatsnew": ": <br>• First launch screen, simple initial setup ^_^<br>• Automatic updates, well, it's clear by name, but you can disable them if you want<br>• Emilia: Options, most of the settings have been moved here<br>• VTube Model, better read <a href='https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8'здесь</a><br>• The Character.AI token receipt windows and the Character Editor are now QWidget, which should speed up their opening<br>• New windows11 theme, available of course only on Windows 11 and above<br>• And well, a bunch of corrections, additions and other things \n",
+      "whatsnew": ": <br>• Now you can use voices from Character.AI, the change is in the parameters (In the future it will appear in <a href='https://github.com/jofizcd/Soul-of-Waifu'> Soul of Waifu</a>) <br>• You can insert links to characters, without having to copy something special there <br>• Various fixes and visual fixes of course",
       "viewallreleases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
       "emiopenproject": "Emilia is an open source project that allows you to talk to your favorite Waifu.<br> At the moment you are using the ",
       "usever": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
@@ -69,14 +71,22 @@
       "addchar": "Add a character",
       "delchar": "Delete a character",
       "error": "ERROR ",
-      "notavchar": "Your character is not in the code"
+      "notavchar": "Your character is not in the code",
+      "yourchar": "Your character by name ",
+      "withid": " with id ",
+      "withvoice": " and voice ",
+      "added": " successfully added!",
+      "characteradded": "Character added!"
     },    
     "AutoUpdate": {
       "upgradeto": "Upgrade to Build",
       "emiliaupdated": "Emilia updated to Build"
     },
     "OptionsWindow": {
+      "ttsselect": "Select TTS",
+      "charaivoices": "Character.AI Voices",
       "torchdeviceselect": "Voice generation device",
+      "torchdeviceselectnotavalable": "The setting is not available because TTS is not Silero TTS",
       "aitypechange": "Select AI",
       "languagechange": "Select language",
       "langselEN": "English",
@@ -89,8 +99,6 @@
       "pickbackgroundcolor": "Pick background color",
       "picktextcolor": "Pick text color",
       "button": "Button Colors",
-      "pickbuttonbackgroundcolor": "Pick background color",
-      "pickbuttontextcolor": "Pick text color",
       "reset": "Reset"
     },
     "Errors": {
@@ -101,6 +109,5 @@
         "UpdateCheckError": "Error checking for updates:",
         "UpdateDownloadError": "Error downloading update:",
         "BadZipFile": "Error when unpacking archive:"
-
       }
-  }
+}
