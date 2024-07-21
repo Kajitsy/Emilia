@@ -33,7 +33,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.1"
-build = "20240717"
+build = "20240721"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -41,16 +41,16 @@ put_accent = True
 put_yo = True
 
 def writeconfig(variable, value, configfile = 'config.json'):
-        try:
-            with open(configfile, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        data.update({variable: value})
-        with open(configfile, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+    try:
+        with open(configfile, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = {}
+    except json.JSONDecodeError:
+         data = {}
+    data.update({variable: value})
+    with open(configfile, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 def getconfig(value, def_value = "", configfile = 'config.json'):
     if os.path.exists(configfile):
@@ -542,7 +542,7 @@ class OptionsWindow(QWidget):
             self.mainwindow.voice_entry.setToolTip("")
             self.mainwindow.voice_entry.setPlaceholderText("")
             self.mainwindow.voice_entry.textChanged.disconnect()
-            self.mainwindow.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.mainwindow.partrm("https://character.ai/?voiceId=", self.mainwindow.voice_entry.text()), "charaiconfig.json"))
+            self.mainwindow.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.mainwindow.voice_entry.text().replace("https://character.ai/?voiceId=", ""), "charaiconfig.json"))
             self.mainwindow.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
         writeconfig('tts', tts)
 
@@ -1089,7 +1089,7 @@ class NewCharacterEditor(QWidget):
         if response.status_code == 200:
             jsn = response.json()
             character = jsn.get('character', {})            
-            return character.get('name', 'N/A'), character.get('description', 'N/A'), character.get('user__username', 'N/A'),character.get('avatar_file_name', 'N/A')
+            return character.get('name', 'No Name'), character.get('description', 'No description'), character.get('user__username', 'Unknown'),character.get('avatar_file_name', '')
 
     def set_background_color(self, color):
         current_style_sheet = self.styleSheet()
@@ -1178,20 +1178,34 @@ class CharacterSearch(QWidget):
         self.network_layout.addLayout(network_details_layout)
 
         self.network_addnovoice_button = QPushButton('Add without voice')
-        self.network_addnovoice_button.clicked.connect(self.addcharnovoice)
+        self.network_addnovoice_button.clicked.connect(self.add_without_voice)
         self.network_addnovoice_button.setEnabled(False)
 
         self.network_addvoice_button = QPushButton('Search Voice')
-        self.network_addvoice_button.clicked.connect(self.addcharvoice)
+        self.network_addvoice_button.clicked.connect(self.add_with_voice)
         self.network_addvoice_button.setEnabled(False)
 
         self.network_add_button = QPushButton('Add another characher')
         self.network_add_button.clicked.connect(self.open_NewCharacherEditor)
 
+        self.network_speaker_entry = QLineEdit()
+        self.network_speaker_entry.textChanged.connect(self.speaker_entry)
+        self.network_speaker_entry.setToolTip(tr("MainWindow", "voices"))
+        self.network_speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
+        self.network_speaker_entry.setEnabled(False)
+
+        self.network_spadd_button = QPushButton('Add characher')
+        self.network_spadd_button.clicked.connect(self.add_without_voice)
+        self.network_spadd_button.setEnabled(False)
+
         self.network_buttons_layout = QVBoxLayout()
         self.network_buttons_layout.addWidget(self.network_add_button)
-        self.network_buttons_layout.addWidget(self.network_addvoice_button)
-        self.network_buttons_layout.addWidget(self.network_addnovoice_button)
+        if self.tts == 'charai':
+            self.network_buttons_layout.addWidget(self.network_addvoice_button)
+            self.network_buttons_layout.addWidget(self.network_addnovoice_button)
+        else:
+            self.network_buttons_layout.addWidget(self.network_speaker_entry)
+            self.network_buttons_layout.addWidget(self.network_spadd_button)
 
         self.network_layout.addLayout(self.network_buttons_layout)
 
@@ -1212,42 +1226,56 @@ class CharacterSearch(QWidget):
         local_details_layout.addWidget(self.local_image_label, alignment=Qt.AlignmentFlag.AlignTop)
         local_details_layout.addWidget(self.local_details_label)
 
+        self.local_buttons_layout = QHBoxLayout()
         self.local_layout.addLayout(local_details_layout)
 
-
-        self.local_select_button = QPushButton('Select')
-        self.local_select_button.clicked.connect(self.locel_select_char)
-        self.local_select_button.setEnabled(False)
-
-        self.local_delete_button = QPushButton('Delete')
-        self.local_delete_button.clicked.connect(self.delchar)
-        self.local_delete_button.setEnabled(False)
-
-        self.local_add_voice_button = QPushButton('Add Voice')
-        self.local_add_voice_button.clicked.connect(self.local_add_char_voice)
-        self.local_add_voice_button.setEnabled(False)
-
-        self.local_delete_voice_button = QPushButton('Delete Voice')
-        self.local_delete_voice_button.clicked.connect(self.delcharvoice)
-        self.local_delete_voice_button.setEnabled(False)
-
-        self.local_edit_voice_button = QPushButton('Edit Voice')
-        self.local_edit_voice_button.clicked.connect(self.local_add_char_voice)
-        self.local_edit_voice_button.setEnabled(False)
-
-        self.local_buttons_layout = QHBoxLayout()
         self.local_sel_del_buttons_layout = QVBoxLayout()
         self.local_buttons_layout.addLayout(self.local_sel_del_buttons_layout)
+
+        self.local_select_button = QPushButton('Select')
+        self.local_select_button.clicked.connect(self.local_select_char)
+        self.local_select_button.setEnabled(False)
         self.local_sel_del_buttons_layout.addWidget(self.local_select_button)
+
+        self.local_delete_button = QPushButton('Delete')
+        self.local_delete_button.clicked.connect(self.local_delete_character)
+        self.local_delete_button.setEnabled(False)
         self.local_sel_del_buttons_layout.addWidget(self.local_delete_button)
+
         self.local_voice_buttons_layout = QVBoxLayout()
         self.local_buttons_layout.addLayout(self.local_voice_buttons_layout)
-        self.local_sel_del_voice_buttons_layout = QHBoxLayout()
-        self.local_voice_buttons_layout.addWidget(self.local_edit_voice_button)
-        self.local_voice_buttons_layout.addLayout(self.local_sel_del_voice_buttons_layout)
-        self.local_sel_del_voice_buttons_layout.addWidget(self.local_add_voice_button)
-        self.local_sel_del_voice_buttons_layout.addWidget(self.local_delete_voice_button)
+        if self.tts == 'charai':
+            self.local_sel_del_voice_buttons_layout = QHBoxLayout()
+            self.local_voice_buttons_layout.addLayout(self.local_sel_del_voice_buttons_layout)
 
+            self.local_edit_voice_button = QPushButton('Edit Voice')
+            self.local_edit_voice_button.clicked.connect(self.local_add_char_voice)
+            self.local_edit_voice_button.setEnabled(False)
+            self.local_voice_buttons_layout.addWidget(self.local_edit_voice_button)
+
+            self.local_add_voice_button = QPushButton('Add Voice')
+            self.local_add_voice_button.clicked.connect(self.local_add_char_voice)
+            self.local_add_voice_button.setEnabled(False)
+            self.local_sel_del_voice_buttons_layout.addWidget(self.local_add_voice_button)
+
+            self.local_delete_voice_button = QPushButton('Delete Voice')
+            self.local_delete_voice_button.clicked.connect(self.local_delete_voice)
+            self.local_delete_voice_button.setEnabled(False)
+            self.local_sel_del_voice_buttons_layout.addWidget(self.local_delete_voice_button)
+        else:
+            self.local_speaker_entry = QLineEdit()
+            self.local_speaker_entry.setFixedWidth(300)
+            self.local_speaker_entry.textChanged.connect(self.speaker_entry)
+            self.local_speaker_entry.setToolTip(tr("MainWindow", "voices"))
+            self.local_speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
+            self.local_speaker_entry.setEnabled(False)
+            self.local_voice_buttons_layout.addWidget(self.local_speaker_entry)
+
+            self.local_set_voice_button = QPushButton('Set Voice')
+            self.local_set_voice_button.clicked.connect(self.local_set_voice)
+            self.local_set_voice_button.setEnabled(False)
+            self.local_voice_buttons_layout.addWidget(self.local_set_voice_button)
+        
         self.local_layout.addLayout(self.local_buttons_layout)
 
         self.tab_widget.addTab(self.network_tab, "Search New Characters")
@@ -1272,73 +1300,107 @@ class CharacterSearch(QWidget):
 
         self.load_local_data()
 
+
+    def speaker_entry(self):
+        if self.network_speaker_entry.text() == "":
+            self.network_spadd_button.setEnabled(False)
+        elif self.network_speaker_entry.text() != "":
+            self.network_spadd_button.setEnabled(True)
+
+        if self.local_speaker_entry.text() == "":
+            self.local_set_voice_button.setEnabled(False)
+        elif self.local_speaker_entry.text() != "":
+            self.local_set_voice_button.setEnabled(True)
+
     def open_NewCharacherEditor(self):
         window = NewCharacterEditor()
         window.show()
         self.close()
 
-    def delchar(self):
-        if hasattr(self, 'current_local_data'):
-            char_id = self.current_local_data.get('char', 'No ID')
-            if char_id in self.local_data:
-                del self.local_data[char_id]
-                self.save_local_data()
-                self.load_local_data()
-            else:
-                msg = QMessageBox()
-                msg.setStyleSheet(self.styleSheet())
-                msg.setWindowTitle("Error")
-                msg.setWindowIcon(QIcon("emiliaicon"))
-                msg.setText("Character not found in local data.")
-                msg.exec()
+    def local_delete_character(self):
+        char_id = self.current_local_data.get('char', 'No ID')
+        if char_id in self.local_data:
+            del self.local_data[char_id]
+            self.save_local_data()
+            self.load_local_data()
+            self.populate_local_list()
         else:
             msg = QMessageBox()
             msg.setStyleSheet(self.styleSheet())
             msg.setWindowTitle("Error")
-            msg.setWindowIcon(QIcon("emiliaicon"))
-            msg.setText("No character selected.")
+            msg.setWindowIcon(QIcon(emiliaicon))
+            msg.setText("Character not found in local data.")
             msg.exec()
 
-    def delcharvoice(self):
-        if hasattr(self, 'current_local_data'):
-            char_id = self.current_local_data.get('char', 'No ID')
-            if char_id in self.local_data:
-                if 'voiceid' in self.local_data[char_id]:
-                    del self.local_data[char_id]['voiceid']
-                self.save_local_data()
-                self.load_local_data()
-            else:
-                msg = QMessageBox()
-                msg.setStyleSheet(self.styleSheet())
-                msg.setWindowTitle("Error")
-                msg.setWindowIcon(QIcon("emiliaicon"))
-                msg.setText("Character not found in local data.")
-                msg.exec()
+    def local_delete_voice(self):
+        char_id = self.current_local_data.get('char', 'No ID')
+        if char_id in self.local_data:
+            if 'voiceid' in self.local_data[char_id]:
+                del self.local_data[char_id]['voiceid']
+            self.save_local_data()
+            self.load_local_data()
+            charid = self.current_local_data.get('char', 'No ID')
+            name = self.current_local_data.get('name', 'No Name')
+            author = self.current_local_data.get('author', 'Unknown')
+            description = self.current_local_data.get('description', 'No Description')
+            self.local_details_label.setText(f"<b>{name}</b> by {author}<br>{description}<br>ID: {charid}<br>Voice ID: No Voice ID")
         else:
             msg = QMessageBox()
             msg.setStyleSheet(self.styleSheet())
             msg.setWindowTitle("Error")
-            msg.setWindowIcon(QIcon("emiliaicon"))
-            msg.setText("No character selected.")
+            msg.setWindowIcon(QIcon(emiliaicon))
+            msg.setText("Character not found in local data.")
             msg.exec()
 
     def local_add_char_voice(self):
         self.close()
         VoiceSearch(local_data=self.current_local_data).show()
 
-    def save_local_data(self):
-        with open('data.json', 'w', encoding='utf-8') as f:
-            json.dump(self.local_data, f, ensure_ascii=False, indent=4)
-
-    def locel_select_char(self):
+    def local_select_char(self):
         self.main_window.char_entry.setText(self.current_local_data.get('char', ''))
-        if self.tts == "silerotts":
-            self.main_window.voice_entry.setText(self.current_local_data.get('voice', ''))
-        elif self.tts == 'charai':
+        if self.tts == "charai":
             self.main_window.voice_entry.setText(self.current_local_data.get('voiceid', ''))
+        else:
+            self.main_window.voice_entry.setText(self.current_local_data.get('voice', ''))
         self.close()
 
-    def addcharnovoice(self):
+    def local_set_voice(self):
+        try:
+            with open('data.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError:
+             data = {}
+
+        charid = self.current_local_data.get('char', 'No ID')
+        name = self.current_local_data.get('name', 'No Name')
+        author = self.current_local_data.get('author', 'Unknown')
+        avatar_url = self.current_local_data.get('avatar_url', '')
+        description = self.current_local_data.get('description', 'No Description')
+        voiceid = self.current_local_data.get('voiceid', 'No Voice ID')
+        title = self.current_local_data.get('title', 'None')
+
+
+        if voiceid != 'No Voice ID':
+            data.update({charid: {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voice": self.local_speaker_entry.text(), "voiceid": voiceid}})
+        else:
+            data.update({charid: {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voice": self.local_speaker_entry.text()}})
+
+        with open('data.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+        self.local_details_label.setText(f"<b>{name}</b> by {author}<br>{description}<br>ID: {charid}<br>Voice: {self.local_speaker_entry.text()}")
+
+        msg = QMessageBox()
+        msg.setWindowTitle("Oh")
+        msg.setStyleSheet(self.styleSheet())
+        msg.setWindowIcon(QIcon(emiliaicon))
+        text = "The character has been successfully edited"
+        msg.setText(text)
+        msg.exec()
+
+    def add_without_voice(self):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -1347,10 +1409,16 @@ class CharacterSearch(QWidget):
 
         charid = self.current_network_data.get('external_id', 'No ID')
         name = self.current_network_data.get('participant__name', 'No Name')
-        author = data.get('user__username', 'Unknown')
-        description = data.get('description', 'No Description')
-        data[charid] = {"name": name, "char": charid, "description": description, "author": author}
-        
+        author = self.current_network_data.get('user__username', 'Unknown')
+        avatar_url = self.current_network_data.get('avatar_file_name', '')
+        description = self.current_network_data.get('description', 'No Description')
+        title = self.current_network_data.get('title', 'None')
+
+        if self.tts == "charai":
+            data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author}
+        else:
+            data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voice": self.network_speaker_entry.text()}
+
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         msg = QMessageBox()
@@ -1362,7 +1430,7 @@ class CharacterSearch(QWidget):
         msg.exec()
         self.close()
 
-    def addcharvoice(self):
+    def add_with_voice(self):
         try:
             with open('data.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -1371,9 +1439,11 @@ class CharacterSearch(QWidget):
 
         charid = self.current_network_data.get('external_id', 'No ID')
         name = self.current_network_data.get('participant__name', 'No Name')
-        author = data.get('user__username', 'Unknown')
-        description = data.get('description', 'No Description')
-        data[charid] = {"name": name, "char": charid, "description": description, "author": author}
+        author = self.current_network_data.get('user__username', 'Unknown')
+        avatar_url = self.current_network_data.get('avatar_file_name', '')
+        description = self.current_network_data.get('description', 'No Description')
+        title = self.current_network_data.get('title', 'None')
+        data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author}
 
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -1381,34 +1451,24 @@ class CharacterSearch(QWidget):
         self.close()
         VoiceSearch(network_data=self.current_network_data).show()
 
-    def on_tab_changed(self, index):
-        if index == 1:
-            self.populate_local_list()
 
     def populate_network_list(self):
         self.network_list_widget.clear()
         if not self.network_data or not isinstance(self.network_data, list):
             return
-        for item in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
-            name = item.get('participant__name', 'No Name')
-            title = item.get('title', '')
-            list_item = QListWidgetItem(f'{name} - {title}')
-            list_item.setData(1, item)
+        threads = []
+        for data in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
+            name = data.get('participant__name', 'No Name')
+            title = data.get('title', 'None')
+            chats = data.get('score', '0')
+            author = data.get('user__username', 'Unknown')
+            if title == 'None' or title == '':
+                list_item = QListWidgetItem(f'{name}\n{chats} chats • By {author}')
+            else:
+                list_item = QListWidgetItem(f'{name} - {title}\n{chats} chats • By {author}')
+            list_item.setData(1, data)
             self.network_list_widget.addItem(list_item)
         self.network_add_button.setVisible(False)
-
-    def display_network_details(self, item):
-        data = item.data(1)
-        self.current_network_data = data
-        self.network_details_label.setText(f"<b>{data.get('participant__name', 'No Name')}</b> by {data.get('user__username', 'Unknown')}<br>{data.get('description', 'No Description')}")
-        self.network_addnovoice_button.setEnabled(True)
-        self.network_addvoice_button.setEnabled(True)
-
-        avatar_url = data.get('avatar_file_name', '')
-        if avatar_url:
-            self.load_image_async(f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0", self.network_image_label)
-        else:
-            self.network_image_label.clear()
 
     def populate_local_list(self):
         self.local_list_widget.clear()
@@ -1416,39 +1476,66 @@ class CharacterSearch(QWidget):
             return
         for charid, char_data in self.local_data.items():
             name = char_data.get('name', 'No Name')
-            list_item = QListWidgetItem(f'{name}')
+            title = char_data.get('title', 'None')
+            author = char_data.get('author', 'Unknown')
+            if title == 'None' or title == '':
+                list_item = QListWidgetItem(f'{name}')
+            else:
+                list_item = QListWidgetItem(f'{name} - {title}')
             list_item.setData(1, char_data)
             self.local_list_widget.addItem(list_item)
+
+    def display_network_details(self, item):
+        data = item.data(1)
+        self.current_network_data = data
+        self.network_details_label.setText(f"<b>{data.get('participant__name', 'No Name')}</b> • By {data.get('user__username', 'Unknown')}<br>{data.get('description', 'No Description')}")
+        self.network_addnovoice_button.setEnabled(True)
+        self.network_addvoice_button.setEnabled(True)
+        self.network_speaker_entry.setEnabled(True)
+
+        avatar_url = data.get('avatar_file_name', '')
+        if avatar_url:
+            self.load_image_async(f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0", self.network_image_label)
+        else:
+            self.network_image_label.clear()
 
     def display_local_details(self, item):
         data = item.data(1)
         self.current_local_data = data
-        voice = data.get('voiceid', 'No Voice ID')
-        self.local_details_label.setText(f"<b>{data.get('name', 'No Name')}</b> by {data.get('author', 'Unknown')}<br>{data.get('description', 'No Description')}<br>ID: {data.get('char', 'No ID')}<br>Voice ID: {voice}")
+        voiceid = data.get('voiceid', 'No Voice ID')
+        voice = data.get('voice', 'No Voice')
+        if self.tts == 'charai':
+            self.local_details_label.setText(f"<b>{data.get('name', 'No Name')}</b> • By {data.get('author', 'Unknown')}<br>{data.get('description', 'No Description')}<br>ID: {data.get('char', 'No ID')}<br>Voice ID: {voiceid}")
+            if voiceid == 'No Voice ID':
+                self.local_add_voice_button.setEnabled(True)
+                self.local_edit_voice_button.setEnabled(False)
+                self.local_delete_voice_button.setEnabled(False)
+            else:
+                self.local_add_voice_button.setEnabled(False)
+                self.local_edit_voice_button.setEnabled(True)
+                self.local_delete_voice_button.setEnabled(True)
+        else:
+            self.local_details_label.setText(f"<b>{data.get('name', 'No Name')}</b> • By {data.get('author', 'Unknown')}<br>{data.get('description', 'No Description')}<br>ID: {data.get('char', 'No ID')}<br>Voice: {voice}")
+            self.local_speaker_entry.setEnabled(True)
+            self.local_set_voice_button.setEnabled(True)
         self.local_select_button.setEnabled(True)
         self.local_delete_button.setEnabled(True)
-        if voice == 'No Voice ID':
-            self.local_add_voice_button.setEnabled(True)
-            self.local_edit_voice_button.setEnabled(False)
-            self.local_delete_voice_button.setEnabled(False)
+
+
+        avatar_url = data.get('avatar_url', '')
+        if avatar_url:
+            self.load_image_async(f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0", self.local_image_label)
         else:
-            self.local_add_voice_button.setEnabled(False)
-            self.local_edit_voice_button.setEnabled(True)
-            self.local_delete_voice_button.setEnabled(True)
-        self.local_image_label.clear()
+            self.local_image_label.clear()
+
+    def on_tab_changed(self, index):
+        if index == 1:
+            self.populate_local_list()
 
     def load_image_async(self, url, label):
         self.image_loader_thread = ImageLoaderThread(url)
         self.image_loader_thread.image_loaded.connect(label.setPixmap)
         self.image_loader_thread.start()
-
-    def print_network_id(self):
-        if hasattr(self, 'current_network_data'):
-            print(f"Selected Network ID: {self.current_network_data.get('external_id', 'No ID')}")
-
-    def print_local_id(self):
-        if hasattr(self, 'current_local_data'):
-            print(f"Selected Local ID: {self.current_local_data.get('char', 'No ID')}")
 
     def search_and_load(self):
         search_query = self.network_search_input.text().strip()
@@ -1472,6 +1559,10 @@ class CharacterSearch(QWidget):
                 self.local_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self.local_data = {}
+
+    def save_local_data(self):
+        with open('data.json', 'w', encoding='utf-8') as f:
+            json.dump(self.local_data, f, ensure_ascii=False, indent=4)
 
     def set_background_color(self, color):
         current_style_sheet = self.styleSheet()
@@ -1566,14 +1657,18 @@ class VoiceSearch(QWidget):
     def populate_list(self):
         self.list_widget.clear()
         for item in self.data['voices']:
-            list_item = QListWidgetItem(f"{item['name']} - {item['description']}")
+            description = item['description']
+            if description == "":
+                list_item = QListWidgetItem(f"{item['name']} • By {item['creatorInfo']['username']}")
+            else:
+                list_item = QListWidgetItem(f"{item['name']} - {description}\n• By {item['creatorInfo']['username']}")
             list_item.setData(1, item)
             self.list_widget.addItem(list_item)
 
     def display_details(self, item):
         data = item.data(1)
         self.current_data = data
-        self.details_label.setText(f"<b>{data['name']}</b><br>{data['description']}")
+        self.details_label.setText(f"<b>{data['name']}</b> • By {data['creatorInfo']['username']}<br>{data['description']}")
         self.preview_text_label.setText(f"An example phrase: {data['previewText']}")
         self.current_audio_uri = data['previewAudioURI']
         self.play_button.setEnabled(True)
@@ -1587,8 +1682,6 @@ class VoiceSearch(QWidget):
                     audio_bytes = io.BytesIO(response.content)
                     audio_array, samplerate = sf.read(audio_bytes)
                     sd.play(audio_array, samplerate)
-                    time.sleep(len(audio_array - 5) / samplerate)
-                    sd.stop()
             except Exception as e:
                 print(f"Error loading and playing audio: {e}")
 
@@ -1623,22 +1716,34 @@ class VoiceSearch(QWidget):
         if self.network_data == "":
             charid = self.local_data.get('char', 'No ID')
             name = self.local_data.get('name', 'No Name')
+            avatar_url = self.local_data.get("avatar_url", '')
             author = self.local_data.get('author', 'Unknown')
             description = self.local_data.get('description', 'No Description')
+            title = self.local_data.get('title', '')
+            voice = self.local_data.get('voice', '')
+            text = "The character has been successfully edited"
+            if voice == '':
+                data.update({charid: {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voiceid": self.current_data['id']}})
+            else:
+                data.update({charid: {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voice": voice, "voiceid": self.current_data['id']}})
         else:
             charid = self.network_data.get('external_id', 'No ID')
             name = self.network_data.get('participant__name', 'No Name')
+            avatar_url = self.network_data.get('avatar_file_name', '')
             author = self.network_data.get('user__username', 'Unknown')
             description = self.network_data.get('description', 'No Description')
-        data[charid] = {"name": name, "char": charid, "description": description, "author": author}
-        data.update({charid: {"name": name, "char": charid, "description": description, "author": author, "voiceid": self.current_data['id']}})
+            title = self.network_data.get('title', 'None')
+            text = "The character has been successfully added"
+            data.update({charid: {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voiceid": self.current_data['id']}})
+            
+
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+
         msg = QMessageBox()
         msg.setWindowTitle("Oh")
         msg.setStyleSheet(self.styleSheet())
         msg.setWindowIcon(QIcon(emiliaicon))
-        text = "The character has been successfully added"
         msg.setText(text)
         msg.exec()
         self.close()
@@ -1824,6 +1929,7 @@ class Emilia(QMainWindow):
             self.voice_entry.setText(getconfig('speaker'))
         elif tts == "charai":
             self.voice_label.setText(tr("MainWindow", "voiceid"))
+            self.voice_entry.setToolTip(tr("MainWindow", "voiceidtooltip"))
             self.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.voice_entry.text().replace("https://character.ai/?voiceId=", ""), "charaiconfig.json"))
             self.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
         self.voice_layout.addWidget(self.voice_label)
