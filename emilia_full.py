@@ -33,7 +33,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.1"
-build = "20240721"
+build = "20240724"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -117,7 +117,7 @@ def load_translations(filename):
         with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        with open("locales/en_US.json", "r", encoding="utf-8") as f:
+        with open("./locales/en_US.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
 def tr(context, text):
@@ -126,7 +126,7 @@ def tr(context, text):
     else:
         return text
 
-translations = load_translations(f"locales/{lang}.json")
+translations = load_translations(f"./locales/{lang}.json")
 
 class EEC():
     """
@@ -302,7 +302,7 @@ class AutoUpdate():
             os.remove(f"Emilia_{build}.zip")
 
             print(f"{tr('AutoUpdate', 'emiliaupdated')} {build}!")
-            os.system("install.bat")
+            os.system("install_full.bat")
         except requests.exceptions.RequestException as e:
             print(f"{tr('Errors', 'UpdateDownloadError')} {e}")
             writeconfig('autoupdate_enable', 'False')
@@ -841,24 +841,6 @@ class FirstLaunch(QMainWindow):
         writeconfig('aitype', 'charai')
         os.execv(sys.executable, ['python'] + sys.argv)
 
-class ImageLoaderThread(QThread):
-    image_loaded = pyqtSignal(QPixmap)
-
-    def __init__(self, url):
-        super().__init__()
-        self.url = url
-
-    def run(self):
-        try:
-            response = requests.get(self.url)
-            response.raise_for_status()
-            image = QPixmap()
-            image.loadFromData(response.content)
-            self.image_loaded.emit(image)
-        except Exception as e:
-            print(f"Error loading the image: {e}")
-            self.image_loaded.emit(QPixmap())
-
 class CharacterEditor(QWidget):
     def __init__(self):
         super().__init__()
@@ -1135,6 +1117,284 @@ class NewCharacterEditor(QWidget):
     def styles_reset(self):
         self.setStyleSheet("")
 
+class ImageLoaderThread(QThread):
+    image_loaded = pyqtSignal(QPixmap)
+    
+    def __init__(self, url):
+        super().__init__()
+        self.url = url
+
+    def run(self):
+        try:
+            response = requests.get(self.url)
+            response.raise_for_status()
+            image = QPixmap()
+            image.loadFromData(response.content)
+            self.image_loaded.emit(image)
+        except Exception as e:
+            print(f"Error loading the image: {e}")
+            self.image_loaded.emit(QPixmap())
+
+class CharacterWidget(QWidget):
+    def __init__(self, CharacterSearch, data, mode):
+        super().__init__()
+        self.data = data
+        self.local_data = CharacterSearch.local_data
+        self.CharacterSearch = CharacterSearch
+        self.mode = mode
+        self.tts = getconfig('tts', 'silerotts')
+
+        layout = QHBoxLayout()
+        self.image_label = QLabel()
+        layout.addWidget(self.image_label)
+
+        text_buttons_layout = QHBoxLayout()
+
+        self.text_label = QLabel()
+        self.text_label.setWordWrap(True)
+        text_buttons_layout.addWidget(self.text_label)
+
+        buttons_layout = QVBoxLayout()
+        self.network_addnovoice_button = QPushButton('Add without voice')
+        self.network_addnovoice_button.setFixedWidth(200)
+        self.network_addnovoice_button.clicked.connect(self.add_without_voice)
+
+        self.network_addvoice_button = QPushButton('Search Voice')
+        self.network_addvoice_button.setFixedWidth(200)
+        self.network_addvoice_button.clicked.connect(self.add_with_voice)
+
+        self.network_speaker_entry = QLineEdit()
+        self.network_speaker_entry.setFixedWidth(290)
+        self.network_speaker_entry.textChanged.connect(self.speaker_entry)
+        self.network_speaker_entry.setToolTip(tr("MainWindow", "voices"))
+        self.network_speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
+
+        self.network_spadd_button = QPushButton('Add characher')
+        self.network_spadd_button.setFixedWidth(290)
+        self.network_spadd_button.setEnabled(False)
+        self.network_spadd_button.clicked.connect(self.add_without_voice)
+
+        self.local_select_button = QPushButton('Select')
+        self.local_select_button.clicked.connect(self.local_select_char)
+
+        if mode == "network":
+            name = data.get('participant__name', 'No Name')
+            title = data.get('title', 'None')
+            chats = data.get('score', '0')
+            author = data.get('user__username', 'Unknown')
+            description = data.get('description', 'None')
+            avatar = data.get('avatar_file_name', '')
+            self.image_label.setFixedSize(80, 80)
+
+            full_description = description
+            if self.tts == 'charai':
+                if f"{description}" != 'None' and len(f"{description}") > 220:
+                    description = description[:220] + '...'
+                self.text_label.setMaximumWidth(400)
+                buttons_layout.addWidget(self.network_addvoice_button)
+                buttons_layout.addWidget(self.network_addnovoice_button)
+            else:
+                if f"{description}" != 'None' and len(f"{description}") > 160:
+                    description = description[:160] + '...'
+                self.text_label.setMaximumWidth(310)
+                buttons_layout.addWidget(self.network_speaker_entry)
+                buttons_layout.addWidget(self.network_spadd_button)
+
+            if f"{title}" == 'None' or f"{title}" == '':
+                if f"{description}" == 'None':
+                    text = f'<b>{name}</b><br>{chats} chats • By {author}'
+                else:
+                    self.text_label.setToolTip(full_description)
+                    text = f'<b>{name}</b><br>{description}<br>{chats} chats • By {author}'
+            else:
+                if f"{description}" == 'None':
+                    text = f'<b>{name}</b> - {title}<br>{chats} chats • By {author}'
+                else:
+                    self.text_label.setToolTip(full_description)
+                    text = f'<b>{name}</b> - {title}<br>{description}<br>{chats} chats • By {author}'
+        elif mode == "recent":
+            name = data.get('character_name', 'No Name')
+            avatar = data.get('character_avatar_uri', '')
+            local_chars = self.local_data.keys()
+            self.character_id = data.get('character_id', '')
+            self.image_label.setFixedSize(50, 50)
+
+            if self.tts == 'charai':
+                self.local_select_button.setFixedWidth(200)
+            else:
+                self.local_select_button.setFixedWidth(290)
+
+            if self.character_id in local_chars:
+                buttons_layout.addWidget(self.local_select_button)
+            else:
+                if self.tts == 'charai':
+                    buttons_layout.addWidget(self.network_addvoice_button)
+                    buttons_layout.addWidget(self.network_addnovoice_button)
+                else:
+                    buttons_layout.addWidget(self.network_speaker_entry)
+                    buttons_layout.addWidget(self.network_spadd_button)
+
+            text = f'<b>{name}</b>'
+        elif mode == "recommend":
+            name = data.get('participant__name', 'No Name')
+            avatar = data.get('avatar_file_name', '')
+            self.image_label.setFixedSize(50, 50)
+
+            if self.tts == 'charai':
+                buttons_layout.addWidget(self.network_addvoice_button)
+                buttons_layout.addWidget(self.network_addnovoice_button)
+            else:
+                buttons_layout.addWidget(self.network_speaker_entry)
+                buttons_layout.addWidget(self.network_spadd_button)
+
+            text = f'<b>{name}</b>'
+        
+        self.threads = []
+        if f"{avatar}" != "None":
+            thread = threading.Thread(self.load_image_async(f'https://characterai.io/i/80/static/avatars/{avatar}?webp=true&anim=0'))
+            thread.start()
+            self.threads.append(thread)
+        self.text_label.setText(text)
+
+        text_buttons_layout.addLayout(buttons_layout)
+        layout.addLayout(text_buttons_layout)
+        self.setLayout(layout)
+
+    def load_image_async(self, url):
+        def set_image(self, pixmap):
+            if self.mode == "network":
+                self.image_label.setPixmap(pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            elif self.mode == "recent":
+                self.image_label.setPixmap(pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            elif self.mode == "recommend":
+                self.image_label.setPixmap(pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+
+        self.image_loader_thread = ImageLoaderThread(url)
+        self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
+        self.image_loader_thread.start()
+
+    def speaker_entry(self):
+        if self.network_speaker_entry.text() == "":
+            self.network_spadd_button.setEnabled(False)
+        elif self.network_speaker_entry.text() != "":
+            self.network_spadd_button.setEnabled(True)
+
+    def add_with_voice(self):
+        try:
+            with open('data.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = {}
+
+        if self.mode == "network":
+            charid = self.data.get('external_id', 'No ID')
+            name = self.data.get('participant__name', 'No Name')
+            author = self.data.get('user__username', 'Unknown')
+            avatar_url = self.data.get('avatar_file_name', '')
+            description = self.data.get('description', 'No Description')
+            title = self.data.get('title', 'None')
+        elif self.mode == "recent":
+            char = self.get_character()
+            charid = char['external_id']
+            name = char['participant__name']
+            author = char['user__username']
+            avatar_url = char['avatar_file_name']
+            description = char['description']
+            title = char['title']
+        
+        data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author}
+
+        with open('data.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+        self.CharacterSearch.close()
+        VoiceSearch(network_data=self.data).show()
+
+    def add_without_voice(self):
+        try:
+            with open('data.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = {}
+
+        if self.mode == "network":
+            charid = self.data.get('external_id', 'No ID')
+            name = self.data.get('participant__name', 'No Name')
+            author = self.data.get('user__username', 'Unknown')
+            avatar_url = self.data.get('avatar_file_name', '')
+            description = self.data.get('description', 'No Description')
+            title = self.data.get('title', 'None')
+        elif self.mode == "recent":
+            char = self.get_character()
+            charid = char['external_id']
+            name = char['participant__name']
+            author = char['user__username']
+            avatar_url = char['avatar_file_name']
+            description = char['description']
+            title = char['title']
+
+        if self.tts == "charai":
+            data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author}
+        else:
+            data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voice": self.network_speaker_entry.text()}
+
+        with open('data.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        msg = QMessageBox()
+        msg.setWindowTitle("Oh")
+        msg.setStyleSheet(self.styleSheet())
+        msg.setWindowIcon(QIcon(emiliaicon))
+        text = "The character has been successfully added"
+        msg.setText(text)
+        msg.exec()
+        self.CharacterSearch.close()
+
+    def get_character(self):
+        headers = {
+            "Content-Type": 'application/json',
+            "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
+        }
+        data = {
+            "external_id": self.data['character_id']
+        }
+        character = requests.post("https://plus.character.ai/chat/character/info/", headers=headers, json=data)
+        if character.status_code == 200:
+            data = character.json()
+            char = data['character']
+            return char
+
+    class IconLoaderThread(QThread):
+        image_loaded = pyqtSignal(QPixmap, QListWidgetItem)
+
+        def __init__(self, url, item):
+            super().__init__()
+            self.url = url
+            self.item = item
+
+        def run(self):
+            try:
+                response = requests.get(self.url)
+                if response.status_code == 200:
+                    image = QPixmap()
+                    image.loadFromData(response.content)
+                    self.image_loaded.emit(image, self.item)
+            except Exception as e:
+                print(f"Error loading the image: {e}")
+                self.image_loaded.emit(QPixmap(), self.item)
+
+    def local_select_char(self):
+        self.CharacterSearch.main_window.char_entry.setText(self.local_data[self.character_id].get('char', ''))
+        if self.tts == "charai":
+            self.CharacterSearch.main_window.voice_entry.setText(self.local_data[self.character_id].get('voiceid', ''))
+        else:
+            self.CharacterSearch.main_window.voice_entry.setText(self.local_data[self.character_id].get('voice', ''))
+        self.CharacterSearch.close()
+
+    def closeEvent(self, event):
+        for thread in self.threads:
+            thread.quit()
+        super().closeEvent(event)
+
 class CharacterSearch(QWidget):
     def __init__(self, mainwindow):
         super().__init__()
@@ -1163,49 +1423,13 @@ class CharacterSearch(QWidget):
         self.network_layout.addWidget(self.network_search_input)
 
         self.network_list_widget = QListWidget()
-        self.network_list_widget.itemClicked.connect(self.display_network_details)
         self.network_layout.addWidget(self.network_list_widget)
-
-        self.network_image_label = QLabel()
-        self.network_details_label = QLabel()
-        self.network_details_label.setWordWrap(True)
-        self.network_details_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-
-        network_details_layout = QHBoxLayout()
-        network_details_layout.addWidget(self.network_image_label, alignment=Qt.AlignmentFlag.AlignTop)
-        network_details_layout.addWidget(self.network_details_label)
-
-        self.network_layout.addLayout(network_details_layout)
-
-        self.network_addnovoice_button = QPushButton('Add without voice')
-        self.network_addnovoice_button.clicked.connect(self.add_without_voice)
-        self.network_addnovoice_button.setEnabled(False)
-
-        self.network_addvoice_button = QPushButton('Search Voice')
-        self.network_addvoice_button.clicked.connect(self.add_with_voice)
-        self.network_addvoice_button.setEnabled(False)
 
         self.network_add_button = QPushButton('Add another characher')
         self.network_add_button.clicked.connect(self.open_NewCharacherEditor)
 
-        self.network_speaker_entry = QLineEdit()
-        self.network_speaker_entry.textChanged.connect(self.speaker_entry)
-        self.network_speaker_entry.setToolTip(tr("MainWindow", "voices"))
-        self.network_speaker_entry.setPlaceholderText(tr("MainWindow", "voices"))
-        self.network_speaker_entry.setEnabled(False)
-
-        self.network_spadd_button = QPushButton('Add characher')
-        self.network_spadd_button.clicked.connect(self.add_without_voice)
-        self.network_spadd_button.setEnabled(False)
-
         self.network_buttons_layout = QVBoxLayout()
         self.network_buttons_layout.addWidget(self.network_add_button)
-        if self.tts == 'charai':
-            self.network_buttons_layout.addWidget(self.network_addvoice_button)
-            self.network_buttons_layout.addWidget(self.network_addnovoice_button)
-        else:
-            self.network_buttons_layout.addWidget(self.network_speaker_entry)
-            self.network_buttons_layout.addWidget(self.network_spadd_button)
 
         self.network_layout.addLayout(self.network_buttons_layout)
 
@@ -1298,15 +1522,13 @@ class CharacterSearch(QWidget):
         if self.buttontextcolor != "":
             self.set_button_text_color(QColor(self.buttontextcolor))
 
-        self.load_local_data()
+        self.recommend_recent_items = []
 
+        self.load_local_data()
+        self.populate_recent_list()
+        self.populate_recommend_list()
 
     def speaker_entry(self):
-        if self.network_speaker_entry.text() == "":
-            self.network_spadd_button.setEnabled(False)
-        elif self.network_speaker_entry.text() != "":
-            self.network_spadd_button.setEnabled(True)
-
         if self.local_speaker_entry.text() == "":
             self.local_set_voice_button.setEnabled(False)
         elif self.local_speaker_entry.text() != "":
@@ -1324,6 +1546,8 @@ class CharacterSearch(QWidget):
             self.save_local_data()
             self.load_local_data()
             self.populate_local_list()
+            self.local_image_label.clear()
+            self.local_details_label.clear()
         else:
             msg = QMessageBox()
             msg.setStyleSheet(self.styleSheet())
@@ -1400,75 +1624,78 @@ class CharacterSearch(QWidget):
         msg.setText(text)
         msg.exec()
 
-    def add_without_voice(self):
-        try:
-            with open('data.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            data = {}
+    def populate_list(self, data, mode):
+        item = QListWidgetItem()
+        custom_widget = CharacterWidget(self, data, mode)
+        
+        item.setSizeHint(custom_widget.sizeHint())
+        self.network_list_widget.addItem(item)
+        self.network_list_widget.setItemWidget(item, custom_widget)
 
-        charid = self.current_network_data.get('external_id', 'No ID')
-        name = self.current_network_data.get('participant__name', 'No Name')
-        author = self.current_network_data.get('user__username', 'Unknown')
-        avatar_url = self.current_network_data.get('avatar_file_name', '')
-        description = self.current_network_data.get('description', 'No Description')
-        title = self.current_network_data.get('title', 'None')
+    def populate_category_header(self, category_name):
+        header_item = QListWidgetItem()
+        header_widget = QLabel(f"<b>{category_name}</b>")
+        header_widget.setStyleSheet("font-size: 20pt;")
+        header_widget.setFixedHeight(30)
+        header_widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        if self.tts == "charai":
-            data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author}
-        else:
-            data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author, "voice": self.network_speaker_entry.text()}
-
-        with open('data.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        msg = QMessageBox()
-        msg.setWindowTitle("Oh")
-        msg.setStyleSheet(self.styleSheet())
-        msg.setWindowIcon(QIcon(emiliaicon))
-        text = "The character has been successfully added"
-        msg.setText(text)
-        msg.exec()
-        self.close()
-
-    def add_with_voice(self):
-        try:
-            with open('data.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            data = {}
-
-        charid = self.current_network_data.get('external_id', 'No ID')
-        name = self.current_network_data.get('participant__name', 'No Name')
-        author = self.current_network_data.get('user__username', 'Unknown')
-        avatar_url = self.current_network_data.get('avatar_file_name', '')
-        description = self.current_network_data.get('description', 'No Description')
-        title = self.current_network_data.get('title', 'None')
-        data[charid] = {"name": name, "char": charid, "avatar_url": avatar_url, "description": description, "title": title, "author": author}
-
-        with open('data.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-        self.close()
-        VoiceSearch(network_data=self.current_network_data).show()
-
+        header_item.setSizeHint(header_widget.sizeHint())
+        self.network_list_widget.addItem(header_item)
+        self.network_list_widget.setItemWidget(header_item, header_widget)
 
     def populate_network_list(self):
         self.network_list_widget.clear()
         if not self.network_data or not isinstance(self.network_data, list):
             return
-        threads = []
+
         for data in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
-            name = data.get('participant__name', 'No Name')
-            title = data.get('title', 'None')
-            chats = data.get('score', '0')
-            author = data.get('user__username', 'Unknown')
-            if title == 'None' or title == '':
-                list_item = QListWidgetItem(f'{name}\n{chats} chats • By {author}')
-            else:
-                list_item = QListWidgetItem(f'{name} - {title}\n{chats} chats • By {author}')
-            list_item.setData(1, data)
-            self.network_list_widget.addItem(list_item)
+            self.populate_list(data, "network")
+
         self.network_add_button.setVisible(False)
+
+    def populate_recent_list(self):
+        self.populate_category_header("Recent Chats")
+        if self.main_window.recent_list:
+            data = self.main_window.recent_list
+            for chats in data:
+                if chats['character_id'] not in self.recommend_recent_items:
+                    self.recommend_recent_items.append(chats['character_id'])
+                    self.populate_list(chats, "recent")
+        else:
+            headers = {
+                "Content-Type": 'application/json',
+                "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
+            }
+            recent_list = requests.get("https://neo.character.ai/chats/recent", headers=headers)
+            if recent_list.status_code == 200:
+                data = recent_list.json()
+                for chats in data['chats']:
+                    if chats['character_id'] not in self.recommend_recent_items:
+                        self.recommend_recent_items.append(chats['character_id'])
+                        self.main_window.recent_list.append(chats)
+                        self.populate_list(chats, "recent")
+
+    def populate_recommend_list(self):
+        self.populate_category_header("For You")
+        if self.main_window.recommend_list:
+            data = self.main_window.recommend_list
+            for recommend in data:
+                if recommend['external_id'] not in self.recommend_recent_items:
+                    self.recommend_recent_items.append(recommend['external_id'])
+                    self.populate_list(recommend, "recommend")
+        else:
+            headers = {
+                "Content-Type": 'application/json',
+                "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
+            }
+            recommend_list = requests.get("https://neo.character.ai/recommendation/v1/user", headers=headers)
+            if recommend_list.status_code == 200:
+                data = recommend_list.json()
+                for recommend in data['characters']:
+                    if recommend['external_id'] not in self.recommend_recent_items:
+                        self.recommend_recent_items.append(recommend['external_id'])
+                        self.main_window.recommend_list.append(recommend)
+                        self.populate_list(recommend, "recommend")
 
     def populate_local_list(self):
         self.local_list_widget.clear()
@@ -1484,20 +1711,6 @@ class CharacterSearch(QWidget):
                 list_item = QListWidgetItem(f'{name} - {title}')
             list_item.setData(1, char_data)
             self.local_list_widget.addItem(list_item)
-
-    def display_network_details(self, item):
-        data = item.data(1)
-        self.current_network_data = data
-        self.network_details_label.setText(f"<b>{data.get('participant__name', 'No Name')}</b> • By {data.get('user__username', 'Unknown')}<br>{data.get('description', 'No Description')}")
-        self.network_addnovoice_button.setEnabled(True)
-        self.network_addvoice_button.setEnabled(True)
-        self.network_speaker_entry.setEnabled(True)
-
-        avatar_url = data.get('avatar_file_name', '')
-        if avatar_url:
-            self.load_image_async(f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0", self.network_image_label)
-        else:
-            self.network_image_label.clear()
 
     def display_local_details(self, item):
         data = item.data(1)
@@ -1543,8 +1756,7 @@ class CharacterSearch(QWidget):
             return
 
         try:
-            url = f'https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D'
-            response = requests.get(url)
+            response = requests.get(f'https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D')
             if response.status_code == 200:
                 self.network_data = response.json()
                 self.populate_network_list()
@@ -1874,6 +2086,9 @@ class Emilia(QMainWindow):
         self.setWindowTitle("Emilia")
         self.setFixedWidth(300)
         self.setMinimumHeight(150)
+
+        self.recommend_list = []
+        self.recent_list = []
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -2347,7 +2562,10 @@ class Emilia(QMainWindow):
             if vtubeenable == "True":
                 await EEC().UseEmote("Says")
             try:
-                audio = self.silero_tts(nums)
+                if tts == 'charai' and aitype == 'charai':
+                    audio, sample_rate = await self.charai_tts(messagenotext)
+                else:
+                    audio = self.silero_tts(nums)
                 device = list(self.unique_devices.values())[
                     self.selected_device_index] if self.selected_device_index != "" else None
                 sd.play(audio, sample_rate, device=device["index"] if device else None)
