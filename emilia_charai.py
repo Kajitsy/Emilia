@@ -1021,19 +1021,41 @@ class ImageLoaderThread(QThread):
             self.image_loaded.emit(QPixmap())
 
 class CustomCharAI():
-    def get_character(self, character_id):
+    def request(self, endpoint, data = None, method = "get", neo = False):
         headers = {
             "Content-Type": 'application/json',
             "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
         }
+
+        if neo:
+            url = f"https://neo.character.ai/{endpoint}"
+        else:
+            url = f"https://plus.character.ai/{endpoint}"
+
+        if method == "get":
+            response = requests.get(url, headers=headers, params=data)
+        elif method == "post":
+            response = requests.post(url, headers=headers, json=data)
+        else:
+            raise ValueError("Invalid method")
+
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            raise Exception(f"Failed to get data, status code: {response.status_code}")
+
+    def get_character(self, character_id):
         data = {
             "external_id": character_id
         }
-        character = requests.post("https://plus.character.ai/chat/character/info/", headers=headers, json=data)
-        if character.status_code == 200:
-            data = character.json()
-            char = data['character']
-            return char
+        return self.request("chat/character/info/", data, "post")['character']
+
+    def get_recommend_chats(self):
+        return self.request("recommendation/v1/user", neo=True)['characters']
+
+    def get_recent_chats(self):
+        return self.request("chats/recent", neo=True)['chats']
 
 class CharacterWidget(QWidget):
     def __init__(self, CharacterSearch, data, mode):
@@ -1052,7 +1074,6 @@ class CharacterWidget(QWidget):
 
         self.text_label = QLabel()
         self.text_label.setWordWrap(True)
-        # text_buttons_layout.addWidget(self.text_label)
 
         buttons_layout = QVBoxLayout()
         self.network_addnovoice_button = QPushButton('Add without voice')
@@ -1374,7 +1395,6 @@ class CharacterSearch(QWidget):
         self.local_layout = QVBoxLayout(self.local_tab)
 
         self.local_list_widget = QListWidget()
-        self.local_list_widget.itemClicked.connect(self.display_local_details)
         self.local_layout.addWidget(self.local_list_widget)
 
         self.local_image_label = QLabel()
@@ -1413,51 +1433,6 @@ class CharacterSearch(QWidget):
         window.show()
         self.close()
 
-    def local_delete_character(self):
-        char_id = self.current_local_data.get('char', 'No ID')
-        if char_id in self.local_data:
-            del self.local_data[char_id]
-            self.save_local_data()
-            self.load_local_data()
-            self.populate_local_list()
-            self.local_image_label.clear()
-            self.local_details_label.clear()
-        else:
-            msg = QMessageBox()
-            msg.setStyleSheet(self.styleSheet())
-            msg.setWindowTitle("Error")
-            msg.setWindowIcon(QIcon(emiliaicon))
-            msg.setText("Character not found in local data.")
-            msg.exec()
-
-    def local_delete_voice(self):
-        char_id = self.current_local_data.get('char', 'No ID')
-        if char_id in self.local_data:
-            if 'voiceid' in self.local_data[char_id]:
-                del self.local_data[char_id]['voiceid']
-            self.save_local_data()
-            self.load_local_data()
-            charid = self.current_local_data.get('char', 'No ID')
-            name = self.current_local_data.get('name', 'No Name')
-            author = self.current_local_data.get('author', 'Unknown')
-            description = self.current_local_data.get('description', 'No Description')
-            self.local_details_label.setText(f"<b>{name}</b> by {author}<br>{description}<br>ID: {charid}<br>Voice ID: No Voice ID")
-        else:
-            msg = QMessageBox()
-            msg.setStyleSheet(self.styleSheet())
-            msg.setWindowTitle("Error")
-            msg.setWindowIcon(QIcon(emiliaicon))
-            msg.setText("Character not found in local data.")
-            msg.exec()
-
-    def local_add_char_voice(self):
-        self.close()
-        VoiceSearch(self.current_local_data.get('char', 'No ID')).show()
-
-    def local_select_char(self):
-        self.main_window.voice_entry.setText(self.current_local_data.get('voiceid', ''))
-        self.close()
-
     def populate_list(self, data, mode):
         item = QListWidgetItem()
         custom_widget = CharacterWidget(self, data, mode)
@@ -1493,47 +1468,23 @@ class CharacterSearch(QWidget):
 
     def populate_recent_list(self):
         self.populate_category_header("Recent Chats")
-        if self.main_window.recent_list:
-            data = self.main_window.recent_list
-            for chats in data:
-                if chats['character_id'] not in self.recommend_recent_items:
-                    self.recommend_recent_items.append(chats['character_id'])
-                    self.populate_list(chats, "recent")
-        else:
-            headers = {
-                "Content-Type": 'application/json',
-                "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
-            }
-            recent_list = requests.get("https://neo.character.ai/chats/recent", headers=headers)
-            if recent_list.status_code == 200:
-                data = recent_list.json()
-                for chats in data['chats']:
+        if self.main_window.recent_chats:
+            for chats in self.main_window.recent_chats:
                     if chats['character_id'] not in self.recommend_recent_items:
                         self.recommend_recent_items.append(chats['character_id'])
-                        self.main_window.recent_list.append(chats)
                         self.populate_list(chats, "recent")
+        else:
+            self.populate_category_header("Empty... <(＿　＿)>")
 
     def populate_recommend_list(self):
         self.populate_category_header("For You")
-        if self.main_window.recommend_list:
-            data = self.main_window.recommend_list
-            for recommend in data:
+        if self.main_window.recommend_chats:
+            for recommend in self.main_window.recommend_chats:
                 if recommend['external_id'] not in self.recommend_recent_items:
                     self.recommend_recent_items.append(recommend['external_id'])
                     self.populate_list(recommend, "recommend")
         else:
-            headers = {
-                "Content-Type": 'application/json',
-                "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
-            }
-            recommend_list = requests.get("https://neo.character.ai/recommendation/v1/user", headers=headers)
-            if recommend_list.status_code == 200:
-                data = recommend_list.json()
-                for recommend in data['characters']:
-                    if recommend['external_id'] not in self.recommend_recent_items:
-                        self.recommend_recent_items.append(recommend['external_id'])
-                        self.main_window.recommend_list.append(recommend)
-                        self.populate_list(recommend, "recommend")
+            self.populate_category_header("Empty... <(＿　＿)>")
 
     def populate_local_list(self):
         self.local_list_widget.clear()
@@ -1542,38 +1493,9 @@ class CharacterSearch(QWidget):
         for charid, char_data in self.local_data.items():
             self.populate_list(char_data, 'local')
 
-    def display_local_details(self, item):
-        data = item.data(1)
-        self.current_local_data = data
-        voiceid = data.get('voiceid', 'No Voice ID')
-        voice = data.get('voice', 'No Voice')
-        self.local_details_label.setText(f"<b>{data.get('name', 'No Name')}</b> • By {data.get('author', 'Unknown')}<br>{data.get('description', 'No Description')}<br>ID: {data.get('char', 'No ID')}<br>Voice ID: {voiceid}")
-        if voiceid == 'No Voice ID':
-            self.local_add_voice_button.setEnabled(True)
-            self.local_edit_voice_button.setEnabled(False)
-            self.local_delete_voice_button.setEnabled(False)
-        else:
-            self.local_add_voice_button.setEnabled(False)
-            self.local_edit_voice_button.setEnabled(True)
-            self.local_delete_voice_button.setEnabled(True)
-        self.local_select_button.setEnabled(True)
-        self.local_delete_button.setEnabled(True)
-
-
-        avatar_url = data.get('avatar_url', '')
-        if avatar_url:
-            self.load_image_async(f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0", self.local_image_label)
-        else:
-            self.local_image_label.clear()
-
     def on_tab_changed(self, index):
         if index == 1:
             self.populate_local_list()
-
-    def load_image_async(self, url, label):
-        self.image_loader_thread = ImageLoaderThread(url)
-        self.image_loader_thread.image_loaded.connect(label.setPixmap)
-        self.image_loader_thread.start()
 
     def search_and_load(self):
         search_query = self.network_search_input.text().strip()
@@ -1892,9 +1814,6 @@ class Emilia(QMainWindow):
         self.setFixedWidth(300)
         self.setMinimumHeight(150)
 
-        self.recommend_list = []
-        self.recent_list = []
-
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
@@ -1924,6 +1843,18 @@ class Emilia(QMainWindow):
         
         self.layout.addLayout(hlayout)
 
+        if self.client_entry.text() != "":
+            try:
+                self.recommend_chats = CustomCharAI().get_recommend_chats()
+                self.recent_chats = CustomCharAI().get_recent_chats()
+            except Exception as e:
+                self.recommend_chats = None
+                self.recent_chats = None
+                print(f"Ops, {e}")
+        else:
+            self.recommend_chats = None
+            self.recent_chats = None
+            
         self.voice_layout = QHBoxLayout()
         self.voice_entry = QLineEdit()
         self.voice_label = QLabel()
@@ -2191,7 +2122,6 @@ class Emilia(QMainWindow):
 
     async def main(self):
         vtubeenable = getconfig('vtubeenable', "False")
-        tts = getconfig('tts', 'silerotts')
         self.layout.addWidget(self.user_input)
         self.layout.addWidget(self.ai_output)
         token = aiocai.Client(self.client_entry.text())
@@ -2201,9 +2131,9 @@ class Emilia(QMainWindow):
             chatid = await token.get_chat(character)
         except:
             chatid = await token.new_chat(character, Account.id)
-        persona = await token.get_persona(character)
+        persona = CustomCharAI().get_character(character)
         username = f"{Account.name}: "
-        ai = f"{persona.name}: "
+        ai = f"{persona["name"]}: "
         while True:
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
@@ -2259,8 +2189,8 @@ class Emilia(QMainWindow):
             except:
                 Account = await token.get_me()
                 chatid = await token.new_chat(character, Account.id)
-            persona = await token.get_persona(character)
-            ai = f"{persona.name}: "
+            persona = CustomCharAI().get_character(character)
+            ai = f"{persona["name"]}: "
             if vtubeenable == "True":
                 await EEC().UseEmote("Thinks")
             msg1 = self.user_aiinput.text()
