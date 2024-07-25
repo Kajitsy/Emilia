@@ -1,44 +1,53 @@
+import io
+import os
+import asyncio
+import winreg
+import threading
+import torch
+import time
+import zipfile
+import requests
+import re
+import json
+import sys
+import webbrowser
+import ctypes
+import pyvts
+import random
+import warnings
+import sounddevice as sd
+import soundfile as sf
+import google.generativeai as genai
+import speech_recognition as sr
+from gpytranslate import Translator
+from characterai import aiocai, sendCode, authUser
+from num2words import num2words
+from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
+from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
+from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
+
 try:
-    import io
-    import os
-    import asyncio
-    import winreg
-    import threading
-    import torch
-    import time
-    import zipfile
-    import requests
-    import re
-    import json
-    import sys
-    import webbrowser
-    import ctypes
-    import pyvts
-    import random
-    import warnings
-    import sounddevice as sd
-    import soundfile as sf
-    import google.generativeai as genai
-    import speech_recognition as sr
-    from gpytranslate import Translator
-    from characterai import aiocai, sendCode, authUser
-    from num2words import num2words
-    from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
-    from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
-    from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
-except:
-    import os
-    os.system("install.bat")
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.full.app')
+except Exception as e:
+    print(f"Ctypes error {e}")
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.1"
-build = "20240724"
+build = "20240725"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
 put_yo = True
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 def writeconfig(variable, value, configfile = 'config.json'):
     try:
@@ -76,23 +85,26 @@ backcolor = getconfig('backgroundcolor')
 buttoncolor = getconfig('buttoncolor')
 buttontextcolor = getconfig('buttontextcolor')
 labelcolor = getconfig('labelcolor')
+imagesfolder = resource_path('images')
+localesfolder = resource_path('locales')
+
 
 # Icons
 if pre == True:
-    emiliaicon = './images/premilia.png'
+    emiliaicon = f'{imagesfolder}/premilia.png'
 else:
-    emiliaicon = './images/emilia.png'
-googleicon = './images/google.png'
-charaiicon = './images/charai.png'
-refreshicon = './images/refresh.png'
+    emiliaicon = f'{imagesfolder}/emilia.png'
+googleicon = f'{imagesfolder}/google.png'
+charaiicon = f'{imagesfolder}/charai.png'
+refreshicon = f'{imagesfolder}/refresh.png'
 if iconcolor == 'white':
-    keyboardicon = './images/keyboard_white.png'
-    inputicon = './images/input_white.png'
-    charediticon = './images/open_char_editor_white.png'
+    keyboardicon = f'{imagesfolder}/keyboard_white.png'
+    inputicon = f'{imagesfolder}/input_white.png'
+    charediticon = f'{imagesfolder}/open_char_editor_white.png'
 else:
-    keyboardicon = './images/keyboard.png'
-    inputicon = './images/input.png'
-    charediticon = './images/open_char_editor.png'
+    keyboardicon = f'{imagesfolder}/keyboard.png'
+    inputicon = f'{imagesfolder}/input.png'
+    charediticon = f'{imagesfolder}/open_char_editor.png'
 print("(｡･∀･)ﾉﾞ")
 if not os.path.exists('voice.pt'):
     if lang == "ru_RU":
@@ -117,7 +129,7 @@ def load_translations(filename):
         with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        with open("./locales/en_US.json", "r", encoding="utf-8") as f:
+        with open(f"{localesfolder}/en_US.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
 def tr(context, text):
@@ -126,7 +138,7 @@ def tr(context, text):
     else:
         return text
 
-translations = load_translations(f"./locales/{lang}.json")
+translations = load_translations(f"{localesfolder}/{lang}.json")
 
 class EEC():
     """
@@ -266,21 +278,28 @@ class EEC():
 
 class AutoUpdate():
     def check_for_updates(self):
+        response = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/autoupdate.json")
+        response.raise_for_status()
+        updates = response.json()
         try:
-            response = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/autoupdate.json")
-            response.raise_for_status()
-            updates = response.json()
-
             if pre == True:
-                if "latest_prerealease" in updates:
+                if "charai_latest_prerealease" in updates:
                     latest_prerealease = updates["latest_prerealease"]
                     if int(latest_prerealease["build"]) > int(build):
+                        if resource_path("autoupdate") != "autoupdate":
+                            if latest_prerealease.get('exe', '') != '':
+                                self.download_and_update_script(latest_prerealease["exe"], latest_prerealease["build"])
+                            return
                         self.download_and_update_script(latest_prerealease["url"], latest_prerealease["build"])
                         return
             else:
-                if "latest_release" in updates:
+                if "charai_latest_release" in updates:
                     latest_release = updates["latest_release"]
                     if int(latest_release["build"]) > int(build):
+                        if resource_path("autoupdate") != "autoupdate":
+                            if latest_release.get('exe', '') != '':
+                                self.download_and_update_script(latest_release["exe"], latest_release["build"])
+                            return
                         self.download_and_update_script(latest_release["url"], latest_release["build"])
                         return
         except Exception as e:
@@ -290,9 +309,13 @@ class AutoUpdate():
     def download_and_update_script(self, url, build):
         print(f"{tr('AutoUpdate', 'upgradeto')} {build}")
         try:
-            response = requests.get(url)
+            response = requests.get(url, stream=True)
             response.raise_for_status()
-
+        except requests.exceptions.RequestException as e:
+            print(f"{tr('Errors', 'UpdateDownloadError')} {e}")
+            writeconfig('autoupdate_enable', 'False')
+            return
+        if resource_path("autoupdate") == "autoupdate":
             with open(f"Emilia_{build}.zip", "wb") as f:
                 f.write(response.content)
 
@@ -302,13 +325,10 @@ class AutoUpdate():
             os.remove(f"Emilia_{build}.zip")
 
             print(f"{tr('AutoUpdate', 'emiliaupdated')} {build}!")
-            os.system("install_full.bat")
-        except requests.exceptions.RequestException as e:
-            print(f"{tr('Errors', 'UpdateDownloadError')} {e}")
-            writeconfig('autoupdate_enable', 'False')
-        except zipfile.BadZipFile as e:
-            print(f"{tr('Errors', 'BadZipFile')} {e}")
-            writeconfig('autoupdate_enable', 'False')
+            os.system("install_charai.bat")
+        elif resource_path("autoupdate") != "autoupdate":
+            with open(f"Emilia_Full.exe", "wb") as f:
+                f.write(response.content)
 
 class OptionsWindow(QWidget):
     def __init__(self, mainwindow):
@@ -568,14 +588,14 @@ class OptionsWindow(QWidget):
     def changeiconcolor(self):
         value = self.iconcolorchange.currentIndex()
         if value == 0:
-            keyboardicon = './images/keyboard_white.png'
-            inputicon = './images/input_white.png'
-            charediticon = './images/open_char_editor_white.png'
+            keyboardicon = f'{imagesfolder}/keyboard_white.png'
+            inputicon = f'{imagesfolder}/input_white.png'
+            charediticon = f'{imagesfolder}/open_char_editor_white.png'
             writeconfig('iconcolor', 'white')
         elif value == 1:
-            keyboardicon = './images/keyboard.png'
-            inputicon = './images/input.png'
-            charediticon = './images/open_char_editor.png'
+            keyboardicon = f'{imagesfolder}/keyboard.png'
+            inputicon = f'{imagesfolder}/input.png'
+            charediticon = f'{imagesfolder}/open_char_editor.png'
             writeconfig('iconcolor', 'black')
         self.mainwindow.visibletextmode.setIcon(QIcon(keyboardicon))
         self.mainwindow.visiblevoicemode.setIcon(QIcon(inputicon))
@@ -628,9 +648,9 @@ class OptionsWindow(QWidget):
         ltheme = "windowsvista"
         app = QApplication.instance()
         app.setStyle(ltheme)
-        keyboardicon = './images/keyboard.png'
-        inputicon = './images/input.png'
-        charediticon = './images/open_char_editor.png'
+        keyboardicon = f'{imagesfolder}/keyboard.png'
+        inputicon = f'{imagesfolder}/input.png'
+        charediticon = f'{imagesfolder}/open_char_editor.png'
         self.mainwindow.visibletextmode.setIcon(QIcon(keyboardicon))
         self.mainwindow.visiblevoicemode.setIcon(QIcon(inputicon))
         if aitype == 'charai':
