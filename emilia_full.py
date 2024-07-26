@@ -34,7 +34,7 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.1"
-build = "20240725"
+build = "20240726"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
