@@ -308,7 +308,7 @@ class AutoUpdate():
 
             os.remove(f"Emilia_{build}.zip")
 
-            print(f"{tr('AutoUpdate', 'emilia_updated')} {build}!")
+            MessageBox("Update!", f"{tr('AutoUpdate', 'emilia_updated')} {build}!")
             os.system("install_charai.bat")
         elif resource_path("autoupdate") != "autoupdate":
             with open(f"Emilia_CharacterAI.exe", "wb") as f:
@@ -1143,6 +1143,7 @@ class ImageLoaderThread(QThread):
             self.image_loaded.emit(image)
         except Exception as e:
             print(f"Error loading the image: {e}")
+            MessageBox(tr('Errors', 'Label'), f"Error loading the image: {e}", self)
             self.image_loaded.emit(QPixmap())
 
 class CustomCharAI():
@@ -2229,6 +2230,7 @@ class Emilia(QMainWindow):
                 return audio_array, samplerate
         else:
             print("Character.AI TTS Error")
+            MessageBox(tr('Errors', 'Label'), f"Character.AI TTS Error \n{response.status_code}", self)
 
     async def main(self):
         vtubeenable = getconfig('vtubeenable', "False")
@@ -2282,6 +2284,7 @@ class Emilia(QMainWindow):
                 sd.stop()
             except Exception as e:
                 print(tr('Errors', 'other') + str(e))
+                MessageBox(tr('Errors', 'Label'), tr('Errors', 'other') + str(e), self)
                 continue
             if vtubeenable == "True":
                 await EEC().UseEmote("AfterSays")
@@ -2322,6 +2325,7 @@ class Emilia(QMainWindow):
                 sd.stop()
             except Exception as e:
                 print(tr('Errors', 'other') + str(e))
+                MessageBox(tr('Errors', 'Label'), tr('Errors', 'other') + str(e), self)
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
 

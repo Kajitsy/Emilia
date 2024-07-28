@@ -333,7 +333,7 @@ class AutoUpdate():
 
             os.remove(f"Emilia_{build}.zip")
 
-            print(f"{tr('AutoUpdate', 'emilia_updated')} {build}!")
+            MessageBox("Update!", f"{tr('AutoUpdate', 'emilia_updated')} {build}!")
             os.system("install_charai.bat")
         elif resource_path("autoupdate") != "autoupdate":
             with open(f"Emilia_Full.exe", "wb") as f:
@@ -1358,6 +1358,7 @@ class ImageLoaderThread(QThread):
             self.image_loaded.emit(image)
         except Exception as e:
             print(f"Error loading the image: {e}")
+            MessageBox(tr('Errors', 'Label'), f"Error loading the image: {e}", self)
             self.image_loaded.emit(QPixmap())
 
 class CustomCharAI():
@@ -2528,6 +2529,7 @@ class Emilia(QMainWindow):
                 return audio_array, samplerate
         else:
             print("Character.AI TTS Error\nUsing SileroTTS with random voice")
+            MessageBox(tr('Errors', 'Label'), f"Using SileroTTS with random voice\nCharacter.AI TTS Error \n{response.status_code}", self)
             model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
             model.to(torch.device(torchdevice))
             audio = model.apply_tts(text=message.text,
@@ -2620,6 +2622,7 @@ class Emilia(QMainWindow):
                 sd.stop()
             except Exception as e:
                 print(tr('Errors', 'other') + str(e))
+                MessageBox(tr('Errors', 'Label'), tr('Errors', 'other') + str(e), self)
                 continue
             if vtubeenable == "True":
                 await EEC().UseEmote("AfterSays")
@@ -2680,6 +2683,7 @@ class Emilia(QMainWindow):
                 sd.stop()
             except Exception as e:
                 print(tr('Errors', 'other') + str(e))
+                MessageBox(tr('Errors', 'Label'), tr('Errors', 'other') + str(e), self)
             if vtubeenable == "True":
                 await EEC().UseEmote("Listening")
 
