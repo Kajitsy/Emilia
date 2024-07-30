@@ -4,12 +4,12 @@
     "url": "https://github.com/Kajitsy/Emilia/releases/download/2.2/Emilia_Release.zip"
   },
   "latest_prerealease": {
-    "build": 20240725,
-    "url": "https://github.com/Kajitsy/Emilia/releases/download/242507/Emilia_Full.zip"
+    "build": 20240728,
+    "url": "https://github.com/Kajitsy/Emilia/releases/download/242807/Emilia_Full.zip"
   },
   "charai_latest_prerealease": {
-    "build": 20240725,
-    "url": "https://github.com/Kajitsy/Emilia/releases/download/242507/Emilia_CharacterAI.zip",
-    "exe" : "https://github.com/Kajitsy/Emilia/releases/download/242507/Emilia_CharacterAI.exe"
+    "build": 20240728,
+    "url": "https://github.com/Kajitsy/Emilia/releases/download/242807/Emilia_CharacterAI.zip",
+    "exe" : "https://github.com/Kajitsy/Emilia/releases/download/242807/Emilia_CharacterAI.exe"
   }
 }
