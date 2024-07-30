@@ -4,8 +4,9 @@
       "first_launch_notification_button_yes": "Gooo!",
       "first_launch_notification_button_no": "I suggest to refuse",
       "second_page": "Customize Emilia to your liking",
-      "third_page": "Find a character you like and add a voice to him, then you can choose him",
+      "third_page": "Find a character you like and add a voice to it\nAfter you have added it, you can close this window and select your character",
       "use_characterai": "Receive the token in the window that opens",
+      "token_saved": "The token has been successfully saved",
       "use_gemini": "Get the API key in an open browser window and enter it here\nAlso don't forget to enter the voice for Gemini",
       "ready_button": "Ready!",
       "relaunch_button": "Restart!"
@@ -29,7 +30,7 @@
       "input_device": "Input device",
       "output_device": "Output device",
       "character_choice": "&Character Choice",
-      "open_character_editor": "Open character editor",
+      "open_character_search": "Find/change a character",
       "refresh_list": "Refresh List",
       "options": "Options",
       "about_emilia": "&About Emilia "
@@ -38,7 +39,7 @@
       "about_emilia": "About Emilia ",
       "language_from": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
       "new_in": "<br><br>New in ",
-      "whats_new": ": <br>• Now you can use voices from Character.AI, the change is in the parameters (In the future it will appear in <a href='https://github.com/jofizcd/Soul-of-Waifu'> Soul of Waifu</a>) <br>• You can insert links to characters, without having to copy something special there <br>• Various fixes and visual fixes of course",
+      "whats_new": ": <br>• Now you can use voices from Character.AI, you can choose in the parameters<br>• Emilia: Character Search - new character editor<br>  In it you can find a character or select it from recent and recommended chats<br>• Emilia: Voice Search - will allow you to find a voice for the selected character<br>  You can listen to an example of a voice right in the window!<br>• Redesigned the first launch window, reduced the number of windows that open, the search for characters is built in<br>• Emilia_CharacterAI.the zip version of Emilia, optimized for use only with Character.AI <br>  Emilia_CharacterAI.exe - the same as the first one, but in exe format, which allows you not to install Python",
       "show_all_releases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
       "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.<br> At the moment you are using the ",
       "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"

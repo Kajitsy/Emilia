@@ -34,8 +34,8 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.1"
-build = "20240728"
-pre = True
+build = "20240730"
+pre = False
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -87,7 +87,6 @@ buttontextcolor = getconfig('buttontextcolor')
 labelcolor = getconfig('labelcolor')
 imagesfolder = resource_path('images')
 localesfolder = resource_path('locales')
-
 
 # Icons
 if pre == True:
@@ -555,11 +554,9 @@ class FirstLaunch(QMainWindow):
 
         self.central_widget.setLayout(self.layout)
 
-    def closeEvent(self, event = None):
-        if imagesfolder == "images":
-            os.execv(sys.executable, ['python'] + sys.argv)
-        else:
-            os.execl(sys.executable, sys.executable, *sys.argv)
+    def closeEvent(self, event):
+        Emilia().show()
+        super().closeEvent(event)
 
     def search_and_load(self):
         search_query = self.search_input.text().strip()
@@ -582,7 +579,7 @@ class FirstLaunch(QMainWindow):
             return
 
         for data in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
-            self.populate_list(data, "network")
+            self.populate_list(data, "firstlaunch")
 
         self.add_another_charcter_button.setVisible(False)
 
@@ -602,7 +599,7 @@ class FirstLaunch(QMainWindow):
         try:
             token = authUser(self.link_entry.text(), self.email_entry.text())
             self.third_page_widget.hide()
-            MessageBox(text='The token has been successfully saved')
+            MessageBox(text=tr('FirstLaunch', 'token_saves'))
             writeconfig('client', token, 'charaiconfig.json')
             self.first_launch_notification_label.setText(tr('FirstLaunch', 'third_page'))
             self.layout.addWidget(self.fourth_page_widget)
@@ -703,7 +700,7 @@ class FirstLaunch(QMainWindow):
 
     def first_launch_button_no(self):
         writeconfig('aitype', 'charai')
-        Emilia().show()
+        self.close()
 
 class OptionsWindow(QWidget):
     def __init__(self, mainwindow):
@@ -1086,155 +1083,6 @@ class OptionsWindow(QWidget):
     def styles_reset(self):
         self.setStyleSheet("")
 
-class CharacterEditor(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowIcon(QIcon(emiliaicon))
-        self.setWindowTitle("Emilia: Character Editor")
-        self.setFixedWidth(300)
-
-        layout = QVBoxLayout()
-
-
-        id_layout = QHBoxLayout()
-        self.id_entry = QLineEdit()
-        self.id_entry.setPlaceholderText("ID...")
-
-        id_layout.addWidget(QLabel(tr("MainWindow", "character_id")))
-        id_layout.addWidget(self.id_entry)
-        layout.addLayout(id_layout)
-
-
-        voice_layout = QHBoxLayout()
-        self.voice_entry = QLineEdit()
-        self.voice_entry.setPlaceholderText(tr("MainWindow", "voices"))
-        self.voice_entry.setToolTip(tr("MainWindow", "voices"))
-
-        voice_layout.addWidget(QLabel(tr("MainWindow", "voice")))
-        voice_layout.addWidget(self.voice_entry)
-        layout.addLayout(voice_layout)
-
-
-        buttons_layout = QHBoxLayout()
-        self.addchar_button = QPushButton(tr("CharEditor", "add_character"))
-        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
-
-        self.delchar_button = QPushButton(tr("CharEditor", "delete_character"))
-        self.delchar_button.clicked.connect(lambda: self.delchar())
-
-        buttons_layout.addWidget(self.addchar_button)
-        buttons_layout.addWidget(self.delchar_button)
-        layout.addLayout(buttons_layout)
-
-        self.setLayout(layout)
-    
-
-        self.backcolor = getconfig('backgroundcolor')
-        self.buttoncolor = getconfig('buttoncolor')
-        self.buttontextcolor = getconfig('buttontextcolor')
-        self.labelcolor = getconfig('labelcolor')
-        if self.backcolor != "":
-            self.set_background_color(QColor(self.backcolor))
-        if self.buttoncolor != "":
-            self.set_button_color(QColor(self.buttoncolor))
-        if self.labelcolor != "":
-            self.set_label_color(QColor(self.labelcolor))
-        if self.buttontextcolor != "":
-            self.set_button_text_color(QColor(self.buttontextcolor))
-    
-    async def addchar(self):
-        try:
-            with open('data.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        token = aiocai.Client(getconfig('client', configfile='charaiconfig.json'))
-        charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
-        char = await token.get_persona(charid)
-        data.update({charid: {"name": char.name, "char": charid, "voice": self.voice_entry.text()}})
-        with open('data.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-        msg = QMessageBox()
-        msg.setWindowTitle(tr('CharEditor', 'character_added'))
-        msg.setStyleSheet(self.styleSheet())
-        response = requests.get(f"https://characterai.io/i/80/static/avatars/{char.avatar_file_name}?webp=true&anim=0")
-        pixmap = QPixmap()
-        pixmap.loadFromData(response.content)
-        msg.setWindowIcon(QIcon(pixmap))
-        msg.setIconPixmap(pixmap)
-        text = tr('CharEditor', 'yourchar') + char.name + tr('CharEditor', 'withid') + charid + tr('CharEditor', 'withvoice') + self.voice_entry.text() + tr('CharEditor', 'added')
-        msg.setText(text)
-        msg.exec()
-
-    def delchar(self):
-        charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
-        try:
-            with open('data.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {}
-        except json.JSONDecodeError:
-             data = {}
-        if charid in data:
-            del data[charid]
-            with open('data.json', 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-        else:
-            msg = QMessageBox()
-            msg.setStyleSheet(self.styleSheet())
-            msg.setWindowTitle(tr("Errors", "Label"))
-            msg.setWindowIcon(QIcon(emiliaicon))
-            text = tr("CharEditor", "notavchar")
-            msg.setText(text)
-            msg.exec()
-    
-    def set_background_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QWidget {{
-                background-color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
-
-    def set_button_text_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QPushButton {{
-                color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
-
-    def set_button_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QPushButton {{
-                background-color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet)
-
-    def set_label_color(self, color):
-        current_style_sheet = self.styleSheet()
-        new_style_sheet = f"""
-            QWidget {{
-                color: {color.name()};
-            }}
-        """
-        new_style_sheet2 = f"""
-            QLineEdit {{
-                color: {color.name()};
-            }}
-        """
-        self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
-
-    def styles_reset(self):
-        self.setStyleSheet("")
-
 class NewCharacterEditor(QWidget):
     def __init__(self):
         super().__init__()
@@ -1402,7 +1250,9 @@ class CharacterWidget(QWidget):
     def __init__(self, CharacterSearch, data, mode):
         super().__init__()
         self.data = data
-        self.local_data = CharacterSearch.local_data
+        self.local_data = None
+        if mode != "firstlaunch":
+            self.local_data = CharacterSearch.local_data
         self.CharacterSearch = CharacterSearch
         self.mode = mode
         self.tts = getconfig('tts', 'silerotts')
@@ -1492,7 +1342,7 @@ class CharacterWidget(QWidget):
             self.chats = data.get('score', '0')
             self.author = data.get('user__username', 'Unknown')
             self.description = data.get('description', 'None')
-            self.avatar = data.get('avatar_file_name', '')
+            self.avatar_url = data.get('avatar_file_name', '')
             self.image_label.setFixedSize(80, 80)
 
             self.full_description = self.description
@@ -1524,7 +1374,7 @@ class CharacterWidget(QWidget):
         elif mode == "recent":
             self.char = data.get('character_id', '')
             self.name = data.get('character_name', 'No Name')
-            self.avatar = data.get('character_avatar_uri', '')
+            self.avatar_url = data.get('character_avatar_uri', '')
             self.local_chars = self.local_data.keys()
             self.image_label.setFixedSize(50, 50)
 
@@ -1547,7 +1397,7 @@ class CharacterWidget(QWidget):
         elif mode == "recommend":
             self.char = data.get('external_id')
             self.name = data.get('participant__name', 'No Name')
-            self.avatar = data.get('avatar_file_name', '')
+            self.avatar_url = data.get('avatar_file_name', '')
             self.image_label.setFixedSize(50, 50)
 
             if self.tts == 'charai':
@@ -1565,7 +1415,7 @@ class CharacterWidget(QWidget):
             self.title = data.get('title', 'None')
             self.author = data.get('author', 'Unknown')
             self.description = data.get('description', 'None')
-            self.avatar = data.get('avatar_url', '')
+            self.avatar_url = data.get('avatar_url', '')
             self.voiceid = data.get('voiceid', '')
             self.image_label.setFixedSize(80, 80)
 
@@ -1598,11 +1448,42 @@ class CharacterWidget(QWidget):
                 else:
                     self.text_label.setToolTip(self.full_description)
                     text = f'<b>{self.name}</b> - {self.title}<br>{self.description}<br>• {self.author_label}: {self.author}'
-        
+        elif mode == "firstlaunch":
+            self.author_label = tr(self.trl, 'author_label')
+            self.char = data.get('external_id')
+            self.name = data.get('participant__name', 'No Name')
+            self.title = data.get('title', 'None')
+            self.chats = data.get('score', '0')
+            self.author = data.get('user__username', 'Unknown')
+            self.description = data.get('description', 'None')
+            self.avatar_url = data.get('avatar_file_name', '')
+
+            self.image_label.setFixedSize(80, 80)
+
+            self.full_description = self.description
+            if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
+                self.description = self.description[:220] + '...'
+            self.text_label.setMaximumWidth(400)
+            buttons_layout.addWidget(self.network_addvoice_button)
+            buttons_layout.addWidget(self.network_addnovoice_button)
+
+            if f"{self.title}" == 'None' or f"{self.title}" == '':
+                if f"{self.description}" == 'None' or f"{self.description}" == '':
+                    text = f'<b>{self.name}</b><br>{self.chats} {tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                else:
+                    self.text_label.setToolTip(self.full_description)
+                    text = f'<b>{self.name}</b><br>{self.description}<br>{self.chats} {tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+            else:
+                if f"{self.description}" == 'None' or f"{self.description}" == '':
+                    text = f'<b>{self.name}</b> - {self.title}<br>{self.chats} {tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                else:
+                    self.text_label.setToolTip(self.full_description)
+                    text = f'<b>{self.name}</b> - {self.title}<br>{self.description}<br>{self.chats} {tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+
         self.threads = []
 
-        if f"{self.avatar}" != "None" and f"{self.avatar}" != "":
-            thread = threading.Thread(self.load_image_async(f'https://characterai.io/i/80/static/avatars/{self.avatar}?webp=true&anim=0'))
+        if f"{self.avatar_url}" != "None" and f"{self.avatar_url}" != "":
+            thread = threading.Thread(self.load_image_async(f'https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0'))
             thread.start()
             self.threads.append(thread)
         self.text_label.setText(text)
@@ -1613,7 +1494,7 @@ class CharacterWidget(QWidget):
 
     def load_image_async(self, url):
         def set_image(self, pixmap):
-            if self.mode == "network" or self.mode == "local":
+            if self.mode == "network" or self.mode == "local" or self.mode == "firstlaunch":
                 self.image_label.setPixmap(pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
             elif self.mode == "recent" or self.mode == "recommend":
                 self.image_label.setPixmap(pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
@@ -1630,23 +1511,28 @@ class CharacterWidget(QWidget):
 
     def add_with_voice(self):
         self.load_data()
-        if self.mode == "recent":
+        if self.mode == "recent" or self.mode == "recommend":
             self.get_recent_data()
 
+        self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author}})
         self.save_data()
 
-        self.CharacterSearch.close()
+        if self.mode != "firstlaunch":
+            self.CharacterSearch.close()
         VoiceSearch(self.char).show()
 
     def add_without_voice(self):
         self.load_data()
-        if self.mode == "recent":
+        if self.mode == "recent" or self.mode == "recommend":
             self.get_recent_data()
 
+        self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author}})
         self.save_data()
 
         MessageBox(tr(self.trl, 'character_added'), tr(self.trl, 'character_added_text'), self=self)
-        self.CharacterSearch.close()
+        
+        if self.mode != "firstlaunch":
+            self.CharacterSearch.close()
 
     def load_data(self):
         try:
@@ -1656,11 +1542,6 @@ class CharacterWidget(QWidget):
             self.datafile = {}
 
     def save_data(self):
-        if self.tts == "charai":
-            self.datafile[self.char] = {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author}
-        else:
-            self.datafile[self.char] = {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author, "voice": self.network_speaker_entry.text()}
-
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(self.datafile, f, ensure_ascii=False, indent=4)
 
@@ -1673,24 +1554,25 @@ class CharacterWidget(QWidget):
         self.title = char.get('title', '')
 
     def local_add_char_voice(self):
-        self.CharacterSearch.close()
+        if self.mode != "firstlaunch":
+            self.CharacterSearch.close()
         VoiceSearch(self.char).show()
 
     def local_delete_character(self):
         self.load_data()
-        char_id = self.data.get('char', 'No ID')
-        del self.datafile[char_id]
+        del self.datafile[self.char]
         self.save_data()
+        self.CharacterSearch.main_window.refreshcharsinmenubar()
         self.CharacterSearch.load_local_data()
         self.CharacterSearch.populate_local_list()
 
     def local_delete_voice(self):
         self.load_data()
-        char_id = self.data.get('char', 'No ID')
-        if char_id in self.datafile:
-            if 'voiceid' in self.datafile[char_id]:
-                del self.datafile[char_id]['voiceid']
+        if self.char in self.datafile:
+            if 'voiceid' in self.datafile[self.char]:
+                del self.datafile[self.char]['voiceid']
         self.save_data()
+        self.CharacterSearch.main_window.refreshcharsinmenubar()
         self.CharacterSearch.load_local_data()
         self.CharacterSearch.populate_local_list()
 
@@ -1711,16 +1593,18 @@ class CharacterWidget(QWidget):
             self.setFont(font)
 
     def select_char(self):
-        if self.mode == "network":
-            self.charid = self.data.get('external_id', 'No ID')
-        elif self.mode == "recent":
-            self.charid = self.data.get('character_id', 'No ID')
+        if self.mode == "network" or self.mode == "recent":
             self.load_data()
-            self.voiceid = self.datafile[self.charid].get('voiceid', '')
+            if getconfig('tts', 'silerotts') == "charai":
+                self.voiceid = self.datafile[self.char].get('voiceid', '')
+            elif getconfig('tts', 'silerotts') == "silerotts":
+                self.voiceid = self.datafile[self.char].get('voice', '')
         elif self.mode == "local":
-            self.charid = self.data.get('char', 'No ID')
-            self.voiceid = self.data.get('voiceid', '')
-        self.CharacterSearch.main_window.char_entry.setText(self.charid)
+            if getconfig('tts', 'silerotts') == "charai":
+                self.voiceid = self.data.get('voiceid', '')
+            elif getconfig('tts', 'silerotts') == "silerotts":
+                self.voiceid = self.data.get('voice', '')
+        self.CharacterSearch.main_window.char_entry.setText(self.char)
         self.CharacterSearch.main_window.voice_entry.setText(self.voiceid)
         self.CharacterSearch.close()
 
@@ -1936,6 +1820,11 @@ class CharacterSearch(QWidget):
         """
         self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
 
+    def closeEvent(self, event):
+        if self.main_window:
+            self.main_window.refreshcharsinmenubar()
+        super().closeEvent(event)
+
     def styles_reset(self):
         self.setStyleSheet("")
 
@@ -2054,6 +1943,7 @@ class VoiceSearch(QWidget):
 
         MessageBox(text=tr(self.trl, 'character_voice_changed'))
         self.close()
+
 class EmiliaAuth(QWidget):
     def __init__(self):
         super().__init__()
@@ -2181,8 +2071,7 @@ class Emilia(QMainWindow):
         self.setFixedWidth(300)
         self.setMinimumHeight(150)
 
-        self.recommend_list = []
-        self.recent_list = []
+        self.characters_list = []
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -2337,16 +2226,13 @@ class Emilia(QMainWindow):
 
         if aitype == "charai":
             self.charselect = self.menubar.addMenu(tr("MainWindow", 'character_choice'))
-            self.chareditopen = QAction(QIcon(charediticon), tr("MainWindow", 'open_character_editor'), self)
-            self.chareditopen.triggered.connect(lambda: CharacterEditor().show())
 
-            self.CharacterSearchopen = QAction(QIcon(charediticon), "Character Search", self)
+            self.CharacterSearchopen = QAction(QIcon(charediticon), tr('MainWindow', 'open_character_search'), self)
             self.CharacterSearchopen.triggered.connect(lambda: self.charsopen())
 
             self.charrefreshlist = QAction(QIcon(refreshicon), tr("MainWindow", "refresh_list"))
-            self.charrefreshlist.triggered.connect(lambda: self.addcharsinmenubar())
+            self.charrefreshlist.triggered.connect(lambda: self.refreshcharsinmenubar())
 
-            self.charselect.addAction(self.chareditopen)
             self.charselect.addAction(self.CharacterSearchopen)
             self.charselect.addAction(self.charrefreshlist)
 
@@ -2378,7 +2264,10 @@ class Emilia(QMainWindow):
                 self.voice_entry.setText(speaker)
             def create_action(key, value):
                 def action_func():
-                    open_json(value['char'], value['voice'])
+                    if getconfig('tts', 'silerotts') == "charai":
+                        open_json(value['char'], value.get('voiceid', ''))
+                    elif getconfig('tts', 'silerotts') == "silerotts":
+                        open_json(value['char'], value.get('voice', ''))
                 action = QAction(value['name'], self)
                 action.triggered.connect(action_func)
                 return action
@@ -2391,7 +2280,14 @@ class Emilia(QMainWindow):
                 data = {}
             for key, value in data.items():
                 action = create_action(key, value)
+                self.characters_list.append(action)
                 self.charselect.addAction(action)
+
+    def refreshcharsinmenubar(self):
+        for action in self.characters_list:
+            self.charselect.removeAction(action)
+        self.characters_list.clear()
+        self.addcharsinmenubar()
 
     def set_microphone(self, index):
         self.microphone = sr.Microphone(device_index=index)
@@ -2689,8 +2585,7 @@ class Emilia(QMainWindow):
 
     def start_main(self, mode):
         if self.voice_entry.text() == "" and tts != 'charai':
-            self.ai_output.setVisible(True)
-            self.ai_output.setText(tr("Errors", "nonvoice"))
+            MessageBox(tr('Errors', 'Label'), tr('Errors', 'nonvoice'), self=self)
         else:
             if mode == "voice":
                 threading.Thread(target=lambda: asyncio.run(self.main())).start()
