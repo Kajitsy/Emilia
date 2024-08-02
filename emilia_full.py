@@ -33,9 +33,9 @@ except Exception as e:
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2.1"
-build = "20240730"
-pre = False
+version = "2.2.2"
+build = "20240801"
+pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -323,20 +323,15 @@ class AutoUpdate():
             print(f"{tr('Errors', 'UpdateDownloadError')} {e}")
             writeconfig('autoupdate_enable', 'False')
             return
-        if resource_path("autoupdate") == "autoupdate":
-            with open(f"Emilia_{build}.zip", "wb") as f:
-                f.write(response.content)
+        with open(f"Emilia_{build}.zip", "wb") as f:
+            f.write(response.content)
 
-            with zipfile.ZipFile(f"Emilia_{build}.zip", "r") as zip_ref:
-                zip_ref.extractall(".")
+        with zipfile.ZipFile(f"Emilia_{build}.zip", "r") as zip_ref:
+            zip_ref.extractall(".")
 
-            os.remove(f"Emilia_{build}.zip")
+        os.remove(f"Emilia_{build}.zip")
 
-            MessageBox("Update!", f"{tr('AutoUpdate', 'emilia_updated')} {build}!")
-            os.system("install_charai.bat")
-        elif resource_path("autoupdate") != "autoupdate":
-            with open(f"Emilia_Full.exe", "wb") as f:
-                f.write(response.content)
+        MessageBox("Update!", f"{tr('AutoUpdate', 'emilia_updated')} {build}!")
 
 class FirstLaunch(QMainWindow):
     def __init__(self):
@@ -1965,7 +1960,7 @@ class EmiliaAuth(QWidget):
 
 
         self.getlink_button = QPushButton(tr("GetToken", "send_email"))
-        self.getlink_button.clicked.connect(lambda: self.getlink())
+        self.getlink_button.clicked.connect(self.getlink)
         self.layout.addWidget(self.getlink_button)
 
         self.link_layout = QHBoxLayout()
@@ -1978,7 +1973,7 @@ class EmiliaAuth(QWidget):
         
 
         self.gettoken_button = QPushButton(tr("GetToken", "get_token"))
-        self.gettoken_button.clicked.connect(lambda: self.gettoken())
+        self.gettoken_button.clicked.connect(self.gettoken)
         
         self.setLayout(self.layout)
 
@@ -2187,10 +2182,10 @@ class Emilia(QMainWindow):
             self.gettokenaction = QAction(QIcon(charaiicon), tr("MainWindow", 'get_token'), self)
         elif aitype == "gemini":
             self.gettokenaction = QAction(QIcon(googleicon), tr("MainWindow", 'get_token'), self)
-        self.gettokenaction.triggered.connect(lambda: self.gettoken())
+        self.gettokenaction.triggered.connect(self.gettoken)
 
         self.optionsopenaction = QAction(tr("MainWindow", "options"))
-        self.optionsopenaction.triggered.connect(lambda: self.optionsopen())
+        self.optionsopenaction.triggered.connect(self.optionsopen)
 
         self.visibletextmode = QAction(QIcon(keyboardicon), tr("MainWindow", 'use_text_mode'), self)
         self.visibletextmode.triggered.connect(lambda: self.modehide("text"))
@@ -2228,10 +2223,10 @@ class Emilia(QMainWindow):
             self.charselect = self.menubar.addMenu(tr("MainWindow", 'character_choice'))
 
             self.CharacterSearchopen = QAction(QIcon(charediticon), tr('MainWindow', 'open_character_search'), self)
-            self.CharacterSearchopen.triggered.connect(lambda: self.charsopen())
+            self.CharacterSearchopen.triggered.connect(self.charsopen)
 
             self.charrefreshlist = QAction(QIcon(refreshicon), tr("MainWindow", "refresh_list"))
-            self.charrefreshlist.triggered.connect(lambda: self.refreshcharsinmenubar())
+            self.charrefreshlist.triggered.connect(self.refreshcharsinmenubar)
 
             self.charselect.addAction(self.CharacterSearchopen)
             self.charselect.addAction(self.charrefreshlist)
@@ -2341,17 +2336,6 @@ class Emilia(QMainWindow):
     def styles_reset(self):
         self.setStyleSheet("")
 
-    def devicechange(self, device):
-        writeconfig('devicefortorch', device)
-
-    def langchange(self, lang):
-        writeconfig('language', lang)
-        os.remove("voice.pt")
-        if imagesfolder == "images":
-            os.execv(sys.executable, ['python'] + sys.argv)
-        else:
-            os.execl(sys.executable, sys.executable, *sys.argv)
-
     def gettoken(self):
         if aitype == "charai":
             self.auth_window = EmiliaAuth()
@@ -2402,7 +2386,8 @@ class Emilia(QMainWindow):
                                 put_yo=put_yo)
         return audio
     
-    async def charai_tts(self, message):
+    async def charai_tts(self):
+        message = self.messagenotext
         data = {
             'candidateId': re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1),
             'roomId': message.turn_key.chat_id,
@@ -2441,151 +2426,161 @@ class Emilia(QMainWindow):
                 return num2words(int(match.group()), lang=lang)
             return re.sub(r'\b\d+\b', _conv_num, text)
         except Exception as e:
-            MessageBox(tr('Error', 'Label') + str(e))
+            MessageBox(tr('Error', 'Label'), str(e))
             return text
 
     async def main(self):
-        vtubeenable = getconfig('vtubeenable', "False")
-        tts = getconfig('tts', 'silerotts')
+        self.vtubeenable = getconfig('vtubeenable', "False") == "True"
+        self.tts = getconfig('tts', 'silerotts')
         self.layout.addWidget(self.user_input)
         self.layout.addWidget(self.ai_output)
+        self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
+        while True:
+            await self.process_user_input()
+
+    async def setup_ai(self):
         if aitype == "charai":
             token = aiocai.Client(self.client_entry.text())
             character = self.char_entry.text().replace("https://character.ai/chat/", "")
-            Account = await token.get_me()
+            account = await token.get_me()
             try:
                 chatid = await token.get_chat(character)
             except:
-                chatid = await token.new_chat(character, Account.id)
+                chatid = await token.new_chat(character, account.id)
             persona = CustomCharAI().get_character(character)
-            username = f"{Account.name}: "
-            ai = f"{persona['name']}: "
+            try:
+                username = f"{account.name}: "
+            except Exception as e:
+                username = tr("MainWindow", "user")
+                print(e)
+            ai_name = f"{persona['name']}: "
+            return username, ai_name, chatid, character, token
+
         elif aitype == "gemini":
             genai.configure(api_key=self.token_entry.text())
             model = genai.GenerativeModel('gemini-pro')
             chat = model.start_chat(history=[])
             username = tr("Main", "user")
-            ai = "Gemini: "
+            ai_name = "Gemini: "
+            return username, ai_name, chat, None, None
+
+    async def process_user_input(self):
+        if self.vtubeenable:
+            await EEC().UseEmote("Listening")
+
+        recognizer = sr.Recognizer()
+        self.user_input.setText(self.username + tr("Main", "speak"))
+        msg1 = await self.recognize_speech(recognizer)
+
+        self.user_input.setText(self.username + msg1)
+        self.ai_output.setText(self.ai_name + tr("Main", "generation"))
+        
+        if self.vtubeenable:
+            await EEC().UseEmote("Thinks")
+
+        message = await self.generate_ai_response(msg1)
+        translation = await Translator().translate(message, targetlang="ru" if lang == "ru_RU" else "en")
+        nums = self.numbers_to_words(translation.text)
+
+        if self.vtubeenable:
+            await EEC().UseEmote("VoiceGen")
+
+        self.ai_output.setText(self.ai_name + translation.text)
+
+        if self.vtubeenable:
+            await EEC().UseEmote("Says")
+
+        await self.play_audio_response(nums)
+
+        if self.vtubeenable:
+            await EEC().UseEmote("AfterSays")
+
+    async def recognize_speech(self, recognizer):
         while True:
-            if vtubeenable == "True":
-                await EEC().UseEmote("Listening")
-            recognizer = sr.Recognizer()
-            self.user_input.setText(username + tr("Main", "speak"))
-            while True:
-                if self.microphone != "":
-                    with self.microphone as source:
-                        audio = recognizer.listen(source)
-                else:
-                    with sr.Microphone() as source:
-                        audio = recognizer.listen(source)
-                try:
-                    msg1 = recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
-                    break
-                except sr.UnknownValueError:
-                    self.user_input.setText(username + tr("Main", "say_again"))
-            self.user_input.setText(username + msg1)
-            self.ai_output.setText(ai + tr("Main", "generation"))
-            if vtubeenable == "True":
-                await EEC().UseEmote("Thinks")
-            if aitype == "charai":
-                async with await token.connect() as chat:
-                    messagenotext = await chat.send_message(character, chatid.chat_id, msg1)
-                    message = messagenotext.text
-            elif aitype == "gemini":
-                try:
-                    for chunk in chat.send_message(msg1):
-                        continue
-                    message = chunk.text
-                except Exception as e:
-                    if e.code == 400 and "User location is not supported" in e.message:
-                        self.ai_output.setText(tr("Errors", 'Gemini 400'))
-            translation = await Translator().translate(message, targetlang="ru" if lang == "ru_RU" else "en")
-            nums = self.numbers_to_words(translation.text)
-            if vtubeenable == "True":
-                await EEC().UseEmote("VoiceGen")
-            self.ai_output.setText(ai + translation.text)
-            if vtubeenable == "True":
-                await EEC().UseEmote("Says")
             try:
-                if tts == 'charai' and aitype == 'charai':
-                    audio, sample_rate = await self.charai_tts(messagenotext)
-                else:
-                    audio = self.silero_tts(nums)
-                device = list(self.unique_devices.values())[
-                    self.selected_device_index] if self.selected_device_index != "" else None
-                sd.play(audio, sample_rate, device=device["index"] if device else None)
-                time.sleep(len(audio - 5) / sample_rate)
-                sd.stop()
+                audio = await self.listen_to_microphone(recognizer)
+                return recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
+            except sr.UnknownValueError:
+                self.user_input.setText(self.username + tr("Main", "say_again"))
+
+    async def listen_to_microphone(self, recognizer):
+        if self.microphone:
+            with self.microphone as source:
+                return recognizer.listen(source)
+        else:
+            with sr.Microphone() as source:
+                return recognizer.listen(source)
+
+    async def generate_ai_response(self, msg1):
+        if aitype == "charai":
+            async with await self.token.connect() as chat:
+                self.messagenotext = await chat.send_message(self.character, self.chat.chat_id, msg1)
+                return self.messagenotext.text
+        elif aitype == "gemini":
+            try:
+                for chunk in self.chat.send_message(msg1):
+                    continue
+                return chunk.text
             except Exception as e:
-                print(tr('Errors', 'other') + str(e))
-                MessageBox(tr('Errors', 'Label'), tr('Errors', 'other') + str(e), self)
-                continue
-            if vtubeenable == "True":
-                await EEC().UseEmote("AfterSays")
+                if e.code == 400 and "User location is not supported" in e.message:
+                    MessageBox(tr('Errors', 'Label') + tr("Errors", 'Gemini 400'))
+                    return ""
+                else:
+                    MessageBox(tr('Errors', 'Label') + str(e))
+                    return ""
+
+    async def play_audio_response(self, text):
+        try:
+            if self.tts == 'charai' and aitype == 'charai':
+                audio, sample_rate = await self.charai_tts()
+            else:
+                audio = self.silero_tts(text)
+
+            device = self.get_audio_device()
+
+            sd.play(audio, sample_rate, device=device["index"] if device else None)
+            await asyncio.sleep(len(audio) / sample_rate)
+            sd.stop()
+        except Exception as e:
+            MessageBox(tr('Errors', 'Label') + str(e))
+
+    def get_audio_device(self):
+        return list(self.unique_devices.values())[self.selected_device_index] if self.selected_device_index else None
 
     async def maintext(self):
         if self.user_aiinput.text() == "" or self.user_aiinput.text() == tr("MainWindow", "but_it_is_empty"):
             self.user_aiinput.setText(tr("MainWindow", "but_it_is_empty"))
         else:
-            vtubeenable = getconfig('vtubeenable', "False")
+            self.vtubeenable = getconfig('vtubeenable', "False")
             self.layout.addWidget(self.ai_output)
-            if aitype == "charai":
-                token = aiocai.Client(self.client_entry.text())
-                character = self.char_entry.text().replace("https://character.ai/chat/", "")
-                try:
-                    chatid = await token.get_chat(character)
-                except:
-                    Account = await token.get_me()
-                    chatid = await token.new_chat(character, Account.id)
-                persona = CustomCharAI().get_character(character)
-                ai = f"{persona['name']}: "
-            elif aitype == "gemini":
-                genai.configure(api_key=self.token_entry.text())
-                model = genai.GenerativeModel('gemini-pro')
-                chat = model.start_chat(history=[])
-                ai = "Gemini: "
-            if vtubeenable == "True":
-                await EEC().UseEmote("Thinks")
+            self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
+                
             msg1 = self.user_aiinput.text()
-            self.ai_output.setText(ai + tr("Main", "emigen"))
-            if aitype == "charai":
-                async with await token.connect() as chat:
-                    messagenotext = await chat.send_message(character, chatid.chat_id, msg1)
-                    message = messagenotext.text
-            elif aitype == "gemini":
-                try:
-                    for chunk in chat.send_message(msg1):
-                        continue
-                    message = chunk.text
-                except Exception as e:
-                    if e.code == 400 and "User location is not supported" in e.message:
-                        self.ai_output.setText(tr("Errors", 'Gemini 400'))
-            translation = await Translator().translate(message, targetlang="ru" if lang == "ru_RU" else "en")
-            nums = self.numbers_to_words(translation.text)
-            if vtubeenable == "True":
+
+            self.ai_output.setText(self.ai_name + tr("Main", "generation"))
+
+            if self.vtubeenable == "True":
+                await EEC().UseEmote("Thinks")
+
+            message = await self.generate_ai_response(msg1)
+
+            if self.vtubeenable == "True":
                 await EEC().UseEmote("VoiceGen")
-            self.ai_output.setText(ai + translation.text)
-            if vtubeenable == "True":
+                
+            self.ai_output.setText(self.ai_name + message)
+
+            if self.vtubeenable == "True":
                 await EEC().UseEmote("Says")
-            try:
-                if tts == 'charai' and aitype == 'charai':
-                    audio, sample_rate = await self.charai_tts(messagenotext)
-                else:
-                    audio = self.silero_tts(nums)
-                device = list(self.unique_devices.values())[
-                    self.selected_device_index] if self.selected_device_index != "" else None
-                sd.play(audio, sample_rate, device=device["index"] if device else None)
-                time.sleep(len(audio - 5) / sample_rate)
-                sd.stop()
-            except Exception as e:
-                print(tr('Errors', 'other') + str(e))
-                MessageBox(tr('Errors', 'Label'), tr('Errors', 'other') + str(e), self)
-            if vtubeenable == "True":
+
+            await self.play_audio_response()
+
+            if self.vtubeenable == "True":
                 await EEC().UseEmote("Listening")
 
     def start_main(self, mode):
         if self.voice_entry.text() == "" and tts != 'charai':
             MessageBox(tr('Errors', 'Label'), tr('Errors', 'nonvoice'), self=self)
+            print("Ebal")
         else:
             if mode == "voice":
                 threading.Thread(target=lambda: asyncio.run(self.main())).start()
