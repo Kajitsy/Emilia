@@ -26,7 +26,6 @@ from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBo
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
 from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
 
-
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.full.app')
 except Exception as e:
