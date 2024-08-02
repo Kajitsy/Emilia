@@ -6,6 +6,7 @@ import threading
 import torch
 import zipfile
 import requests
+import aiohttp
 import re
 import json
 import sys
@@ -33,7 +34,7 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.2"
-build = "20240801"
+build = "20240802"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -1128,7 +1129,7 @@ class NewCharacterEditor(QWidget):
         except json.JSONDecodeError:
              data = {}
         charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
-        character = CustomCharAI().get_character(charid)
+        character = await CustomCharAI().get_character(charid)
         data.update({charid: {"name": character['name'], "char": charid, "avatar_url": character['avatar_file_name'], "description": character['description'], "author": character['user__username'], "voice": character['voice']}})
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -1204,7 +1205,7 @@ class ImageLoaderThread(QThread):
             self.image_loaded.emit(QPixmap())
 
 class CustomCharAI():
-    def request(self, endpoint, data = None, method = "get", neo = False):
+    async def request(self, endpoint, data = None, method = "get", neo = False):
         headers = {
             "Content-Type": 'application/json',
             "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
@@ -1215,30 +1216,36 @@ class CustomCharAI():
         else:
             url = f"https://plus.character.ai/{endpoint}"
 
-        if method == "get":
-            response = requests.get(url, headers=headers, params=data)
-        elif method == "post":
-            response = requests.post(url, headers=headers, json=data)
-        else:
-            raise ValueError("Invalid method")
+        async with aiohttp.ClientSession() as session:
+            if method == "get":
+                async with session.get(url, headers=headers, params=data) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    else:
+                        raise Exception(f"Failed to get data, status code: {response.status}")
+            elif method == "post":
+                async with session.post(url, headers=headers, json=data) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    else:
+                        raise Exception(f"Failed to get data, status code: {response.status}")
+            else:
+                raise ValueError("Invalid method")
 
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        else:
-            raise Exception(f"Failed to get data, status code: {response.status_code}")
-
-    def get_character(self, character_id):
+    async def get_character(self, character_id):
         data = {
             "external_id": character_id
         }
-        return self.request("chat/character/info/", data, "post")['character']
+        response = await self.request("chat/character/info/", data, "post")
+        return response['character']
 
-    def get_recommend_chats(self):
-        return self.request("recommendation/v1/user", neo=True)['characters']
+    async def get_recommend_chats(self):
+        response = await self.request("recommendation/v1/user", neo=True)
+        return response['characters']
 
-    def get_recent_chats(self):
-        return self.request("chats/recent", neo=True)['chats']
+    async def get_recent_chats(self):
+        response = await self.request("chats/recent", neo=True)
+        return response['chats']
 
 class CharacterWidget(QWidget):
     def __init__(self, CharacterSearch, data, mode):
@@ -1540,7 +1547,7 @@ class CharacterWidget(QWidget):
             json.dump(self.datafile, f, ensure_ascii=False, indent=4)
 
     def get_recent_data(self):
-        char = CustomCharAI().get_character(self.char)
+        char = asyncio.run(CustomCharAI().get_character(self.char))
         self.name = char.get('participant__name', 'No Name')
         self.author = char.get('user__username', 'Unknown')
         self.avatar_url = char.get('avatar_file_name', '')
@@ -2110,8 +2117,8 @@ class Emilia(QMainWindow):
             hlayout.addWidget(self.client_entry)
             if self.client_entry.text() != "":
                 try:
-                    self.recommend_chats = CustomCharAI().get_recommend_chats()
-                    self.recent_chats = CustomCharAI().get_recent_chats()
+                    self.recommend_chats = asyncio.run(CustomCharAI().get_recommend_chats())
+                    self.recent_chats = asyncio.run(CustomCharAI().get_recent_chats())
                 except Exception as e:
                     self.recommend_chats = None
                     self.recent_chats = None
@@ -2446,7 +2453,7 @@ class Emilia(QMainWindow):
                 chatid = await token.get_chat(character)
             except:
                 chatid = await token.new_chat(character, account.id)
-            persona = CustomCharAI().get_character(character)
+            persona = await CustomCharAI().get_character(character)
             try:
                 username = f"{account.name}: "
             except Exception as e:

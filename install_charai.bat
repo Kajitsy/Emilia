@@ -7,6 +7,7 @@ pip install sounddevice
 pip install soundfile
 pip install pyvts
 pip install pyaudio
+pip install aiohttp
 pip install numpy<2
 pip install PyQt6
 @echo Emilia Launch
