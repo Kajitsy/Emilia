@@ -39,7 +39,7 @@
       "about_emilia": "Об Emilia ",
       "language_from": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
       "new_in": "<br><br>Новое в ",
-      "whats_new": ": <br>• Теперь Вы можете использовать голоса от Character.AI, выбрать можно в параметрах<br>• Emilia: Character Search - новый редактор персонажей<br>  В нём вы сможете найти персонажа или выбрать его из недавних и рекомендованных Вам чатов<br>• Emilia: Voice Search - позволит найти голос для выбранного персонажа<br>  Вы сможете прослушать пример голоса прямо в окне!<br>• Переработанное окно первого запуска, уменьшено кол-во открывающихся окон, поиск персонажей встроен<br>• Emilia_CharacterAI.zip - версия Emilia, оптимизированная для использования только с Character.AI<br>  Emilia_CharacterAI.exe - тоже самое что и первое, но в exe формате что позволяет не устанавливать Python",
+      "whats_new": ": <br>• Оптимизирован код<br>• Исправления ошибок",
       "show_all_releases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
       "emilia_is_open_source": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
       "use_version": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
