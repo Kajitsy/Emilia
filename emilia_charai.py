@@ -5,7 +5,6 @@ import os
 import asyncio
 import winreg
 import threading
-import time
 import zipfile
 import requests
 import re

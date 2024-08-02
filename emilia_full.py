@@ -4,7 +4,6 @@ import asyncio
 import winreg
 import threading
 import torch
-import time
 import zipfile
 import requests
 import re
