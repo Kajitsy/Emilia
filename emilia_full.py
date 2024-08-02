@@ -24,7 +24,7 @@ from characterai import aiocai, sendCode, authUser
 from num2words import num2words
 from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
-from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
+from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread 
 
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.full.app')
