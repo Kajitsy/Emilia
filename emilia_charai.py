@@ -1,6 +1,5 @@
 # pyinstaller --noconfirm --onefile --windowed --icon "Emilia\images\premilia.ico" --add-data "Emilia\images;images/" --add-data "Emilia\locales;locales/"  "Emilia\emilia_charai.py"
 
-
 import io
 import os
 import asyncio
