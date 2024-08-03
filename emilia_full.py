@@ -34,7 +34,7 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.2"
-build = "20240802"
+build = "20240803"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -2394,37 +2394,41 @@ class Emilia(QMainWindow):
     
     async def charai_tts(self):
         message = self.messagenotext
-        data = {
-            'candidateId': re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1),
-            'roomId': message.turn_key.chat_id,
-            'turnId': message.turn_key.turn_id,
-            'voiceId': self.voice_entry.text().replace("https://character.ai/chat/", ""),
-            'voiceQuery': message.name
-        }
+        voiceid = self.voice_entry.text().replace("https://character.ai/chat/", "")
+        if voiceid == "":
+            data = {
+                'candidateId': re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1),
+                'roomId': message.turn_key.chat_id,
+                'turnId': message.turn_key.turn_id,
+                'voiceId': voiceid,
+                'voiceQuery': message.name
+            }
+        else:
+            data = {
+                'candidateId': re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1),
+                'roomId': message.turn_key.chat_id,
+                'turnId': message.turn_key.turn_id,
+                'voiceId': voiceid
+            }           
         headers = {
                 "Content-Type": 'application/json',
                 "Authorization": f'Token {self.client_entry.text()}'
             }
         response = requests.post('https://neo.character.ai/multimodal/api/v1/memo/replay', data=json.dumps(data), headers=headers)
-        if response.status_code == 200:
-            voice = response.json()
-            link = voice["replayUrl"]
-            download = requests.get(link, stream=True)
-            if download.status_code == 200:
-                audio_bytes = io.BytesIO(download.content)
-                audio_array, samplerate = sf.read(audio_bytes)
-                return audio_array, samplerate
-        else:
-            print("Character.AI TTS Error\nUsing SileroTTS with random voice")
-            MessageBox(tr('Errors', 'Label'), f"Using SileroTTS with random voice\nCharacter.AI TTS Error \n{response.status_code}", self)
-            model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
-            model.to(torch.device(torchdevice))
-            audio = model.apply_tts(text=message.text,
-                                    speaker="random",
-                                    sample_rate=sample_rate,
-                                    put_accent=put_accent,
-                                    put_yo=put_yo)
-            return audio, sample_rate
+        try:
+            if response.status_code == 200:
+                voice = response.json()
+                link = voice["replayUrl"]
+                download = requests.get(link, stream=True)
+                if download.status_code == 200:
+                    audio_bytes = io.BytesIO(download.content)
+                    audio_array, samplerate = sf.read(audio_bytes)
+                    return audio_array, samplerate
+            else:
+                print("Character.AI TTS Error")
+                MessageBox(tr('Errors', 'Label'), f"Character.AI TTS Error \n{response.status_code}", self=self)
+        except Exception as e:
+            MessageBox(tr('Errors', 'Label'), str(e), self=self)
 
     def numbers_to_words(self, text):
         try:
