@@ -35,7 +35,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.2"
 build = "20240803"
-pre = False
+pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -1136,7 +1136,7 @@ class NewCharacterEditor(QWidget):
              data = {}
         charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
         character = await CustomCharAI().get_character(charid)
-        data.update({charid: {"name": character['name'], "char": charid, "avatar_url": character['avatar_file_name'], "description": character['description'], "author": character['user__username'], "voice": character['voice']}})
+        data.update({charid: {"name": character['name'], "char": charid, "avatar_url": character['avatar_file_name'], "description": character['description'], "author": character['user__username']}})
         with open('data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
