@@ -33,7 +33,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.2"
 build = "20240803"
-pre = True
+pre = False
 sample_rate = 48000
 
 def resource_path(relative_path):
@@ -2114,28 +2114,26 @@ class Emilia(QMainWindow):
                 "Authorization": f'Token {self.client_entry.text()}'
             }
         response = requests.post('https://neo.character.ai/multimodal/api/v1/memo/replay', data=json.dumps(data), headers=headers)
-        try:
-            if response.status_code == 200:
-                voice = response.json()
-                link = voice["replayUrl"]
-                download = requests.get(link, stream=True)
-                if download.status_code == 200:
-                    audio_bytes = io.BytesIO(download.content)
-                    audio_array, samplerate = sf.read(audio_bytes)
-                    return audio_array, samplerate
-            else:
-                print("Character.AI TTS Error")
-                MessageBox(tr('Errors', 'Label'), f"Character.AI TTS Error \n{response.status_code}", self=self)
-        except Exception as e:
-            MessageBox(tr('Errors', 'Label'), str(e), self=self)
+        if response.status_code == 200:
+            voice = response.json()
+            link = voice["replayUrl"]
+            download = requests.get(link, stream=True)
+            if download.status_code == 200:
+                audio_bytes = io.BytesIO(download.content)
+                audio_array, samplerate = sf.read(audio_bytes)
+                return audio_array, samplerate
 
     async def main(self):
-        self.vtubeenable = getconfig('vtubeenable', "False") == "True"
-        self.layout.addWidget(self.user_input)
-        self.layout.addWidget(self.ai_output)
-        self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
-        while True:
-            await self.process_user_input()
+        try:
+            self.vtubeenable = getconfig('vtubeenable', "False") == "True"
+            self.tts = getconfig('tts', 'silerotts')
+            self.layout.addWidget(self.user_input)
+            self.layout.addWidget(self.ai_output)
+            self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
+            while True:
+                await self.process_user_input()
+        except Exception as e:
+            MessageBox(tr('Error', 'Label'), str(e), self=self)
 
     async def setup_ai(self):
         token = aiocai.Client(self.client_entry.text())
