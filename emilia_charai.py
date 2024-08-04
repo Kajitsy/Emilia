@@ -19,7 +19,10 @@ import warnings
 import sounddevice as sd
 import soundfile as sf
 import speech_recognition as sr
+from gpytranslate import Translator
 from characterai import aiocai, sendCode, authUser
+from elevenlabs.client import ElevenLabs
+from elevenlabs import VoiceSettings, play
 from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPainter, QBrush
 from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
@@ -616,6 +619,21 @@ class OptionsWindow(QWidget):
         firsthalf.addLayout(langlayout)
 
 
+        ttslayout = QHBoxLayout()
+        self.ttsselect = QComboBox()
+        self.ttsselect.addItems([tr(self.trl, 'character.ai_voices'), "ElevenLabs"])
+        if getconfig("tts", "silerotts") == "elevenlabs":
+            self.ttsselect.setCurrentIndex(1)
+        self.ttsselect.currentTextChanged.connect(lambda: self.ttschange())
+
+        self.ttslabel = QLabel(tr(self.trl, 'select_tts'))
+        self.ttslabel.setWordWrap(True)
+
+        ttslayout.addWidget(self.ttslabel)
+        ttslayout.addWidget(self.ttsselect)
+        firsthalf.addLayout(ttslayout)
+
+
         vtubelayout = QHBoxLayout()
         self.vtubecheck = QCheckBox()
         if getconfig('vtubeenable', 'False') == "True":
@@ -742,6 +760,31 @@ class OptionsWindow(QWidget):
             writeconfig('autoupdate_enable', "True")
         else:
             writeconfig('autoupdate_enable', "False")
+
+    def ttschange(self):
+        value = self.ttsselect.currentIndex()
+        if value == 0:
+            tts = "charai"
+            self.mainwindow.tts_token_label.setVisible(False)
+            self.mainwindow.tts_token_entry.setVisible(False)
+            self.mainwindow.voice_label.setText(tr("MainWindow", "voice_id"))
+            self.mainwindow.voice_entry.setToolTip("")
+            self.mainwindow.voice_entry.setPlaceholderText("")
+            self.mainwindow.voice_entry.textChanged.disconnect()
+            self.mainwindow.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.mainwindow.voice_entry.text().replace("https://character.ai/?voiceId=", ""), "charaiconfig.json"))
+            self.mainwindow.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
+        elif value == 1:
+            tts = "elevenlabs"
+            self.mainwindow.voice_label.setText("Voice")
+            self.mainwindow.tts_token_label.setText("ElevenLabs API Key")
+            self.mainwindow.tts_token_entry.setText(getconfig("elevenlabs_api_key"))
+            self.mainwindow.voice_entry.setPlaceholderText("")
+            self.mainwindow.voice_entry.textChanged.disconnect()
+            self.mainwindow.voice_entry.textChanged.connect(lambda: writeconfig("elevenlabs_voice", self.mainwindow.voice_entry.text(), "charaiconfig.json"))
+            self.mainwindow.voice_entry.setText(getconfig('elevenlabs_voice', configfile="charaiconfig.json"))
+            self.mainwindow.voice_layout.addWidget(self.mainwindow.tts_token_label)
+            self.mainwindow.voice_layout.addWidget(self.mainwindow.tts_token_entry)
+        writeconfig('tts', tts)
 
     def changetheme(self):
         value = self.themechange.currentIndex()
@@ -1047,6 +1090,7 @@ class CharacterWidget(QWidget):
             self.local_data = CharacterSearch.local_data
         self.CharacterSearch = CharacterSearch
         self.mode = mode
+        self.tts = getconfig('tts', 'charai')
         self.trl = 'CharEditor'
 
         layout = QHBoxLayout()
@@ -1070,6 +1114,22 @@ class CharacterWidget(QWidget):
         self.network_addvoice_button.setFixedWidth(200)
         self.network_addvoice_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.network_addvoice_button.clicked.connect(self.add_with_voice)
+
+        self.network_speaker_entry = QLineEdit()
+        self.network_spadd_button = QPushButton(tr(self.trl, 'add_character'))
+        self.network_spadd_button = QPushButton(tr(self.trl, 'set_voice'))
+        self.network_speaker_entry.setFixedWidth(200)
+        self.network_speaker_entry.setText(data.get('elevenlabs_voice', ''))
+        self.network_speaker_entry.textChanged.connect(self.speaker_entry)
+        self.network_speaker_entry.setPlaceholderText("Enter the name of the voice")
+
+        self.network_spadd_button.setFixedWidth(200)
+        self.network_spadd_button.setEnabled(False)
+        self.network_spadd_button.clicked.connect(self.add_with_elevenlabs_voice)
+
+        self.network_spadd_button.setFixedWidth(200)
+        self.network_spadd_button.setEnabled(False)
+        self.network_spadd_button.clicked.connect(self.add_with_elevenlabs_voice)
 
         local_seldel_buttons = QHBoxLayout()
 
@@ -1126,16 +1186,24 @@ class CharacterWidget(QWidget):
             self.image_label.setFixedSize(80, 80)
 
             self.full_description = self.description
-            if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                self.description = self.description[:220] + '...'
             self.text_label.setMaximumWidth(400)
             self.local_chars = self.local_data.keys()
             if self.char in self.local_chars:
                 buttons_layout.addWidget(self.local_select_button)
                 self.local_select_button.setFixedWidth(200)
             else:
-                buttons_layout.addWidget(self.network_addvoice_button)
-                buttons_layout.addWidget(self.network_addnovoice_button)
+                if self.tts == 'charai':
+                    if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
+                        self.description = self.description[:220] + '...'
+                    self.text_label.setMaximumWidth(400)
+                    buttons_layout.addWidget(self.network_addvoice_button)
+                    buttons_layout.addWidget(self.network_addnovoice_button)
+                elif self.tts == 'elevenlabs':
+                    if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
+                        self.description = self.description[:220] + '...'
+                    self.text_label.setMaximumWidth(400)
+                    buttons_layout.addWidget(self.network_speaker_entry)
+                    buttons_layout.addWidget(self.network_spadd_button)
 
             if f"{self.title}" == 'None' or f"{self.title}" == '':
                 if f"{self.description}" == 'None' or f"{self.description}" == '':
@@ -1156,14 +1224,22 @@ class CharacterWidget(QWidget):
             self.local_chars = self.local_data.keys()
             self.image_label.setFixedSize(50, 50)
 
-            self.local_select_button.setFixedWidth(200)
-            self.show_chat_button.setFixedWidth(200)
+            if self.tts == 'charai':
+                self.local_select_button.setFixedWidth(200)
+                self.show_chat_button.setFixedWidth(200)
+            elif self.tts == 'elevenlabs':
+                self.local_select_button.setFixedWidth(200)
+                self.show_chat_button.setFixedWidth(200)
 
             if self.char in self.local_chars:
                 buttons_layout.addWidget(self.local_select_button)
             else:
-                buttons_layout.addWidget(self.network_addvoice_button)
-                buttons_layout.addWidget(self.network_addnovoice_button)
+                if self.tts == 'charai':
+                    buttons_layout.addWidget(self.network_addvoice_button)
+                    buttons_layout.addWidget(self.network_addnovoice_button)
+                elif self.tts == 'elevenlabs':
+                    buttons_layout.addWidget(self.network_speaker_entry)
+                    buttons_layout.addWidget(self.network_spadd_button)
             buttons_layout.addWidget(self.show_chat_button)
 
             text = f'<b>{self.name}</b>'
@@ -1173,8 +1249,12 @@ class CharacterWidget(QWidget):
             self.avatar_url = data.get('avatar_file_name', '')
             self.image_label.setFixedSize(50, 50)
 
-            buttons_layout.addWidget(self.network_addvoice_button)
-            buttons_layout.addWidget(self.network_addnovoice_button)
+            if self.tts == 'charai':
+                buttons_layout.addWidget(self.network_addvoice_button)
+                buttons_layout.addWidget(self.network_addnovoice_button)
+            elif self.tts == 'elevenlabs':
+                buttons_layout.addWidget(self.network_speaker_entry)
+                buttons_layout.addWidget(self.network_spadd_button)
 
             text = f'<b>{self.name}</b>'
         elif mode == "local":
@@ -1189,14 +1269,21 @@ class CharacterWidget(QWidget):
             self.image_label.setFixedSize(80, 80)
 
             self.full_description = self.description
-            if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                self.description = self.description[:220] + '...'
-            self.text_label.setMaximumWidth(400)
-            if self.voiceid == '':
-                buttons_layout.addWidget(self.local_add_voice_button)
-            else:
-                buttons_layout.addWidget(self.local_edit_voice_button)
-            buttons_layout.addWidget(self.local_delete_voice_button)
+            if self.tts == 'charai':
+                if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
+                    self.description = self.description[:220] + '...'
+                self.text_label.setMaximumWidth(400)
+                if self.voiceid == '':
+                    buttons_layout.addWidget(self.local_add_voice_button)
+                else:
+                    buttons_layout.addWidget(self.local_edit_voice_button)
+                buttons_layout.addWidget(self.local_delete_voice_button)
+            elif self.tts == 'elevenlabs':
+                if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
+                    self.description = self.description[:220] + '...'
+                self.text_label.setMaximumWidth(400)
+                buttons_layout.addWidget(self.network_speaker_entry)
+                buttons_layout.addWidget(self.network_spadd_button)
             buttons_layout.addWidget(self.show_chat_button)
 
             if f"{self.title}" == 'None' or f"{self.title}" == '':
@@ -1284,6 +1371,12 @@ class CharacterWidget(QWidget):
         pixmap.setMask(mask.mask())
         return pixmap
 
+    def speaker_entry(self):
+        if self.network_speaker_entry.text() == "":
+            self.network_spadd_button.setEnabled(False)
+        elif self.network_speaker_entry.text() != "":
+            self.network_spadd_button.setEnabled(True)
+
     def add_with_voice(self):
         self.load_data()
         if self.mode == "recent" or self.mode == "recommend":
@@ -1295,6 +1388,17 @@ class CharacterWidget(QWidget):
         if self.mode != "firstlaunch":
             self.CharacterSearch.close()
         VoiceSearch(self.char).show()
+
+    def add_with_elevenlabs_voice(self):
+        self.load_data()
+        if self.mode == "recent" or self.mode == "recommend":
+            self.get_recent_data()
+
+        self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author, "elevenlabs_voice": self.network_speaker_entry.text()}})
+        self.save_data()
+
+        if self.mode != "firstlaunch":
+            self.CharacterSearch.close()
 
     def add_without_voice(self):
         self.load_data()
@@ -1370,9 +1474,15 @@ class CharacterWidget(QWidget):
     def select_char(self):
         if self.mode == "network" or self.mode == "recent":
             self.load_data()
-            self.voiceid = self.datafile[self.char].get('voiceid', '')
+            if self.tts == "charai":
+                self.voiceid = self.datafile[self.char].get('voiceid', '')
+            elif self.tts == "elevenlabs":
+                self.voiceid = self.datafile[self.char].get('elevenlabs_voice', '')
         elif self.mode == "local":
-            self.voiceid = self.data.get('voiceid', '')
+            if self.tts == "charai":
+                self.voiceid = self.data.get('voiceid', '')
+            elif self.tts == "elevenlabs":
+                self.voiceid = self.data.get('elevenlabs_voice', '')
         self.CharacterSearch.main_window.char_entry.setText(self.char)
         self.CharacterSearch.main_window.voice_entry.setText(self.voiceid)
         self.CharacterSearch.close()
@@ -2076,12 +2186,25 @@ class Emilia(QMainWindow):
         self.layout.addLayout(hlayout)
             
         self.voice_layout = QHBoxLayout()
-        self.voice_entry = QLineEdit()
+        self.tts_token_label = QLabel()
+        self.tts_token_label.setWordWrap(True)
+        self.tts_token_entry = QLineEdit()
         self.voice_label = QLabel()
-        self.voice_label.setText(tr("MainWindow", "voice_id"))
-        self.voice_entry.setToolTip(tr("MainWindow", "voice_id_tooltip"))
-        self.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.voice_entry.text().replace("https://character.ai/?voiceId=", ""), "charaiconfig.json"))
-        self.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
+        self.voice_entry = QLineEdit()
+        if getconfig('tts', 'charai') == "charai":
+            self.voice_label.setText(tr("MainWindow", "voice_id"))
+            self.voice_entry.setToolTip(tr("MainWindow", "voice_id_tooltip"))
+            self.voice_entry.textChanged.connect(lambda: writeconfig("voiceid", self.voice_entry.text().replace("https://character.ai/?voiceId=", ""), "charaiconfig.json"))
+            self.voice_entry.setText(getconfig('voiceid', configfile="charaiconfig.json"))
+        elif getconfig('tts', 'charai') == "elevenlabs":
+            self.voice_label.setText("Voice")
+            self.voice_entry.textChanged.connect(lambda: writeconfig("elevenlabs_voice", self.voice_entry.text(), "charaiconfig.json"))
+            self.voice_entry.setText(getconfig('elevenlabs_voice', configfile="charaiconfig.json"))
+            self.tts_token_label.setText("ElevenLabs API Key")
+            self.tts_token_entry.setText(getconfig("elevenlabs_api_key"))
+            self.tts_token_entry.textChanged.connect(lambda: writeconfig("elevenlabs_api_key", self.tts_token_entry.text()))
+            self.voice_layout.addWidget(self.tts_token_label)
+            self.voice_layout.addWidget(self.tts_token_entry)
         self.voice_layout.addWidget(self.voice_label)
         self.voice_layout.addWidget(self.voice_entry)
 
@@ -2210,7 +2333,6 @@ class Emilia(QMainWindow):
                 self.CharacterSearchopen.setEnabled(True)
                 self.recommend_chats = None
                 self.recent_chats = None
-
 
     def handle_recommend_chats(self, chats):
         self.recommend_chats = chats
@@ -2358,7 +2480,7 @@ class Emilia(QMainWindow):
         text = tr("About", "emilia_is_open_source") + version + tr("About", "use_version") + language + whatsnew + otherversions
         msg.setText(text)
         msg.exec()
-    
+
     async def charai_tts(self):
         message = self.messagenotext
         voiceid = self.voice_entry.text().replace("https://character.ai/chat/", "")
@@ -2394,7 +2516,7 @@ class Emilia(QMainWindow):
     async def main(self):
         try:
             self.vtubeenable = getconfig('vtubeenable', "False") == "True"
-            self.tts = getconfig('tts', 'silerotts')
+            self.tts = getconfig('tts', 'charai')
             self.layout.addWidget(self.user_input)
             self.layout.addWidget(self.ai_output)
             self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
@@ -2405,6 +2527,8 @@ class Emilia(QMainWindow):
             MessageBox(tr('Errors', 'Label'), str(e), self=self)
 
     async def setup_ai(self):
+        if self.tts == "elevenlabs":
+            self.elevenlabs = ElevenLabs(api_key=getconfig('elevenlabs_api_key'))
         token = aiocai.Client(self.client_entry.text())
         character = self.char_entry.text().replace("https://character.ai/chat/", "")
         account = await token.get_me()
@@ -2428,7 +2552,6 @@ class Emilia(QMainWindow):
 
         recognizer = sr.Recognizer()
         self.user_input.setText(self.username + tr("Main", "speak"))
-        self.ai_output.setText(self.ai_name + "...")
         msg1 = await self.recognize_speech(recognizer)
 
         self.user_input.setText(self.username + msg1)
@@ -2438,6 +2561,9 @@ class Emilia(QMainWindow):
             await EEC().UseEmote("Thinks")
 
         message = await self.generate_ai_response(msg1)
+        if self.tts != "charai" and lang == "ru_RU":
+            self.translation = await Translator().translate(message, targetlang="ru")
+            message = self.translation.text
 
         if self.vtubeenable:
             await EEC().UseEmote("VoiceGen")
@@ -2447,7 +2573,7 @@ class Emilia(QMainWindow):
         if self.vtubeenable:
             await EEC().UseEmote("Says")
 
-        await self.play_audio_response()
+        await self.play_audio_response(message)
 
         if self.vtubeenable:
             await EEC().UseEmote("AfterSays")
@@ -2473,10 +2599,25 @@ class Emilia(QMainWindow):
             self.messagenotext = await chat.send_message(self.character, self.chat.chat_id, msg1)
             return self.messagenotext.text
 
-    async def play_audio_response(self):
+    async def play_audio_response(self, text):
         try:
-            audio, sample_rate = await self.charai_tts()
-
+            if self.tts == "charai":
+                audio, sample_rate = await self.charai_tts()
+            elif self.tts == "elevenlabs":
+                audio = self.elevenlabs.generate(
+                    voice=getconfig("elevenlabs_voice", configfile="charaiconfig.json"),
+                    output_format="mp3_22050_32",
+                    text=text,
+                    model="eleven_multilingual_v2",
+                    voice_settings=VoiceSettings(
+                        stability=0.2,
+                        similarity_boost=0.8,
+                        style=0.4,
+                        use_speaker_boost=True,
+                    )
+                )
+                play(audio, use_ffmpeg=False)
+                return
             sd.play(audio, sample_rate)
             await asyncio.sleep(len(audio) / sample_rate)
             sd.stop()
@@ -2521,6 +2662,8 @@ class Emilia(QMainWindow):
             self.char_entry.setVisible(False)
             self.client_label.setVisible(False)
             self.client_entry.setVisible(False)
+            self.tts_token_label.setVisible(False)
+            self.tts_token_entry.setVisible(False)
             self.voice_label.setVisible(False)
             self.voice_entry.setVisible(False)
             self.vstart_button.setVisible(False)

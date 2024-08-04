@@ -9,6 +9,7 @@ pip install gpytranslate
 pip install pyvts
 pip install aiohttp
 pip install pyaudio
+pip install elevenlabs
 pip install google-generativeai
 pip install num2words
 pip install numpy<2
