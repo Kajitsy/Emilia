@@ -21,7 +21,7 @@ import soundfile as sf
 import speech_recognition as sr
 from characterai import aiocai, sendCode, authUser
 from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
-from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
+from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPainter, QBrush
 from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
 from PyQt6.QtMultimedia import QMediaDevices
 
@@ -1051,6 +1051,7 @@ class CharacterWidget(QWidget):
 
         layout = QHBoxLayout()
         self.image_label = QLabel()
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.image_label)
 
         text_buttons_layout = QHBoxLayout()
@@ -1259,14 +1260,29 @@ class CharacterWidget(QWidget):
 
     def load_image_async(self, url):
         def set_image(self, pixmap):
+            rounded_pixmap = self.round_corners(pixmap, 20)
             if self.mode == "network" or self.mode == "local" or self.mode == "firstlaunch":
-                self.image_label.setPixmap(pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                self.image_label.setPixmap(rounded_pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
             elif self.mode == "recent" or self.mode == "recommend":
-                self.image_label.setPixmap(pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                self.image_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
         self.image_loader_thread = ImageLoaderThread(url)
         self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
         self.image_loader_thread.start()
+
+    def round_corners(self, pixmap, radius):
+        size = pixmap.size()
+        mask = QPixmap(size)
+        mask.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(mask)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QBrush(Qt.GlobalColor.white))
+        painter.drawRoundedRect(0, 0, size.width(), size.height(), radius, radius)
+        painter.end()
+
+        pixmap.setMask(mask.mask())
+        return pixmap
 
     def add_with_voice(self):
         self.load_data()
@@ -1711,6 +1727,12 @@ class MessageWidget(QWidget):
         if self.message_type is None:
             self.character_id = data.author.author_id
 
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                color: #333;
+            }
+        """)
 
         layout = QHBoxLayout()
 
@@ -1720,18 +1742,37 @@ class MessageWidget(QWidget):
         self.formatted_text = self.format_text(self.raw_content)
 
         self.avatar_label = QLabel()
-        self.avatar_label.setFixedSize(40, 40)
+        self.avatar_label.setFixedSize(50, 50)
 
+        self.name_label = QLabel(f"{self.author_name}")
+        self.name_label.setFixedSize(50, 50)
+        self.name_label.setWordWrap(True)
+        self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.name_label.setStyleSheet("font-size: 13px; background-color: #fff; border-radius: 10px;")
+
+        self.avatar_name_layout = QVBoxLayout()
+        self.avatar_name_layout.addWidget(self.avatar_label)
+        self.avatar_name_layout.addWidget(self.name_label)
+
+        text_layout = QVBoxLayout()
         if self.message_type:
             self.text_label = QLabel(f'{self.formatted_text}')
-            self.text_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-            self.text_label.setStyleSheet("font-size: 16px;")
+            self.text_label.setStyleSheet("font-size: 16px; background-color: #e1f5fe; border-radius: 10px; padding: 5px;")
+            text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignHCenter)
         else:
-            self.text_label = QLabel(f'<b>{self.author_name}</b>: {self.formatted_text}')
-            self.text_label.setStyleSheet("font-size: 15px;")
+            self.text_label = QLabel(f'{self.formatted_text}')
+            self.text_label.setStyleSheet("font-size: 16px; background-color: #fff; border-radius: 10px; padding: 5px;")
+            text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignHCenter)
         self.text_label.setWordWrap(True)
-        layout.addWidget(self.avatar_label)
-        layout.addWidget(self.text_label)
+
+        if self.message_type:
+            layout.addLayout(text_layout)
+        else:
+            if len(self.text_label.text()) > 80:
+                layout.addLayout(self.avatar_name_layout)
+            else: 
+                layout.addWidget(self.avatar_label)
+            layout.addLayout(text_layout)
         self.setLayout(layout)
 
         self.threads = []
@@ -1742,19 +1783,32 @@ class MessageWidget(QWidget):
 
     def load_image_async(self):
         def set_image(self, pixmap):
-            self.avatar_label.setPixmap(pixmap.scaled(40, 40, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            rounded_pixmap = self.round_corners(pixmap, 25)
+            self.avatar_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))        
         self.avatar_url = self.chat.character.get('avatar_file_name', '')
         url = f'https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0'
         self.image_loader_thread = ImageLoaderThread(url)
         self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
         self.image_loader_thread.start()
 
+    def round_corners(self, pixmap, radius):
+        size = pixmap.size()
+        mask = QPixmap(size)
+        mask.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(mask)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QBrush(Qt.GlobalColor.white))
+        painter.drawRoundedRect(0, 0, size.width(), size.height(), radius, radius)
+        painter.end()
+
+        pixmap.setMask(mask.mask())
+        return pixmap
+
     def format_text(self, text):
         pattern = re.compile(r'\*(.*?)\*')
         html_text = pattern.sub(r'<i>\1</i>', text)
-        
         html_text = html_text.replace('\n', '<br>')
-        
         return html_text
 
 class ChatWithCharacter(QWidget):
@@ -1775,11 +1829,11 @@ class ChatWithCharacter(QWidget):
         self.new_chat_button = QPushButton('New Chat')
         self.new_chat_button.clicked.connect(self.new_chat)
 
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.list_widget)
-        main_layout.addWidget(self.new_chat_button)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addWidget(self.list_widget)
+        self.main_layout.addWidget(self.new_chat_button)
 
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
 
         self.start()
 
@@ -1795,13 +1849,15 @@ class ChatWithCharacter(QWidget):
             self.populate_list(list(reversed(history.turns)))
         except Exception as e:
             print(f"An error occurred: {e}")
-            MessageBox(tr('Errors', 'Label'), f"Error loading chat: {e}")
+            MessageBox(tr('Errors', 'Label'), f"Error loading chat: {str(e)}")
         finally:
             self.on_chat_load_finish()
 
     def populate_list(self, data):
         self.list_widget.clear()
         for turn in data:
+            if turn.author.is_human:
+                self.account_id = turn.author.author_id
             item = QListWidgetItem()
             custom_widget = MessageWidget(self, turn)
             item.setSizeHint(custom_widget.sizeHint())
@@ -1814,7 +1870,8 @@ class ChatWithCharacter(QWidget):
 
     def new_chat(self):
         self.list_widget.setEnabled(False)
-        self.start_new_chat()
+        self.new_chat_button.setEnabled(False)
+        threading.Thread(target=lambda: asyncio.run(self.start_new_chat())).start()
 
     async def start_new_chat(self):
         try:
@@ -1825,13 +1882,14 @@ class ChatWithCharacter(QWidget):
                 await chat.new_chat(self.character_id, self.account_id)
         except Exception as e:
             print(f"An error occurred while starting new chat: {e}")
-            MessageBox(tr('Errors', 'Label'), f"Error starting new chat: {e}")
+            MessageBox(tr('Errors', 'Label'), f"Error starting new chat: {str(e)}")
         finally:
             self.on_new_chat_finish()
 
     def on_new_chat_finish(self):
         self.list_widget.clear()
         self.list_widget.setEnabled(True)
+        self.new_chat_button.setEnabled(True)
 
 class EmiliaAuth(QWidget):
     def __init__(self):
@@ -2132,17 +2190,24 @@ class Emilia(QMainWindow):
         self.start_fetching_data()
 
     def start_fetching_data(self):
-        if self.client_entry.text() != "":
-            self.CharacterSearchopen.setEnabled(False)
-            self.custom_char_ai = CustomCharAI()
-            self.chat_data_worker = ChatDataWorker(self.custom_char_ai)
-            self.chat_data_worker.recommend_chats_signal.connect(self.handle_recommend_chats)
-            self.chat_data_worker.recent_chats_signal.connect(self.handle_recent_chats)
-            self.chat_data_worker.error_signal.connect(self.handle_error)
-            self.chat_data_worker.start()
-        else:
-            self.recommend_chats = None
-            self.recent_chats = None
+        try:
+            if self.client_entry.text() != "":
+                self.CharacterSearchopen.setEnabled(False)
+                self.custom_char_ai = CustomCharAI()
+                self.chat_data_worker = ChatDataWorker(self.custom_char_ai)
+                self.chat_data_worker.recommend_chats_signal.connect(self.handle_recommend_chats)
+                self.chat_data_worker.recent_chats_signal.connect(self.handle_recent_chats)
+                self.chat_data_worker.error_signal.connect(self.handle_error)
+                self.chat_data_worker.start()
+            else:
+                self.CharacterSearchopen.setEnabled(True)
+                self.recommend_chats = None
+                self.recent_chats = None
+        except:
+                self.CharacterSearchopen.setEnabled(True)
+                self.recommend_chats = None
+                self.recent_chats = None
+
 
     def handle_recommend_chats(self, chats):
         self.recommend_chats = chats
