@@ -1983,15 +1983,16 @@ class VoiceSearch(QWidget):
         self.close()
 
 class MessageWidget(QWidget):
-    def __init__(self, chat, data):
+    def __init__(self, chat, data = None, message_type = None):
         super().__init__()
         self.data = data
         self.chat = chat
-        self.message_id = data.turn_key
-        self.message_type = data.author.is_human
+        self.message_type = message_type
         self.character_id = None
+        self.message_id = None
         if self.message_type is None:
             self.character_id = data.author.author_id
+            self.message_id = data.turn_key
 
         self.setStyleSheet("""
             QLabel {
@@ -2092,7 +2093,7 @@ class ChatWithCharacter(QWidget):
         self.setGeometry(300, 300, 800, 400)
 
         self.list_widget = QListWidget()
-        self.new_chat_button = QPushButton('New Chat')
+        self.new_chat_button = QPushButton('Reset Chat')
         self.new_chat_button.clicked.connect(self.new_chat)
 
         self.main_layout = QVBoxLayout()
@@ -2124,8 +2125,10 @@ class ChatWithCharacter(QWidget):
         for turn in data:
             if turn.author.is_human:
                 self.account_id = turn.author.author_id
+                custom_widget = MessageWidget(self, turn, True)
+            else:
+                custom_widget = MessageWidget(self, turn, None)
             item = QListWidgetItem()
-            custom_widget = MessageWidget(self, turn)
             item.setSizeHint(custom_widget.sizeHint())
             self.list_widget.addItem(item)
             self.list_widget.setItemWidget(item, custom_widget)
@@ -2133,12 +2136,11 @@ class ChatWithCharacter(QWidget):
 
     def on_chat_load_finish(self):
         self.list_widget.setEnabled(True)
-        self.new_chat_button.setEnabled(False)
-        threading.Thread(target=lambda: asyncio.run(self.start_new_chat())).start()
 
     def new_chat(self):
         self.list_widget.setEnabled(False)
-        self.start_new_chat()
+        self.new_chat_button.setEnabled(False)
+        threading.Thread(target=lambda: asyncio.run(self.start_new_chat())).start()
 
     async def start_new_chat(self):
         try:
@@ -2351,7 +2353,6 @@ class Emilia(QMainWindow):
             hlayout.addWidget(self.char_entry)
             hlayout.addWidget(self.client_label)
             hlayout.addWidget(self.client_entry)
-            self.start_fetching_data()
         self.layout.addLayout(hlayout)
 
         self.voice_layout = QHBoxLayout()
@@ -2479,6 +2480,9 @@ class Emilia(QMainWindow):
         self.emi_menu.addAction(self.aboutemi)
         self.emi_menu.addMenu(self.inputdeviceselect)
         self.emi_menu.addMenu(self.outputdeviceselect)
+
+        if aitype == "charai":
+            self.start_fetching_data()
 
     def start_fetching_data(self):
         try:
@@ -2725,7 +2729,9 @@ class Emilia(QMainWindow):
                 chatid = await token.get_chat(character)
             except:
                 async with await self.token.connect() as chat:
-                    chatid = await chat.new_chat(character, account.id)
+                    await chat.new_chat(self.character_id, self.account_id)
+                    chat = await self.client.get_chat(self.character_id)
+                    chatid = chat.chat_id
             persona = await CustomCharAI().get_character(character)
             try:
                 username = f"{account.name}: "

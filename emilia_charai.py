@@ -1717,15 +1717,16 @@ class VoiceSearch(QWidget):
         self.close()
 
 class MessageWidget(QWidget):
-    def __init__(self, chat, data):
+    def __init__(self, chat, data = None, message_type = None):
         super().__init__()
         self.data = data
         self.chat = chat
-        self.message_id = data.turn_key
-        self.message_type = data.author.is_human
+        self.message_type = message_type
         self.character_id = None
+        self.message_id = None
         if self.message_type is None:
             self.character_id = data.author.author_id
+            self.message_id = data.turn_key
 
         self.setStyleSheet("""
             QLabel {
@@ -1826,7 +1827,7 @@ class ChatWithCharacter(QWidget):
         self.setGeometry(300, 300, 800, 400)
 
         self.list_widget = QListWidget()
-        self.new_chat_button = QPushButton('New Chat')
+        self.new_chat_button = QPushButton('Reset Chat')
         self.new_chat_button.clicked.connect(self.new_chat)
 
         self.main_layout = QVBoxLayout()
@@ -1858,8 +1859,10 @@ class ChatWithCharacter(QWidget):
         for turn in data:
             if turn.author.is_human:
                 self.account_id = turn.author.author_id
+                custom_widget = MessageWidget(self, turn, True)
+            else:
+                custom_widget = MessageWidget(self, turn, None)
             item = QListWidgetItem()
-            custom_widget = MessageWidget(self, turn)
             item.setSizeHint(custom_widget.sizeHint())
             self.list_widget.addItem(item)
             self.list_widget.setItemWidget(item, custom_widget)
