@@ -25,6 +25,7 @@ from num2words import num2words
 from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
 from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
+from PyQt6.QtMultimedia import QMediaDevices
 
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.full.app')
@@ -33,8 +34,8 @@ except Exception as e:
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2.2"
-build = "20240803"
+version = "2.2.3"
+build = "20240804"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
@@ -1252,6 +1253,10 @@ class CustomCharAI():
     async def get_recent_chats(self):
         response = await self.request("chats/recent", neo=True)
         return response['chats']
+    
+    async def get_me(self):
+        response = await self.request("chat/user/")
+        return response['user']['user']
 
 class CharacterWidget(QWidget):
     def __init__(self, CharacterSearch, data, mode):
@@ -1312,6 +1317,10 @@ class CharacterWidget(QWidget):
             self.local_select_button = QPushButton(tr(self.trl,'select'))
         self.local_select_button.clicked.connect(self.select_char)
         local_seldel_buttons.addWidget(self.local_select_button)
+
+        self.show_chat_button = QPushButton("Show Chat")
+        self.show_chat_button.clicked.connect(self.open_chat)
+        local_seldel_buttons.addWidget(self.show_chat_button)
 
         self.local_delete_button = QPushButton(tr(self.trl,'delete'))
         self.local_delete_button.clicked.connect(self.local_delete_character)
@@ -1387,8 +1396,10 @@ class CharacterWidget(QWidget):
 
             if self.tts == 'charai':
                 self.local_select_button.setFixedWidth(200)
+                self.show_chat_button.setFixedWidth(200)
             else:
                 self.local_select_button.setFixedWidth(290)
+                self.show_chat_button.setFixedWidth(290)
 
             if self.char in self.local_chars:
                 buttons_layout.addWidget(self.local_select_button)
@@ -1399,6 +1410,7 @@ class CharacterWidget(QWidget):
                 else:
                     buttons_layout.addWidget(self.network_speaker_entry)
                     buttons_layout.addWidget(self.network_spadd_button)
+            buttons_layout.addWidget(self.show_chat_button)
 
             text = f'<b>{self.name}</b>'
         elif mode == "recommend":
@@ -1442,6 +1454,7 @@ class CharacterWidget(QWidget):
                 self.text_label.setMaximumWidth(340)
                 buttons_layout.addWidget(self.network_speaker_entry)
                 buttons_layout.addWidget(self.network_spadd_button)
+            buttons_layout.addWidget(self.show_chat_button)
 
             if f"{self.title}" == 'None' or f"{self.title}" == '':
                 if f"{self.description}" == 'None' or f"{self.description}" == '':
@@ -1498,6 +1511,10 @@ class CharacterWidget(QWidget):
         text_buttons_layout.addLayout(buttons_layout)
         layout.addLayout(text_buttons_layout)
         self.setLayout(layout)
+
+    def open_chat(self):
+        window = ChatWithCharacter(self.char)
+        window.show()
 
     def load_image_async(self, url):
         def set_image(self, pixmap):
@@ -1951,6 +1968,139 @@ class VoiceSearch(QWidget):
         MessageBox(text=tr(self.trl, 'character_voice_changed'))
         self.close()
 
+class MessageWidget(QWidget):
+    def __init__(self, chat, data):
+        super().__init__()
+        self.data = data
+        self.chat = chat
+        self.message_id = data.turn_key
+        self.message_type = data.author.is_human
+        self.character_id = None
+        if self.message_type is None:
+            self.character_id = data.author.author_id
+
+
+        layout = QHBoxLayout()
+
+        self.author_name = data.author.name
+        self.raw_content = data.candidates[0].raw_content
+
+        self.formatted_text = self.format_text(self.raw_content)
+
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(40, 40)
+
+        if self.message_type:
+            self.text_label = QLabel(f'{self.formatted_text}')
+            self.text_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+            self.text_label.setStyleSheet("font-size: 16px;")
+        else:
+            self.text_label = QLabel(f'<b>{self.author_name}</b>: {self.formatted_text}')
+            self.text_label.setStyleSheet("font-size: 15px;")
+        self.text_label.setWordWrap(True)
+        layout.addWidget(self.avatar_label)
+        layout.addWidget(self.text_label)
+        self.setLayout(layout)
+
+        self.threads = []
+        if self.character_id:
+            thread = threading.Thread(self.load_image_async())
+            thread.start()
+            self.threads.append(thread)
+
+    def load_image_async(self):
+        def set_image(self, pixmap):
+            self.avatar_label.setPixmap(pixmap.scaled(40, 40, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        self.avatar_url = self.chat.character.get('avatar_file_name', '')
+        url = f'https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0'
+        self.image_loader_thread = ImageLoaderThread(url)
+        self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
+        self.image_loader_thread.start()
+
+    def format_text(self, text):
+        pattern = re.compile(r'\*(.*?)\*')
+        html_text = pattern.sub(r'<i>\1</i>', text)
+        
+        html_text = html_text.replace('\n', '<br>')
+        
+        return html_text
+
+class ChatWithCharacter(QWidget):
+    def __init__(self, character_id=getconfig("char", configfile="charaiconfig.json")):
+        super().__init__()
+        self.setWindowIcon(QIcon(emiliaicon))
+        self.character_id = character_id
+        self.account_id = None
+        self.trl = "ChatWithCharacter"
+        self.client = aiocai.Client(getconfig("client", configfile="charaiconfig.json"))
+
+        self.addchar_button = QPushButton(tr("CharEditor", "add_character"))
+        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
+
+        self.setGeometry(300, 300, 800, 400)
+
+        self.list_widget = QListWidget()
+        self.new_chat_button = QPushButton('New Chat')
+        self.new_chat_button.clicked.connect(self.new_chat)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.list_widget)
+        main_layout.addWidget(self.new_chat_button)
+
+        self.setLayout(main_layout)
+
+        self.start()
+
+    def start(self):
+        asyncio.run(self.load_chat())
+
+    async def load_chat(self):
+        self.character = await CustomCharAI().get_character(self.character_id)
+        self.setWindowTitle(f'Emilia: Chat With {self.character["name"]}')
+        try:
+            chat = await self.client.get_chat(self.character_id)
+            history = await self.client.get_history(chat.chat_id)
+            self.populate_list(list(reversed(history.turns)))
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            MessageBox(tr('Errors', 'Label'), f"Error loading chat: {e}")
+        finally:
+            self.on_chat_load_finish()
+
+    def populate_list(self, data):
+        self.list_widget.clear()
+        for turn in data:
+            item = QListWidgetItem()
+            custom_widget = MessageWidget(self, turn)
+            item.setSizeHint(custom_widget.sizeHint())
+            self.list_widget.addItem(item)
+            self.list_widget.setItemWidget(item, custom_widget)
+        self.list_widget.scrollToBottom()
+
+    def on_chat_load_finish(self):
+        self.list_widget.setEnabled(True)
+
+    def new_chat(self):
+        self.list_widget.setEnabled(False)
+        self.start_new_chat()
+
+    async def start_new_chat(self):
+        try:
+            if self.account_id is None:
+                self.account = await CustomCharAI().get_me()
+                self.account_id = self.account['id']
+            async with await self.client.connect() as chat:
+                await chat.new_chat(self.character_id, self.account_id)
+        except Exception as e:
+            print(f"An error occurred while starting new chat: {e}")
+            MessageBox(tr('Errors', 'Label'), f"Error starting new chat: {e}")
+        finally:
+            self.on_new_chat_finish()
+
+    def on_new_chat_finish(self):
+        self.list_widget.clear()
+        self.list_widget.setEnabled(True)
+
 class EmiliaAuth(QWidget):
     def __init__(self):
         super().__init__()
@@ -2070,6 +2220,29 @@ class EmiliaAuth(QWidget):
     def styles_reset(self):
         self.setStyleSheet("")
 
+class ChatDataWorker(QThread):
+    recommend_chats_signal = pyqtSignal(object)
+    recent_chats_signal = pyqtSignal(object)
+    error_signal = pyqtSignal(str)
+
+    def __init__(self, custom_char_ai):
+        super().__init__()
+        self.custom_char_ai = custom_char_ai
+
+    async def fetch_data(self):
+        try:
+            recommend_chats = await CustomCharAI().get_recommend_chats()
+            recent_chats = await CustomCharAI().get_recent_chats()
+            self.recommend_chats_signal.emit(recommend_chats)
+            self.recent_chats_signal.emit(recent_chats)
+        except Exception as e:
+            self.error_signal.emit(str(e))
+
+    def run(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.fetch_data())
+
 class Emilia(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -2121,17 +2294,7 @@ class Emilia(QMainWindow):
             hlayout.addWidget(self.char_entry)
             hlayout.addWidget(self.client_label)
             hlayout.addWidget(self.client_entry)
-            if self.client_entry.text() != "":
-                try:
-                    self.recommend_chats = asyncio.run(CustomCharAI().get_recommend_chats())
-                    self.recent_chats = asyncio.run(CustomCharAI().get_recent_chats())
-                except Exception as e:
-                    self.recommend_chats = None
-                    self.recent_chats = None
-                    MessageBox(tr("Errors", "Label"), tr("Errors", "other") + str(e))
-            else:
-                self.recommend_chats = None
-                self.recent_chats = None
+            self.start_fetching_data()
         self.layout.addLayout(hlayout)
 
         self.voice_layout = QHBoxLayout()
@@ -2196,6 +2359,9 @@ class Emilia(QMainWindow):
             self.gettokenaction = QAction(QIcon(googleicon), tr("MainWindow", 'get_token'), self)
         self.gettokenaction.triggered.connect(self.gettoken)
 
+        self.show_chat = QAction("Show Chat", self)
+        self.show_chat.triggered.connect(self.open_chat)
+
         self.optionsopenaction = QAction(tr("MainWindow", "options"))
         self.optionsopenaction.triggered.connect(self.optionsopen)
 
@@ -2206,25 +2372,25 @@ class Emilia(QMainWindow):
         self.visiblevoicemode.triggered.connect(lambda: self.modehide("voice"))
         self.visiblevoicemode.setVisible(False)
 
-        self.recognizer = sr.Recognizer()
-        self.mic_list = [
-            mic_name for mic_name in sr.Microphone.list_microphone_names()
-            if any(keyword in mic_name.lower() for keyword in ["microphone", "mic", "input"])
-        ]
-
         self.inputdeviceselect = QMenu(tr("MainWindow", 'input_device'), self)
-
-        for index, mic_name in enumerate(self.mic_list):
-            action = QAction(mic_name, self)
+        
+        input_devices = QMediaDevices.audioInputs()
+        
+        for index, device in enumerate(input_devices):
+            device_name = device.description()
+            action = QAction(device_name, self)
             action.triggered.connect(lambda checked, i=index: self.set_microphone(i))
             self.inputdeviceselect.addAction(action)
 
         self.outputdeviceselect = QMenu(tr("MainWindow", 'output_device'), self)
-
+        
+        output_devices = QMediaDevices.audioOutputs()
+        
         self.unique_devices = {}
-        for dev in sd.query_devices():
-            if dev["max_output_channels"] > 0 and dev["name"] not in self.unique_devices:
-                self.unique_devices[dev["name"]] = dev
+        for device in output_devices:
+            device_name = device.description()
+            if device_name not in self.unique_devices:
+                self.unique_devices[device_name] = device
 
         for index, (name, device) in enumerate(self.unique_devices.items()):
             action = QAction(name, self)
@@ -2249,12 +2415,42 @@ class Emilia(QMainWindow):
         self.aboutemi.triggered.connect(self.about)
 
         self.emi_menu.addAction(self.gettokenaction)
+        self.emi_menu.addAction(self.show_chat)
         self.emi_menu.addAction(self.visibletextmode)
         self.emi_menu.addAction(self.visiblevoicemode)
         self.emi_menu.addAction(self.optionsopenaction)
         self.emi_menu.addAction(self.aboutemi)
         self.emi_menu.addMenu(self.inputdeviceselect)
         self.emi_menu.addMenu(self.outputdeviceselect)
+
+    def start_fetching_data(self):
+        if self.client_entry.text() != "":
+            self.CharacterSearchopen.setEnabled(False)
+            self.custom_char_ai = CustomCharAI()
+            self.chat_data_worker = ChatDataWorker(self.custom_char_ai)
+            self.chat_data_worker.recommend_chats_signal.connect(self.handle_recommend_chats)
+            self.chat_data_worker.recent_chats_signal.connect(self.handle_recent_chats)
+            self.chat_data_worker.error_signal.connect(self.handle_error)
+            self.chat_data_worker.start()
+        else:
+            self.recommend_chats = None
+            self.recent_chats = None
+
+    def handle_recommend_chats(self, chats):
+        self.recommend_chats = chats
+
+    def handle_recent_chats(self, chats):
+        self.recent_chats = chats
+        self.CharacterSearchopen.setEnabled(True)
+
+    def handle_error(self, error_message):
+        self.recommend_chats = None
+        self.recent_chats = None
+        QMessageBox.critical(self, "Error", f"An error occurred: {error_message}")
+
+    def open_chat(self):
+        window = ChatWithCharacter()
+        window.show()
 
     def optionsopen(self):
         window = OptionsWindow(self)
@@ -2301,8 +2497,13 @@ class Emilia(QMainWindow):
 
     def set_output_device(self, index):
         device = list(self.unique_devices.values())[index]
-        sd.default.device = device["index"]
-        self.selected_device_index = index
+        device_name = device.description()
+        devices = sd.query_devices()
+        for i, dev in enumerate(devices):
+            if dev['name'] == device_name and dev['max_output_channels'] > 0:
+                sd.default.device = (sd.default.device[0], i)
+                self.selected_device_index = index
+                break
 
     def set_background_color(self, color):
         current_style_sheet = self.styleSheet()
@@ -2449,7 +2650,8 @@ class Emilia(QMainWindow):
             while True:
                 await self.process_user_input()
         except Exception as e:
-            MessageBox(tr('Error', 'Label'), str(e), self=self)
+            print(e)
+            MessageBox(tr('Errors', 'Label'), str(e), self=self)
 
     async def setup_ai(self):
         if aitype == "charai":
@@ -2459,7 +2661,8 @@ class Emilia(QMainWindow):
             try:
                 chatid = await token.get_chat(character)
             except:
-                chatid = await token.new_chat(character, account.id)
+                async with await self.token.connect() as chat:
+                    chatid = await chat.new_chat(character, account.id)
             persona = await CustomCharAI().get_character(character)
             try:
                 username = f"{account.name}: "
@@ -2483,6 +2686,7 @@ class Emilia(QMainWindow):
 
         recognizer = sr.Recognizer()
         self.user_input.setText(self.username + tr("Main", "speak"))
+        self.ai_output.setText(self.ai_name + "...")
         msg1 = await self.recognize_speech(recognizer)
 
         self.user_input.setText(self.username + msg1)
@@ -2549,16 +2753,12 @@ class Emilia(QMainWindow):
             else:
                 audio = self.silero_tts(text)
 
-            device = self.get_audio_device()
-
-            sd.play(audio, sample_rate, device=device["index"] if device else None)
+            sd.play(audio, sample_rate)
             await asyncio.sleep(len(audio) / sample_rate)
             sd.stop()
         except Exception as e:
-            MessageBox(tr('Errors', 'Label') + str(e))
-
-    def get_audio_device(self):
-        return list(self.unique_devices.values())[self.selected_device_index] if self.selected_device_index else None
+            print(e)
+            MessageBox(tr('Errors', 'Label'), str(e))
 
     async def maintext(self):
         if self.user_aiinput.text() == "" or self.user_aiinput.text() == tr("MainWindow", "but_it_is_empty"):
