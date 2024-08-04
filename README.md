@@ -1,12 +1,14 @@
-# Emilia - это графический интерфейс для [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
+# Emilia - это форк проекта [Soul-of-Waifu от jofizcd](https://github.com/jofizcd/Soul-of-Waifu)
+<b>Emilia основана на старой версии Soul of Waifu, переход на новую версию бессмыслен, ибо бОльшинство функций было/будет реализовано</b>
+
 
 [Скачать последний релиз](https://github.com/Kajitsy/Emilia/releases/latest)
 
 Простенький интерфейс, пишите свои идеи/проблемы в [дискорд создателя Soul of Waifu](https://discord.gg/6UvYzBKCZK) т.к. я там есть или в Issues 
 
-Хотите использовать ElevenLabs? Вам следует дождаться нового релиза [Soul of Waifu](https://github.com/jofizcd/Soul-of-Waifu), либо использовать [мой форк](https://github.com/Kajitsy/Soul-of-Waifu)
+Хотите использовать ElevenLabs? Используйте новую версию [Soul of Waifu](https://github.com/jofizcd/Soul-of-Waifu)
 <br>
-Либо же ждать добавления в Emilia...
+Либо же ждать Emilia 2.2.3
 
 # Что нужно для использования?
 1. Для установки Emilia нужен Python 3.10
