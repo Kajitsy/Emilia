@@ -16,6 +16,7 @@ import ctypes
 import pyvts
 import random
 import warnings
+import websockets
 import sounddevice as sd
 import soundfile as sf
 import speech_recognition as sr
@@ -36,7 +37,7 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.3"
-build = "20240804"
+build = "20240807"
 pre = True
 sample_rate = 48000
 
@@ -2155,6 +2156,7 @@ class Emilia(QMainWindow):
         self.setMinimumHeight(150)
 
         self.characters_list = []
+        self.connect = None
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -2483,7 +2485,7 @@ class Emilia(QMainWindow):
 
     async def charai_tts(self):
         message = self.messagenotext
-        voiceid = self.voice_entry.text().replace("https://character.ai/chat/", "")
+        voiceid = self.voice_entry.text()
         if voiceid == "":
             data = {
                 'candidateId': re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1),
@@ -2519,7 +2521,7 @@ class Emilia(QMainWindow):
             self.tts = getconfig('tts', 'charai')
             self.layout.addWidget(self.user_input)
             self.layout.addWidget(self.ai_output)
-            self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
+            self.username, self.ai_name, self.chat, self.character, self.token, self.connect = await self.setup_ai()
             while True:
                 await self.process_user_input()
         except Exception as e:
@@ -2531,12 +2533,12 @@ class Emilia(QMainWindow):
             self.elevenlabs = ElevenLabs(api_key=getconfig('elevenlabs_api_key'))
         token = aiocai.Client(self.client_entry.text())
         character = self.char_entry.text().replace("https://character.ai/chat/", "")
+        connect = await token.connect()
         account = await token.get_me()
         try:
             chatid = await token.get_chat(character)
         except:
-            async with await self.token.connect() as chat:
-                chatid = await chat.new_chat(character, account.id)
+            chatid = await connect.new_chat(character, account.id)
         persona = await CustomCharAI().get_character(character)
         try:
             username = f"{account.name}: "
@@ -2544,7 +2546,7 @@ class Emilia(QMainWindow):
             username = tr("MainWindow", "user")
             print(e)
         ai_name = f"{persona['name']}: "
-        return username, ai_name, chatid, character, token
+        return username, ai_name, chatid, character, token, connect
 
     async def process_user_input(self):
         if self.vtubeenable:
@@ -2561,6 +2563,7 @@ class Emilia(QMainWindow):
             await EEC().UseEmote("Thinks")
 
         message = await self.generate_ai_response(msg1)
+
         if self.tts != "charai" and lang == "ru_RU":
             self.translation = await Translator().translate(message, targetlang="ru")
             message = self.translation.text
@@ -2595,9 +2598,12 @@ class Emilia(QMainWindow):
                 return recognizer.listen(source)
 
     async def generate_ai_response(self, msg1):
-        async with await self.token.connect() as chat:
-            self.messagenotext = await chat.send_message(self.character, self.chat.chat_id, msg1)
-            return self.messagenotext.text
+        while True:
+            try:
+                self.messagenotext = await self.connect.send_message(self.character, self.chat.chat_id, msg1)
+                return self.messagenotext.text
+            except websockets.exceptions.ConnectionClosedError:
+                self.connect = await self.token.connect()
 
     async def play_audio_response(self, text):
         try:
