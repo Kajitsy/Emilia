@@ -27,6 +27,8 @@
       "use_text_mode": "&Use Text Mode",
       "use_voice_mode": "&Use Voice Mode",
       "but_it_is_empty": "But it's empty here",
+      "show_chat": "Show Chat",
+      "reset_chat": "Reset Chat",
       "input_device": "Input device",
       "output_device": "Output device",
       "character_choice": "&Character Choice",

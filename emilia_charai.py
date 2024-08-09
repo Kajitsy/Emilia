@@ -37,7 +37,7 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.3"
-build = "20240807"
+build = "20240810"
 pre = True
 sample_rate = 48000
 
@@ -1142,7 +1142,7 @@ class CharacterWidget(QWidget):
         self.local_select_button.clicked.connect(self.select_char)
         local_seldel_buttons.addWidget(self.local_select_button)
 
-        self.show_chat_button = QPushButton("Show Chat")
+        self.show_chat_button = QPushButton(tr('MainWindow', 'show_chat'))
         self.show_chat_button.clicked.connect(self.open_chat)
         local_seldel_buttons.addWidget(self.show_chat_button)
 
@@ -1938,7 +1938,7 @@ class ChatWithCharacter(QWidget):
         self.setGeometry(300, 300, 800, 400)
 
         self.list_widget = QListWidget()
-        self.new_chat_button = QPushButton('Reset Chat')
+        self.new_chat_button = QPushButton(tr('MainWindow', 'reset_chat'))
         self.new_chat_button.clicked.connect(self.new_chat)
 
         self.main_layout = QVBoxLayout()
@@ -2252,7 +2252,7 @@ class Emilia(QMainWindow):
         self.gettokenaction = QAction(QIcon(charaiicon), tr("MainWindow", 'get_token'), self)
         self.gettokenaction.triggered.connect(self.gettoken)
 
-        self.show_chat = QAction("Show Chat", self)
+        self.show_chat = QAction(tr('MainWindow', 'show_chat'), self)
         self.show_chat.triggered.connect(self.open_chat)
 
         self.optionsopenaction = QAction(tr("MainWindow", "options"))
