@@ -1,21 +1,7 @@
-import io
-import os
-import asyncio
-import winreg
-import threading
+import io, os, asyncio, winreg, threading, zipfile, re, json, sys, webbrowser, ctypes, warnings
+import pyvts, random
 import torch
-import zipfile
-import requests
-import aiohttp
-import re
-import json
-import sys
-import webbrowser
-import ctypes
-import pyvts
-import random
-import warnings
-import websockets
+import requests, aiohttp, websockets
 import sounddevice as sd
 import soundfile as sf
 import google.generativeai as genai
@@ -25,7 +11,22 @@ from characterai import aiocai, sendCode, authUser
 from elevenlabs.client import ElevenLabs
 from elevenlabs import VoiceSettings, play
 from num2words import num2words
-from PyQt6.QtWidgets import QTabWidget, QColorDialog, QComboBox, QCheckBox, QHBoxLayout, QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QMessageBox, QMenu, QListWidget, QListWidgetItem, QSizePolicy
+from PyQt6.QtWidgets import (QTabWidget,
+                             QColorDialog,
+                             QComboBox, 
+                             QCheckBox,
+                             QHBoxLayout, 
+                             QApplication, 
+                             QMainWindow, 
+                             QLabel, QLineEdit, 
+                             QPushButton, 
+                             QVBoxLayout, 
+                             QWidget, 
+                             QMessageBox, 
+                             QMenu, 
+                             QListWidget, 
+                             QListWidgetItem, 
+                             QSizePolicy)
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QPainter, QBrush
 from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
 from PyQt6.QtMultimedia import QMediaDevices
@@ -38,7 +39,7 @@ except Exception as e:
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.3"
-build = "20240810"
+build = "20240811"
 pre = True
 local_file = 'voice.pt'
 sample_rate = 48000
