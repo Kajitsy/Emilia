@@ -39,7 +39,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.3"
 build = "20240811"
-pre = True
+pre = False
 sample_rate = 48000
 
 def resource_path(relative_path):
@@ -362,6 +362,19 @@ class FirstLaunch(QMainWindow):
         self.second_page_layout.addLayout(self.autoupdate_layout)
 
 
+        self.ttslayout = QHBoxLayout()
+        self.ttsselect = QComboBox()
+        self.ttsselect.addItems([tr("OptionsWindow", 'character.ai_voices'), "ElevenLabs"])
+        self.ttsselect.currentTextChanged.connect(self.ttschange)
+
+        self.ttslabel = QLabel(tr("OptionsWindow", 'select_tts'))
+        self.ttslabel.setWordWrap(True)
+
+        self.ttslayout.addWidget(self.ttslabel)
+        self.ttslayout.addWidget(self.ttsselect)
+        self.second_page_layout.addLayout(self.ttslayout)
+
+
         self.vtubelayout = QHBoxLayout()
         self.vtubecheck = QCheckBox()
         if getconfig('vtubeenable', 'False') == "True":
@@ -544,6 +557,14 @@ class FirstLaunch(QMainWindow):
             writeconfig('vtubeenable', "True")
         else:
             writeconfig('vtubeenable', "False")
+
+    def ttschange(self):
+        value = self.ttsselect.currentIndex()
+        if value == 0:
+            tts = "charai"
+        elif value == 1:
+            tts = "elevenlabs"
+        writeconfig('tts', tts)
 
     def change_theme(self):
         value = self.themechange.currentIndex()

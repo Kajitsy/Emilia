@@ -40,7 +40,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 version = "2.2.3"
 build = "20240811"
-pre = True
+pre = False
 local_file = 'voice.pt'
 sample_rate = 48000
 put_accent = True
@@ -419,11 +419,9 @@ class FirstLaunch(QMainWindow):
 
         self.ttslayout = QHBoxLayout()
         self.ttsselect = QComboBox()
-        self.ttsselect.addItem("Silero TTS")
+        self.ttsselect.addItems(["Silero TTS", "ElevenLabs"])
         if aitype == "charai":
             self.ttsselect.addItem(tr("OptionsWindow", 'character.ai_voices'))
-        if getconfig("tts", "silerotts") == "charai":
-            self.ttsselect.setCurrentIndex(1)
         self.ttsselect.currentTextChanged.connect(self.ttschange)
 
         self.ttslabel = QLabel(tr("OptionsWindow", 'select_tts'))
@@ -650,6 +648,10 @@ class FirstLaunch(QMainWindow):
             self.torchdeviceselect.setVisible(True)
             self.torchdeviceselectlabel.setVisible(True)
         elif value == 1:
+            tts = "elevenlabs"
+            self.torchdeviceselect.setVisible(False)
+            self.torchdeviceselectlabel.setVisible(False)
+        elif value == 2:
             tts = "charai"
             self.torchdeviceselect.setVisible(False)
             self.torchdeviceselectlabel.setVisible(False)
@@ -669,7 +671,7 @@ class FirstLaunch(QMainWindow):
             self.ttsselect.addItem(tr("OptionsWindow", 'character.ai_voices'))
         elif value == 1:
             writeconfig('aitype', "gemini")
-            self.ttsselect.removeItem(1)
+            self.ttsselect.removeItem(2)
             self.ttsselect.setCurrentIndex(0)
 
     def change_theme(self):
