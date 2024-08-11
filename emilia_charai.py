@@ -1071,6 +1071,10 @@ class CustomCharAI():
         response = await self.request("chat/character/info/", data, "post")
         return response['character']
 
+    async def tts(self, data):
+        response = await self.request("multimodal/api/v1/memo/replay", data, "post", neo=True)
+        return response
+
     async def get_recommend_chats(self):
         response = await self.request("recommendation/v1/user", neo=True)
         return response['characters']
@@ -2501,20 +2505,14 @@ class Emilia(QMainWindow):
                 'roomId': message.turn_key.chat_id,
                 'turnId': message.turn_key.turn_id,
                 'voiceId': voiceid
-            }           
-        headers = {
-                "Content-Type": 'application/json',
-                "Authorization": f'Token {self.client_entry.text()}'
             }
-        response = requests.post('https://neo.character.ai/multimodal/api/v1/memo/replay', data=json.dumps(data), headers=headers)
-        if response.status_code == 200:
-            voice = response.json()
-            link = voice["replayUrl"]
-            download = requests.get(link, stream=True)
-            if download.status_code == 200:
-                audio_bytes = io.BytesIO(download.content)
-                audio_array, samplerate = sf.read(audio_bytes)
-                return audio_array, samplerate
+        response = await CustomCharAI().tts(data)
+        link = response["replayUrl"]
+        download = requests.get(link, stream=True)
+        if download.status_code == 200:
+            audio_bytes = io.BytesIO(download.content)
+            audio_array, samplerate = sf.read(audio_bytes)
+            return audio_array, samplerate
 
     async def main(self):
         try:
@@ -2637,8 +2635,9 @@ class Emilia(QMainWindow):
             self.user_aiinput.setText(tr("MainWindow", "but_it_is_empty"))
         else:
             self.vtubeenable = getconfig('vtubeenable', "False")
+            self.tts = getconfig('tts', 'charai')
             self.layout.addWidget(self.ai_output)
-            self.username, self.ai_name, self.chat, self.character, self.token = await self.setup_ai()
+            self.username, self.ai_name, self.chat, self.character, self.token, self.connect = await self.setup_ai()
                 
             msg1 = self.user_aiinput.text()
 
@@ -2657,7 +2656,7 @@ class Emilia(QMainWindow):
             if self.vtubeenable == "True":
                 await EEC().UseEmote("Says")
 
-            await self.play_audio_response()
+            await self.play_audio_response(message)
 
             if self.vtubeenable == "True":
                 await EEC().UseEmote("Listening")
