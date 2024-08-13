@@ -2388,7 +2388,9 @@ class Emilia(QMainWindow):
 
         self.characters_list = []
         self.connect = None
-
+        self.microphone_muted = False
+        self.ev_close = False
+        
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
@@ -2571,7 +2573,6 @@ class Emilia(QMainWindow):
         self.emi_menu.addAction(self.visiblevoicemode)
         self.emi_menu.addAction(self.optionsopenaction)
         self.emi_menu.addAction(self.aboutemi)
-        self.emi_menu.addAction(self.mute_microphone_action)
         self.emi_menu.addMenu(self.inputdeviceselect)
         self.emi_menu.addMenu(self.outputdeviceselect)
 
@@ -2798,6 +2799,13 @@ class Emilia(QMainWindow):
             MessageBox(tr('Error', 'Label'), str(e))
             return text
 
+    def load_characters_data(self):
+        try:
+            with open('data.json', 'r', encoding='utf-8') as f:
+                self.characters_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.characters_data = {}
+
     async def main(self):
         try:
             self.vtubeenable = getconfig('vtubeenable', "False") == "True"
@@ -2806,6 +2814,8 @@ class Emilia(QMainWindow):
             self.layout.addWidget(self.ai_output)
             self.username, self.ai_name, self.chat, self.character, self.token, self.connect = await self.setup_ai()
             while True:
+                if self.ev_close:
+                    break
                 await self.process_user_input()
         except Exception as e:
             print(e)
@@ -2816,6 +2826,7 @@ class Emilia(QMainWindow):
             if self.tts == "elevenlabs":
                 self.elevenlabs = ElevenLabs(api_key=getconfig('elevenlabs_api_key'))
             token = aiocai.Client(self.client_entry.text())
+            self.load_characters_data()
             character = self.char_entry.text().replace("https://character.ai/chat/", "")
             connect = await token.connect()
             account = await token.get_me()
@@ -2823,7 +2834,7 @@ class Emilia(QMainWindow):
                 chatid = await token.get_chat(character)
             except:
                 chatid = await connect.new_chat(character, account.id)
-            persona = await CustomCharAI().get_character(character)
+            persona = self.characters_data.get(character, CustomCharAI().get_character(character))
             try:
                 username = f"{account.name}: "
             except Exception as e:
@@ -2987,6 +2998,9 @@ class Emilia(QMainWindow):
         else:
             if mode == "voice":
                 threading.Thread(target=lambda: asyncio.run(self.main())).start()
+                for actions in self.emi_menu.actions():
+                    actions.setVisible(False)
+                    self.emi_menu.addAction(self.mute_microphone_action)
                 if aitype == 'charai':
                     self.char_label.setVisible(False)
                     self.char_entry.setVisible(False)
@@ -3007,6 +3021,10 @@ class Emilia(QMainWindow):
             elif mode == "text":
                 threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
 
+    def closeEvent(self, event):
+        self.ev_close = True
+        super().closeEvent(event)
+        
 if __name__ == "__main__":
     if autoupdate_enable != "False":
         AutoUpdate().check_for_updates()
