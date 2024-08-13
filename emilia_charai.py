@@ -37,9 +37,9 @@ except Exception as e:
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2.3"
-build = "20240811"
-pre = False
+version = "2.2.4"
+build = "20240813"
+pre = True
 sample_rate = 48000
 
 def resource_path(relative_path):
@@ -2183,6 +2183,7 @@ class Emilia(QMainWindow):
 
         self.characters_list = []
         self.connect = None
+        self.microphone_muted = False
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -2291,6 +2292,10 @@ class Emilia(QMainWindow):
         self.visiblevoicemode.triggered.connect(lambda: self.modehide("voice"))
         self.visiblevoicemode.setVisible(False)
 
+        self.mute_microphone_action = QAction(tr("MainWindow", 'mute_microphone'), self)
+        self.mute_microphone_action.setCheckable(True)
+        self.mute_microphone_action.triggered.connect(self.toggle_microphone_mute)
+
         self.inputdeviceselect = QMenu(tr("MainWindow", 'input_device'), self)
         
         input_devices = QMediaDevices.audioInputs()
@@ -2338,6 +2343,7 @@ class Emilia(QMainWindow):
         self.emi_menu.addAction(self.visiblevoicemode)
         self.emi_menu.addAction(self.optionsopenaction)
         self.emi_menu.addAction(self.aboutemi)
+        self.emi_menu.addAction(self.mute_microphone_action)
         self.emi_menu.addMenu(self.inputdeviceselect)
         self.emi_menu.addMenu(self.outputdeviceselect)
 
@@ -2373,6 +2379,9 @@ class Emilia(QMainWindow):
         self.recommend_chats = None
         self.recent_chats = None
         QMessageBox.critical(self, "Error", f"An error occurred: {error_message}")
+
+    def toggle_microphone_mute(self, checked):
+        self.microphone_muted = checked
 
     def open_chat(self):
         window = ChatWithCharacter()
@@ -2603,11 +2612,18 @@ class Emilia(QMainWindow):
 
     async def recognize_speech(self, recognizer):
         while True:
-            try:
-                audio = await self.listen_to_microphone(recognizer)
-                return recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
-            except sr.UnknownValueError:
-                self.user_input.setText(self.username + tr("Main", "say_again"))
+            if not self.microphone_muted:
+                try:
+                    audio = await self.listen_to_microphone(recognizer)
+                    result = recognizer.recognize_google(audio, language="ru-RU" if lang == "ru_RU" else "en-US")
+                    if not self.microphone_muted:
+                        return result
+                    else:
+                        await asyncio.sleep(0.5)
+                except sr.UnknownValueError:
+                    self.user_input.setText(self.username + tr("Main", "say_again"))
+            else:
+                await asyncio.sleep(0.5)
 
     async def listen_to_microphone(self, recognizer):
         if self.microphone:
@@ -2696,7 +2712,6 @@ class Emilia(QMainWindow):
             self.vstart_button.setVisible(False)
             self.tstart_button.setVisible(False)
             self.user_aiinput.setVisible(False)
-            self.menubar.setVisible(False)
             self.user_input.setVisible(True)
         elif mode == "text":
             threading.Thread(target=lambda: asyncio.run(self.maintext())).start()
