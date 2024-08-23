@@ -1,0 +1,11 @@
+speechrecognition
+setuptools
+characterai
+sounddevice
+soundfile
+pyvts
+pyaudio
+elevenlabs
+aiohttp
+numpy<2
+PyQt6

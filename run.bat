@@ -1,5 +1,5 @@
 @echo Emilia Launch
 @echo off
-python emilia_full.py
+python emilia.py
 pause
 @echo Press any key to continue. . .

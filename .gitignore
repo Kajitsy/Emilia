@@ -4,6 +4,6 @@ charaiconfig.json
 chat_history.json
 data.json
 voice.pt
-/__pycache__
 /.idea
 /testing_files
+/modules/__pycache__
