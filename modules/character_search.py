@@ -53,6 +53,31 @@ class ChatDataWorker(QThread):
         asyncio.set_event_loop(loop)
         loop.run_until_complete(self.fetch_data())
 
+class LoadChatThread(QThread):
+    finished = pyqtSignal()
+    chatLoaded = pyqtSignal(list)
+    errorOccurred = pyqtSignal(str)
+
+    def __init__(self, parent, client, character_id):
+        super().__init__(parent)
+        self.parent = parent
+        self.client = client
+        self.character_id = character_id
+
+    async def load_chat_async(self):
+        try:
+            self.parent.character = await CustomCharAI.get_character(self.character_id)
+            self.parent.setWindowTitle(f'Emilia: Chat With {self.parent.character["name"]}')
+            chat = await self.client.get_chat(self.character_id)
+            history = await self.client.get_history(chat.chat_id)
+            self.chatLoaded.emit(list(reversed(history.turns)))
+        except Exception as e:
+            self.errorOccurred.emit(str(e))
+
+    def run(self):
+        asyncio.run(self.load_chat_async())
+        self.finished.emit()
+
 class MessageWidget(QWidget):
     def __init__(self, chat, data = None, message_type = None):
         super().__init__()
@@ -153,13 +178,11 @@ class ChatWithCharacter(QWidget):
     def __init__(self, character_id=getconfig("char", configfile="charaiconfig.json")):
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
+        self.setWindowTitle(f'Emilia: Chat With...')
         self.character_id = character_id
         self.account_id = None
         self.trl = "ChatWithCharacter"
         self.client = aiocai.Client(getconfig("client", configfile="charaiconfig.json"))
-
-        self.addchar_button = QPushButton(trls.tr("CharEditor", "add_character"))
-        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
 
         self.setGeometry(300, 300, 800, 400)
 
@@ -173,23 +196,13 @@ class ChatWithCharacter(QWidget):
 
         self.setLayout(self.main_layout)
 
-        self.start()
+        self.load_chat()
 
-    def start(self):
-        asyncio.run(self.load_chat())
-
-    async def load_chat(self):
-        self.character = await CustomCharAI.get_character(self.character_id)
-        self.setWindowTitle(f'Emilia: Chat With {self.character["name"]}')
-        try:
-            chat = await self.client.get_chat(self.character_id)
-            history = await self.client.get_history(chat.chat_id)
-            self.populate_list(list(reversed(history.turns)))
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            MessageBox(trls.tr('Errors', 'Label'), f"Error loading chat: {str(e)}")
-        finally:
-            self.on_chat_load_finish()
+    def load_chat(self):
+        self.load_chat_thread = LoadChatThread(self, self.client, self.character_id)
+        self.load_chat_thread.finished.connect(self.on_chat_load_finish)
+        self.load_chat_thread.chatLoaded.connect(self.populate_list)
+        self.load_chat_thread.start()
 
     def populate_list(self, data):
         self.list_widget.clear()
