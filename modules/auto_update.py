@@ -1,83 +1,97 @@
-import requests, zipfile, os
-from modules.config import getconfig, writeconfig, resource_path 
+import requests, zipfile, os, sys
+from packaging import version
+from modules.config import getconfig, writeconfig, resource_path
 from modules.translations import translations
-from modules.other import MessageBox
-from PyQt6.QtCore import QLocale
+from PyQt6.QtCore import QLocale, Qt
+from PyQt6.QtWidgets import (
+    QApplication, QMessageBox, QProgressDialog
+)
 
-trls = translations(getconfig('language', QLocale.system().name()), resource_path('locales'))
+locales = resource_path('locales')
 
-class AutoUpdate():
-    def __init__(self, build, type = 'full', pre = False) -> None:
-        self.build = build
-        self.type = type
-        self.pre = pre
+trls = translations(getconfig('language', QLocale.system().name()), locales)
 
-    def check_for_updates(self):
-        response = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/autoupdate.json")
+def check_for_updates(ver, target_filename, pre=False, parent=None):
+    if locales == 'locales':
+        return
+
+    try:
+        headers = {'Accept': 'application/vnd.github.v3+json'}
+        response = requests.get(
+            "https://api.github.com/repos/Kajitsy/Emilia/releases",
+            headers=headers
+        )
         response.raise_for_status()
-        updates = response.json()
-        try:
-            if self.pre:
-                if self.type == 'full':
-                    if "latest_prerealease" in updates:
-                        latest_prerealease = updates["latest_prerealease"]
-                        if int(latest_prerealease["build"]) > int(self.build):
-                            if resource_path("autoupdate") != "autoupdate":
-                                if latest_prerealease.get('exe', '') != '':
-                                    self.download_and_update_script(latest_prerealease["exe"], latest_prerealease["build"])
-                                return
-                            self.download_and_update_script(latest_prerealease["url"], latest_prerealease["build"])
-                            return
-                elif self.type == 'charai':
-                    if "charai_latest_prerealease" in updates:
-                        latest_prerealease = updates["charai_latest_prerealease"]
-                        if int(latest_prerealease["build"]) > int(self.build):
-                            if resource_path("autoupdate") != "autoupdate":
-                                if latest_prerealease.get('exe', '') != '':
-                                    self.download_and_update_script(latest_prerealease["exe"], latest_prerealease["build"])
-                                return
-                            self.download_and_update_script(latest_prerealease["url"], latest_prerealease["build"])
-                            return
-            else:
-                if self.type == 'full':
-                    if "latest_realease" in updates:
-                        latest_realease = updates["latest_realease"]
-                        if int(latest_realease["build"]) > int(self.build):
-                            if resource_path("autoupdate") != "autoupdate":
-                                if latest_realease.get('exe', '') != '':
-                                    self.download_and_update_script(latest_realease["exe"], latest_realease["build"])
-                                return
-                            self.download_and_update_script(latest_realease["url"], latest_realease["build"])
-                            return
-                elif self.type == 'charai':
-                    if "latest_realease" in updates:
-                        latest_realease = updates["latest_realease"]
-                        if int(latest_realease["build"]) > int(self.build):
-                            if resource_path("autoupdate") != "autoupdate":
-                                if latest_realease.get('exe', '') != '':
-                                    self.download_and_update_script(latest_realease["exe"], latest_realease["build"])
-                                return
-                            self.download_and_update_script(latest_realease["url"], latest_realease["build"])
-                            return
-        except Exception as e:
-            print(f"{trls.tr('Errors', 'UpdateCheckError')} {e}")
-            writeconfig('autoupdate_enable', 'False')
 
-    def download_and_update_script(self, url, build):
-        print(f"{trls.tr('AutoUpdate', 'upgrade_to')} {build}")
-        try:
-            response = requests.get(url, stream=True)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(f"{trls.tr('Errors', 'UpdateDownloadError')} {e}")
-            writeconfig('autoupdate_enable', 'False')
-            return
-        with open(f"Emilia_{build}.zip", "wb") as f:
-            f.write(response.content)
+        releases = response.json()
 
-        with zipfile.ZipFile(f"Emilia_{build}.zip", "r") as zip_ref:
-            zip_ref.extractall(".")
+        for release in releases:
+            latest_version = release["tag_name"]
+            if pre or not release["prerelease"]:
+                if version.parse(latest_version) > version.parse(ver):
+                    reply = QMessageBox.question(
+                        parent, 'An update is available',
+                        f"{trls.tr('AutoUpdate', 'upgrade_to')} {latest_version}?",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                    )
 
-        os.remove(f"Emilia_{build}.zip")
+                    if reply == QMessageBox.StandardButton.Yes:
+                        update(release, target_filename, parent)
+                    return
 
-        MessageBox("Update!", f"{trls.tr('AutoUpdate', 'emilia_updated')} {build}!")
+    except requests.exceptions.RequestException as e:
+        QMessageBox.warning(
+            parent, trls.tr('Errors', 'Error'), 
+            f"{trls.tr('Errors', 'UpdateCheckError')} {e}"
+        )
+        writeconfig('autoupdate_enable', False)
+
+def update(release, target_filename, parent=None):
+    for asset in release["assets"]:
+        if asset["name"] == target_filename:
+            download_url = asset["browser_download_url"]
+
+            try:
+                response = requests.get(download_url, stream=True)
+                response.raise_for_status()
+
+                total_size = int(response.headers.get('content-length', 0))
+                downloaded = 0
+
+                progress = QProgressDialog(
+                    'Download', None, 0, total_size, parent
+                )
+                progress.setWindowTitle('Updating')
+                progress.setWindowModality(Qt.WindowModality.WindowModal)
+                progress.show()
+
+                with open("update.zip", "wb") as f:
+                    for chunk in response.iter_content(chunk_size=4096):
+                        if progress.wasCanceled():
+                            return
+
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        progress.setValue(downloaded)
+                        QApplication.processEvents()
+
+                progress.setValue(total_size)
+
+                with zipfile.ZipFile("update.zip", "r") as zip_ref:
+                    zip_ref.extractall(".")
+
+                os.remove("update.zip")
+
+                QMessageBox.information(
+                    parent, trls.tr('AutoUpdate', 'UpdateCompleteTitle'),
+                    trls.tr('AutoUpdate', 'UpdateCompleteMessage')
+                )
+                sys.exit()
+
+            except requests.exceptions.RequestException as e:
+                QMessageBox.warning(
+                    parent, trls.tr('Errors', 'Error'),
+                    f"{trls.tr('Errors', 'UpdateDownloadError')} {e}"
+                )
+                writeconfig('autoupdate_enable', False)
+                return

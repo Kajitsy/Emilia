@@ -94,7 +94,9 @@
     },
     "AutoUpdate": {
       "upgrade_to": "Обновление до Build",
-      "emilia_updated": "Emilia обновлена до Build"
+      "emilia_updated": "Emilia обновлена до Build",
+      "UpdateCompleteTitle": "Обновление завершено",
+      "UpdateCompleteMessage": "Обновление успешно установлено. Пожалуйста, перезапустите приложение."
     },
     "OptionsWindow": {
       "select_tts": "Выберите TTS",

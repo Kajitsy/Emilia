@@ -19,7 +19,6 @@ from modules.config import getconfig, resource_path
 from modules.translations import translations
 from modules.other import MessageBox
 
-
 lang = getconfig('language', QLocale.system().name())
 backcolor = getconfig('backgroundcolor')
 buttoncolor = getconfig('buttoncolor')

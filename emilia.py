@@ -27,10 +27,10 @@ from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
 from PyQt6.QtCore import QLocale, Qt
 from PyQt6.QtMultimedia import QMediaDevices
 from modules.config import getconfig, writeconfig, resource_path 
-from modules.auto_update import AutoUpdate
-from modules.character_search import CharacterSearch, CharacterWidget, NewCharacterEditor, ChatWithCharacter
+from modules.auto_update import check_for_updates
+from modules.character_search import CharacterSearch, CharacterWidget, NewCharacterEditor, ChatWithCharacter, ChatDataWorker
 from modules.translations import translations
-from modules.other import MessageBox, Emote_File, ChatDataWorker
+from modules.other import MessageBox, Emote_File
 
 try:
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('emilia.app')
@@ -39,8 +39,7 @@ except Exception as e:
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2.4"
-build = "20240823"
+version = "2.2.4b2"
 pre = True
 sample_rate = 48000
 
@@ -1202,7 +1201,7 @@ class Emilia(QMainWindow):
 
     def about(self):
         if pre == True:
-            title = trls.tr("About", "about_emilia") + build
+            title = trls.tr("About", "about_emilia") + version
         else:
             title = trls.tr("About", "about_emilia")
         pixmap = QPixmap(emiliaicon).scaled(64, 64)
@@ -1452,14 +1451,14 @@ class Emilia(QMainWindow):
         super().closeEvent(event)
 
 if __name__ == "__main__":
-    if autoupdate_enable:
-        AutoUpdate(build, 'charai', True).check_for_updates()
     app = QApplication(sys.argv)
     app.setStyle(theme)
     if not os.path.exists('config.json'):
         window = FirstLaunch()
     else:
         window = Emilia()
+    if autoupdate_enable:
+        check_for_updates(version, 'Emilia.zip', pre, window)
     if vtube_enable:
         Emote_File()
         asyncio.run(EEC.VTubeConnect())
