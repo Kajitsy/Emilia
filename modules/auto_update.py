@@ -25,23 +25,36 @@ def check_for_updates(ver, target_filename, pre=False, parent=None):
 
         releases = response.json()
 
+        latest_release = None
+        latest_prerelease = None
         for release in releases:
-            latest_version = release["tag_name"]
-            if pre or not release["prerelease"]:
-                if version.parse(latest_version) > version.parse(ver):
-                    reply = QMessageBox.question(
-                        parent, 'An update is available',
-                        f"{trls.tr('AutoUpdate', 'upgrade_to')} {latest_version}?",
-                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                    )
+            if not latest_release and not release["prerelease"]:
+                latest_release = release
+            elif not latest_prerelease and release["prerelease"]:
+                latest_prerelease = release
 
-                    if reply == QMessageBox.StandardButton.Yes:
-                        update(release, target_filename, parent)
-                    return
+        target_release = None
+        if pre and latest_prerelease:
+            target_release = latest_prerelease
+        else:
+            target_release = latest_release
+
+        if target_release:
+            latest_version = target_release["tag_name"]
+            if version.parse(latest_version) > version.parse(ver):
+                reply = QMessageBox.question(
+                    parent, 'An update is available',
+                    f"{trls.tr('AutoUpdate', 'upgrade_to')} {latest_version}?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+
+                if reply == QMessageBox.StandardButton.Yes:
+                    update(target_release, target_filename, parent)
+                return
 
     except requests.exceptions.RequestException as e:
         QMessageBox.warning(
-            parent, trls.tr('Errors', 'Error'), 
+            parent, trls.tr('Errors', 'Error'),
             f"{trls.tr('Errors', 'UpdateCheckError')} {e}"
         )
         writeconfig('autoupdate_enable', False)

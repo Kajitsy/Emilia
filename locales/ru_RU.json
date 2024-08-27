@@ -93,8 +93,7 @@
       "character_voice_changed": "Голос персонажа был добавлен/изменен!"
     },
     "AutoUpdate": {
-      "upgrade_to": "Обновление до Build",
-      "emilia_updated": "Emilia обновлена до Build",
+      "upgrade_to": "Обновление до ",
       "UpdateCompleteTitle": "Обновление завершено",
       "UpdateCompleteMessage": "Обновление успешно установлено. Пожалуйста, перезапустите приложение."
     },

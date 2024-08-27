@@ -93,8 +93,7 @@
       "character_voice_changed": "The character's voice has been added/changed!"
     },    
     "AutoUpdate": {
-      "upgrade_to": "Upgrade to Build",
-      "emilia_updated": "Emilia updated to Build",
+      "upgrade_to": "Upgrade to ",
       "UpdateCompleteTitle": "Update Complete",
       "UpdateCompleteMessage": "The update has been successfully installed. Please restart the application."
     },

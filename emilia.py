@@ -39,7 +39,7 @@ except Exception as e:
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2.4b2"
+version = "2.2.4b3"
 pre = True
 sample_rate = 48000
 
