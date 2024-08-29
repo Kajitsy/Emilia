@@ -1,6 +1,8 @@
 speechrecognition
 setuptools
 characterai
+google-generativeai
+gpytranslate
 sounddevice
 soundfile
 pyvts

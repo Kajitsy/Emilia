@@ -39,8 +39,8 @@ except Exception as e:
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-version = "2.2.4b3"
-pre = True
+version = "2.2.4"
+pre = False
 sample_rate = 48000
 
 # Global Variables
@@ -1280,6 +1280,7 @@ class Emilia(QMainWindow):
             except Exception as e:
                 username = trls.tr("MainWindow", "user")
                 print(e)
+                MessageBox(text=str(e))
             ai_name = f"{persona['name']}: "
             return username, ai_name, chatid, character, token, connect
         elif aitype == 'gemini':

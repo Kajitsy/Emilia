@@ -172,7 +172,7 @@ class MessageWidget(QWidget):
         html_text = pattern.sub(r'<i>\1</i>', text)
         html_text = html_text.replace('\n', '<br>')
         return html_text
-
+    
 class ChatWithCharacter(QWidget):
     def __init__(self, character_id=getconfig("char", configfile="charaiconfig.json")):
         super().__init__()
@@ -361,7 +361,7 @@ class ImageLoaderThread(QThread):
             self.image_loaded.emit(image)
         except Exception as e:
             print(f"Error loading the image: {e}")
-            MessageBox(trls.tr('Errors', 'Label'), f"Error loading the image: {e}", self)
+            MessageBox(trls.tr('Errors', 'Label'), f"Error loading the image: {e}", self=self)
             self.image_loaded.emit(QPixmap())
 
 class CharacterWidget(QWidget):
@@ -802,6 +802,9 @@ class CharacterSearch(QWidget):
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Character Search")
         self.setGeometry(300, 300, 800, 400)
+
+        self.addchar_button = QPushButton(trls.tr("CharEditor", "add_character"))
+        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
 
         self.trl = "CharEditor"
 
