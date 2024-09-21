@@ -12,11 +12,11 @@
       "relaunch_button": "Перезапустить!"
     },
     "MainWindow": {
-      "start": "Запустить",
-      "start_text_mode": "Запустить в текстовом режиме",
-      "before_pressing": "Прежде чем жать кнопку ниже...",
-      "gemini_token": "Ваш Gemini токен",
-      "character_token": "Токен клиента",
+      "select_ai_label": "Выберите ИИ",
+      "settings": "Настройки",
+      "start": "Запустить с",
+      "gemini_token": "Gemini Токен",
+      "character_token": "Character.AI Токен",
       "elevenlabs_api_key": "Ключ ElevenLabs API",
       "character_id": "ID персонажа",
       "token": "Токен...",
@@ -40,10 +40,10 @@
     },
     "About": {
       "about_emilia": "Об Emilia ",
-      "language_from": "<br><br>Русский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
-      "new_in": "<br><br>Новое в ",
-      "whats_new": ": <br>• Оптимизирован код<br>• Исправления ошибок",
-      "show_all_releases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
+      "language_from": "\n\nРусский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
+      "new_in": "\n\nНовое в",
+      "whats_new": ": \n• Новый интерфейс в основном окне\n• При запуске будет отображаться чат с 20 последними сообщениями и всеми последующими\n• В настройках появились пункты отвечающие за перевод сообщений пользователя и ИИ, сообщения пользователя переводятся на английский для лучшего понимая их ИИ, а сообщения ИИ переводятся на основной язык Emilia\n• Оптимизирован Emilia Emotes Core\n• Выключение микрофона теперь на главном экране\n• Анимация появления сообщений в чате",
+      "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
       "emilia_is_open_source": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
       "use_version": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
     },
@@ -98,10 +98,6 @@
       "UpdateCompleteMessage": "Обновление успешно установлено. Пожалуйста, перезапустите приложение."
     },
     "OptionsWindow": {
-      "select_tts": "Выберите TTS",
-      "character.ai_voices": "Голоса Character.AI",
-      "voice_generation_device": "Устройство генерации голоса",
-      "select_ai": "Выберите ИИ",
       "select_language": "Выберите язык",
       "english": "Английский",
       "russian": "Русский",
@@ -113,7 +109,13 @@
       "pick_background_color": "Выбрать цвет фона",
       "pick_text_color": "Выбрать цвет текста",
       "button_colors": "Цвета кнопок",
-      "reset": "Сбросить"
+      "reset": "Сбросить",
+      "umlayout": "Переводить сообщения\nпользователя",
+      "aimlayout": "Переводить сообщения ИИ",
+      "sntmlayout": "Показывать оригинальное\nсообщение",
+      "system_options": "Системные",
+      "other_options": "Другие",
+      "customization_options": "Внешний вид"
     },
     "Errors": {
       "Label": "Ошибка",

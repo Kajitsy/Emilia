@@ -12,11 +12,11 @@
       "relaunch_button": "Restart!"
     },
     "MainWindow": {
-      "start": "Start",
-      "start_text_mode": "Start in Text Mode",
-      "before_pressing": "Before pressing the button below...",
+      "select_ai_label": "Select AI",
+      "settings": "Settings",
+      "start": "Start with",
       "gemini_token": "Gemini Token",
-      "character_token": "Client Token",
+      "character_token": "Character Token",
       "elevenlabs_api_key": "ElevenLabs API Key",
       "character_id": "Character ID",
       "token": "Token...",
@@ -24,9 +24,6 @@
       "voice_id": "Voice ID",
       "voice_id_tooltip": "You can leave it empty,\nThe built-in voice of the character will be used",
       "get_token": "&Get Token",
-      "use_text_mode": "&Use Text Mode",
-      "use_voice_mode": "&Use Voice Mode",
-      "but_it_is_empty": "But it's empty here",
       "show_chat": "Show Chat",
       "reset_chat": "Reset Chat",
       "mute_microphone": "Mute microphone",
@@ -42,7 +39,7 @@
       "about_emilia": "About Emilia ",
       "language_from": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
       "new_in": "<br><br>New in ",
-      "whats_new": ": <br>• Optimized code<br>• Bug fixes",
+      "whats_new": ": \n• New interface in the main window\n• At startup, a chat with the last 20 messages and all subsequent ones will be displayed\n• There are items in the settings responsible for translating user and AI messages, user messages are translated into English for a better understanding of their AI, and AI messages are translated into the main language of Emilia\n• Emilia Emotes Core is optimized• Turning off the microphone is now on the home screen\n• Animation of the appearance of messages in the chat",
       "show_all_releases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
       "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.<br> At the moment you are using the ",
       "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
@@ -98,10 +95,6 @@
       "UpdateCompleteMessage": "The update has been successfully installed. Please restart the application."
     },
     "OptionsWindow": {
-      "select_tts": "Select TTS",
-      "character.ai_voices": "Character.AI Voices",
-      "voice_generation_device": "Voice generation device",
-      "select_ai": "Select AI",
       "select_language": "Select language",
       "english": "English",
       "russian": "Russian",
@@ -113,7 +106,13 @@
       "pick_background_color": "Pick background color",
       "pick_text_color": "Pick text color",
       "button_colors": "Button Colors",
-      "reset": "Reset"
+      "reset": "Reset",
+      "umlayout": "Translate user's messages",
+      "aimlayout": "Translate AI messages",
+      "sntmlayout": "Show untranslated messages",
+      "system_options": "System",
+      "other_options": "Other",
+      "customization_options": "Customization"
     },
     "Errors": {
         "Label": "Error",

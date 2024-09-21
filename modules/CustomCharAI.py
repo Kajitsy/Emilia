@@ -35,7 +35,23 @@ async def get_character(character_id):
     response = await request("chat/character/info/", data, "post")
     return response['character']
 
-async def tts(data):
+async def tts(candidateId, roomId, turnId, voiceId=None, voiceQuery=None):
+    """voiceId or voiceQuery required"""
+    if voiceId == "":
+        data = {
+            'candidateId': candidateId,
+            'roomId': roomId,
+            'turnId': turnId,
+            'voiceId': voiceId,
+            'voiceQuery':voiceQuery
+        }
+    else:
+        data = {
+            'candidateId': candidateId,
+            'roomId': roomId,
+            'turnId': turnId,
+            'voiceId': voiceId
+        }
     response = await request("multimodal/api/v1/memo/replay", data, "post", neo=True)
     return response
 
