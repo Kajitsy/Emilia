@@ -16,6 +16,8 @@
       "settings": "Settings",
       "start": "Start with",
       "gemini_token": "Gemini Token",
+      "gemini_safety_settings": "Safety Settings",
+      "gemini_model": "Model",
       "character_token": "Character Token",
       "elevenlabs_api_key": "ElevenLabs API Key",
       "character_id": "Character ID",
@@ -35,13 +37,24 @@
       "options": "Options",
       "about_emilia": "&About Emilia "
     },
+    "Gemini_Safety_Settings": {
+      "harassment_label": "Harassment",
+      "hate_label": "Hate",
+      "se_exlicit_label": "Sexually Explicit",
+      "dangerous_content_label": "Dangerous Content",
+      "civic_integrity_label": "Civic Integrity",
+      "block_none": "Block None",
+      "block_few": "Block Few",
+      "block_some": "Block Some",
+      "block_most": "Block Most"
+    },
     "About": {
       "about_emilia": "About Emilia ",
-      "language_from": "<br><br>English from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
-      "new_in": "<br><br>New in ",
+      "language_from": "\n\nEnglish from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
+      "new_in": "\n\nNew in ",
       "whats_new": ": \n• New interface in the main window\n• At startup, a chat with the last 20 messages and all subsequent ones will be displayed\n• There are items in the settings responsible for translating user and AI messages, user messages are translated into English for a better understanding of their AI, and AI messages are translated into the main language of Emilia\n• Emilia Emotes Core is optimized• Turning off the microphone is now on the home screen\n• Animation of the appearance of messages in the chat",
-      "show_all_releases": "<br><br><a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
-      "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.<br> At the moment you are using the ",
+      "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
+      "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.\n At the moment you are using the ",
       "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
     },
     "Main": {
@@ -110,6 +123,7 @@
       "umlayout": "Translate user's messages",
       "aimlayout": "Translate AI messages",
       "sntmlayout": "Show untranslated messages",
+      "ssmlayout": "Show system messages",
       "system_options": "System",
       "other_options": "Other",
       "customization_options": "Customization"

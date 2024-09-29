@@ -14,11 +14,12 @@ from PyQt6.QtWidgets import (QTabWidget,
                              QListWidgetItem,
                              QGraphicsOpacityEffect)
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush
-from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread, QPropertyAnimation, QTimer
+from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
 from modules.config import getconfig, resource_path
 from modules.translations import translations
 from modules.other import MessageBox
 from modules.QCustom import ResizableButton, ResizableLineEdit
+from modules.QThreads import ImageLoaderThread, LoadChatThread
 
 lang = getconfig('language', QLocale.system().name())
 backcolor = getconfig('backgroundcolor')
@@ -29,71 +30,6 @@ localesfolder = resource_path('locales')
 imagesfolder = resource_path('images')
 emiliaicon = f'{imagesfolder}/emilia.png'
 trls = translations(lang, localesfolder)
-
-class ChatDataWorker(QThread):
-    recommend_chats_signal = pyqtSignal(object)
-    recent_chats_signal = pyqtSignal(object)
-    error_signal = pyqtSignal(str)
-
-    def __init__(self, custom_char_ai):
-        super().__init__()
-        self.custom_char_ai = custom_char_ai
-
-    async def fetch_data(self):
-        try:
-            recommend_chats = await CustomCharAI.get_recommend_chats()
-            recent_chats = await CustomCharAI.get_recent_chats()
-            self.recommend_chats_signal.emit(recommend_chats)
-            self.recent_chats_signal.emit(recent_chats)
-        except Exception as e:
-            self.error_signal.emit(str(e))
-
-    def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.fetch_data())
-
-class LoadChatThread(QThread):
-    finished = pyqtSignal()
-    chatLoaded = pyqtSignal(list)
-    errorOccurred = pyqtSignal(str)
-
-    def __init__(self, parent, client, character_id):
-        super().__init__(parent)
-        self.parent = parent
-        self.client = client
-        self.character_id = character_id
-
-    async def load_chat_async(self):
-        try:
-            self.parent.character = await CustomCharAI.get_character(self.character_id)
-            self.parent.setWindowTitle(f'Emilia: Chat With {self.parent.character["name"]}')
-            chat = await self.client.get_chat(self.character_id)
-            history = await self.client.get_history(chat.chat_id)
-            self.chatLoaded.emit(list(reversed(history.turns)))
-        except Exception as e:
-            self.errorOccurred.emit(str(e))
-
-    def run(self):
-        asyncio.run(self.load_chat_async())
-        self.finished.emit()
-
-class ImageLoaderThread(QThread):
-    image_loaded = pyqtSignal(QPixmap)
-    
-    def __init__(self, url):
-        super().__init__()
-        self.url = url
-
-    def run(self):
-        try:
-            response = requests.get(self.url)
-            response.raise_for_status()
-            image = QPixmap()
-            image.loadFromData(response.content)
-            self.image_loaded.emit(image)
-        except:
-            self.image_loaded.emit(QPixmap())
 
 class MessageWidget(QWidget):
     def __init__(self, chat, data = None, message_type = None):
@@ -274,11 +210,14 @@ class ChatWithCharacter(QWidget):
         self.new_chat_button.setEnabled(True)
 
 class MainMessageWidget(QWidget):
-    def __init__(self, parent, is_human, text):
+    def __init__(self, parent, mode, text, audio_len, new, translated = False):
         super().__init__()
-        self.is_human = is_human
+        self.mode = mode
         self.text = text
         self.parent = parent
+        self.audio_len = audio_len
+        self.new = new
+        self.translated = translated
 
         self.setStyleSheet("""
             QLabel {
@@ -291,26 +230,38 @@ class MainMessageWidget(QWidget):
 
         self.formatted_text = self.format_text(self.text)
         self.index = 0
-        self.total_duration = 2000
-        self.interval = self.total_duration // len(self.formatted_text)
+        self.total_duration = audio_len
+        self.interval = self.total_duration // len(self.formatted_text) // 28
 
         text_layout = QVBoxLayout()
-        if self.is_human:
-            self.text_label = QLabel()
+        self.text_label = QLabel()
+        if mode == 'human':
+            self.interval = self.interval * 50
             self.text_label.setStyleSheet("font-size: 16px; background-color: #e1f5fe; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignHCenter)
-        else:
-            self.text_label = QLabel()
+            if new:
+                self.timer = QTimer(self)
+                self.timer.timeout.connect(self.show_next_char)
+                self.timer.start(self.interval)
+            else:
+                self.text_label.setText(self.formatted_text)
+        elif mode == 'sys':
+            self.text_label.setStyleSheet("color: gray; font-style: italic; font-size: 12px; background-color: white; border-radius: 10px; padding: 5px;")
+            text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignHCenter)
+            self.text_label.setText(self.formatted_text)
+        elif mode == 'ai':
             self.text_label.setStyleSheet("font-size: 16px; background-color: #fff; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignHCenter)
+            if new:
+                self.timer = QTimer(self)
+                self.timer.timeout.connect(self.show_next_char)
+                self.timer.start(self.interval)
+            else:
+                self.text_label.setText(self.formatted_text)
         self.text_label.setWordWrap(True)
 
         layout.addLayout(text_layout)
         self.setLayout(layout)
-
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.show_next_char)
-        self.timer.start(self.interval)
 
     def show_next_char(self):
         item = self.parent.chat_widget
@@ -719,7 +670,7 @@ class CharacterWidget(QWidget):
 
         if self.mode != "firstlaunch":
             self.parent.close()
-        VoiceSearch(self.char).show()
+        VoiceSearch(self.char, self.name).show()
 
     def add_with_elevenlabs_voice(self):
         self.load_data()
@@ -767,13 +718,13 @@ class CharacterWidget(QWidget):
     def local_add_char_voice(self):
         if self.mode != "firstlaunch":
             self.parent.close()
-        VoiceSearch(self.char).show()
+        VoiceSearch(self.char, self.name).show()
 
     def local_delete_character(self):
         self.load_data()
         del self.datafile[self.char]
         self.save_data()
-        self.parent.main_window.refreshcharsinmenubar()
+        self.parent.parent.refreshcharsinmenubar()
         self.parent.load_local_data()
         self.parent.populate_local_list()
 
@@ -783,7 +734,7 @@ class CharacterWidget(QWidget):
             if 'voiceid' in self.datafile[self.char]:
                 del self.datafile[self.char]['voiceid']
         self.save_data()
-        self.parent.main_window.refreshcharsinmenubar()
+        self.parent.parent.refreshcharsinmenubar()
         self.parent.load_local_data()
         self.parent.populate_local_list()
 
@@ -799,8 +750,8 @@ class CharacterWidget(QWidget):
                 self.voiceid = self.data.get('voiceid', '')
             elif self.tts == "elevenlabs":
                 self.voiceid = self.data.get('elevenlabs_voice', '')
-        self.parent.main_window.charai_char_entry.setText(self.char)
-        self.parent.main_window.charaitts_voice_entry.setText(self.voiceid)
+        self.parent.parent.charai_char_entry.setText(self.char)
+        self.parent.parent.charaitts_voice_entry.setText(self.voiceid)
         self.parent.close()
 
     def closeEvent(self, event):
@@ -809,7 +760,7 @@ class CharacterWidget(QWidget):
         super().closeEvent(event)
 
 class CharacterSearch(QWidget):
-    def __init__(self, mainwindow):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Character Search")
@@ -821,7 +772,7 @@ class CharacterSearch(QWidget):
         self.trl = "CharEditor"
 
         main_layout = QVBoxLayout(self)
-        self.main_window = mainwindow
+        self.parent = parent
 
         self.tab_widget = QTabWidget()
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
@@ -840,6 +791,7 @@ class CharacterSearch(QWidget):
 
         self.add_another_charcter_button = QPushButton(trls.tr(self.trl, 'add_another_charcter_button'))
         self.add_another_charcter_button.clicked.connect(self.open_NewCharacherEditor)
+        self.network_layout.addWidget(self.add_another_charcter_button)
 
         self.local_tab = QWidget()
         self.local_layout = QVBoxLayout(self.local_tab)
@@ -909,8 +861,8 @@ class CharacterSearch(QWidget):
 
     def populate_recent_list(self):
         self.populate_category_header(trls.tr(self.trl, 'recent_chats'))
-        if self.main_window.recent_chats:
-            for chats in self.main_window.recent_chats:
+        if self.parent.recent_chats:
+            for chats in self.parent.recent_chats:
                     if chats['character_id'] not in self.recommend_recent_items:
                         self.recommend_recent_items.append(chats['character_id'])
                         self.populate_list(chats, "recent")
@@ -919,8 +871,8 @@ class CharacterSearch(QWidget):
 
     def populate_recommend_list(self):
         self.populate_category_header(trls.tr(self.trl, 'recommend_chats'))
-        if self.main_window.recommend_chats:
-            for recommend in self.main_window.recommend_chats:
+        if self.parent.recommend_chats:
+            for recommend in self.parent.recommend_chats:
                 if recommend['external_id'] not in self.recommend_recent_items:
                     self.recommend_recent_items.append(recommend['external_id'])
                     self.populate_list(recommend, "recommend")
@@ -942,6 +894,8 @@ class CharacterSearch(QWidget):
         search_query = self.network_search_input.text().strip()
         if not search_query:
             return
+        
+        self.add_another_charcter_button.setVisible(False)
 
         try:
             response = requests.get(f'https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D')
@@ -1006,17 +960,18 @@ class CharacterSearch(QWidget):
         self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
 
     def closeEvent(self, event):
-        if self.main_window:
-            self.main_window.refreshcharsinmenubar()
+        if self.parent:
+            self.parent.refreshcharsinmenubar()
         super().closeEvent(event)
 
     def styles_reset(self):
         self.setStyleSheet("")
 
 class VoiceSearch(QWidget):
-    def __init__(self, character_id):
+    def __init__(self, character_id, character_name):
         super().__init__()
         self.character_id = character_id
+        self.character_name = character_name
         self.trl = "CharEditor"
 
         self.setWindowTitle('Emilia: Voice Search')
@@ -1059,6 +1014,8 @@ class VoiceSearch(QWidget):
 
         self.setLayout(main_layout)
 
+        self.search_and_load()
+
     def populate_list(self):
         self.list_widget.clear()
         for item in self.data['voices']:
@@ -1093,7 +1050,7 @@ class VoiceSearch(QWidget):
     def search_and_load(self):
         search_query = self.search_input.text().strip()
         if not search_query:
-            return
+            search_query = self.character_name
 
         try:
             url = f'https://neo.character.ai/multimodal/api/v1/voices/search?query={search_query}'

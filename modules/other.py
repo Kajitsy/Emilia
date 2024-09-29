@@ -1,11 +1,9 @@
 import requests, os
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import QLocale
-from modules.config import resource_path, getconfig
+from modules.config import resource_path
 
 emiliaicon = f'{resource_path('images')}/emilia.png'
-lang = getconfig('language', QLocale.system().name())
 
 def MessageBox(title = "Emilia", text = "Hm?", icon = emiliaicon, pixmap = None, self = None): 
     msg = QMessageBox()

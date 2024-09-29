@@ -1,12 +1,10 @@
 import os, asyncio, winreg, json, sys, webbrowser, ctypes
-import requests
 
 import sounddevice as sd
 import speech_recognition as sr
 import modules.CustomCharAI as CustomCharAI
 
-from gpytranslate import Translator
-from characterai import aiocai, sendCode, authUser
+from characterai import sendCode, authUser
 
 from PyQt6.QtWidgets import (QColorDialog,
                              QComboBox, 
@@ -31,16 +29,13 @@ from PyQt6.QtMultimedia import QMediaDevices
 
 from modules.auto_update import check_for_updates
 from modules.config import getconfig, writeconfig, resource_path 
-from modules.character_search import (CharacterSearch, 
-                                      CharacterWidget, 
-                                      NewCharacterEditor, 
+from modules.character_search import (CharacterSearch,
                                       ChatWithCharacter,
-                                      MainMessageWidget,
-                                      ChatDataWorker)
+                                      MainMessageWidget)
 from modules.translations import translations
-from modules.eec import EEC
+from modules.first_launch import FirstLaunch
 from modules.QCustom import ResizableLabel, ResizableLineEdit, ResizableButton
-from modules.QThreads import MainThreadCharAI, MainThreadGemini
+from modules.QThreads import MainThreadCharAI, MainThreadGemini, ChatDataWorker
 from modules.other import MessageBox, Emote_File
 
 try:
@@ -48,7 +43,7 @@ try:
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.3b1"
+version = "2.3b2"
 pre = True
 sample_rate = 48000
 
@@ -58,6 +53,7 @@ vtube_enable = getconfig('vtubeenable', False)
 umtranslate = getconfig('umtranslate', False)
 aimtranslate = getconfig('aimtranslate', False)
 show_notranslate_message = getconfig('show_notranslate_message', True)
+show_system_messages = getconfig('show_system_messages', True)
 lang = getconfig('language', QLocale.system().name())
 aitype = getconfig('aitype', 'charai')
 tts = getconfig('tts', 'charai')
@@ -81,318 +77,24 @@ gemini_civic_integrity = getconfig('civic_integrity', 3, 'geminiconfig.json')
 
 # Icons
 emiliaicon = f'{imagesfolder}/emilia.png'
-googleicon = f'{imagesfolder}/google.png'
-charaiicon = f'{imagesfolder}/charai.png'
-refreshicon = f'{imagesfolder}/refresh.png'
 if iconcolor == 'white':
-    keyboardicon = f'{imagesfolder}/keyboard_white.png'
+    refreshicon = f'{imagesfolder}/refresh_white.png'
     charediticon = f'{imagesfolder}/open_char_editor_white.png'
+    sendmsgicon = f'{imagesfolder}/send_message_white.png'
+    micicon = f'{imagesfolder}/mic_white.png'
+    micofficon = f'{imagesfolder}/mic_off_white.png'
 else:
-    keyboardicon = f'{imagesfolder}/keyboard.png'
+    refreshicon = f'{imagesfolder}/refresh.png'
     charediticon = f'{imagesfolder}/open_char_editor.png'
+    sendmsgicon = f'{imagesfolder}/send_message.png'
+    micicon = f'{imagesfolder}/mic.png'
+    micofficon = f'{imagesfolder}/mic_off.png'
 
 if tts == 'charai' and aitype != 'charai':
     tts = 'elevenlabs'
     writeconfig('tts', tts)
 
 print("(｡･∀･)ﾉﾞ")
-
-class FirstLaunch(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowIcon(QIcon(emiliaicon))
-        self.setWindowTitle("Emilia")
-        self.setMinimumWidth(300)
-        self.setMinimumHeight(100)
-
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.layout = QVBoxLayout()
-
-        # First Page
-
-        self.first_launch_notification_label = QLabel(trls.tr('FirstLaunch', 'first_launch_notification_label'))
-        self.first_launch_notification_label.setWordWrap(True)
-        self.layout.addWidget(self.first_launch_notification_label)
-
-        fphlayout = QHBoxLayout()
-        self.layout.addLayout(fphlayout)
-        self.first_launch_notification_button_yes = QPushButton(trls.tr('FirstLaunch', 'first_launch_notification_button_yes'))
-        self.first_launch_notification_button_yes.clicked.connect(self.second_page)
-        fphlayout.addWidget(self.first_launch_notification_button_yes)
-
-        self.first_launch_notification_button_no = QPushButton(trls.tr('FirstLaunch', 'first_launch_notification_button_no'))
-        self.first_launch_notification_button_no.clicked.connect(self.first_launch_button_no)
-        fphlayout.addWidget(self.first_launch_notification_button_no)
-        
-        self.central_widget.setLayout(self.layout)
-
-        # Second Page
-
-        self.second_page_widget = QWidget()
-        self.second_page_layout = QVBoxLayout()
-        self.second_page_widget.setLayout(self.second_page_layout)
-
-        self.autoupdate_layout = QHBoxLayout()
-        self.autoupdate = QCheckBox()
-        if autoupdate_enable:
-            self.autoupdate.setChecked(True)
-        self.autoupdate.stateChanged.connect(self.autoupdate_change)
-
-        self.autoupdate_layout.addWidget(QLabel(trls.tr("OptionsWindow", 'automatic_updates')))
-        self.autoupdate_layout.addWidget(self.autoupdate)
-        self.second_page_layout.addLayout(self.autoupdate_layout)
-
-
-        self.ttslayout = QHBoxLayout()
-        self.ttsselect = QComboBox()
-        self.ttsselect.addItems([trls.tr("OptionsWindow", 'character.ai_voices'), "ElevenLabs"])
-        self.ttsselect.currentTextChanged.connect(self.ttschange)
-
-        self.ttslabel = QLabel(trls.tr("OptionsWindow", 'select_tts'))
-        self.ttslabel.setWordWrap(True)
-
-        self.ttslayout.addWidget(self.ttslabel)
-        self.ttslayout.addWidget(self.ttsselect)
-        self.second_page_layout.addLayout(self.ttslayout)
-
-
-        self.vtubelayout = QHBoxLayout()
-        self.vtubecheck = QCheckBox()
-        if vtube_enable:
-            self.vtubecheck.setChecked(True)
-        self.vtubecheck.stateChanged.connect(self.vtubechange)
-        self.vtubewiki = QPushButton("Wiki")
-        self.vtubewiki.clicked.connect(lambda: webbrowser.open("https://github.com/Kajitsy/Emilia/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-VTube-%D0%9C%D0%BE%D0%B4%D0%B5%D0%BB%D1%8C%D0%BA%D0%B8"))
-
-        self.vtubelayout.addWidget(QLabel("VTube Model"))
-        self.vtubelayout.addWidget(self.vtubecheck)
-        self.vtubelayout.addWidget(self.vtubewiki)
-        self.second_page_layout.addLayout(self.vtubelayout)
-
-
-        try:
-            build_number, _ = winreg.QueryValueEx(
-                winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"),
-                "CurrentBuildNumber")
-        except Exception:
-            build_number = "0"
-        self.theme_layout = QHBoxLayout()
-        self.themechange = QComboBox()
-        self.themechange.addItems(["Fusion", "Windows Old"])
-        if int(build_number) > 22000:
-            self.themechange.addItem("Windows 11")
-        theme = getconfig('theme', 'windowsvista')
-        if theme == 'windowsvista':
-            self.themechange.setCurrentIndex(1)
-        elif theme == 'windows11':
-            self.themechange.setCurrentIndex(2)
-        elif theme == 'Fuison':
-            self.themechange.setCurrentIndex(0)
-        self.themechange.currentIndexChanged.connect(self.change_theme)
-
-        self.theme_layout.addWidget(QLabel(trls.tr("OptionsWindow", "select_theme")))
-        self.theme_layout.addWidget(self.themechange)
-        self.second_page_layout.addLayout(self.theme_layout)
-
-
-        self.iconcolorlayout = QHBoxLayout()
-        self.iconcolorchange = QComboBox()
-        self.iconcolorchange.addItems([trls.tr("OptionsWindow", 'white'), trls.tr("OptionsWindow", 'black')])
-        iconcolor = getconfig('iconcolor', 'white')
-        if iconcolor == 'black':
-            self.iconcolorchange.setCurrentIndex(1)
-        self.iconcolorchange.currentIndexChanged.connect(self.changeiconcolor)
-
-        self.iconcolorlayout.addWidget(QLabel(trls.tr("OptionsWindow", "pick_icon_color")))
-        self.iconcolorlayout.addWidget(self.iconcolorchange)
-        self.second_page_layout.addLayout(self.iconcolorlayout)
-
-        self.second_page_continue_button = QPushButton("Continue")
-        self.second_page_continue_button.clicked.connect(self.second_page_continue)
-        self.second_page_layout.addWidget(self.second_page_continue_button)
-        
-        # Third Page
-
-        self.third_page_widget = QWidget()
-        self.third_page_layout = QVBoxLayout()
-        self.third_page_widget.setLayout(self.third_page_layout)
-
-        email_layout = QHBoxLayout()
-        self.email_label = QLabel(trls.tr("GetToken","your_email"))
-        self.email_entry = QLineEdit()
-        self.email_entry.setPlaceholderText("example@example.com")
-
-        email_layout.addWidget(self.email_label)
-        email_layout.addWidget(self.email_entry)
-        self.third_page_layout.addLayout(email_layout)
-
-        self.getlink_button = QPushButton(trls.tr("GetToken", "send_email"))
-        self.getlink_button.clicked.connect(self.getlink)
-        self.third_page_layout.addWidget(self.getlink_button)
-
-        self.getlink_button = QPushButton(trls.tr("GetToken", "send_email"))
-        self.getlink_button.clicked.connect(self.getlink)
-
-        self.link_layout = QHBoxLayout()
-        self.link_label = QLabel(trls.tr("GetToken", "link_from_email"))
-        self.link_entry = QLineEdit()
-        self.link_entry.setPlaceholderText("https...")
-
-        self.link_layout.addWidget(self.link_label)
-        self.link_layout.addWidget(self.link_entry)
-
-        self.gettoken_button = QPushButton(trls.tr("GetToken", "get_token"))
-        self.gettoken_button.clicked.connect(self.gettoken)
-
-        # Fourth Page
-
-        self.fourth_page_widget = QWidget()
-        self.fourth_page_layout = QVBoxLayout()
-        self.fourth_page_widget.setLayout(self.fourth_page_layout)
-
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(trls.tr("CharEditor", 'network_search_input'))
-        self.search_input.returnPressed.connect(self.search_and_load)
-        self.fourth_page_layout.addWidget(self.search_input)
-
-        self.list_widget = QListWidget()
-        self.fourth_page_layout.addWidget(self.list_widget)
-
-        self.add_another_charcter_button = QPushButton(trls.tr("CharEditor", 'add_another_charcter_button'))
-        self.add_another_charcter_button.clicked.connect(self.open_NewCharacherEditor)
-
-        self.network_buttons_layout = QVBoxLayout()
-        self.network_buttons_layout.addWidget(self.add_another_charcter_button)
-
-        self.central_widget.setLayout(self.layout)
-
-    def closeEvent(self, event):
-        Emilia().show()
-        super().closeEvent(event)
-
-    def search_and_load(self):
-        search_query = self.search_input.text().strip()
-        if not search_query:
-            return
-        try:
-            response = requests.get(f'https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D')
-            if response.status_code == 200:
-                self.network_data = response.json()
-                self.populate_network_list()
-                self.setGeometry(300, 300, 800, 400)
-            else:
-                MessageBox(trls.tr('Errors', 'Label'), f"Error receiving data: {response.status_code}")
-        except Exception as e:
-            MessageBox(trls.tr('Errors', 'Label'), f"Error when executing the request: {e}")
-
-    def populate_network_list(self):
-        self.list_widget.clear()
-        if not self.network_data or not isinstance(self.network_data, list):
-            return
-
-        for data in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
-            self.populate_list(data, "firstlaunch")
-
-        self.add_another_charcter_button.setVisible(False)
-
-    def populate_list(self, data, mode):
-        item = QListWidgetItem()
-        custom_widget = CharacterWidget(self, data, mode)
-        
-        item.setSizeHint(custom_widget.sizeHint())
-        self.list_widget.addItem(item)
-        self.list_widget.setItemWidget(item, custom_widget)
-
-    def open_NewCharacherEditor(self):
-        window = NewCharacterEditor()
-        window.show()
-
-    def gettoken(self):
-        try:
-            token = authUser(self.link_entry.text(), self.email_entry.text())
-            self.third_page_widget.hide()
-            MessageBox(text=trls.tr('FirstLaunch', 'token_saves'))
-            writeconfig('client', token, 'charaiconfig.json')
-            self.first_launch_notification_label.setText(trls.tr('FirstLaunch', 'third_page'))
-            self.layout.addWidget(self.fourth_page_widget)
-        except Exception as e:
-            MessageBox(trls.tr("Errors", "Label"), trls.tr("Errors", "other") + str(e))
-
-    def getlink(self):
-        try:
-            sendCode(self.email_entry.text())
-            self.email_entry.setEnabled(False)
-            self.getlink_button.setEnabled(False)
-            self.third_page_layout.addLayout(self.link_layout)
-            self.third_page_layout.addWidget(self.gettoken_button)
-        except Exception as e:
-            MessageBox(trls.tr("Errors", "Label"), trls.tr("Errors", "other") + str(e))
-
-    def second_page_continue(self):
-        self.first_launch_notification_label.setText(trls.tr('FirstLaunch', 'use_characterai'))
-        self.second_page_widget.setVisible(False)
-        self.layout.addWidget(self.third_page_widget)
-
-    def vtubechange(self, state):
-        global vtube_enable
-        if state == 2:
-            vtube_enable = True
-        else:
-            vtube_enable = False
-        writeconfig('vtubeenable', vtube_enable)
-
-    def ttschange(self):
-        value = self.ttsselect.currentIndex()
-        global tts
-        if value == 0:
-            tts = 'charai'
-        elif value == 1:
-            tts = 'elevenlabs'
-        writeconfig('tts', tts)
-
-    def change_theme(self):
-        value = self.themechange.currentIndex()
-        global theme
-        if value == 0:
-            theme = 'fusion'
-        elif value == 1:
-            theme = 'windowsvista'
-        elif value == 2:
-            theme = 'windows11'
-        app = QApplication.instance()
-        app.setStyle(theme)
-        writeconfig('theme', theme)
-
-    def changeiconcolor(self):
-        value = self.iconcolorchange.currentIndex()
-        global iconcolor, charediticon
-        if value == 0:
-            charediticon = f'{imagesfolder}/open_char_editor_white.png'
-            iconcolor = 'white'
-        elif value == 1:
-            charediticon = f'{imagesfolder}/open_char_editor.png'
-            iconcolor = 'black'
-        writeconfig('iconcolor', iconcolor)
-
-    def autoupdate_change(self, state):
-        global autoupdate_enable
-        if state == 2:
-            autoupdate_enable = True
-        else:
-            autoupdate_enable = False
-        writeconfig('autoupdate_enable', autoupdate_enable)
-
-    def second_page(self):
-        self.first_launch_notification_label.setText(trls.tr('FirstLaunch', 'second_page'))
-        self.first_launch_notification_button_yes.setVisible(False)
-        self.first_launch_notification_button_no.setVisible(False)
-        self.layout.addWidget(self.second_page_widget)
-        self.setMinimumHeight(185)
-
-    def first_launch_button_no(self):
-        writeconfig('aitype', 'charai')
-        self.close()
 
 class OptionsWindow(QWidget):
     def __init__(self, mainwindow):
@@ -475,6 +177,17 @@ class OptionsWindow(QWidget):
         self.sntmlayout.addWidget(QLabel(trls.tr(self.trl, 'sntmlayout')))
         self.sntmlayout.addWidget(self.sntmcheck_box)
         self.system_options_layout.addLayout(self.sntmlayout)
+
+
+        self.ssmlayout = QHBoxLayout()
+        self.ssmcheck_box = QCheckBox()
+        if show_system_messages:
+            self.ssmcheck_box.setChecked(True)
+        self.ssmcheck_box.stateChanged.connect(self.show_ss_messages_change)
+
+        self.ssmlayout.addWidget(QLabel(trls.tr(self.trl, 'ssmlayout')))
+        self.ssmlayout.addWidget(self.ssmcheck_box)
+        self.system_options_layout.addLayout(self.ssmlayout)
 
 
         self.other_options = QGroupBox(trls.tr(self.trl, 'other_options'))
@@ -592,6 +305,14 @@ class OptionsWindow(QWidget):
         if buttontextcolor:
             self.set_button_text_color(QColor(buttontextcolor))
 
+    def show_ss_messages_change(self, state):
+        global show_system_messages
+        if state == 2:
+            show_system_messages = True
+        else:
+            show_system_messages = False
+        writeconfig('show_system_messages', show_system_messages)
+
     def show_untrl_messages_change(self, state):
         global show_notranslate_message
         if state == 2:
@@ -651,15 +372,26 @@ class OptionsWindow(QWidget):
         writeconfig('theme', theme)
 
     def changeiconcolor(self, value):
-        global iconcolor
+        global iconcolor, micofficon
         if value == 0:
+            refreshicon = f'{imagesfolder}/refresh_white.png'
             charediticon = f'{imagesfolder}/open_char_editor_white.png'
+            sendmsgicon = f'{imagesfolder}/send_message_white.png'
+            micicon = f'{imagesfolder}/mic_white.png'
+            micofficon = f'{imagesfolder}/mic_off_white.png'
             iconcolor = 'white'
         elif value == 1:
+            refreshicon = f'{imagesfolder}/refresh.png'
             charediticon = f'{imagesfolder}/open_char_editor.png'
+            sendmsgicon = f'{imagesfolder}/send_message.png'
+            micicon = f'{imagesfolder}/mic.png'
+            micofficon = f'{imagesfolder}/mic_off.png'
             iconcolor = 'black'
         writeconfig('iconcolor', iconcolor)
         self.mainwindow.CharacterSearchopen.setIcon(QIcon(charediticon))
+        self.mainwindow.charrefreshlist.setIcon(QIcon(refreshicon))
+        self.mainwindow.send_user_message_button.setIcon(QIcon(sendmsgicon))
+        self.mainwindow.mute_microphone_button.setIcon(QIcon(micicon))
 
     def langchange(self, value):
         if value == 0:
@@ -767,12 +499,13 @@ class Gemini_Safety_Settings(QWidget):
         self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
 
         self.layout = QVBoxLayout()
+        self.trl = "Gemini_Safety_Settings"
 
         harassment_layout = QHBoxLayout()
-        self.harassment_label = QLabel('Harassment')
+        self.harassment_label = QLabel(trls.tr(self.trl, 'label_harassment'))
 
         harassment_slider_layout = QVBoxLayout()
-        self.harassment_slider_label = QLabel('Block None')
+        self.harassment_slider_label = QLabel(trls.tr(self.trl, 'block_none'))
         self.harassment_slider = QSlider(Qt.Orientation.Horizontal)
         self.harassment_slider.setMinimum(1)
         self.harassment_slider.setMaximum(4)
@@ -787,10 +520,10 @@ class Gemini_Safety_Settings(QWidget):
 
 
         hate_layout = QHBoxLayout()
-        self.hate_label = QLabel('Hate')
+        self.hate_label = QLabel(trls.tr(self.trl, 'label_hate'))
 
         hate_slider_layout = QVBoxLayout()
-        self.hate_slider_label = QLabel('Block None')
+        self.hate_slider_label = QLabel(trls.tr(self.trl, 'block_none'))
         self.hate_slider = QSlider(Qt.Orientation.Horizontal)
         self.hate_slider.setMinimum(1)
         self.hate_slider.setMaximum(4)
@@ -805,10 +538,10 @@ class Gemini_Safety_Settings(QWidget):
 
 
         se_exlicit_layout = QHBoxLayout()
-        self.se_exlicit_label = QLabel('Sexually Explicit')
+        self.se_exlicit_label = QLabel(trls.tr(self.trl, 'label_se_exlicit'))
 
         se_exlicit_slider_layout = QVBoxLayout()
-        self.se_exlicit_slider_label = QLabel('Block None')
+        self.se_exlicit_slider_label = QLabel(trls.tr(self.trl, 'block_none'))
         self.se_exlicit_slider = QSlider(Qt.Orientation.Horizontal)
         self.se_exlicit_slider.setMinimum(1)
         self.se_exlicit_slider.setMaximum(4)
@@ -823,10 +556,10 @@ class Gemini_Safety_Settings(QWidget):
 
 
         dangerous_content_layout = QHBoxLayout()
-        self.dangerous_content_label = QLabel('Dangerous Content')
+        self.dangerous_content_label = QLabel(trls.tr(self.trl, 'label_dangerous_content'))
 
         dangerous_content_slider_layout = QVBoxLayout()
-        self.dangerous_content_slider_label = QLabel('Block None')
+        self.dangerous_content_slider_label = QLabel(trls.tr(self.trl, 'block_none'))
         self.dangerous_content_slider = QSlider(Qt.Orientation.Horizontal)
         self.dangerous_content_slider.setMinimum(1)
         self.dangerous_content_slider.setMaximum(4)
@@ -841,10 +574,10 @@ class Gemini_Safety_Settings(QWidget):
 
 
         civic_integrity_layout = QHBoxLayout()
-        self.civic_integrity_label = QLabel('Civic Integrity')
+        self.civic_integrity_label = QLabel(trls.tr(self.trl, 'label_civic_integrity'))
 
         civic_integrity_slider_layout = QVBoxLayout()
-        self.civic_integrity_slider_label = QLabel('Block None')
+        self.civic_integrity_slider_label = QLabel(trls.tr(self.trl, 'block_none'))
         self.civic_integrity_slider = QSlider(Qt.Orientation.Horizontal)
         self.civic_integrity_slider.setMinimum(1)
         self.civic_integrity_slider.setMaximum(4)
@@ -896,13 +629,13 @@ class Gemini_Safety_Settings(QWidget):
 
     def block_status(self, value):
         if value == 1:
-            return 'Block None'
+            return trls.tr(self.trl, 'block_none')
         elif value == 2:
-            return 'Block Few'
+            return trls.tr(self.trl, 'block_few')
         elif value == 3:
-            return 'Block Some'
+            return trls.tr(self.trl, 'block_some')
         elif value == 4:
-            return 'Block Most'
+            return trls.tr(self.trl, 'block_most')
 
     def set_background_color(self, color):
         current_style_sheet = self.styleSheet()
@@ -949,8 +682,11 @@ class Gemini_Safety_Settings(QWidget):
         self.setStyleSheet("")
 
 class EmiliaAuth(QWidget):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+
+        self.parent = parent
+
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Getting Token")
         self.setFixedWidth(300)
@@ -1010,6 +746,7 @@ class EmiliaAuth(QWidget):
             self.email_entry.setVisible(False)
             self.getlink_button.setVisible(False)
             self.email_label.setText(trls.tr("GetToken", "your_token") + token + trls.tr("GetToken", "save_in_charaiconfig"))
+            self.parent.charai_token_entry.setText(token)
             writeconfig('client', token, 'charaiconfig.json')
         except Exception as e:
             MessageBox(title=trls.tr("Errors", "Label"), text=trls.tr("Errors", "other") + str(e))
@@ -1111,7 +848,7 @@ class Emilia(QMainWindow):
         gemini_model_layout = QHBoxLayout()
         self.gemini_layout.addLayout(gemini_model_layout)
 
-        self.gemini_model_label = QLabel("Select Model")
+        self.gemini_model_label = QLabel(trls.tr('MainWindow', 'gemini_model'))
         self.gemini_model_label.setWordWrap(True)
         gemini_model_layout.addWidget(self.gemini_model_label)
 
@@ -1122,7 +859,7 @@ class Emilia(QMainWindow):
         gemini_model_layout.addWidget(self.gemini_model_box)
 
         self.gemini_safety_button = ResizableButton()
-        self.gemini_safety_button.setText('Safety Settings')
+        self.gemini_safety_button.setText(trls.tr('MainWindow', 'gemini_safety_settings'))
         self.gemini_safety_button.clicked.connect(self.open_gemini_safety_settings)
         self.gemini_layout_main.addWidget(self.gemini_safety_button)
 
@@ -1260,18 +997,14 @@ class Emilia(QMainWindow):
         if buttontextcolor:
             self.set_button_text_color(QColor(buttontextcolor))
 
-        self.user_input = QLabel()
-        self.user_input.setWordWrap(True)
-
-        self.ai_output = QLabel()
-        self.ai_output.setWordWrap(True)
-
         self.central_widget.setLayout(self.layout)
 
         # Chat
 
         self.chat_widget = QListWidget()
-        self.mute_microphone_button = QPushButton(trls.tr("MainWindow", 'mute_microphone'))
+        
+        self.mute_microphone_button = QPushButton()
+        self.mute_microphone_button.setIcon(QIcon(micicon))
         self.mute_microphone_button.setCheckable(True)
         self.mute_microphone_button.clicked.connect(self.toggle_microphone_mute)
 
@@ -1415,6 +1148,10 @@ class Emilia(QMainWindow):
 
     def toggle_microphone_mute(self, checked):
         self.microphone_muted = checked
+        if self.microphone_muted:
+            self.mute_microphone_button.setIcon(QIcon(micofficon))
+        else:
+            self.mute_microphone_button.setIcon(QIcon(micicon))
 
     def open_gemini_safety_settings(self):
         window = Gemini_Safety_Settings()
@@ -1436,10 +1173,16 @@ class Emilia(QMainWindow):
         if os.path.exists('data.json'):
             def open_json(char, speaker):
                 self.charai_char_entry.setText(char)
-                self.charaitts_voice_entry.setText(speaker)
+                if tts == 'charai':
+                    self.charaitts_voice_entry.setText(speaker)
+                elif tts == 'elevenlabs':
+                    self.elevenlabs_voice_entry.setText(speaker)
             def create_action(key, value):
                 def action_func():
-                    open_json(value['char'], value.get('voice', ''))
+                    if tts == 'charai':
+                        open_json(value['char'], value.get('voiceid', ''))    
+                    elif tts == 'elevenlabs':
+                        open_json(value['char'], value.get('voice', ''))
                 action = QAction(value['name'], self)
                 action.triggered.connect(action_func)
                 return action
@@ -1520,7 +1263,7 @@ class Emilia(QMainWindow):
 
     def gettoken(self):
         if aitype == "charai":
-            self.auth_window = EmiliaAuth()
+            self.auth_window = EmiliaAuth(self)
             self.auth_window.show()
         elif aitype == "gemini":
             webbrowser.open("https://aistudio.google.com/app/apikey")
@@ -1530,7 +1273,7 @@ class Emilia(QMainWindow):
             title = trls.tr("About", "about_emilia") + version
         else:
             title = trls.tr("About", "about_emilia")
-        pixmap = QPixmap(emiliaicon).scaled(128, 128)
+        pixmap = QPixmap(emiliaicon).scaled(128, 128, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         language = trls.tr("About", "language_from")
         whatsnew = trls.tr("About", "new_in") + version + trls.tr("About", "whats_new")
         otherversions = trls.tr("About", "show_all_releases")
@@ -1571,30 +1314,29 @@ class Emilia(QMainWindow):
 
     def gemini_start_main(self, tts):
         self.layout.addWidget(self.chat_widget)
+        self.layout.addWidget(self.mute_microphone_button)
         self.main_thread_charai = MainThreadGemini(self, tts)
         self.main_thread_charai.ouinput_signal.connect(self.populate_list)
         self.main_thread_charai.start()
 
-    def populate_list(self, data = 'zxc', is_human = 'zxc', text = None):
+    def populate_list(self, data = 'zxc', is_human = 'zxc', text = None, audio_len = 100, new = False, translated = False):
         if data != 'zxc':
             for turn in data:
                 if is_human == 'zxc':
                     is_human = turn.author.is_human
+                    if is_human:
+                        is_human = 'human'
+                    else:
+                        is_human = 'ai'
                     text = turn.candidates[0].raw_content
-                if is_human:
-                    custom_widget = MainMessageWidget(self, True, text)
-                else:
-                    custom_widget = MainMessageWidget(self, False, text)
+                custom_widget = MainMessageWidget(self, is_human, text, audio_len, new, translated)
                 item = QListWidgetItem()
                 item.setSizeHint(custom_widget.sizeHint())
                 self.chat_widget.addItem(item)
                 self.chat_widget.setItemWidget(item, custom_widget)
                 is_human = 'zxc'
         else:
-            if is_human:
-                custom_widget = MainMessageWidget(self, True, text)
-            else:
-                custom_widget = MainMessageWidget(self, False, text)
+            custom_widget = MainMessageWidget(self, is_human, text, audio_len, new, translated)
             item = QListWidgetItem()
             item.setSizeHint(custom_widget.sizeHint())
             self.chat_widget.addItem(item)
@@ -1609,7 +1351,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle(theme)
     if not os.path.exists('config.json'):
-        window = FirstLaunch()
+        window = FirstLaunch(Emilia())
     else:
         window = Emilia()
     if autoupdate_enable:
