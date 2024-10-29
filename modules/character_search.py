@@ -11,13 +11,15 @@ from PyQt6.QtWidgets import (QTabWidget,
                              QVBoxLayout, 
                              QWidget, 
                              QListWidget, 
-                             QListWidgetItem, 
-                             QSizePolicy)
+                             QListWidgetItem,
+                             QGraphicsOpacityEffect)
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush
-from PyQt6.QtCore import QLocale, Qt, pyqtSignal, Qt, QThread
-from modules.config import getconfig, resource_path 
+from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
+from modules.config import getconfig, resource_path
 from modules.translations import translations
 from modules.other import MessageBox
+from modules.QCustom import ResizableButton, ResizableLineEdit
+from modules.QThreads import ImageLoaderThread, LoadChatThread
 
 lang = getconfig('language', QLocale.system().name())
 backcolor = getconfig('backgroundcolor')
@@ -28,54 +30,6 @@ localesfolder = resource_path('locales')
 imagesfolder = resource_path('images')
 emiliaicon = f'{imagesfolder}/emilia.png'
 trls = translations(lang, localesfolder)
-
-class ChatDataWorker(QThread):
-    recommend_chats_signal = pyqtSignal(object)
-    recent_chats_signal = pyqtSignal(object)
-    error_signal = pyqtSignal(str)
-
-    def __init__(self, custom_char_ai):
-        super().__init__()
-        self.custom_char_ai = custom_char_ai
-
-    async def fetch_data(self):
-        try:
-            recommend_chats = await CustomCharAI.get_recommend_chats()
-            recent_chats = await CustomCharAI.get_recent_chats()
-            self.recommend_chats_signal.emit(recommend_chats)
-            self.recent_chats_signal.emit(recent_chats)
-        except Exception as e:
-            self.error_signal.emit(str(e))
-
-    def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.fetch_data())
-
-class LoadChatThread(QThread):
-    finished = pyqtSignal()
-    chatLoaded = pyqtSignal(list)
-    errorOccurred = pyqtSignal(str)
-
-    def __init__(self, parent, client, character_id):
-        super().__init__(parent)
-        self.parent = parent
-        self.client = client
-        self.character_id = character_id
-
-    async def load_chat_async(self):
-        try:
-            self.parent.character = await CustomCharAI.get_character(self.character_id)
-            self.parent.setWindowTitle(f'Emilia: Chat With {self.parent.character["name"]}')
-            chat = await self.client.get_chat(self.character_id)
-            history = await self.client.get_history(chat.chat_id)
-            self.chatLoaded.emit(list(reversed(history.turns)))
-        except Exception as e:
-            self.errorOccurred.emit(str(e))
-
-    def run(self):
-        asyncio.run(self.load_chat_async())
-        self.finished.emit()
 
 class MessageWidget(QWidget):
     def __init__(self, chat, data = None, message_type = None):
@@ -142,6 +96,8 @@ class MessageWidget(QWidget):
             thread = threading.Thread(self.load_image_async())
             thread.start()
             self.threads.append(thread)
+        
+        self.animate(self.text_label)
 
     def load_image_async(self):
         def set_image(self, pixmap):
@@ -172,7 +128,17 @@ class MessageWidget(QWidget):
         html_text = pattern.sub(r'<i>\1</i>', text)
         html_text = html_text.replace('\n', '<br>')
         return html_text
-    
+
+    def animate(self, widget):
+        self.effect = QGraphicsOpacityEffect()
+        widget.setGraphicsEffect(self.effect)
+
+        self.animation = QPropertyAnimation(self.effect, b"opacity")
+        self.animation.setDuration(400)
+        self.animation.setStartValue(0)
+        self.animation.setEndValue(1)
+        self.animation.start()
+
 class ChatWithCharacter(QWidget):
     def __init__(self, character_id=getconfig("char", configfile="charaiconfig.json")):
         super().__init__()
@@ -242,6 +208,82 @@ class ChatWithCharacter(QWidget):
         self.list_widget.clear()
         self.list_widget.setEnabled(True)
         self.new_chat_button.setEnabled(True)
+
+class MainMessageWidget(QWidget):
+    def __init__(self, parent, mode, text, audio_len, new, translated = False):
+        super().__init__()
+        self.mode = mode
+        self.text = text
+        self.parent = parent
+        self.audio_len = audio_len
+        self.new = new
+        self.translated = translated
+
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                color: #333;
+            }
+        """)
+
+        layout = QHBoxLayout()
+
+        self.formatted_text = self.format_text(self.text)
+        self.index = 0
+        self.total_duration = audio_len
+        self.interval = self.total_duration // len(self.formatted_text) // 28
+
+        text_layout = QVBoxLayout()
+        self.text_label = QLabel()
+        if mode == 'human':
+            self.interval = self.interval * 50
+            self.text_label.setStyleSheet("font-size: 16px; background-color: #e1f5fe; border-radius: 10px; padding: 5px;")
+            text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignHCenter)
+            if new:
+                self.timer = QTimer(self)
+                self.timer.timeout.connect(self.show_next_char)
+                self.timer.start(self.interval)
+            else:
+                self.text_label.setText(self.formatted_text)
+        elif mode == 'sys':
+            self.text_label.setStyleSheet("color: gray; font-style: italic; font-size: 12px; background-color: white; border-radius: 10px; padding: 5px;")
+            text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignHCenter)
+            self.text_label.setText(self.formatted_text)
+        elif mode == 'ai':
+            self.text_label.setStyleSheet("font-size: 16px; background-color: #fff; border-radius: 10px; padding: 5px;")
+            text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignHCenter)
+            if new:
+                self.timer = QTimer(self)
+                self.timer.timeout.connect(self.show_next_char)
+                self.timer.start(self.interval)
+            else:
+                self.text_label.setText(self.formatted_text)
+        self.text_label.setWordWrap(True)
+
+        layout.addLayout(text_layout)
+        self.setLayout(layout)
+
+    def show_next_char(self):
+        item = self.parent.chat_widget
+        if self.index < len(self.formatted_text):
+            self.text_label.setText(self.text_label.text() + self.formatted_text[self.index])
+            self.index += 1
+            self.adjust_size()
+            item.scrollToBottom()
+        else:
+            self.timer.stop()
+            item.scrollToBottom()
+
+    def adjust_size(self):
+        item = self.parent.chat_widget.itemAt(self.pos())
+        if item:
+            item.setSizeHint(self.sizeHint()) 
+
+    def format_text(self, text):
+        pattern = re.compile(r'\*(.*?)\*')
+        html_text = pattern.sub(r'<i>\1</i>', text)
+        html_text = html_text.replace('\n', '<br>')
+        return html_text
 
 class NewCharacterEditor(QWidget):
     def __init__(self):
@@ -345,39 +387,21 @@ class NewCharacterEditor(QWidget):
     def styles_reset(self):
         self.setStyleSheet("")
 
-class ImageLoaderThread(QThread):
-    image_loaded = pyqtSignal(QPixmap)
-    
-    def __init__(self, url):
-        super().__init__()
-        self.url = url
-
-    def run(self):
-        try:
-            response = requests.get(self.url)
-            response.raise_for_status()
-            image = QPixmap()
-            image.loadFromData(response.content)
-            self.image_loaded.emit(image)
-        except Exception as e:
-            print(f"Error loading the image: {e}")
-            MessageBox(trls.tr('Errors', 'Label'), f"Error loading the image: {e}", self=self)
-            self.image_loaded.emit(QPixmap())
-
 class CharacterWidget(QWidget):
-    def __init__(self, CharacterSearch, data, mode):
+    def __init__(self, parent, data, mode):
         super().__init__()
         self.data = data
         self.local_data = None
         if mode != "firstlaunch":
-            self.local_data = CharacterSearch.local_data
-        self.CharacterSearch = CharacterSearch
+            self.local_data = parent.local_data
+        self.parent = parent
         self.mode = mode
         self.tts = getconfig('tts', 'charai')
         self.trl = 'CharEditor'
 
         layout = QHBoxLayout()
         self.image_label = QLabel()
+        self.image_label.setFixedSize(80, 80)
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.image_label)
 
@@ -388,73 +412,62 @@ class CharacterWidget(QWidget):
         self.text_label.setWordWrap(True)
 
         buttons_layout = QVBoxLayout()
-        self.network_addnovoice_button = QPushButton(trls.tr(self.trl, 'add_without_voice'))
-        self.network_addnovoice_button.setFixedWidth(200)
-        self.network_addnovoice_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.network_addnovoice_button.clicked.connect(self.add_without_voice)
+        self.add_without_voice_button = ResizableButton(trls.tr(self.trl, 'add_without_voice'))
+        self.add_without_voice_button.setFixedWidth(200)
+        self.add_without_voice_button.clicked.connect(self.add_without_voice)
 
-        self.network_addvoice_button = QPushButton(trls.tr(self.trl, 'search_voice'))
-        self.network_addvoice_button.setFixedWidth(200)
-        self.network_addvoice_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.network_addvoice_button.clicked.connect(self.add_with_voice)
+        self.search_voice_button = ResizableButton(trls.tr(self.trl, 'search_voice'))
+        self.search_voice_button.setFixedWidth(200)
+        self.search_voice_button.clicked.connect(self.add_with_voice)
 
-        self.network_speaker_entry = QLineEdit()
-        self.network_spadd_button = QPushButton(trls.tr(self.trl, 'add_character'))
-        self.network_spadd_button = QPushButton(trls.tr(self.trl, 'set_voice'))
-        self.network_speaker_entry.setFixedWidth(200)
-        self.network_speaker_entry.setText(data.get('elevenlabs_voice', ''))
-        self.network_speaker_entry.textChanged.connect(self.speaker_entry)
-        self.network_speaker_entry.setPlaceholderText("Enter the name of the voice")
+        self.voice_entry_button = ResizableLineEdit()
+        self.voice_entry_button.setFixedWidth(200)
+        self.voice_entry_button.setText(data.get('elevenlabs_voice', ''))
+        self.voice_entry_button.textChanged.connect(self.speaker_entry)
+        self.voice_entry_button.setPlaceholderText("Enter the name of the voice")
 
-        self.network_spadd_button.setFixedWidth(200)
-        self.network_spadd_button.setEnabled(False)
-        self.network_spadd_button.clicked.connect(self.add_with_elevenlabs_voice)
-
-        self.network_spadd_button.setFixedWidth(200)
-        self.network_spadd_button.setEnabled(False)
-        self.network_spadd_button.clicked.connect(self.add_with_elevenlabs_voice)
+        self.set_voice_button = ResizableButton(trls.tr(self.trl, 'set_voice'))
+        self.set_voice_button.setFixedWidth(200)
+        self.set_voice_button.setEnabled(False)
+        self.set_voice_button.clicked.connect(self.add_with_elevenlabs_voice)
 
         local_seldel_buttons = QHBoxLayout()
 
         if mode != "local":
-            self.local_select_button = self.ResizableButton(trls.tr(self.trl,'select'))
-            self.local_select_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            self.select_char_button = ResizableButton(trls.tr(self.trl,'select'))
         else:
-            self.local_select_button = QPushButton(trls.tr(self.trl,'select'))
-        self.local_select_button.clicked.connect(self.select_char)
-        local_seldel_buttons.addWidget(self.local_select_button)
+            self.select_char_button = QPushButton(trls.tr(self.trl,'select'))
+        self.select_char_button.clicked.connect(self.select_char)
+        local_seldel_buttons.addWidget(self.select_char_button)
 
         self.show_chat_button = QPushButton(trls.tr('MainWindow', 'show_chat'))
         self.show_chat_button.clicked.connect(self.open_chat)
         local_seldel_buttons.addWidget(self.show_chat_button)
 
-        self.local_delete_button = QPushButton(trls.tr(self.trl,'delete'))
-        self.local_delete_button.clicked.connect(self.local_delete_character)
-        local_seldel_buttons.addWidget(self.local_delete_button)
+        self.delete_char_button = QPushButton(trls.tr(self.trl,'delete'))
+        self.delete_char_button.clicked.connect(self.local_delete_character)
+        local_seldel_buttons.addWidget(self.delete_char_button)
 
-        self.local_edit_voice_button = self.ResizableButton(trls.tr(self.trl,'edit_voice'))
-        self.local_edit_voice_button.clicked.connect(self.local_add_char_voice)
-        self.local_edit_voice_button.setFixedWidth(200)
-        self.local_edit_voice_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.edit_voice_button = ResizableButton(trls.tr(self.trl,'edit_voice'))
+        self.edit_voice_button.clicked.connect(self.local_add_char_voice)
+        self.edit_voice_button.setFixedWidth(200)
 
-        self.local_add_voice_button = self.ResizableButton(trls.tr(self.trl,'add_voice'))
-        self.local_add_voice_button.setFixedWidth(200)
-        self.local_add_voice_button.clicked.connect(self.local_add_char_voice)
-        self.local_add_voice_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.add_voice_button = ResizableButton(trls.tr(self.trl,'add_voice'))
+        self.add_voice_button.setFixedWidth(200)
+        self.add_voice_button.clicked.connect(self.local_add_char_voice)
 
-        self.local_delete_voice_button = self.ResizableButton(trls.tr(self.trl,'delete_voice'))
-        self.local_delete_voice_button.setFixedWidth(200)
-        self.local_delete_voice_button.clicked.connect(self.local_delete_voice)
-        self.local_delete_voice_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.delete_voice_button = ResizableButton(trls.tr(self.trl,'delete_voice'))
+        self.delete_voice_button.setFixedWidth(200)
+        self.delete_voice_button.clicked.connect(self.local_delete_voice)
         if self.data.get('voiceid', '') == "":
-            self.local_delete_voice_button.setEnabled(False)
+            self.delete_voice_button.setEnabled(False)
 
         local_text_buttons_layout.addWidget(self.text_label)
-        local_text_buttons_layout.addLayout(local_seldel_buttons)
         if mode == "local":
             text_buttons_layout.addLayout(local_text_buttons_layout)
         else:
             text_buttons_layout.addWidget(self.text_label)
+        local_text_buttons_layout.addLayout(local_seldel_buttons)
         
         if mode == "network":
             self.author_label = trls.tr(self.trl, 'author_label')
@@ -466,33 +479,20 @@ class CharacterWidget(QWidget):
             self.description = data.get('description', 'None')
             self.avatar_url = data.get('avatar_file_name', '')
 
-            self.image_label.setFixedSize(80, 80)
-
             self.full_description = self.description
-            self.text_label.setMaximumWidth(400)
             self.local_chars = self.local_data.keys()
+            if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
+                self.description = self.description[:220] + '...'
             if self.char in self.local_chars:
-                buttons_layout.addWidget(self.local_select_button)
-                self.local_select_button.setFixedWidth(200)
+                buttons_layout.addWidget(self.select_char_button)
+                self.select_char_button.setFixedWidth(200)
             else:
                 if self.tts == 'charai':
-                    if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                        self.description = self.description[:220] + '...'
-                    self.text_label.setMaximumWidth(400)
-                    buttons_layout.addWidget(self.network_addvoice_button)
-                    buttons_layout.addWidget(self.network_addnovoice_button)
-                elif self.tts == 'silerotts':
-                    if f"{self.description}" != 'None' and len(f"{self.description}") > 160:
-                        self.description = self.description[:160] + '...'
-                    self.text_label.setMaximumWidth(340)
-                    buttons_layout.addWidget(self.network_speaker_entry)
-                    buttons_layout.addWidget(self.network_spadd_button)
+                    buttons_layout.addWidget(self.search_voice_button)
+                    buttons_layout.addWidget(self.add_without_voice_button)
                 elif self.tts == 'elevenlabs':
-                        if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                            self.description = self.description[:220] + '...'
-                        self.text_label.setMaximumWidth(400)
-                        buttons_layout.addWidget(self.network_speaker_entry)
-                        buttons_layout.addWidget(self.network_spadd_button)
+                    buttons_layout.addWidget(self.voice_entry_button)
+                    buttons_layout.addWidget(self.set_voice_button)
 
             if f"{self.title}" == 'None' or f"{self.title}" == '':
                 if f"{self.description}" == 'None' or f"{self.description}" == '':
@@ -511,30 +511,23 @@ class CharacterWidget(QWidget):
             self.name = data.get('character_name', 'No Name')
             self.avatar_url = data.get('character_avatar_uri', '')
             self.local_chars = self.local_data.keys()
-            self.image_label.setFixedSize(50, 50)
 
             if self.tts == 'charai':
-                self.local_select_button.setFixedWidth(200)
+                self.select_char_button.setFixedWidth(200)
                 self.show_chat_button.setFixedWidth(200)
-            elif self.tts == 'silerotts':
-                self.local_select_button.setFixedWidth(290)
-                self.show_chat_button.setFixedWidth(290)
             elif self.tts == 'elevenlabs':
-                self.local_select_button.setFixedWidth(200)
+                self.select_char_button.setFixedWidth(200)
                 self.show_chat_button.setFixedWidth(200)
 
             if self.char in self.local_chars:
-                buttons_layout.addWidget(self.local_select_button)
+                buttons_layout.addWidget(self.select_char_button)
             else:
                 if self.tts == 'charai':
-                    buttons_layout.addWidget(self.network_addvoice_button)
-                    buttons_layout.addWidget(self.network_addnovoice_button)
-                elif self.tts == 'silerotts':
-                    buttons_layout.addWidget(self.network_speaker_entry)
-                    buttons_layout.addWidget(self.network_spadd_button)
+                    buttons_layout.addWidget(self.search_voice_button)
+                    buttons_layout.addWidget(self.add_without_voice_button)
                 elif self.tts == 'elevenlabs':
-                    buttons_layout.addWidget(self.network_speaker_entry)
-                    buttons_layout.addWidget(self.network_spadd_button)
+                    buttons_layout.addWidget(self.voice_entry_button)
+                    buttons_layout.addWidget(self.set_voice_button)
             buttons_layout.addWidget(self.show_chat_button)
 
             text = f'<b>{self.name}</b>'
@@ -542,17 +535,13 @@ class CharacterWidget(QWidget):
             self.char = data.get('external_id')
             self.name = data.get('participant__name', 'No Name')
             self.avatar_url = data.get('avatar_file_name', '')
-            self.image_label.setFixedSize(50, 50)
 
             if self.tts == 'charai':
-                buttons_layout.addWidget(self.network_addvoice_button)
-                buttons_layout.addWidget(self.network_addnovoice_button)
-            elif self.tts == 'silerotts':
-                buttons_layout.addWidget(self.network_speaker_entry)
-                buttons_layout.addWidget(self.network_spadd_button)
+                buttons_layout.addWidget(self.search_voice_button)
+                buttons_layout.addWidget(self.add_without_voice_button)
             elif self.tts == 'elevenlabs':
-                buttons_layout.addWidget(self.network_speaker_entry)
-                buttons_layout.addWidget(self.network_spadd_button)
+                buttons_layout.addWidget(self.voice_entry_button)
+                buttons_layout.addWidget(self.set_voice_button)
 
             text = f'<b>{self.name}</b>'
         elif mode == "local":
@@ -570,25 +559,16 @@ class CharacterWidget(QWidget):
             if self.tts == 'charai':
                 if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
                     self.description = self.description[:220] + '...'
-                self.text_label.setMaximumWidth(400)
                 if self.voiceid == '':
-                    buttons_layout.addWidget(self.local_add_voice_button)
+                    buttons_layout.addWidget(self.add_voice_button)
                 else:
-                    buttons_layout.addWidget(self.local_edit_voice_button)
-                buttons_layout.addWidget(self.local_delete_voice_button)
-            elif self.tts == 'silerotts':
-                if f"{self.description}" != 'None' and len(f"{self.description}") > 160:
-                    self.description = self.description[:160] + '...'
-                self.text_label.setMaximumWidth(340)
-                buttons_layout.addWidget(self.network_speaker_entry)
-                buttons_layout.addWidget(self.network_spadd_button)
+                    buttons_layout.addWidget(self.edit_voice_button)
+                buttons_layout.addWidget(self.delete_voice_button)
             elif self.tts == 'elevenlabs':
                 if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
                     self.description = self.description[:220] + '...'
-                self.text_label.setMaximumWidth(400)
-                buttons_layout.addWidget(self.network_speaker_entry)
-                buttons_layout.addWidget(self.network_spadd_button)
-            buttons_layout.addWidget(self.show_chat_button)
+                buttons_layout.addWidget(self.voice_entry_button)
+                buttons_layout.addWidget(self.set_voice_button)
 
             if f"{self.title}" == 'None' or f"{self.title}" == '':
                 if f"{self.description}" == 'None' or f"{self.description}" == '':
@@ -617,9 +597,8 @@ class CharacterWidget(QWidget):
             self.full_description = self.description
             if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
                 self.description = self.description[:220] + '...'
-            self.text_label.setMaximumWidth(400)
-            buttons_layout.addWidget(self.network_addvoice_button)
-            buttons_layout.addWidget(self.network_addnovoice_button)
+            buttons_layout.addWidget(self.search_voice_button)
+            buttons_layout.addWidget(self.add_without_voice_button)
 
             if f"{self.title}" == 'None' or f"{self.title}" == '':
                 if f"{self.description}" == 'None' or f"{self.description}" == '':
@@ -651,7 +630,7 @@ class CharacterWidget(QWidget):
 
     def load_image_async(self, url):
         def set_image(self, pixmap):
-            rounded_pixmap = self.round_corners(pixmap, 20)
+            rounded_pixmap = self.round_corners(pixmap, 90)
             if self.mode == "network" or self.mode == "local" or self.mode == "firstlaunch":
                 self.image_label.setPixmap(rounded_pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
             elif self.mode == "recent" or self.mode == "recommend":
@@ -676,10 +655,10 @@ class CharacterWidget(QWidget):
         return pixmap
 
     def speaker_entry(self):
-        if self.network_speaker_entry.text() == "":
-            self.network_spadd_button.setEnabled(False)
-        elif self.network_speaker_entry.text() != "":
-            self.network_spadd_button.setEnabled(True)
+        if self.voice_entry_button.text() == "":
+            self.set_voice_button.setEnabled(False)
+        elif self.voice_entry_button.text() != "":
+            self.set_voice_button.setEnabled(True)
 
     def add_with_voice(self):
         self.load_data()
@@ -690,19 +669,19 @@ class CharacterWidget(QWidget):
         self.save_data()
 
         if self.mode != "firstlaunch":
-            self.CharacterSearch.close()
-        VoiceSearch(self.char).show()
+            self.parent.close()
+        VoiceSearch(self.char, self.name).show()
 
     def add_with_elevenlabs_voice(self):
         self.load_data()
         if self.mode == "recent" or self.mode == "recommend":
             self.get_recent_data()
 
-        self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author, "elevenlabs_voice": self.network_speaker_entry.text()}})
+        self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author, "elevenlabs_voice": self.voice_entry_button.text()}})
         self.save_data()
 
         if self.mode != "firstlaunch":
-            self.CharacterSearch.close()
+            self.parent.close()
 
     def add_without_voice(self):
         self.load_data()
@@ -715,7 +694,7 @@ class CharacterWidget(QWidget):
         MessageBox(trls.tr(self.trl, 'character_added'), trls.tr(self.trl, 'character_added_text'), self=self)
 
         if self.mode != "firstlaunch":
-            self.CharacterSearch.close()
+            self.parent.close()
 
     def load_data(self):
         try:
@@ -738,16 +717,16 @@ class CharacterWidget(QWidget):
 
     def local_add_char_voice(self):
         if self.mode != "firstlaunch":
-            self.CharacterSearch.close()
-        VoiceSearch(self.char).show()
+            self.parent.close()
+        VoiceSearch(self.char, self.name).show()
 
     def local_delete_character(self):
         self.load_data()
         del self.datafile[self.char]
         self.save_data()
-        self.CharacterSearch.main_window.refreshcharsinmenubar()
-        self.CharacterSearch.load_local_data()
-        self.CharacterSearch.populate_local_list()
+        self.parent.parent.refreshcharsinmenubar()
+        self.parent.load_local_data()
+        self.parent.populate_local_list()
 
     def local_delete_voice(self):
         self.load_data()
@@ -755,25 +734,9 @@ class CharacterWidget(QWidget):
             if 'voiceid' in self.datafile[self.char]:
                 del self.datafile[self.char]['voiceid']
         self.save_data()
-        self.CharacterSearch.main_window.refreshcharsinmenubar()
-        self.CharacterSearch.load_local_data()
-        self.CharacterSearch.populate_local_list()
-
-    class ResizableButton(QPushButton):
-        def resizeEvent(self, event):
-            super().resizeEvent(event)
-            self.adjustFontSize()
-    
-        def adjustFontSize(self):
-            button_width = self.width()
-            button_height = self.height()
-
-            base_size = min(button_width, button_height) // 5
-            min_font_size = 10
-            font_size = max(base_size, min_font_size)
-            font = self.font()
-            font.setPointSize(font_size)
-            self.setFont(font)
+        self.parent.parent.refreshcharsinmenubar()
+        self.parent.load_local_data()
+        self.parent.populate_local_list()
 
     def select_char(self):
         if self.mode == "network" or self.mode == "recent":
@@ -787,9 +750,9 @@ class CharacterWidget(QWidget):
                 self.voiceid = self.data.get('voiceid', '')
             elif self.tts == "elevenlabs":
                 self.voiceid = self.data.get('elevenlabs_voice', '')
-        self.CharacterSearch.main_window.char_entry.setText(self.char)
-        self.CharacterSearch.main_window.voice_entry.setText(self.voiceid)
-        self.CharacterSearch.close()
+        self.parent.parent.charai_char_entry.setText(self.char)
+        self.parent.parent.charaitts_voice_entry.setText(self.voiceid)
+        self.parent.close()
 
     def closeEvent(self, event):
         for thread in self.threads:
@@ -797,7 +760,7 @@ class CharacterWidget(QWidget):
         super().closeEvent(event)
 
 class CharacterSearch(QWidget):
-    def __init__(self, mainwindow):
+    def __init__(self, parent):
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Character Search")
@@ -809,7 +772,7 @@ class CharacterSearch(QWidget):
         self.trl = "CharEditor"
 
         main_layout = QVBoxLayout(self)
-        self.main_window = mainwindow
+        self.parent = parent
 
         self.tab_widget = QTabWidget()
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
@@ -828,23 +791,13 @@ class CharacterSearch(QWidget):
 
         self.add_another_charcter_button = QPushButton(trls.tr(self.trl, 'add_another_charcter_button'))
         self.add_another_charcter_button.clicked.connect(self.open_NewCharacherEditor)
-
-        self.network_buttons_layout = QVBoxLayout()
-        self.network_buttons_layout.addWidget(self.add_another_charcter_button)
-
-        self.network_layout.addLayout(self.network_buttons_layout)
-
+        self.network_layout.addWidget(self.add_another_charcter_button)
 
         self.local_tab = QWidget()
         self.local_layout = QVBoxLayout(self.local_tab)
 
         self.local_list_widget = QListWidget()
         self.local_layout.addWidget(self.local_list_widget)
-
-        self.local_image_label = QLabel()
-        self.local_details_label = QLabel()
-        self.local_details_label.setWordWrap(True)
-        self.local_details_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.tab_widget.addTab(self.network_tab, trls.tr(self.trl, 'network_tab'))
         self.tab_widget.addTab(self.local_tab, trls.tr(self.trl, 'local_tab'))
@@ -908,8 +861,8 @@ class CharacterSearch(QWidget):
 
     def populate_recent_list(self):
         self.populate_category_header(trls.tr(self.trl, 'recent_chats'))
-        if self.main_window.recent_chats:
-            for chats in self.main_window.recent_chats:
+        if self.parent.recent_chats:
+            for chats in self.parent.recent_chats:
                     if chats['character_id'] not in self.recommend_recent_items:
                         self.recommend_recent_items.append(chats['character_id'])
                         self.populate_list(chats, "recent")
@@ -918,8 +871,8 @@ class CharacterSearch(QWidget):
 
     def populate_recommend_list(self):
         self.populate_category_header(trls.tr(self.trl, 'recommend_chats'))
-        if self.main_window.recommend_chats:
-            for recommend in self.main_window.recommend_chats:
+        if self.parent.recommend_chats:
+            for recommend in self.parent.recommend_chats:
                 if recommend['external_id'] not in self.recommend_recent_items:
                     self.recommend_recent_items.append(recommend['external_id'])
                     self.populate_list(recommend, "recommend")
@@ -941,6 +894,8 @@ class CharacterSearch(QWidget):
         search_query = self.network_search_input.text().strip()
         if not search_query:
             return
+        
+        self.add_another_charcter_button.setVisible(False)
 
         try:
             response = requests.get(f'https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D')
@@ -1005,17 +960,18 @@ class CharacterSearch(QWidget):
         self.setStyleSheet(current_style_sheet + new_style_sheet + new_style_sheet2)
 
     def closeEvent(self, event):
-        if self.main_window:
-            self.main_window.refreshcharsinmenubar()
+        if self.parent:
+            self.parent.refreshcharsinmenubar()
         super().closeEvent(event)
 
     def styles_reset(self):
         self.setStyleSheet("")
 
 class VoiceSearch(QWidget):
-    def __init__(self, character_id):
+    def __init__(self, character_id, character_name):
         super().__init__()
         self.character_id = character_id
+        self.character_name = character_name
         self.trl = "CharEditor"
 
         self.setWindowTitle('Emilia: Voice Search')
@@ -1058,6 +1014,8 @@ class VoiceSearch(QWidget):
 
         self.setLayout(main_layout)
 
+        self.search_and_load()
+
     def populate_list(self):
         self.list_widget.clear()
         for item in self.data['voices']:
@@ -1092,7 +1050,7 @@ class VoiceSearch(QWidget):
     def search_and_load(self):
         search_query = self.search_input.text().strip()
         if not search_query:
-            return
+            search_query = self.character_name
 
         try:
             url = f'https://neo.character.ai/multimodal/api/v1/voices/search?query={search_query}'

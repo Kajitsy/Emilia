@@ -1,22 +1,24 @@
 import requests, zipfile, os, sys
+
 from packaging import version
-from modules.config import getconfig, writeconfig, resource_path
-from modules.translations import translations
 from PyQt6.QtCore import QLocale, Qt
 from PyQt6.QtWidgets import (
     QApplication, QMessageBox, QProgressDialog
 )
 
-locales = resource_path('locales')
+from modules.config import getconfig, writeconfig, resource_path
+from modules.ets import translations
 
-trls = translations(getconfig('language', QLocale.system().name()), locales)
+locales = resource_path("locales")
+
+trls = translations(getconfig("language", QLocale.system().name()), locales)
 
 def check_for_updates(ver, target_filename, pre=False, parent=None):
-    if locales == 'locales':
+    if locales == "locales":
         return
 
     try:
-        headers = {'Accept': 'application/vnd.github.v3+json'}
+        headers = {"Accept": "application/vnd.github.v3+json"}
         response = requests.get(
             "https://api.github.com/repos/Kajitsy/Emilia/releases",
             headers=headers
@@ -43,8 +45,8 @@ def check_for_updates(ver, target_filename, pre=False, parent=None):
             latest_version = target_release["tag_name"]
             if version.parse(latest_version) > version.parse(ver):
                 reply = QMessageBox.question(
-                    parent, 'An update is available',
-                    f"{trls.tr('AutoUpdate', 'upgrade_to')} {latest_version}?",
+                    parent, "An update is available",
+                    f"{trls.tr("AutoUpdate", "upgrade_to")} {latest_version}?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
 
@@ -54,10 +56,10 @@ def check_for_updates(ver, target_filename, pre=False, parent=None):
 
     except requests.exceptions.RequestException as e:
         QMessageBox.warning(
-            parent, trls.tr('Errors', 'Error'),
-            f"{trls.tr('Errors', 'UpdateCheckError')} {e}"
+            parent, trls.tr("Errors", "Error"),
+            f"{trls.tr("Errors", "UpdateCheckError")} {e}"
         )
-        writeconfig('autoupdate_enable', False)
+        writeconfig("autoupdate_enable", False)
 
 def update(release, target_filename, parent=None):
     for asset in release["assets"]:
@@ -68,13 +70,13 @@ def update(release, target_filename, parent=None):
                 response = requests.get(download_url, stream=True)
                 response.raise_for_status()
 
-                total_size = int(response.headers.get('content-length', 0))
+                total_size = int(response.headers.get("content-length", 0))
                 downloaded = 0
 
                 progress = QProgressDialog(
-                    'Download', None, 0, total_size, parent
+                    "Download", None, 0, total_size, parent
                 )
-                progress.setWindowTitle('Updating')
+                progress.setWindowTitle("Updating")
                 progress.setWindowModality(Qt.WindowModality.WindowModal)
                 progress.show()
 
@@ -96,15 +98,15 @@ def update(release, target_filename, parent=None):
                 os.remove("update.zip")
 
                 QMessageBox.information(
-                    parent, trls.tr('AutoUpdate', 'UpdateCompleteTitle'),
-                    trls.tr('AutoUpdate', 'UpdateCompleteMessage')
+                    parent, trls.tr("AutoUpdate", "UpdateCompleteTitle"),
+                    trls.tr("AutoUpdate", "UpdateCompleteMessage")
                 )
                 sys.exit()
 
             except requests.exceptions.RequestException as e:
                 QMessageBox.warning(
-                    parent, trls.tr('Errors', 'Error'),
-                    f"{trls.tr('Errors', 'UpdateDownloadError')} {e}"
+                    parent, trls.tr("Errors", "Error"),
+                    f"{trls.tr("Errors", "UpdateDownloadError")} {e}"
                 )
-                writeconfig('autoupdate_enable', False)
+                writeconfig("autoupdate_enable", False)
                 return

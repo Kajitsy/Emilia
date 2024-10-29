@@ -2,13 +2,12 @@ speechrecognition
 setuptools
 characterai
 google-generativeai
-gpytranslate
 sounddevice
 soundfile
 pyvts
 pyaudio
 elevenlabs
 aiohttp
-numpy<2
 PyQt6
 packaging
+translators
