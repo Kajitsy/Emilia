@@ -1,3 +1,8 @@
+> About the future:
+> I lost the source code of the last release, in my free time I will try to write in a new
+> way, which is why nothing new is planned in the near future.
+> Excuse me
+
 # Emilia - это проект для использования Character.AI без необходимости заходить на сайт
 [Скачать последний релиз](https://github.com/Kajitsy/Emilia/releases/latest)
 
