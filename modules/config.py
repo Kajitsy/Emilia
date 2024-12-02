@@ -44,6 +44,16 @@ def getchardata(character, variable, char_data_file = "data.json"):
     if os.path.exists(char_data_file):
         with open(char_data_file, "r") as char_data_file:
             data = json.load(char_data_file)
-            return data.get(character, None).get(variable, None)
+            character_data = data.get(character, None)
+            if character_data:
+                return  character_data.get(variable, None)
+            else:
+                return None
     else:
         return None
+
+def exe_check():
+    if os.path.exists('emilia.py'):
+        return False
+    else:
+        return True

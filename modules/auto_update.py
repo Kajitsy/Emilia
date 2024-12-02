@@ -6,15 +6,13 @@ from PyQt6.QtWidgets import (
     QApplication, QMessageBox, QProgressDialog
 )
 
-from modules.config import getconfig, writeconfig, resource_path
+from modules.config import getconfig, writeconfig, exe_check
 from modules.ets import translations
 
-locales = resource_path("locales")
-
-trls = translations(getconfig("language", QLocale.system().name()), locales)
+trls = translations(getconfig("language", QLocale.system().name()), "locales")
 
 def check_for_updates(ver, target_filename, pre=False, parent=None):
-    if locales == "locales":
+    if not exe_check():
         return
 
     try:
@@ -46,7 +44,7 @@ def check_for_updates(ver, target_filename, pre=False, parent=None):
             if version.parse(latest_version) > version.parse(ver):
                 reply = QMessageBox.question(
                     parent, "An update is available",
-                    f"{trls.tr("AutoUpdate", "upgrade_to")} {latest_version}?",
+                    f"{trls.tr('AutoUpdate', 'upgrade_to')} {latest_version}?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
 
@@ -57,7 +55,7 @@ def check_for_updates(ver, target_filename, pre=False, parent=None):
     except requests.exceptions.RequestException as e:
         QMessageBox.warning(
             parent, trls.tr("Errors", "Error"),
-            f"{trls.tr("Errors", "UpdateCheckError")} {e}"
+            f"{trls.tr('Errors', 'UpdateCheckError')} {e}"
         )
         writeconfig("autoupdate_enable", False)
 
@@ -106,7 +104,7 @@ def update(release, target_filename, parent=None):
             except requests.exceptions.RequestException as e:
                 QMessageBox.warning(
                     parent, trls.tr("Errors", "Error"),
-                    f"{trls.tr("Errors", "UpdateDownloadError")} {e}"
+                    f"{trls.tr('Errors', 'UpdateDownloadError')} {e}"
                 )
                 writeconfig("autoupdate_enable", False)
                 return

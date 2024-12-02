@@ -1,9 +1,8 @@
 import requests, os
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
-from modules.config import resource_path
 
-emiliaicon = f'{resource_path('images')}/emilia.png'
+emiliaicon = "images/emilia.png"
 
 def MessageBox(title = "Emilia", text = "Hm?", icon = emiliaicon, pixmap = None, self = None): 
     msg = QMessageBox()
@@ -15,7 +14,7 @@ def MessageBox(title = "Emilia", text = "Hm?", icon = emiliaicon, pixmap = None,
     msg.exec()
 
 def Emote_File():
-    if not os.path.exists('Emotes.json'):
+    if not os.path.exists("Emotes.json"):
         emotesjson = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/Emotes.json")
         emotesjson.raise_for_status()
         with open("Emotes.json", "wb") as f:

@@ -1,8 +1,11 @@
 import io, asyncio, threading, json, re
 import requests
+
 import sounddevice as sd
 import soundfile as sf
 import modules.CustomCharAI as CustomCharAI
+import translators as ts
+
 from characterai import aiocai
 from PyQt6.QtWidgets import (QTabWidget,
                              QHBoxLayout, 
@@ -13,23 +16,23 @@ from PyQt6.QtWidgets import (QTabWidget,
                              QListWidget, 
                              QListWidgetItem,
                              QGraphicsOpacityEffect)
-from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush
+from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush, QMouseEvent
 from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
-from modules.config import getconfig, resource_path
-from modules.translations import translations
+
+from modules.config import getconfig, getchardata
+from modules.CustomCharAI import Sync as ccas
+from modules.ets import translations
 from modules.other import MessageBox
 from modules.QCustom import ResizableButton, ResizableLineEdit
 from modules.QThreads import ImageLoaderThread, LoadChatThread
 
-lang = getconfig('language', QLocale.system().name())
-backcolor = getconfig('backgroundcolor')
-buttoncolor = getconfig('buttoncolor')
-buttontextcolor = getconfig('buttontextcolor')
-labelcolor = getconfig('labelcolor')
-localesfolder = resource_path('locales')
-imagesfolder = resource_path('images')
-emiliaicon = f'{imagesfolder}/emilia.png'
-trls = translations(lang, localesfolder)
+lang = getconfig("language", QLocale.system().name())
+backcolor = getconfig("backgroundcolor")
+buttoncolor = getconfig("buttoncolor")
+buttontextcolor = getconfig("buttontextcolor")
+labelcolor = getconfig("labelcolor")
+emiliaicon = "images/emilia.png"
+trls = translations(lang)
 
 class MessageWidget(QWidget):
     def __init__(self, chat, data = None, message_type = None):
@@ -39,6 +42,7 @@ class MessageWidget(QWidget):
         self.message_type = message_type
         self.character_id = None
         self.message_id = None
+        self.translated = False; self.formatted_tr_text = ""
         if self.message_type is None:
             self.character_id = data.author.author_id
             self.message_id = data.turn_key
@@ -72,11 +76,11 @@ class MessageWidget(QWidget):
 
         text_layout = QVBoxLayout()
         if self.message_type:
-            self.text_label = QLabel(f'{self.formatted_text}')
+            self.text_label = QLabel(f"{self.formatted_text}")
             self.text_label.setStyleSheet("font-size: 16px; background-color: #e1f5fe; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignHCenter)
         else:
-            self.text_label = QLabel(f'{self.formatted_text}')
+            self.text_label = QLabel(f"{self.formatted_text}")
             self.text_label.setStyleSheet("font-size: 16px; background-color: #fff; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignHCenter)
         self.text_label.setWordWrap(True)
@@ -103,8 +107,8 @@ class MessageWidget(QWidget):
         def set_image(self, pixmap):
             rounded_pixmap = self.round_corners(pixmap, 25)
             self.avatar_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))        
-        self.avatar_url = self.chat.character.get('avatar_file_name', '')
-        url = f'https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0'
+        self.avatar_url = self.chat.character.get("avatar_file_name", "")
+        url = f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0"
         self.image_loader_thread = ImageLoaderThread(url)
         self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
         self.image_loader_thread.start()
@@ -124,9 +128,9 @@ class MessageWidget(QWidget):
         return pixmap
 
     def format_text(self, text):
-        pattern = re.compile(r'\*(.*?)\*')
-        html_text = pattern.sub(r'<i>\1</i>', text)
-        html_text = html_text.replace('\n', '<br>')
+        pattern = re.compile(r"\*(.*?)\*")
+        html_text = pattern.sub(r"<i>\1</i>", text)
+        html_text = html_text.replace("\n", "<br>")
         return html_text
 
     def animate(self, widget):
@@ -139,11 +143,29 @@ class MessageWidget(QWidget):
         self.animation.setEndValue(1)
         self.animation.start()
 
+    def adjust_size(self):
+        item = self.chat.list_widget.itemAt(self.pos())
+        if item:
+            item.setSizeHint(self.sizeHint())
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            if not self.translated:
+                if not self.formatted_tr_text:
+                    tr_text = ts.translate_text(self.raw_content, to_language=trls.slang)
+                    self.formatted_tr_text = self.format_text(tr_text)
+                self.text_label.setText(self.formatted_tr_text)
+                self.translated = True
+            else:
+                self.text_label.setText(self.formatted_text)
+                self.translated = False
+            self.adjust_size()
+
 class ChatWithCharacter(QWidget):
     def __init__(self, character_id=getconfig("char", configfile="charaiconfig.json")):
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
-        self.setWindowTitle(f'Emilia: Chat With...')
+        self.setWindowTitle(f"Emilia: Chat With...")
         self.character_id = character_id
         self.account_id = None
         self.trl = "ChatWithCharacter"
@@ -152,7 +174,7 @@ class ChatWithCharacter(QWidget):
         self.setGeometry(300, 300, 800, 400)
 
         self.list_widget = QListWidget()
-        self.new_chat_button = QPushButton(trls.tr('MainWindow', 'reset_chat'))
+        self.new_chat_button = QPushButton(trls.tr("MainWindow", "reset_chat"))
         self.new_chat_button.clicked.connect(self.new_chat)
 
         self.main_layout = QVBoxLayout()
@@ -195,12 +217,12 @@ class ChatWithCharacter(QWidget):
         try:
             if self.account_id is None:
                 self.account = await CustomCharAI.get_me()
-                self.account_id = self.account['id']
+                self.account_id = self.account["id"]
             async with await self.client.connect() as chat:
                 await chat.new_chat(self.character_id, self.account_id)
         except Exception as e:
             print(f"An error occurred while starting new chat: {e}")
-            MessageBox(trls.tr('Errors', 'Label'), f"Error starting new chat: {str(e)}")
+            MessageBox(trls.tr("Errors", "Label"), f"Error starting new chat: {str(e)}")
         finally:
             self.on_new_chat_finish()
 
@@ -235,7 +257,7 @@ class MainMessageWidget(QWidget):
 
         text_layout = QVBoxLayout()
         self.text_label = QLabel()
-        if mode == 'human':
+        if mode == "human":
             self.interval = self.interval * 50
             self.text_label.setStyleSheet("font-size: 16px; background-color: #e1f5fe; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignHCenter)
@@ -245,11 +267,11 @@ class MainMessageWidget(QWidget):
                 self.timer.start(self.interval)
             else:
                 self.text_label.setText(self.formatted_text)
-        elif mode == 'sys':
+        elif mode == "sys":
             self.text_label.setStyleSheet("color: gray; font-style: italic; font-size: 12px; background-color: white; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignHCenter)
             self.text_label.setText(self.formatted_text)
-        elif mode == 'ai':
+        elif mode == "ai":
             self.text_label.setStyleSheet("font-size: 16px; background-color: #fff; border-radius: 10px; padding: 5px;")
             text_layout.addWidget(self.text_label, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignHCenter)
             if new:
@@ -280,14 +302,15 @@ class MainMessageWidget(QWidget):
             item.setSizeHint(self.sizeHint()) 
 
     def format_text(self, text):
-        pattern = re.compile(r'\*(.*?)\*')
-        html_text = pattern.sub(r'<i>\1</i>', text)
-        html_text = html_text.replace('\n', '<br>')
+        pattern = re.compile(r"\*(.*?)\*")
+        html_text = pattern.sub(r"<i>\1</i>", text)
+        html_text = html_text.replace("\n", "<br>")
         return html_text
 
 class NewCharacterEditor(QWidget):
     def __init__(self):
         super().__init__()
+        self.ccas = ccas()
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Character Editor")
         self.setFixedWidth(300)
@@ -324,23 +347,23 @@ class NewCharacterEditor(QWidget):
     
     async def add_character(self):
         try:
-            with open('data.json', 'r', encoding='utf-8') as f:
+            with open("data.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
             data = {}
         except json.JSONDecodeError:
              data = {}
         charid = self.id_entry.text().replace("https://character.ai/chat/", "") 
-        character = await CustomCharAI.get_character(charid)
-        data.update({charid: {"name": character['name'], "char": charid, "avatar_url": character['avatar_file_name'], "description": character['description'], "author": character['user__username']}})
-        with open('data.json', 'w', encoding='utf-8') as f:
+        character = self.ccas.get_character(charid)
+        data.update({charid: {"name": character["name"], "char": charid, "avatar_url": character["avatar_file_name"], "description": character["description"], "author": character["user__username"]}})
+        with open("data.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
         response = requests.get(f"https://characterai.io/i/80/static/avatars/{character['avatar_file_name']}?webp=true&anim=0")
         pixmap = QPixmap()
         pixmap.loadFromData(response.content)
-        text = trls.tr('CharEditor', 'yourchar') + character['name'] + trls.tr('CharEditor', 'withid') + charid + trls.tr('CharEditor', 'added')
-        MessageBox(trls.tr('CharEditor', 'character_added'), text, pixmap, pixmap, self)
+        text = trls.tr("CharEditor", "yourchar") + character["name"] + trls.tr("CharEditor", "withid") + charid + trls.tr("CharEditor", "added")
+        MessageBox(trls.tr("CharEditor", "character_added"), text, pixmap, pixmap, self)
         self.close()
 
     def set_background_color(self, color):
@@ -396,8 +419,9 @@ class CharacterWidget(QWidget):
             self.local_data = parent.local_data
         self.parent = parent
         self.mode = mode
-        self.tts = getconfig('tts', 'charai')
-        self.trl = 'CharEditor'
+        self.tts = getconfig("tts", "charai")
+        self.trl = "CharEditor"
+        self.ccas = ccas()
 
         layout = QHBoxLayout()
         self.image_label = QLabel()
@@ -412,21 +436,21 @@ class CharacterWidget(QWidget):
         self.text_label.setWordWrap(True)
 
         buttons_layout = QVBoxLayout()
-        self.add_without_voice_button = ResizableButton(trls.tr(self.trl, 'add_without_voice'))
+        self.add_without_voice_button = ResizableButton(trls.tr(self.trl, "add_without_voice"))
         self.add_without_voice_button.setFixedWidth(200)
         self.add_without_voice_button.clicked.connect(self.add_without_voice)
 
-        self.search_voice_button = ResizableButton(trls.tr(self.trl, 'search_voice'))
+        self.search_voice_button = ResizableButton(trls.tr(self.trl, "search_voice"))
         self.search_voice_button.setFixedWidth(200)
         self.search_voice_button.clicked.connect(self.add_with_voice)
 
         self.voice_entry_button = ResizableLineEdit()
         self.voice_entry_button.setFixedWidth(200)
-        self.voice_entry_button.setText(data.get('elevenlabs_voice', ''))
+        self.voice_entry_button.setText(data.get("elevenlabs_voice", ""))
         self.voice_entry_button.textChanged.connect(self.speaker_entry)
         self.voice_entry_button.setPlaceholderText("Enter the name of the voice")
 
-        self.set_voice_button = ResizableButton(trls.tr(self.trl, 'set_voice'))
+        self.set_voice_button = ResizableButton(trls.tr(self.trl, "set_voice"))
         self.set_voice_button.setFixedWidth(200)
         self.set_voice_button.setEnabled(False)
         self.set_voice_button.clicked.connect(self.add_with_elevenlabs_voice)
@@ -434,32 +458,32 @@ class CharacterWidget(QWidget):
         local_seldel_buttons = QHBoxLayout()
 
         if mode != "local":
-            self.select_char_button = ResizableButton(trls.tr(self.trl,'select'))
+            self.select_char_button = ResizableButton(trls.tr(self.trl,"select"))
         else:
-            self.select_char_button = QPushButton(trls.tr(self.trl,'select'))
+            self.select_char_button = QPushButton(trls.tr(self.trl,"select"))
         self.select_char_button.clicked.connect(self.select_char)
         local_seldel_buttons.addWidget(self.select_char_button)
 
-        self.show_chat_button = QPushButton(trls.tr('MainWindow', 'show_chat'))
+        self.show_chat_button = QPushButton(trls.tr("MainWindow", "show_chat"))
         self.show_chat_button.clicked.connect(self.open_chat)
         local_seldel_buttons.addWidget(self.show_chat_button)
 
-        self.delete_char_button = QPushButton(trls.tr(self.trl,'delete'))
+        self.delete_char_button = QPushButton(trls.tr(self.trl,"delete"))
         self.delete_char_button.clicked.connect(self.local_delete_character)
         local_seldel_buttons.addWidget(self.delete_char_button)
 
-        self.edit_voice_button = ResizableButton(trls.tr(self.trl,'edit_voice'))
+        self.edit_voice_button = ResizableButton(trls.tr(self.trl,"edit_voice"))
         self.edit_voice_button.clicked.connect(self.local_add_char_voice)
         self.edit_voice_button.setFixedWidth(200)
 
-        self.add_voice_button = ResizableButton(trls.tr(self.trl,'add_voice'))
+        self.add_voice_button = ResizableButton(trls.tr(self.trl,"add_voice"))
         self.add_voice_button.setFixedWidth(200)
         self.add_voice_button.clicked.connect(self.local_add_char_voice)
 
-        self.delete_voice_button = ResizableButton(trls.tr(self.trl,'delete_voice'))
+        self.delete_voice_button = ResizableButton(trls.tr(self.trl,"delete_voice"))
         self.delete_voice_button.setFixedWidth(200)
         self.delete_voice_button.clicked.connect(self.local_delete_voice)
-        if self.data.get('voiceid', '') == "":
+        if self.data.get("voiceid", "") == "":
             self.delete_voice_button.setEnabled(False)
 
         local_text_buttons_layout.addWidget(self.text_label)
@@ -470,152 +494,152 @@ class CharacterWidget(QWidget):
         local_text_buttons_layout.addLayout(local_seldel_buttons)
         
         if mode == "network":
-            self.author_label = trls.tr(self.trl, 'author_label')
-            self.char = data.get('external_id')
-            self.name = data.get('participant__name', 'No Name')
-            self.title = data.get('title', 'None')
-            self.chats = data.get('score', '0')
-            self.author = data.get('user__username', 'Unknown')
-            self.description = data.get('description', 'None')
-            self.avatar_url = data.get('avatar_file_name', '')
+            self.author_label = trls.tr(self.trl, "author_label")
+            self.char = data.get("external_id")
+            self.name = data.get("participant__name", "No Name")
+            self.title = data.get("title", "None")
+            self.chats = data.get("score", "0")
+            self.author = data.get("user__username", "Unknown")
+            self.description = data.get("description", "None")
+            self.avatar_url = data.get("avatar_file_name", "")
 
             self.full_description = self.description
             self.local_chars = self.local_data.keys()
-            if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                self.description = self.description[:220] + '...'
+            if f"{self.description}" != "None" and len(f"{self.description}") > 220:
+                self.description = self.description[:220] + "..."
             if self.char in self.local_chars:
                 buttons_layout.addWidget(self.select_char_button)
                 self.select_char_button.setFixedWidth(200)
             else:
-                if self.tts == 'charai':
+                if self.tts == "charai":
                     buttons_layout.addWidget(self.search_voice_button)
                     buttons_layout.addWidget(self.add_without_voice_button)
-                elif self.tts == 'elevenlabs':
+                elif self.tts == "elevenlabs":
                     buttons_layout.addWidget(self.voice_entry_button)
                     buttons_layout.addWidget(self.set_voice_button)
 
-            if f"{self.title}" == 'None' or f"{self.title}" == '':
-                if f"{self.description}" == 'None' or f"{self.description}" == '':
-                    text = f'<b>{self.name}</b><br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+            if f"{self.title}" == "None" or f"{self.title}" == "":
+                if f"{self.description}" == "None" or f"{self.description}" == "":
+                    text = f"<b>{self.name}</b><br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
                 else:
                     self.text_label.setToolTip(self.full_description)
-                    text = f'<b>{self.name}</b><br>{self.description}<br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                    text = f"<b>{self.name}</b><br>{self.description}<br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
             else:
-                if f"{self.description}" == 'None' or f"{self.description}" == '':
-                    text = f'<b>{self.name}</b> - {self.title}<br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                if f"{self.description}" == "None" or f"{self.description}" == "":
+                    text = f"<b>{self.name}</b> - {self.title}<br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
                 else:
                     self.text_label.setToolTip(self.full_description)
-                    text = f'<b>{self.name}</b> - {self.title}<br>{self.description}<br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                    text = f"<b>{self.name}</b> - {self.title}<br>{self.description}<br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
         elif mode == "recent":
-            self.char = data.get('character_id')
-            self.name = data.get('character_name', 'No Name')
-            self.avatar_url = data.get('character_avatar_uri', '')
+            self.char = data.get("character_id")
+            self.name = data.get("character_name", "No Name")
+            self.avatar_url = data.get("character_avatar_uri", "")
             self.local_chars = self.local_data.keys()
 
-            if self.tts == 'charai':
+            if self.tts == "charai":
                 self.select_char_button.setFixedWidth(200)
                 self.show_chat_button.setFixedWidth(200)
-            elif self.tts == 'elevenlabs':
+            elif self.tts == "elevenlabs":
                 self.select_char_button.setFixedWidth(200)
                 self.show_chat_button.setFixedWidth(200)
 
             if self.char in self.local_chars:
                 buttons_layout.addWidget(self.select_char_button)
             else:
-                if self.tts == 'charai':
+                if self.tts == "charai":
                     buttons_layout.addWidget(self.search_voice_button)
                     buttons_layout.addWidget(self.add_without_voice_button)
-                elif self.tts == 'elevenlabs':
+                elif self.tts == "elevenlabs":
                     buttons_layout.addWidget(self.voice_entry_button)
                     buttons_layout.addWidget(self.set_voice_button)
             buttons_layout.addWidget(self.show_chat_button)
 
-            text = f'<b>{self.name}</b>'
+            text = f"<b>{self.name}</b>"
         elif mode == "recommend":
-            self.char = data.get('external_id')
-            self.name = data.get('participant__name', 'No Name')
-            self.avatar_url = data.get('avatar_file_name', '')
+            self.char = data.get("external_id")
+            self.name = data.get("participant__name", "No Name")
+            self.avatar_url = data.get("avatar_file_name", "")
 
-            if self.tts == 'charai':
+            if self.tts == "charai":
                 buttons_layout.addWidget(self.search_voice_button)
                 buttons_layout.addWidget(self.add_without_voice_button)
-            elif self.tts == 'elevenlabs':
+            elif self.tts == "elevenlabs":
                 buttons_layout.addWidget(self.voice_entry_button)
                 buttons_layout.addWidget(self.set_voice_button)
 
-            text = f'<b>{self.name}</b>'
+            text = f"<b>{self.name}</b>"
         elif mode == "local":
-            self.author_label = trls.tr(self.trl, 'author_label')
-            self.name = data.get('name', 'No Name')
-            self.char = data.get('char', '')
-            self.title = data.get('title', 'None')
-            self.author = data.get('author', 'Unknown')
-            self.description = data.get('description', 'None')
-            self.avatar_url = data.get('avatar_url', '')
-            self.voiceid = data.get('voiceid', '')
+            self.author_label = trls.tr(self.trl, "author_label")
+            self.name = data.get("name", "No Name")
+            self.char = data.get("char", "")
+            self.title = data.get("title", "None")
+            self.author = data.get("author", "Unknown")
+            self.description = data.get("description", "None")
+            self.avatar_url = data.get("avatar_url", "")
+            self.voiceid = data.get("voiceid", "")
             self.image_label.setFixedSize(80, 80)
 
             self.full_description = self.description
-            if self.tts == 'charai':
-                if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                    self.description = self.description[:220] + '...'
-                if self.voiceid == '':
+            if self.tts == "charai":
+                if f"{self.description}" != "None" and len(f"{self.description}") > 220:
+                    self.description = self.description[:220] + "..."
+                if self.voiceid == "":
                     buttons_layout.addWidget(self.add_voice_button)
                 else:
                     buttons_layout.addWidget(self.edit_voice_button)
                 buttons_layout.addWidget(self.delete_voice_button)
-            elif self.tts == 'elevenlabs':
-                if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                    self.description = self.description[:220] + '...'
+            elif self.tts == "elevenlabs":
+                if f"{self.description}" != "None" and len(f"{self.description}") > 220:
+                    self.description = self.description[:220] + "..."
                 buttons_layout.addWidget(self.voice_entry_button)
                 buttons_layout.addWidget(self.set_voice_button)
 
-            if f"{self.title}" == 'None' or f"{self.title}" == '':
-                if f"{self.description}" == 'None' or f"{self.description}" == '':
-                    text = f'<b>{self.name}</b><br>• {self.author_label}: {self.author}'
+            if f"{self.title}" == "None" or f"{self.title}" == "":
+                if f"{self.description}" == "None" or f"{self.description}" == "":
+                    text = f"<b>{self.name}</b><br>• {self.author_label}: {self.author}"
                 else:
                     self.text_label.setToolTip(self.full_description)
-                    text = f'<b>{self.name}</b><br>{self.description}<br> • {self.author_label}: {self.author}'
+                    text = f"<b>{self.name}</b><br>{self.description}<br> • {self.author_label}: {self.author}"
             else:
-                if f"{self.description}" == 'None' or f"{self.description}" == '':
-                    text = f'<b>{self.name}</b> - {self.title}<br> • {self.author_label}: {self.author}'
+                if f"{self.description}" == "None" or f"{self.description}" == "":
+                    text = f"<b>{self.name}</b> - {self.title}<br> • {self.author_label}: {self.author}"
                 else:
                     self.text_label.setToolTip(self.full_description)
-                    text = f'<b>{self.name}</b> - {self.title}<br>{self.description}<br>• {self.author_label}: {self.author}'
+                    text = f"<b>{self.name}</b> - {self.title}<br>{self.description}<br>• {self.author_label}: {self.author}"
         elif mode == "firstlaunch":
-            self.author_label = trls.tr(self.trl, 'author_label')
-            self.char = data.get('external_id')
-            self.name = data.get('participant__name', 'No Name')
-            self.title = data.get('title', 'None')
-            self.chats = data.get('score', '0')
-            self.author = data.get('user__username', 'Unknown')
-            self.description = data.get('description', 'None')
-            self.avatar_url = data.get('avatar_file_name', '')
+            self.author_label = trls.tr(self.trl, "author_label")
+            self.char = data.get("external_id")
+            self.name = data.get("participant__name", "No Name")
+            self.title = data.get("title", "None")
+            self.chats = data.get("score", "0")
+            self.author = data.get("user__username", "Unknown")
+            self.description = data.get("description", "None")
+            self.avatar_url = data.get("avatar_file_name", "")
 
             self.image_label.setFixedSize(80, 80)
 
             self.full_description = self.description
-            if f"{self.description}" != 'None' and len(f"{self.description}") > 220:
-                self.description = self.description[:220] + '...'
+            if f"{self.description}" != "None" and len(f"{self.description}") > 220:
+                self.description = self.description[:220] + "..."
             buttons_layout.addWidget(self.search_voice_button)
             buttons_layout.addWidget(self.add_without_voice_button)
 
-            if f"{self.title}" == 'None' or f"{self.title}" == '':
-                if f"{self.description}" == 'None' or f"{self.description}" == '':
-                    text = f'<b>{self.name}</b><br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+            if f"{self.title}" == "None" or f"{self.title}" == "":
+                if f"{self.description}" == "None" or f"{self.description}" == "":
+                    text = f"<b>{self.name}</b><br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
                 else:
                     self.text_label.setToolTip(self.full_description)
-                    text = f'<b>{self.name}</b><br>{self.description}<br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                    text = f"<b>{self.name}</b><br>{self.description}<br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
             else:
-                if f"{self.description}" == 'None' or f"{self.description}" == '':
-                    text = f'<b>{self.name}</b> - {self.title}<br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                if f"{self.description}" == "None" or f"{self.description}" == "":
+                    text = f"<b>{self.name}</b> - {self.title}<br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
                 else:
                     self.text_label.setToolTip(self.full_description)
-                    text = f'<b>{self.name}</b> - {self.title}<br>{self.description}<br>{self.chats} {trls.tr(self.trl, "chats_label")} • {self.author_label}: {self.author}'
+                    text = f"<b>{self.name}</b> - {self.title}<br>{self.description}<br>{self.chats} {trls.tr(self.trl, 'chats_label')} • {self.author_label}: {self.author}"
 
         self.threads = []
         if f"{self.avatar_url}" != "None" and f"{self.avatar_url}" != "" :
-            thread = threading.Thread(self.load_image_async(f'https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0'))
+            thread = threading.Thread(self.load_image_async(f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0"))
             thread.start()
             self.threads.append(thread)
         self.text_label.setText(text)
@@ -691,29 +715,29 @@ class CharacterWidget(QWidget):
         self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author}})
         self.save_data()
 
-        MessageBox(trls.tr(self.trl, 'character_added'), trls.tr(self.trl, 'character_added_text'), self=self)
+        MessageBox(trls.tr(self.trl, "character_added"), trls.tr(self.trl, "character_added_text"), self=self)
 
         if self.mode != "firstlaunch":
             self.parent.close()
 
     def load_data(self):
         try:
-            with open('data.json', 'r', encoding='utf-8') as f:
+            with open("data.json", "r", encoding="utf-8") as f:
                 self.datafile = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self.datafile = {}
 
     def save_data(self):
-        with open('data.json', 'w', encoding='utf-8') as f:
+        with open("data.json", "w", encoding="utf-8") as f:
             json.dump(self.datafile, f, ensure_ascii=False, indent=4)
 
     def get_recent_data(self):
-        char = asyncio.run(CustomCharAI.get_character(self.char))
-        self.name = char.get('participant__name', 'No Name')
-        self.author = char.get('user__username', 'Unknown')
-        self.avatar_url = char.get('avatar_file_name', '')
-        self.description = char.get('description', '')
-        self.title = char.get('title', '')
+        char = self.ccas.get_character(self.char)
+        self.name = char.get("participant__name", "No Name")
+        self.author = char.get("user__username", "Unknown")
+        self.avatar_url = char.get("avatar_file_name", "")
+        self.description = char.get("description", "")
+        self.title = char.get("title", "")
 
     def local_add_char_voice(self):
         if self.mode != "firstlaunch":
@@ -731,8 +755,8 @@ class CharacterWidget(QWidget):
     def local_delete_voice(self):
         self.load_data()
         if self.char in self.datafile:
-            if 'voiceid' in self.datafile[self.char]:
-                del self.datafile[self.char]['voiceid']
+            if "voiceid" in self.datafile[self.char]:
+                del self.datafile[self.char]["voiceid"]
         self.save_data()
         self.parent.parent.refreshcharsinmenubar()
         self.parent.load_local_data()
@@ -742,14 +766,14 @@ class CharacterWidget(QWidget):
         if self.mode == "network" or self.mode == "recent":
             self.load_data()
             if self.tts == "charai":
-                self.voiceid = self.datafile[self.char].get('voiceid', '')
+                self.voiceid = self.datafile[self.char].get("voiceid", "")
             elif self.tts == "elevenlabs":
-                self.voiceid = self.datafile[self.char].get('elevenlabs_voice', '')
+                self.voiceid = self.datafile[self.char].get("elevenlabs_voice", "")
         elif self.mode == "local":
             if self.tts == "charai":
-                self.voiceid = self.data.get('voiceid', '')
+                self.voiceid = self.data.get("voiceid", "")
             elif self.tts == "elevenlabs":
-                self.voiceid = self.data.get('elevenlabs_voice', '')
+                self.voiceid = self.data.get("elevenlabs_voice", "")
         self.parent.parent.charai_char_entry.setText(self.char)
         self.parent.parent.charaitts_voice_entry.setText(self.voiceid)
         self.parent.close()
@@ -782,14 +806,14 @@ class CharacterSearch(QWidget):
         self.network_layout = QVBoxLayout(self.network_tab)
 
         self.network_search_input = QLineEdit()
-        self.network_search_input.setPlaceholderText(trls.tr(self.trl, 'network_search_input'))
+        self.network_search_input.setPlaceholderText(trls.tr(self.trl, "network_search_input"))
         self.network_search_input.returnPressed.connect(self.search_and_load)
         self.network_layout.addWidget(self.network_search_input)
 
         self.network_list_widget = QListWidget()
         self.network_layout.addWidget(self.network_list_widget)
 
-        self.add_another_charcter_button = QPushButton(trls.tr(self.trl, 'add_another_charcter_button'))
+        self.add_another_charcter_button = QPushButton(trls.tr(self.trl, "add_another_charcter_button"))
         self.add_another_charcter_button.clicked.connect(self.open_NewCharacherEditor)
         self.network_layout.addWidget(self.add_another_charcter_button)
 
@@ -799,8 +823,8 @@ class CharacterSearch(QWidget):
         self.local_list_widget = QListWidget()
         self.local_layout.addWidget(self.local_list_widget)
 
-        self.tab_widget.addTab(self.network_tab, trls.tr(self.trl, 'network_tab'))
-        self.tab_widget.addTab(self.local_tab, trls.tr(self.trl, 'local_tab'))
+        self.tab_widget.addTab(self.network_tab, trls.tr(self.trl, "network_tab"))
+        self.tab_widget.addTab(self.local_tab, trls.tr(self.trl, "local_tab"))
 
         main_layout.addWidget(self.tab_widget)
 
@@ -831,7 +855,7 @@ class CharacterSearch(QWidget):
         custom_widget = CharacterWidget(self, data, mode)
         
         item.setSizeHint(custom_widget.sizeHint())
-        if mode == 'local':
+        if mode == "local":
             self.local_list_widget.addItem(item)
             self.local_list_widget.setItemWidget(item, custom_widget)
             return
@@ -860,21 +884,21 @@ class CharacterSearch(QWidget):
         self.add_another_charcter_button.setVisible(False)
 
     def populate_recent_list(self):
-        self.populate_category_header(trls.tr(self.trl, 'recent_chats'))
+        self.populate_category_header(trls.tr(self.trl, "recent_chats"))
         if self.parent.recent_chats:
             for chats in self.parent.recent_chats:
-                    if chats['character_id'] not in self.recommend_recent_items:
-                        self.recommend_recent_items.append(chats['character_id'])
+                    if chats["character_id"] not in self.recommend_recent_items:
+                        self.recommend_recent_items.append(chats["character_id"])
                         self.populate_list(chats, "recent")
         else:
             self.populate_category_header(f"{trls.tr(self.trl, 'empty_chats')}... <(＿　＿)>")
 
     def populate_recommend_list(self):
-        self.populate_category_header(trls.tr(self.trl, 'recommend_chats'))
+        self.populate_category_header(trls.tr(self.trl, "recommend_chats"))
         if self.parent.recommend_chats:
             for recommend in self.parent.recommend_chats:
-                if recommend['external_id'] not in self.recommend_recent_items:
-                    self.recommend_recent_items.append(recommend['external_id'])
+                if recommend["external_id"] not in self.recommend_recent_items:
+                    self.recommend_recent_items.append(recommend["external_id"])
                     self.populate_list(recommend, "recommend")
         else:
             self.populate_category_header(f"{trls.tr(self.trl, 'empty_chats')}... <(＿　＿)>")
@@ -884,7 +908,7 @@ class CharacterSearch(QWidget):
         if not self.local_data:
             return
         for charid, char_data in self.local_data.items():
-            self.populate_list(char_data, 'local')
+            self.populate_list(char_data, "local")
 
     def on_tab_changed(self, index):
         if index == 1:
@@ -898,24 +922,24 @@ class CharacterSearch(QWidget):
         self.add_another_charcter_button.setVisible(False)
 
         try:
-            response = requests.get(f'https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D')
+            response = requests.get(f"https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D")
             if response.status_code == 200:
                 self.network_data = response.json()
                 self.populate_network_list()
             else:
-                MessageBox(trls.tr('Errors', 'Label'), f"Error receiving data: {response.status_code}")
+                MessageBox(trls.tr("Errors", "Label"), f"Error receiving data: {response.status_code}")
         except Exception as e:
-            MessageBox(trls.tr('Errors', 'Label'), f"Error when executing the request: {e}")
+            MessageBox(trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
 
     def load_local_data(self):
         try:
-            with open('data.json', 'r', encoding='utf-8') as f:
+            with open("data.json", "r", encoding="utf-8") as f:
                 self.local_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self.local_data = {}
 
     def save_local_data(self):
-        with open('data.json', 'w', encoding='utf-8') as f:
+        with open("data.json", "w", encoding="utf-8") as f:
             json.dump(self.local_data, f, ensure_ascii=False, indent=4)
 
     def set_background_color(self, color):
@@ -968,13 +992,13 @@ class CharacterSearch(QWidget):
         self.setStyleSheet("")
 
 class VoiceSearch(QWidget):
-    def __init__(self, character_id, character_name):
+    def __init__(self, character_id, character_name=""):
         super().__init__()
         self.character_id = character_id
         self.character_name = character_name
         self.trl = "CharEditor"
 
-        self.setWindowTitle('Emilia: Voice Search')
+        self.setWindowTitle("Emilia: Voice Search")
         self.setWindowIcon(QIcon(emiliaicon))
         self.setGeometry(300, 300, 800, 400)
 
@@ -992,11 +1016,11 @@ class VoiceSearch(QWidget):
 
         self.preview_text_label = QLabel()
 
-        self.play_button = QPushButton(trls.tr(self.trl, 'play_an_example'))
+        self.play_button = QPushButton(trls.tr(self.trl, "play_an_example"))
         self.play_button.clicked.connect(self.play_audio)
         self.play_button.setEnabled(False)
 
-        self.select_button = QPushButton(trls.tr(self.trl, 'select'))
+        self.select_button = QPushButton(trls.tr(self.trl, "select"))
         self.select_button.clicked.connect(self.addcharvoice)
         self.select_button.setEnabled(False)
 
@@ -1018,8 +1042,8 @@ class VoiceSearch(QWidget):
 
     def populate_list(self):
         self.list_widget.clear()
-        for item in self.data['voices']:
-            description = item['description']
+        for item in self.data["voices"]:
+            description = item["description"]
             if description == "":
                 list_item = QListWidgetItem(f"{item['name']} • {trls.tr(self.trl, 'author_label')}: {item['creatorInfo']['username']}")
             else:
@@ -1032,12 +1056,12 @@ class VoiceSearch(QWidget):
         self.current_data = data
         self.details_label.setText(f"<b>{data['name']}</b> • {trls.tr(self.trl, 'author_label')}: {data['creatorInfo']['username']}<br>{data['description']}")
         self.preview_text_label.setText(f"{trls.tr(self.trl, 'example_phrase')}: {data['previewText']}")
-        self.current_audio_uri = data['previewAudioURI']
+        self.current_audio_uri = data["previewAudioURI"]
         self.play_button.setEnabled(True)
         self.select_button.setEnabled(True)
 
     def play_audio(self):
-        if hasattr(self, 'current_audio_uri'):
+        if hasattr(self, "current_audio_uri"):
             try:
                 response = requests.get(self.current_audio_uri, stream=True)
                 if response.status_code == 200:
@@ -1045,7 +1069,7 @@ class VoiceSearch(QWidget):
                     audio_array, samplerate = sf.read(audio_bytes)
                     sd.play(audio_array, samplerate)
             except Exception as e:
-                MessageBox(trls.tr('Errors', 'Label'), f"Error loading and playing audio: {e}")
+                MessageBox(trls.tr("Errors", "Label"), f"Error loading and playing audio: {e}")
 
     def search_and_load(self):
         search_query = self.search_input.text().strip()
@@ -1053,33 +1077,33 @@ class VoiceSearch(QWidget):
             search_query = self.character_name
 
         try:
-            url = f'https://neo.character.ai/multimodal/api/v1/voices/search?query={search_query}'
+            url = f"https://neo.character.ai/multimodal/api/v1/voices/search?query={search_query}"
             headers = {
-                "Content-Type": 'application/json',
-                "Authorization": f'Token {getconfig("client", configfile="charaiconfig.json")}'
+                "Content-Type": "application/json",
+                "Authorization": f"Token {getconfig('client', configfile='charaiconfig.json')}"
             }
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 self.data = response.json()
                 self.populate_list()
             else:
-                MessageBox(trls.tr('Errors', 'Label'), f"Error receiving data: {response.status_code}")
+                MessageBox(trls.tr("Errors", "Label"), f"Error receiving data: {response.status_code}")
         except Exception as e:
-            MessageBox(trls.tr('Errors', 'Label'), f"Error when executing the request: {e}")
+            MessageBox(trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
 
     def addcharvoice(self):
         try:
-            with open('data.json', 'r', encoding='utf-8') as f:
+            with open("data.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
             data = {}
         except json.JSONDecodeError:
              data = {}
             
-        data.update({self.character_id: {"name": data[self.character_id]["name"], "char": data[self.character_id]["char"], "avatar_url": data[self.character_id]["avatar_url"], "description": data[self.character_id]['description'], "title": data[self.character_id]['title'], "author": data[self.character_id]["author"],"voiceid": self.current_data['id']}})
+        data.update({self.character_id: {"name": data[self.character_id]["name"], "char": data[self.character_id]["char"], "avatar_url": data[self.character_id]["avatar_url"], "description": data[self.character_id]["description"], "title": data[self.character_id]["title"], "author": data[self.character_id]["author"],"voiceid": self.current_data["id"]}})
 
-        with open('data.json', 'w', encoding='utf-8') as f:
+        with open("data.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-        MessageBox(text=trls.tr(self.trl, 'character_voice_changed'))
+        MessageBox(text=trls.tr(self.trl, "character_voice_changed"))
         self.close()

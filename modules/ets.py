@@ -1,11 +1,11 @@
 import json
 
 class translations:
-    def __init__(self, lang, folder):
+    def __init__(self, lang, folder="locales"):
         self.lang = lang
         self.folder = folder
         self.translations = self.load_translations(f"{folder}/{lang}.json")
-        self.slang = self.translations['small']
+        self.slang = self.translations["small"]
 
     def load_translations(self, filename):
         try:

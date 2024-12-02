@@ -1,16 +1,5 @@
 {
-  "FirstLaunch": {
-    "first_launch_notification_label": "О, это ваш первый запуск Emilia, давайте настроим её?",
-    "first_launch_notification_button_yes": "Вперёд!",
-    "first_launch_notification_button_no": "Предпочту отказаться",
-    "second_page": "Настройте Emilia по своему вкусу",
-    "third_page": "Найдите персонажа по душе и добавьте ему голос\nПосле того как добавили, Вы можете закрыть это окно и выбрать своего персонажа",
-    "use_characterai": "Получите API-токен",
-    "token_saved": "Токен успешно сохранен",
-    "use_gemini": "Получите API-ключ в открывшемся окне браузера и введите его здесь\nТакже не забудьте ввести голос для Gemini",
-    "ready_button": "Готово!",
-    "relaunch_button": "Перезапустить!"
-  },
+  "small": "ru",
   "MainWindow": {
     "select_ai_label": "Выберите ИИ",
     "settings": "Настройки",
@@ -55,7 +44,7 @@
     "about_emilia": "Об Emilia ",
     "language_from": "\n\nРусский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nНовое в",
-    "whats_new": ": \n• Новый интерфейс в основном окне\n• При запуске будет отображаться чат с 20 последними сообщениями и всеми последующими\n• В настройках появились пункты отвечающие за перевод сообщений пользователя и ИИ, сообщения пользователя переводятся на английский для лучшего понимая их ИИ, а сообщения ИИ переводятся на основной язык Emilia\n• Оптимизирован Emilia Emotes Core\n• Выключение микрофона теперь на главном экране\n• Анимация появления сообщений в чате",
+    "whats_new": ": \n• None",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
     "emilia_is_open_source": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
     "use_version": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
@@ -64,7 +53,10 @@
     "speak": "Говорите...",
     "say_again": "Скажите ещё раз...",
     "user": "Пользователь: ",
-    "generation": "Генерация..."
+    "generation": "Генерация...",
+    "your_recent_messages": "Ваши недавние сообщения",
+    "you_can_start": "Можете начинать",
+    "repeat": "Повторите..."
   },
   "GetToken": {
     "your_email": "Ваша электронная почта:",

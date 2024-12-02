@@ -26,7 +26,7 @@ class EEC():
                 await self.myvts.write_token()
                 await self.myvts.request_authenticate()
         except:
-            writeconfig('vtubeenable', False)
+            writeconfig("vtubeenable", False)
 
     async def SetCustomParameter(self, name, value=50, min=-100, max=100):
         """
