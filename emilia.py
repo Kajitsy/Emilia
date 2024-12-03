@@ -42,7 +42,7 @@ try:
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.4b1dev1"
+version = "2.4b1dev2"
 pre = True
 sample_rate = 48000
 

@@ -11,3 +11,6 @@ aiohttp
 PyQt6
 packaging
 translators
+requests
+websockets
+protobuf

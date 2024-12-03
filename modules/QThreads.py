@@ -5,7 +5,6 @@ import sounddevice as sd
 import soundfile as sf
 import speech_recognition as sr
 import google.generativeai as genai
-import modules.CustomCharAI as CustomCharAI
 import translators as ts
 
 from elevenlabs.client import ElevenLabs
@@ -18,6 +17,7 @@ from PyQt6.QtGui import QPixmap
 
 from modules.config import getconfig
 from modules.CustomCharAI import Sync as ccas
+from modules.CustomCharAI import Async as ccaa
 from modules.eec import EEC
 from modules.ets import translations as ets
 from modules.other import MessageBox
@@ -32,6 +32,7 @@ class MainThreadCharAI(QThread):
         self.parent = parent
         self.tts = tts
         self.vts = EEC()
+        self.ccaa = ccaa()
 
         self.vtube_enable = getconfig("vtubeenable", False)
         self.umtranslate = getconfig("umtranslate", False)
@@ -83,7 +84,7 @@ class MainThreadCharAI(QThread):
         voiceId = self.parent.charaitts_voice_entry.text()
         voiceQuery = message.name
 
-        response = await CustomCharAI.tts(candidateId, roomId, turnId, voiceId, voiceQuery)
+        response = await self.ccaa.tts(candidateId, roomId, turnId, voiceId, voiceQuery)
         link = response["replayUrl"]
         download = requests.get(link, stream=True)
         if download.status_code == 200: 
@@ -370,9 +371,11 @@ class LoadChatThread(QThread):
         self.client = client
         self.character_id = character_id
 
+        self.ccaa = ccaa()
+
     async def load_chat_async(self):
         try:
-            self.parent.character = await CustomCharAI.get_character(self.character_id)
+            self.parent.character = await self.ccaa.get_character(self.character_id)
             self.parent.setWindowTitle(f"Emilia: Chat With {self.parent.character['name']}")
             chat = await self.client.get_chat(self.character_id)
             history = await self.client.get_history(chat.chat_id)

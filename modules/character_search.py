@@ -3,7 +3,6 @@ import requests
 
 import sounddevice as sd
 import soundfile as sf
-import modules.CustomCharAI as CustomCharAI
 import translators as ts
 
 from characterai import aiocai
@@ -21,6 +20,7 @@ from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
 
 from modules.config import getconfig, getchardata
 from modules.CustomCharAI import Sync as ccas
+from modules.CustomCharAI import Async as ccaa
 from modules.ets import translations
 from modules.other import MessageBox
 from modules.QCustom import ResizableButton, ResizableLineEdit
@@ -170,6 +170,7 @@ class ChatWithCharacter(QWidget):
         self.account_id = None
         self.trl = "ChatWithCharacter"
         self.client = aiocai.Client(getconfig("client", configfile="charaiconfig.json"))
+        self.ccaa = ccaa()
 
         self.setGeometry(300, 300, 800, 400)
 
@@ -216,7 +217,7 @@ class ChatWithCharacter(QWidget):
     async def start_new_chat(self):
         try:
             if self.account_id is None:
-                self.account = await CustomCharAI.get_me()
+                self.account = await self.ccaa.get_me()
                 self.account_id = self.account["id"]
             async with await self.client.connect() as chat:
                 await chat.new_chat(self.character_id, self.account_id)
