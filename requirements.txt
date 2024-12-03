@@ -12,5 +12,5 @@ PyQt6
 packaging
 translators
 requests
-websockets
+websockets==11.0.3
 protobuf

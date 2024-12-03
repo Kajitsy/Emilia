@@ -64,7 +64,7 @@ class MainThreadCharAI(QThread):
                         await asyncio.sleep(0.5)
                 except sr.UnknownValueError:
                     if self.show_system_messages:
-                        self.ouinput_signal.emit("zxc", "sys", self.trls.tr("repeat", "Main"), 0, False, False)
+                        self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "repeat"), 0, False, False)
                     pass
             else:
                 await asyncio.sleep(0.5)
@@ -139,58 +139,81 @@ class MainThreadCharAI(QThread):
     async def process_user_input(self):
         self.recognizer = sr.Recognizer()
         self.character = getconfig("char", configfile="charaiconfig.json")
-        self.connect = await self.client.connect()
+        async with await self.client.connect() as self.connect:
 
-        if self.vtube_enable:
-            await self.vts.VTubeConnect()
-
-        self.chat = await self.client.get_chat(self.character)
-
-        if self.show_system_messages:
-            self.ouinput_signal.emit("zxc", "sys", self.trls.tr("your_recent_messages", "Main"), 0, False, False)
-
-        history = await self.client.get_history(self.chat.chat_id)
-        self.chatLoaded.emit(list(reversed(history.turns)))
-
-        if self.tts == "elevenlabs":
-            self.elevenlabs = ElevenLabs(api_key=getconfig("elevenlabs_api_key"))
-
-        if self.show_system_messages:
-            self.ouinput_signal.emit("zxc", "sys", self.trls.tr("you_can_start", "Main"), 0, False, False)
-
-        while self._running:
             if self.vtube_enable:
-                await self.vts.UseEmote("Listening")
+                await self.vts.VTubeConnect()
 
-            user_message = await self.recognize_speech(self.recognizer)
+            self.chat = await self.client.get_chat(self.character)
 
-            if self.umtranslate:
-                while True:
-                    try:
-                        user_message_translate = ts.translate_text(user_message, to_language="en")
-                        break
-                    except:
-                        pass
-                user_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{user_message}</p>"
-                user_message = user_message_translate
+            if self.show_system_messages:
+                self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "your_recent_messages"), 0, False, False)
 
-            self.ouinput_signal.emit("zxc", "human", user_message + user_message_before_translate if self.umtranslate and self.show_notranslate_message else user_message, len(user_message), True, True if self.aimtranslate and self.show_notranslate_message else False)
+            history = await self.client.get_history(self.chat.chat_id)
+            self.chatLoaded.emit(list(reversed(history.turns)))
 
-            self.message = await self.generate_ai_response(user_message)
+            if self.tts == "elevenlabs":
+                self.elevenlabs = ElevenLabs(api_key=getconfig("elevenlabs_api_key"))
 
-            self.ai_message = self.message.text
+            if self.show_system_messages:
+                self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "you_can_start"), 0, False, False)
 
-            if self.aimtranslate:
-                while True:
-                    try:
-                        self.ai_message_translate = ts.translate_text(self.ai_message, to_language=self.trls.slang)
-                        break
-                    except:
-                        pass
-                self.ai_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{self.ai_message}</p>"
-                self.ai_message = self.ai_message_translate
+            while self._running:
+                if not self._running:
+                    break
 
-            await self.play_audio_response(self.ai_message)
+                if self.vtube_enable:
+                    await self.vts.UseEmote("Listening")
+
+                user_message = await self.recognize_speech(self.recognizer)
+
+                if not self._running:
+                    break
+
+                if self.umtranslate:
+                    while True:
+                        try:
+                            user_message_translate = ts.translate_text(user_message, to_language="en")
+                            break
+                        except:
+                            if not self._running:
+                                break
+                            pass
+                    user_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{user_message}</p>"
+                    user_message = user_message_translate
+
+                self.ouinput_signal.emit(
+                    "zxc", "human",
+                    user_message + user_message_before_translate
+                    if self.umtranslate and self.show_notranslate_message else user_message,
+                    len(user_message), True,
+                    True if self.aimtranslate and self.show_notranslate_message else False
+                )
+
+                if not self._running:
+                    break
+
+                self.message = await self.generate_ai_response(user_message)
+
+                if not self._running:
+                    break
+
+                self.ai_message = self.message.text
+
+                if self.aimtranslate:
+                    while True:
+                        try:
+                            self.ai_message_translate = ts.translate_text(self.ai_message, to_language=self.trls.slang)
+                            break
+                        except:
+                            pass
+                    self.ai_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{self.ai_message}</p>"
+                    self.ai_message = self.ai_message_translate
+
+                if not self._running:
+                    break
+
+                await self.play_audio_response(self.ai_message)
 
     def run(self):
         self.loop = asyncio.new_event_loop()
@@ -255,7 +278,7 @@ class MainThreadGemini(QThread):
                         await asyncio.sleep(0.5)
                 except sr.UnknownValueError:
                     if self.show_system_messages:
-                        self.ouinput_signal.emit("zxc", "sys", self.trls.tr("repeat", "Main"), 0, False, False)
+                        self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "repeat"), 0, False, False)
                     pass
             else:
                 await asyncio.sleep(0.5)
@@ -304,7 +327,7 @@ class MainThreadGemini(QThread):
             self.elevenlabs = ElevenLabs(api_key=getconfig("elevenlabs_api_key"))
 
         if self.show_system_messages:
-            self.ouinput_signal.emit("zxc", "sys", self.trls.tr("you_can_start", "Main"), 0, False, False)
+            self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "you_can_start"), 0, False, False)
 
         while self._running:
             if self.vtube_enable:
