@@ -158,7 +158,7 @@ class MainThreadCharAI(QThread):
         if self.show_system_messages:
             self.ouinput_signal.emit("zxc", "sys", self.trls.tr("you_can_start", "Main"), 0, False, False)
 
-        while True:
+        while self._running:
             if self.vtube_enable:
                 await self.vts.UseEmote("Listening")
 
@@ -306,7 +306,7 @@ class MainThreadGemini(QThread):
         if self.show_system_messages:
             self.ouinput_signal.emit("zxc", "sys", self.trls.tr("you_can_start", "Main"), 0, False, False)
 
-        while True:
+        while self._running:
             if self.vtube_enable:
                 await self.vts.UseEmote("Listening")
 
