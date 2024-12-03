@@ -649,6 +649,15 @@ class CharacterWidget(QWidget):
         layout.addLayout(text_buttons_layout)
         self.setLayout(layout)
 
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            if self.mode == "local":
+                self.select_char()
+                return
+            self.add_without_voice()
+        elif event.button() == Qt.MouseButton.RightButton:
+            self.open_chat()
+
     def open_chat(self):
         window = ChatWithCharacter(self.char)
         window.show()
@@ -718,8 +727,7 @@ class CharacterWidget(QWidget):
 
         MessageBox(trls.tr(self.trl, "character_added"), trls.tr(self.trl, "character_added_text"), self=self)
 
-        if self.mode != "firstlaunch":
-            self.parent.close()
+        self.select_char()
 
     def load_data(self):
         try:
@@ -764,7 +772,7 @@ class CharacterWidget(QWidget):
         self.parent.populate_local_list()
 
     def select_char(self):
-        if self.mode == "network" or self.mode == "recent":
+        if self.mode == "network" or self.mode == "recent" or self.mode == "recommend":
             self.load_data()
             if self.tts == "charai":
                 self.voiceid = self.datafile[self.char].get("voiceid", "")
