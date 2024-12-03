@@ -28,6 +28,8 @@ class MainThreadCharAI(QThread):
 
     def __init__(self, parent, tts):
         super().__init__()
+        self._running = True
+
         self.client = aiocai.Client(getconfig("client", configfile="charaiconfig.json"))
         self.parent = parent
         self.tts = tts
@@ -200,6 +202,8 @@ class MainThreadGemini(QThread):
 
     def __init__(self, parent, tts):
         super().__init__()
+        self._running = True
+
         self.gemini_model = getconfig("gemini_model", "gemini-1.5-flash", "geminiconfig.json")
         self.model = genai.GenerativeModel(self.gemini_model)
         self.chat = self.model.start_chat(history=[])
