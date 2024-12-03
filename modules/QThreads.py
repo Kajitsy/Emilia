@@ -1,4 +1,4 @@
-import io, asyncio, re
+import io, asyncio, re, os, hashlib
 import requests, websockets
 
 import sounddevice as sd
@@ -416,17 +416,37 @@ class LoadChatThread(QThread):
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
-    
-    def __init__(self, url):
+
+    def __init__(self, url, cache_dir="cache/avatars"):
         super().__init__()
         self.url = url
+        self.cache_dir = cache_dir
+
+        os.makedirs(self.cache_dir, exist_ok=True)
+
+    def get_cache_path(self):
+        filename = hashlib.md5(self.url.encode('utf-8')).hexdigest() + ".png"
+        return os.path.join(self.cache_dir, filename)
 
     def run(self):
+        cache_path = self.get_cache_path()
+
+        if os.path.exists(cache_path):
+            image = QPixmap(cache_path)
+            self.image_loaded.emit(image)
+            return
+
         try:
-            response = requests.get(self.url)
+            response = requests.get(self.url, timeout=10)
             response.raise_for_status()
             image = QPixmap()
-            image.loadFromData(response.content)
-            self.image_loaded.emit(image)
-        except:
+            if image.loadFromData(response.content):
+                if not image.save(cache_path):
+                    print(f"Ошибка сохранения файла: {cache_path}")
+                self.image_loaded.emit(image)
+            else:
+                print("Ошибка загрузки изображения из данных.")
+                self.image_loaded.emit(QPixmap())
+        except Exception as e:
+            print(f"Ошибка загрузки изображения: {e}")
             self.image_loaded.emit(QPixmap())
