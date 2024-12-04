@@ -123,6 +123,10 @@
     "other_options": "Другие",
     "customization_options": "Внешний вид"
   },
+  "CacheManager": {
+    "avatars": "Папка с аватарами",
+    "search_voice": "Папка с примерами голосов"
+  },
   "Errors": {
     "Label": "Ошибка",
     "Gemini 400": "Ваше местоположение не позволяет использовать Gemini :(<br>Но вы можете использовать <a href='https://www.comss.ru/page.php?id=7315'>данный днс</a> ;)",

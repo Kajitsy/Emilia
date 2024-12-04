@@ -1,4 +1,4 @@
-import os, asyncio, winreg, json, sys, webbrowser, ctypes
+import os, asyncio, winreg, json, sys, webbrowser, ctypes, shutil
 
 import sounddevice as sd
 import speech_recognition as sr
@@ -14,14 +14,13 @@ from PyQt6.QtWidgets import (QColorDialog,
                              QLabel, QLineEdit, 
                              QPushButton, 
                              QVBoxLayout, 
-                             QWidget, 
-                             QMenu, 
+                             QWidget, QMenu,
                              QListWidget, 
                              QListWidgetItem,
                              QGroupBox,
                              QSizePolicy,
                              QStackedLayout,
-                             QSlider)
+                             QSlider, QMessageBox)
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
 from PyQt6.QtCore import QLocale, Qt
 from PyQt6.QtMultimedia import QMediaDevices
@@ -34,15 +33,15 @@ from modules.character_search import (CharacterSearch,
 from modules.config import getconfig, writeconfig, exe_check
 from modules.ets import translations
 from modules.other import MessageBox, Emote_File
-from modules.QCustom import ResizableLabel, ResizableLineEdit, ResizableButton
+from modules.QCustom import ResizableButton
 from modules.QThreads import MainThreadCharAI, MainThreadGemini, ChatDataWorker
 
 try:
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("emilia.app")
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("emilia_beta.app")
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.4b1dev2"
+version = "2.4b1dev3"
 pre = True
 sample_rate = 48000
 
@@ -92,6 +91,95 @@ if tts == "charai" and aitype != "charai":
     writeconfig("tts", tts)
 
 print("(｡･∀･)ﾉﾞ")
+
+class CacheManagerWindow(QWidget):
+    def __init__(self, cache_dir):
+        super().__init__()
+        self.cache_dir = cache_dir
+        self.setWindowIcon(QIcon(emiliaicon))
+        self.setWindowTitle("Emilia: Cache Manager")
+        self.setGeometry(300, 300, 400, 300)
+
+        self.addchar_button = QPushButton(trls.tr("CharEditor", "add_character"))
+        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
+
+        self.layout = QVBoxLayout()
+
+        self.folder_list = QListWidget()
+        self.layout.addWidget(self.folder_list)
+
+        self.refresh_button = QPushButton("Refresh List")
+        self.refresh_button.clicked.connect(self.load_folders)
+        self.layout.addWidget(self.refresh_button)
+
+        self.delete_button = QPushButton("Delete Selected Folder")
+        self.delete_button.clicked.connect(self.delete_selected_folder)
+        self.layout.addWidget(self.delete_button)
+
+        self.clear_all_button = QPushButton("Clear All Cache")
+        self.clear_all_button.clicked.connect(self.clear_all_cache)
+        self.layout.addWidget(self.clear_all_button)
+
+        self.setLayout(self.layout)
+
+        self.load_folders()
+
+    def get_folder_size(self, folder_path):
+        total_size = 0
+        for dirpath, _, filenames in os.walk(folder_path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                try:
+                    total_size += os.path.getsize(fp)
+                except OSError:
+                    pass
+        return total_size
+
+    def load_folders(self):
+        self.folder_list.clear()
+        try:
+            if os.path.exists(self.cache_dir):
+                for folder in os.listdir(self.cache_dir):
+                    full_path = os.path.join(self.cache_dir, folder)
+                    if os.path.isdir(full_path):
+                        folder_size = self.get_folder_size(full_path)
+                        size_mb = folder_size / (1024 * 1024)
+                        self.folder_list.addItem(f"{folder} - {trls.tr('CacheManager', folder)} {size_mb:.2f} MB")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error loading folders: {e}")
+
+    def delete_selected_folder(self):
+        selected_item = self.folder_list.currentItem()
+        if selected_item:
+            folder_name = selected_item.text().split(" - ")[0]
+            folder_path = os.path.join(self.cache_dir, folder_name)
+            confirmation = QMessageBox.question(
+                self, "Confirm", f"Are you sure you want to delete '{folder_name}'?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if confirmation == QMessageBox.StandardButton.Yes:
+                try:
+                    shutil.rmtree(folder_path)
+                    QMessageBox.information(self, "Info", f"Folder '{folder_name}' deleted.")
+                    self.load_folders()
+                except Exception as e:
+                    QMessageBox.critical(self, "Error", f"Error deleting folder: {e}")
+        else:
+            QMessageBox.warning(self, "Warning", "No folder selected.")
+
+    def clear_all_cache(self):
+        confirmation = QMessageBox.question(
+            self, "Confirm", "Are you sure you want to clear all cache?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if confirmation == QMessageBox.StandardButton.Yes:
+            try:
+                shutil.rmtree(self.cache_dir)
+                os.makedirs(self.cache_dir, exist_ok=True)
+                QMessageBox.information(self, "Info", "All cache cleared.")
+                self.load_folders()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Error clearing cache: {e}")
 
 class OptionsWindow(QWidget):
     def __init__(self, mainwindow):
@@ -206,6 +294,10 @@ class OptionsWindow(QWidget):
         vtubelayout.addWidget(self.vtubewiki)
         self.other_options_layout.addLayout(vtubelayout)
 
+        self.clear_cache_button = QPushButton("Cache Control")
+        self.clear_cache_button.clicked.connect(self.clear_cache)
+        self.other_options_layout.addWidget(self.clear_cache_button)
+
 
         self.customization_options = QGroupBox(trls.tr(self.trl, "customization_options"))
         self.customization_options_layout = QVBoxLayout()
@@ -301,6 +393,10 @@ class OptionsWindow(QWidget):
             self.set_label_color(QColor(labelcolor))
         if buttontextcolor:
             self.set_button_text_color(QColor(buttontextcolor))
+
+    def clear_cache(self):
+        CacheManagerWindow("cache").show()
+        self.close()
 
     def show_ss_messages_change(self, state):
         global show_system_messages

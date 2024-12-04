@@ -1,4 +1,4 @@
-import io, asyncio, threading, json, re
+import io, asyncio, threading, json, re, os, time
 import requests
 
 import sounddevice as sd
@@ -1001,11 +1001,16 @@ class CharacterSearch(QWidget):
         self.setStyleSheet("")
 
 class VoiceSearch(QWidget):
-    def __init__(self, character_id, character_name=""):
+    def __init__(self, character_id, character_name="", cache_dir="cache/search_voice"):
         super().__init__()
         self.character_id = character_id
         self.character_name = character_name
+        self.cache_dir=cache_dir
         self.trl = "CharEditor"
+
+        self.CACHE_TTL = 86400 # in seconds
+
+        os.makedirs(self.cache_dir, exist_ok=True)
 
         self.setWindowTitle("Emilia: Voice Search")
         self.setWindowIcon(QIcon(emiliaicon))
@@ -1046,8 +1051,29 @@ class VoiceSearch(QWidget):
         main_layout.addLayout(buttons_layout)
 
         self.setLayout(main_layout)
-
         self.search_and_load()
+
+    def get_cache_path(self, query):
+        safe_query = query.replace(" ", "_")
+        return os.path.join(self.cache_dir, f"{safe_query}.json")
+
+    def get_audio_cache_path(self, audio_uri):
+        filename = os.path.basename(audio_uri).split("?")[0]
+        safe_filename = re.sub(r'[\\/:*?"<>|]', '_', filename)
+        return os.path.join(self.cache_dir, safe_filename)
+
+    def load_cache(self, query):
+        cache_path = self.get_cache_path(query)
+        if os.path.exists(cache_path):
+            if time.time() - os.path.getmtime(cache_path) < self.CACHE_TTL:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        return None
+
+    def save_cache(self, query, data):
+        cache_path = self.get_cache_path(query)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
     def populate_list(self):
         self.list_widget.clear()
@@ -1071,19 +1097,35 @@ class VoiceSearch(QWidget):
 
     def play_audio(self):
         if hasattr(self, "current_audio_uri"):
-            try:
-                response = requests.get(self.current_audio_uri, stream=True)
-                if response.status_code == 200:
-                    audio_bytes = io.BytesIO(response.content)
-                    audio_array, samplerate = sf.read(audio_bytes)
-                    sd.play(audio_array, samplerate)
-            except Exception as e:
-                MessageBox(trls.tr("Errors", "Label"), f"Error loading and playing audio: {e}")
+            audio_cache_path = self.get_audio_cache_path(self.current_audio_uri)
+            if os.path.exists(audio_cache_path):
+                with sf.SoundFile(audio_cache_path, "rb") as audio_file:
+                    audio_array = audio_file.read()
+                    samplerate = audio_file.samplerate
+                sd.play(audio_array, samplerate)
+            else:
+                try:
+                    response = requests.get(self.current_audio_uri, stream=True)
+                    if response.status_code == 200:
+                        with open(audio_cache_path, "wb") as audio_file:
+                            audio_file.write(response.content)
+                        audio_bytes = sf.SoundFile(audio_cache_path, "rb")
+                        audio_array = audio_bytes.read()
+                        samplerate = audio_bytes.samplerate
+                        sd.play(audio_array, samplerate)
+                except Exception as e:
+                    MessageBox(trls.tr("Errors", "Label"), f"Error loading and playing audio: {e}")
 
     def search_and_load(self):
         search_query = self.search_input.text().strip()
         if not search_query:
             search_query = self.character_name
+
+        cached_data = self.load_cache(search_query)
+        if cached_data:
+            self.data = cached_data
+            self.populate_list()
+            return
 
         try:
             url = f"https://neo.character.ai/multimodal/api/v1/voices/search?query={search_query}"
@@ -1094,6 +1136,7 @@ class VoiceSearch(QWidget):
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 self.data = response.json()
+                self.save_cache(search_query, self.data)
                 self.populate_list()
             else:
                 MessageBox(trls.tr("Errors", "Label"), f"Error receiving data: {response.status_code}")
