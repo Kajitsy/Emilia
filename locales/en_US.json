@@ -41,10 +41,12 @@
     "about_emilia": "About Emilia ",
     "language_from": "\n\nEnglish from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nNew in ",
-    "whats_new": ": \n• None",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
     "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.\n At the moment you are using the ",
-    "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
+    "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>",
+    "new": [
+      "Cache"
+    ]
   },
   "Main": {
     "speak": "Speak up...",
@@ -118,7 +120,17 @@
     "ssmlayout": "Show system messages",
     "system_options": "System",
     "other_options": "Other",
-    "customization_options": "Customization"
+    "customization_options": "Customization",
+    "cache_options": "Cache",
+    "cache_manager": "Cache Manager",
+    "save_cache": "Save cache"
+  },
+  "CacheManager": {
+    "avatars": "Folder with avatars",
+    "search_voice": "Folder with sample voices",
+    "refresh_list": "Refresh List",
+    "delete_selected_folder": "Delete Selected Folder",
+    "clear_all_cache": "Clear All Cache"
   },
   "Errors": {
     "Label": "Error",

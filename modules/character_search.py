@@ -11,20 +11,20 @@ from PyQt6.QtWidgets import (QTabWidget,
                              QLabel, QLineEdit, 
                              QPushButton, 
                              QVBoxLayout, 
-                             QWidget, 
+                             QWidget, QMessageBox,
                              QListWidget, 
                              QListWidgetItem,
                              QGraphicsOpacityEffect)
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush, QMouseEvent
 from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
 
-from modules.config import getconfig, getchardata
+from modules.config import getconfig
 from modules.CustomCharAI import Sync as ccas
 from modules.CustomCharAI import Async as ccaa
 from modules.ets import translations
 from modules.other import MessageBox
 from modules.QCustom import ResizableButton, ResizableLineEdit
-from modules.QThreads import ImageLoaderThread, LoadChatThread
+from modules.QThreads import ImageLoaderThread, LoadChatThread, SearchLoaderThread, FileLoaderThread, AudioPlayerThread
 
 lang = getconfig("language", QLocale.system().name())
 backcolor = getconfig("backgroundcolor")
@@ -223,7 +223,7 @@ class ChatWithCharacter(QWidget):
                 await chat.new_chat(self.character_id, self.account_id)
         except Exception as e:
             print(f"An error occurred while starting new chat: {e}")
-            MessageBox(trls.tr("Errors", "Label"), f"Error starting new chat: {str(e)}")
+            QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error starting new chat: {str(e)}")
         finally:
             self.on_new_chat_finish()
 
@@ -316,6 +316,9 @@ class NewCharacterEditor(QWidget):
         self.setWindowTitle("Emilia: Character Editor")
         self.setFixedWidth(300)
 
+        self.addchar_button = QPushButton(trls.tr("CharEditor", "add_character"))
+        self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
+
         layout = QVBoxLayout()
 
 
@@ -330,7 +333,7 @@ class NewCharacterEditor(QWidget):
 
         buttons_layout = QHBoxLayout()
         self.add_character_button = QPushButton(trls.tr("CharEditor", "add_character"))
-        self.add_character_button.clicked.connect(lambda: asyncio.run(self.add_character()))
+        self.add_character_button.clicked.connect(self.add_character)
 
         buttons_layout.addWidget(self.add_character_button)
         layout.addLayout(buttons_layout)
@@ -346,7 +349,7 @@ class NewCharacterEditor(QWidget):
         if buttontextcolor:
             self.set_button_text_color(QColor(buttontextcolor))
     
-    async def add_character(self):
+    def add_character(self):
         try:
             with open("data.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -360,11 +363,14 @@ class NewCharacterEditor(QWidget):
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-        response = requests.get(f"https://characterai.io/i/80/static/avatars/{character['avatar_file_name']}?webp=true&anim=0")
         pixmap = QPixmap()
-        pixmap.loadFromData(response.content)
         text = trls.tr("CharEditor", "yourchar") + character["name"] + trls.tr("CharEditor", "withid") + charid + trls.tr("CharEditor", "added")
-        MessageBox(trls.tr("CharEditor", "character_added"), text, pixmap, pixmap, self)
+
+        thread = ImageLoaderThread(f"https://characterai.io/i/80/static/avatars/{character['avatar_file_name']}?webp=true&anim=0")
+        thread.image_loaded.connect(lambda image: MessageBox(trls.tr("CharEditor", "character_added"), text, image, image, self))
+        thread.error.connect(lambda error: QMessageBox.critical(self, "Error", error))
+        thread.start()
+
         self.close()
 
     def set_background_color(self, color):
@@ -725,7 +731,7 @@ class CharacterWidget(QWidget):
         self.datafile.update({self.char: {"name": self.name, "char": self.char, "avatar_url": self.avatar_url, "description": self.description, "title": self.title, "author": self.author}})
         self.save_data()
 
-        MessageBox(trls.tr(self.trl, "character_added"), trls.tr(self.trl, "character_added_text"), self=self)
+        QMessageBox.information(self, trls.tr(self.trl, "character_added"), trls.tr(self.trl, "character_added_text"))
 
         self.select_char()
 
@@ -882,8 +888,9 @@ class CharacterSearch(QWidget):
         self.network_list_widget.addItem(header_item)
         self.network_list_widget.setItemWidget(header_item, header_widget)
 
-    def populate_network_list(self):
+    def populate_network_list(self, data):
         self.network_list_widget.clear()
+        self.network_data = data
         if not self.network_data or not isinstance(self.network_data, list):
             return
 
@@ -931,14 +938,16 @@ class CharacterSearch(QWidget):
         self.add_another_charcter_button.setVisible(False)
 
         try:
-            response = requests.get(f"https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D")
-            if response.status_code == 200:
-                self.network_data = response.json()
-                self.populate_network_list()
-            else:
-                MessageBox(trls.tr("Errors", "Label"), f"Error receiving data: {response.status_code}")
+            url = f"https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D"
+
+            thread = SearchLoaderThread(url, query=search_query, cache_dir="cache/search_character")
+            thread.data.connect(lambda data: self.populate_network_list(data))
+            thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+
+            thread.start()
+
         except Exception as e:
-            MessageBox(trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
+            QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
 
     def load_local_data(self):
         try:
@@ -1001,11 +1010,18 @@ class CharacterSearch(QWidget):
         self.setStyleSheet("")
 
 class VoiceSearch(QWidget):
-    def __init__(self, character_id, character_name="", cache_dir="cache/search_voice"):
+    cache_dir = "cache/search_voice"
+    save_cache_status = getconfig("save_cache", True)
+
+    def __init__(self, character_id, character_name="", main_window=False, parent=None):
         super().__init__()
         self.character_id = character_id
         self.character_name = character_name
-        self.cache_dir=cache_dir
+        self.main_window = main_window
+        self.parent = parent
+        self.data = None
+        self.played = False
+        self.audio_thread = None
         self.trl = "CharEditor"
 
         self.CACHE_TTL = 86400 # in seconds
@@ -1062,21 +1078,9 @@ class VoiceSearch(QWidget):
         safe_filename = re.sub(r'[\\/:*?"<>|]', '_', filename)
         return os.path.join(self.cache_dir, safe_filename)
 
-    def load_cache(self, query):
-        cache_path = self.get_cache_path(query)
-        if os.path.exists(cache_path):
-            if time.time() - os.path.getmtime(cache_path) < self.CACHE_TTL:
-                with open(cache_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-        return None
-
-    def save_cache(self, query, data):
-        cache_path = self.get_cache_path(query)
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-    def populate_list(self):
+    def populate_list(self, data):
         self.list_widget.clear()
+        self.data = data
         for item in self.data["voices"]:
             description = item["description"]
             if description == "":
@@ -1092,40 +1096,58 @@ class VoiceSearch(QWidget):
         self.details_label.setText(f"<b>{data['name']}</b> • {trls.tr(self.trl, 'author_label')}: {data['creatorInfo']['username']}<br>{data['description']}")
         self.preview_text_label.setText(f"{trls.tr(self.trl, 'example_phrase')}: {data['previewText']}")
         self.current_audio_uri = data["previewAudioURI"]
-        self.play_button.setEnabled(True)
+        self.play_button.setEnabled(not self.played)
         self.select_button.setEnabled(True)
+
+    def save_and_play_audio(self, file, audio_cache_path):
+        try:
+            with open(audio_cache_path, "wb") as audio_file:
+                audio_file.write(file)
+
+            audio_bytes = sf.SoundFile(audio_cache_path, "rb")
+            audio_array = audio_bytes.read()
+            samplerate = audio_bytes.samplerate
+            self.audio_thread = AudioPlayerThread(self, audio_array, samplerate)
+            self.audio_thread.played.connect(lambda played: setattr(self, "played", played))
+            self.audio_thread.played.connect(lambda played: self.play_button.setEnabled(not played))
+            self.audio_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+            self.audio_thread.start()
+        except Exception as e:
+            QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Audio playback error: {e}")
 
     def play_audio(self):
         if hasattr(self, "current_audio_uri"):
             audio_cache_path = self.get_audio_cache_path(self.current_audio_uri)
             if os.path.exists(audio_cache_path):
-                with sf.SoundFile(audio_cache_path, "rb") as audio_file:
-                    audio_array = audio_file.read()
-                    samplerate = audio_file.samplerate
-                sd.play(audio_array, samplerate)
-            else:
                 try:
-                    response = requests.get(self.current_audio_uri, stream=True)
-                    if response.status_code == 200:
-                        with open(audio_cache_path, "wb") as audio_file:
-                            audio_file.write(response.content)
-                        audio_bytes = sf.SoundFile(audio_cache_path, "rb")
-                        audio_array = audio_bytes.read()
-                        samplerate = audio_bytes.samplerate
-                        sd.play(audio_array, samplerate)
+                    with sf.SoundFile(audio_cache_path, "rb") as audio_file:
+                        audio_array = audio_file.read()
+                        samplerate = audio_file.samplerate
+                    self.audio_thread = AudioPlayerThread(self, audio_array, samplerate)
+                    self.audio_thread.played.connect(lambda played: setattr(self, "played", played))
+                    self.audio_thread.played.connect(lambda played: self.play_button.setEnabled(not played))
+                    self.audio_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+                    self.audio_thread.start()
                 except Exception as e:
-                    MessageBox(trls.tr("Errors", "Label"), f"Error loading and playing audio: {e}")
+                    QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Audio playback error: {e}")
+
+            else:
+                file_thread = FileLoaderThread(self.current_audio_uri, {
+                "Authorization": f"Token {getconfig('client', configfile='charaiconfig.json')}"
+            })
+                file_thread.file.connect(lambda file: self.save_and_play_audio(file, audio_cache_path))
+                file_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+                file_thread.start()
 
     def search_and_load(self):
+        self.search_input.returnPressed.disconnect()
         search_query = self.search_input.text().strip()
         if not search_query:
             search_query = self.character_name
-
-        cached_data = self.load_cache(search_query)
-        if cached_data:
-            self.data = cached_data
-            self.populate_list()
-            return
+            if not search_query:
+                ccas().get_character(self.character_id)
+                search_query = ccas().get_character(self.character_id).get("participant__name", "")
+        self.search_input.setText(search_query)
 
         try:
             url = f"https://neo.character.ai/multimodal/api/v1/voices/search?query={search_query}"
@@ -1133,15 +1155,15 @@ class VoiceSearch(QWidget):
                 "Content-Type": "application/json",
                 "Authorization": f"Token {getconfig('client', configfile='charaiconfig.json')}"
             }
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                self.data = response.json()
-                self.save_cache(search_query, self.data)
-                self.populate_list()
-            else:
-                MessageBox(trls.tr("Errors", "Label"), f"Error receiving data: {response.status_code}")
+
+            search_thread = SearchLoaderThread(url, headers, search_query, self.cache_dir)
+            search_thread.data.connect(lambda data: self.populate_list(data))
+            search_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+            search_thread.start()
+
         except Exception as e:
-            MessageBox(trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
+            QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
+        self.search_input.returnPressed.connect(self.search_and_load)
 
     def addcharvoice(self):
         try:
@@ -1151,11 +1173,16 @@ class VoiceSearch(QWidget):
             data = {}
         except json.JSONDecodeError:
              data = {}
-            
-        data.update({self.character_id: {"name": data[self.character_id]["name"], "char": data[self.character_id]["char"], "avatar_url": data[self.character_id]["avatar_url"], "description": data[self.character_id]["description"], "title": data[self.character_id]["title"], "author": data[self.character_id]["author"],"voiceid": self.current_data["id"]}})
+
+        data[self.character_id]["voiceid"] = self.current_data["id"]
 
         with open("data.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-        MessageBox(text=trls.tr(self.trl, "character_voice_changed"))
+        if self.main_window and self.parent:
+            self.parent.charaitts_voice_entry.setText(self.current_data["id"])
+            self.close()
+            return
+
+        QMessageBox.information(self, "Ez", trls.tr(self.trl, "character_voice_changed"))
         self.close()

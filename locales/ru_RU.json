@@ -44,10 +44,12 @@
     "about_emilia": "Об Emilia ",
     "language_from": "\n\nРусский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nНовое в",
-    "whats_new": ": \n• None",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
     "emilia_is_open_source": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
-    "use_version": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>"
+    "use_version": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>",
+    "new": [
+      "Кэш"
+    ]
   },
   "Main": {
     "speak": "Говорите...",
@@ -121,11 +123,17 @@
     "ssmlayout": "Показывать системные\nсообщения",
     "system_options": "Системные",
     "other_options": "Другие",
-    "customization_options": "Внешний вид"
+    "customization_options": "Внешний вид",
+    "cache_options": "Настройки кэша",
+    "cache_manager": "Управление кэшом",
+    "save_cache": "Сохранять кэш"
   },
   "CacheManager": {
     "avatars": "Папка с аватарами",
-    "search_voice": "Папка с примерами голосов"
+    "search_voice": "Папка с примерами голосов",
+    "refresh_list": "Обновить список",
+    "delete_selected_folder": "Удалить выбранную папку",
+    "clear_all_cache": "Очистить весь кэш"
   },
   "Errors": {
     "Label": "Ошибка",

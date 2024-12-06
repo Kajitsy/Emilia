@@ -22,7 +22,7 @@ def writeconfig(variable, value, configfile = "config.json"):
 
 def getconfig(value, def_value = "", configfile = "config.json"):
     if os.path.exists(configfile):
-        with open(configfile, "r") as configfile:
+        with open(configfile, "r", encoding="utf-8") as configfile:
             config = json.load(configfile)
             return config.get(value, def_value)
     else:
@@ -42,7 +42,7 @@ def writechardata(character, variable, value, char_data_file = "data.json"):
 
 def getchardata(character, variable, char_data_file = "data.json"):
     if os.path.exists(char_data_file):
-        with open(char_data_file, "r") as char_data_file:
+        with open(char_data_file, "r", encoding="utf-8") as char_data_file:
             data = json.load(char_data_file)
             character_data = data.get(character, None)
             if character_data:

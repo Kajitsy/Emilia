@@ -30,7 +30,7 @@ from modules.character_search import (CharacterSearch,
                                       ChatWithCharacter,
                                       MainMessageWidget,
                                       VoiceSearch)
-from modules.config import getconfig, writeconfig, exe_check
+from modules.config import getconfig, writeconfig, exe_check, getchardata
 from modules.ets import translations
 from modules.other import MessageBox, Emote_File
 from modules.QCustom import ResizableButton
@@ -41,7 +41,7 @@ try:
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.4b1dev3"
+version = "2.4b1dev4"
 pre = True
 sample_rate = 48000
 
@@ -52,6 +52,7 @@ umtranslate = getconfig("umtranslate", False)
 aimtranslate = getconfig("aimtranslate", False)
 show_notranslate_message = getconfig("show_notranslate_message", True)
 show_system_messages = getconfig("show_system_messages", True)
+save_cache = getconfig("save_cache", True)
 lang = getconfig("language", QLocale.system().name())
 aitype = getconfig("aitype", "charai")
 tts = getconfig("tts", "charai")
@@ -108,15 +109,15 @@ class CacheManagerWindow(QWidget):
         self.folder_list = QListWidget()
         self.layout.addWidget(self.folder_list)
 
-        self.refresh_button = QPushButton("Refresh List")
+        self.refresh_button = QPushButton(trls.tr("CacheManager", "refresh_list"))
         self.refresh_button.clicked.connect(self.load_folders)
         self.layout.addWidget(self.refresh_button)
 
-        self.delete_button = QPushButton("Delete Selected Folder")
+        self.delete_button = QPushButton(trls.tr("CacheManager", "delete_selected_folder"))
         self.delete_button.clicked.connect(self.delete_selected_folder)
         self.layout.addWidget(self.delete_button)
 
-        self.clear_all_button = QPushButton("Clear All Cache")
+        self.clear_all_button = QPushButton(trls.tr("CacheManager", "clear_all_cache"))
         self.clear_all_button.clicked.connect(self.clear_all_cache)
         self.layout.addWidget(self.clear_all_button)
 
@@ -294,10 +295,24 @@ class OptionsWindow(QWidget):
         vtubelayout.addWidget(self.vtubewiki)
         self.other_options_layout.addLayout(vtubelayout)
 
-        self.clear_cache_button = QPushButton("Cache Control")
-        self.clear_cache_button.clicked.connect(self.clear_cache)
-        self.other_options_layout.addWidget(self.clear_cache_button)
+        self.cache_options = QGroupBox(trls.tr(self.trl, "cache_options"))
+        self.cache_options_layout = QVBoxLayout()
+        self.cache_options.setLayout(self.cache_options_layout)
+        secondhalf.addWidget(self.cache_options)
 
+        self.save_cache_layout = QHBoxLayout()
+        self.save_cache_checkbox = QCheckBox()
+        if save_cache:
+            self.save_cache_checkbox.setChecked(True)
+        self.save_cache_checkbox.stateChanged.connect(self.save_cache_change)
+
+        self.save_cache_layout.addWidget(QLabel(trls.tr(self.trl, "save_cache")))
+        self.save_cache_layout.addWidget(self.save_cache_checkbox)
+        self.cache_options_layout.addLayout(self.save_cache_layout)
+
+        self.clear_cache_button = QPushButton(trls.tr(self.trl, "cache_manager"))
+        self.clear_cache_button.clicked.connect(self.clear_cache)
+        self.cache_options_layout.addWidget(self.clear_cache_button)
 
         self.customization_options = QGroupBox(trls.tr(self.trl, "customization_options"))
         self.customization_options_layout = QVBoxLayout()
@@ -398,6 +413,14 @@ class OptionsWindow(QWidget):
         CacheManagerWindow("cache").show()
         self.close()
 
+    def save_cache_change(self, state):
+        global save_cache
+        if state == 2:
+            save_cache = True
+        else:
+            save_cache = False
+        writeconfig("save_cache", save_cache)
+
     def show_ss_messages_change(self, state):
         global show_system_messages
         if state == 2:
@@ -439,7 +462,7 @@ class OptionsWindow(QWidget):
     def vtubechange(self, state):
         global vtube_enable
         if state == 2:
-            MessageBox(text="Attention, using Emilia together with the VTube model can greatly slow down the generation of responses")
+            QMessageBox.warning(self, "Attention", "Attention, using Emilia together with the VTube model can greatly slow down the generation of responses")
             vtube_enable = True
         else:
             vtube_enable = False
@@ -483,7 +506,6 @@ class OptionsWindow(QWidget):
         writeconfig("iconcolor", iconcolor)
         self.mainwindow.CharacterSearchopen.setIcon(QIcon(charediticon))
         self.mainwindow.charrefreshlist.setIcon(QIcon(refreshicon))
-        self.mainwindow.send_user_message_button.setIcon(QIcon(sendmsgicon))
         self.mainwindow.mute_microphone_button.setIcon(QIcon(micicon))
 
     def langchange(self, value):
@@ -843,7 +865,7 @@ class EmiliaAuth(QWidget):
             writeconfig("client", token, "charaiconfig.json")
             self.parent.start_fetching_data()
         except Exception as e:
-            MessageBox(title=trls.tr("Errors", "Label"), text=trls.tr("Errors", "other") + str(e))
+            QMessageBox.critical(self, trls.tr("Errors", "Label"), trls.tr("Errors", "other") + str(e))
 
     def set_background_color(self, color):
         current_style_sheet = self.styleSheet()
@@ -1077,7 +1099,7 @@ class Emilia(QMainWindow):
 
         self.charaitts_voice_button = QPushButton()
         self.charaitts_voice_button.setText("Search Voice")
-        self.charaitts_voice_button.clicked.connect(lambda: VoiceSearch(self.charai_char_entry.text()).show())
+        self.charaitts_voice_button.clicked.connect(lambda: VoiceSearch(self.charai_char_entry.text(), main_window=True, parent=self).show())
         self.charaitts_layout.addWidget(self.charaitts_voice_button)
 
         self.charaitts_start_button = QPushButton(f"{trls.tr('MainWindow', 'start')} Character.AI TTS")
@@ -1240,7 +1262,7 @@ class Emilia(QMainWindow):
     def handle_error(self, error_message):
         self.recommend_chats = None
         self.recent_chats = None
-        MessageBox(trls.tr("Errors", "Label"), f"An error occurred: {error_message}")
+        QMessageBox.critical(self, trls.tr("Errors", "Label"), f"An error occurred: {error_message}")
 
     def toggle_microphone_mute(self, checked):
         self.microphone_muted = checked
@@ -1267,18 +1289,13 @@ class Emilia(QMainWindow):
 
     def addcharsinmenubar(self):
         if os.path.exists("data.json"):
-            def open_json(char, speaker):
-                self.charai_char_entry.setText(char)
-                if tts == "charai":
-                    self.charaitts_voice_entry.setText(speaker)
-                elif tts == "elevenlabs":
-                    self.elevenlabs_voice_entry.setText(speaker)
             def create_action(key, value):
                 def action_func():
+                    self.charai_char_entry.setText(value["char"])
                     if tts == "charai":
-                        open_json(value["char"], value.get("voiceid", ""))
+                        self.charaitts_voice_entry.setText(getchardata(value["char"], "voiceid"))
                     elif tts == "elevenlabs":
-                        open_json(value["char"], value.get("voice", ""))
+                        self.elevenlabs_voice_entry.setText(getchardata(value["char"], "elevenlabs_voice"))
                 action = QAction(value["name"], self)
                 action.triggered.connect(action_func)
                 return action
@@ -1371,15 +1388,18 @@ class Emilia(QMainWindow):
             title = trls.tr("About", "about_emilia")
         pixmap = QPixmap(emiliaicon).scaled(128, 128, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         language = trls.tr("About", "language_from")
-        whatsnew = trls.tr("About", "new_in") + version + trls.tr("About", "whats_new")
         otherversions = trls.tr("About", "show_all_releases")
-        text = trls.tr("About", "emilia_is_open_source") + version + trls.tr("About", "use_version") + language + whatsnew + otherversions
+        text = trls.tr("About", "emilia_is_open_source") + version + trls.tr("About", "use_version") + language
+        text += trls.tr("About", "new_in") + version
+        for new in trls.tr("About", "new"):
+            text += " <br>• " + new
+        text += otherversions
         text = text.replace("\n", "<br>")
         MessageBox(title, text, pixmap=pixmap, self=self)
 
     def start_main(self, tts):
         if tts == "elevenlabs" and self.elevenlabs_voice_entry.text() == "":
-            MessageBox(text="Voice?")
+            QMessageBox.question(self, "Voice?", "Voice")
             return
         
         for actions in self.emi_menu.actions():

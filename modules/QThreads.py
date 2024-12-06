@@ -1,4 +1,4 @@
-import io, asyncio, re, os, hashlib
+import io, asyncio, re, os, hashlib, json, time
 import requests, websockets
 
 import sounddevice as sd
@@ -6,6 +6,7 @@ import soundfile as sf
 import speech_recognition as sr
 import google.generativeai as genai
 import translators as ts
+from PyQt6.QtWidgets import QMessageBox
 
 from elevenlabs.client import ElevenLabs
 from characterai import aiocai
@@ -20,7 +21,6 @@ from modules.CustomCharAI import Sync as ccas
 from modules.CustomCharAI import Async as ccaa
 from modules.eec import EEC
 from modules.ets import translations as ets
-from modules.other import MessageBox
 
 class MainThreadCharAI(QThread):
     ouinput_signal = pyqtSignal(str, object, str, int, object, object)
@@ -134,7 +134,7 @@ class MainThreadCharAI(QThread):
             sd.stop()
         except Exception as e:
             print(e)
-            MessageBox(self.trls.tr("Errors", "Label"), str(e))
+            QMessageBox.critical(self, self.trls.tr("Errors", "Label"), str(e))
 
     async def process_user_input(self):
         self.recognizer = sr.Recognizer()
@@ -261,9 +261,9 @@ class MainThreadGemini(QThread):
             return self.chunk
         except Exception as e:
             if e.code == 400 and "User location is not supported" in e.message:
-                MessageBox(self.trls.tr("Errors", "Label") + self.trls.tr("Errors", "Gemini 400"))
+                QMessageBox.critical(self, self.trls.tr("Errors", "Label") + self.trls.tr("Errors", "Gemini 400"))
             else:
-                MessageBox(self.trls.tr("Errors", "Label") + str(e))
+                QMessageBox.critical(self, self.trls.tr("Errors", "Label") + str(e))
             return ""
 
     async def recognize_speech(self, recognizer):
@@ -315,7 +315,7 @@ class MainThreadGemini(QThread):
                 play(audio, use_ffmpeg=False)
         except Exception as e:
             print(e)
-            MessageBox(self.trls.tr("Errors", "Label"), str(e))
+            QMessageBox.critical(self, self.trls.tr("Errors", "Label"), str(e))
 
     async def process_user_input(self):
         recognizer = sr.Recognizer()
@@ -416,6 +416,8 @@ class LoadChatThread(QThread):
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
+    error = pyqtSignal(str)
+    save_cache = getconfig("save_cache", True)
 
     def __init__(self, url, cache_dir="cache/avatars"):
         super().__init__()
@@ -437,16 +439,107 @@ class ImageLoaderThread(QThread):
             return
 
         try:
-            response = requests.get(self.url, timeout=10)
+            response = requests.get(self.url)
             response.raise_for_status()
             image = QPixmap()
-            if image.loadFromData(response.content):
+            if self.save_cache and image.loadFromData(response.content):
                 if not image.save(cache_path):
-                    print(f"Ошибка сохранения файла: {cache_path}")
+                    self.error.emit(f"File saving error: {cache_path}")
                 self.image_loaded.emit(image)
             else:
-                print("Ошибка загрузки изображения из данных.")
                 self.image_loaded.emit(QPixmap())
         except Exception as e:
-            print(f"Ошибка загрузки изображения: {e}")
+            self.error.emit(f"Image download error: {e}")
             self.image_loaded.emit(QPixmap())
+
+class SearchLoaderThread(QThread):
+    data = pyqtSignal(object)
+    error = pyqtSignal(str)
+
+    save_cache_status = getconfig("save_cache", True)
+
+    def __init__(self, url, headers={}, query="", cache_dir="", cache_ttl=86400):
+        super().__init__()
+        self.url = url
+        self.headers = headers
+        self.query = query.lower()
+        self.cache_dir = cache_dir
+        self.cache_ttl = cache_ttl
+
+        os.makedirs(self.cache_dir, exist_ok=True)
+
+    def get_cache_path(self, query):
+        safe_query = query.replace(" ", "_")
+        return os.path.join(self.cache_dir, f"{safe_query}.json")
+
+    def load_cache(self, query):
+        cache_path = self.get_cache_path(query)
+        if os.path.exists(cache_path):
+            if time.time() - os.path.getmtime(cache_path) < self.cache_ttl:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        return None
+
+    def save_cache(self, query, data):
+        cache_path = self.get_cache_path(query)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    def run(self):
+        cached_data = self.load_cache(self.query)
+        if cached_data:
+            data = cached_data
+            self.data.emit(data)
+            return
+
+        try:
+            response = requests.get(self.url, headers=self.headers)
+
+            if response.status_code == 200:
+                data = response.json()
+                if self.save_cache_status and self.query: self.save_cache(self.query, data)
+                self.data.emit(data)
+            else:
+                self.error.emit(f"Error receiving data: {response.status_code}")
+
+        except Exception as e:
+            self.error.emit(str(e))
+
+class FileLoaderThread(QThread):
+    file = pyqtSignal(object)
+    error = pyqtSignal(str)
+
+    def __init__(self, url, headers={}):
+        super().__init__()
+        self.url = url
+        self.headers = headers
+
+    def run(self):
+        try:
+            response = requests.get(self.url, headers=self.headers)
+            if response.status_code == 200:
+                self.file.emit(response.content)
+            else:
+                self.error.emit(f"File download error: {response.status_code}")
+        except Exception as e:
+            self.error.emit(f"File download error: {e}")
+
+class AudioPlayerThread(QThread):
+    played = pyqtSignal(object)
+    error = pyqtSignal(str)
+
+    def __init__(self, parent, audio_array, samplerate):
+        super().__init__()
+        self.parent = parent
+        self.audio_array = audio_array
+        self.samplerate = samplerate
+
+    def run(self):
+        try:
+            self.played.emit(True)
+            sd.play(self.audio_array, self.samplerate)
+            time.sleep(len(self.audio_array) / self.samplerate)
+            sd.stop()
+            self.played.emit(False)
+        except Exception as e:
+            self.error.emit(f"Audio playback error: {e}")
