@@ -173,7 +173,7 @@ class MainThreadCharAI(QThread):
                 if self.umtranslate:
                     while True:
                         try:
-                            user_message_translate = ts.translate_text(user_message, to_language="en")
+                            user_message_translate = ts.translate_text(user_message, to_language="en", translator="google")
                             break
                         except:
                             if not self._running:
@@ -203,7 +203,7 @@ class MainThreadCharAI(QThread):
                 if self.aimtranslate:
                     while True:
                         try:
-                            self.ai_message_translate = ts.translate_text(self.ai_message, to_language=self.trls.slang)
+                            self.ai_message_translate = ts.translate_text(self.ai_message, to_language=self.trls.slang, translator="google")
                             break
                         except:
                             pass
@@ -337,7 +337,7 @@ class MainThreadGemini(QThread):
 
             if self.umtranslate:
                 try:
-                    user_message_translate = ts.translate_text(user_message, to_language="en")
+                    user_message_translate = ts.translate_text(user_message, to_language="en", translator="google")
                     break
                 except:
                     pass
@@ -352,7 +352,7 @@ class MainThreadGemini(QThread):
             if self.aimtranslate:
                 while True:
                     try:
-                        self.ai_message_translate = ts.translate_text(self.ai_message, to_languaget=self.trls.slang)
+                        self.ai_message_translate = ts.translate_text(self.ai_message, to_languaget=self.trls.slang, translator="google")
                         break
                     except:
                         pass
@@ -388,7 +388,6 @@ class ChatDataWorker(QThread):
         self.fetch_data()
 
 class LoadChatThread(QThread):
-    finished = pyqtSignal()
     chatLoaded = pyqtSignal(list)
     errorOccurred = pyqtSignal(str)
 
@@ -398,21 +397,21 @@ class LoadChatThread(QThread):
         self.client = client
         self.character_id = character_id
 
-        self.ccaa = ccaa()
-
-    async def load_chat_async(self):
-        try:
-            self.parent.character = await self.ccaa.get_character(self.character_id)
-            self.parent.setWindowTitle(f"Emilia: Chat With {self.parent.character['name']}")
-            chat = await self.client.get_chat(self.character_id)
-            history = await self.client.get_history(chat.chat_id)
-            self.chatLoaded.emit(list(reversed(history.turns)))
-        except Exception as e:
-            self.errorOccurred.emit(str(e))
+        self.ccas = ccas()
 
     def run(self):
-        asyncio.run(self.load_chat_async())
-        self.finished.emit()
+        try:
+            self.parent.character = self.ccas.get_character(self.character_id)
+            self.parent.setWindowTitle(f"Emilia: Chat With {self.parent.character['name']}")
+            chat = self.ccas.get_recent_chat(self.character_id)
+            if chat == {}: self.chatLoaded.emit([]); return
+            turns = self.ccas.get_all_messages(chat[0]['chat_id'])
+            self.chatLoaded.emit(list(reversed(turns)))
+        except Exception as e:
+            if str(e) == "Failed to get data, status code: 404":
+                self.chatLoaded.emit([]); return
+            else:
+                self.errorOccurred.emit(str(e))
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
@@ -431,11 +430,13 @@ class ImageLoaderThread(QThread):
         return os.path.join(self.cache_dir, filename)
 
     def run(self):
+        print("\nDownloading an image", self.url, end="")
         cache_path = self.get_cache_path()
 
         if os.path.exists(cache_path):
             image = QPixmap(cache_path)
             self.image_loaded.emit(image)
+            print("; Using a cached image", end="")
             return
 
         try:
@@ -486,10 +487,13 @@ class SearchLoaderThread(QThread):
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     def run(self):
+        print("\nLoading the search", self.url, end="")
         cached_data = self.load_cache(self.query)
+
         if cached_data:
             data = cached_data
             self.data.emit(data)
+            print("; Using Cached Search", end="")
             return
 
         try:
@@ -515,6 +519,7 @@ class FileLoaderThread(QThread):
         self.headers = headers
 
     def run(self):
+        print("Downloading a file", self.url)
         try:
             response = requests.get(self.url, headers=self.headers)
             if response.status_code == 200:
@@ -535,6 +540,7 @@ class AudioPlayerThread(QThread):
         self.samplerate = samplerate
 
     def run(self):
+        print("Audio playback")
         try:
             self.played.emit(True)
             sd.play(self.audio_array, self.samplerate)

@@ -45,7 +45,13 @@
     "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.\n At the moment you are using the ",
     "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>",
     "new": [
-      "Cache"
+      "Cache management and the cache itself\nNow bot avatars, character search results, and voice samples, as well as voice examples, are saved",
+      "Improvements in EmiliaAuth\nThe Enter button now works, so you don’t have to grab the mouse and aim at the button",
+      "Chat display now shows all messages, not just the latest ones",
+      "Double right-clicking in the character editor will open a chat with the character",
+      "Each search is performed in a separate thread\nThis prevents the program from freezing during searches",
+      "New localizations",
+      "Other visual and technical changes"
     ]
   },
   "Main": {
@@ -128,6 +134,7 @@
   "CacheManager": {
     "avatars": "Folder with avatars",
     "search_voice": "Folder with sample voices",
+    "search_character": "Folder with the search for characters",
     "refresh_list": "Refresh List",
     "delete_selected_folder": "Delete Selected Folder",
     "clear_all_cache": "Clear All Cache"

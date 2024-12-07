@@ -22,7 +22,7 @@ from modules.config import getconfig
 from modules.CustomCharAI import Sync as ccas
 from modules.CustomCharAI import Async as ccaa
 from modules.ets import translations
-from modules.other import MessageBox
+from modules.other import message_box
 from modules.QCustom import ResizableButton, ResizableLineEdit
 from modules.QThreads import ImageLoaderThread, LoadChatThread, SearchLoaderThread, FileLoaderThread, AudioPlayerThread
 
@@ -44,8 +44,8 @@ class MessageWidget(QWidget):
         self.message_id = None
         self.translated = False; self.formatted_tr_text = ""
         if self.message_type is None:
-            self.character_id = data.author.author_id
-            self.message_id = data.turn_key
+            self.character_id = data['author']['author_id']
+            self.message_id = data['turn_key']
 
         self.setStyleSheet("""
             QLabel {
@@ -56,8 +56,8 @@ class MessageWidget(QWidget):
 
         layout = QHBoxLayout()
 
-        self.author_name = data.author.name
-        self.raw_content = data.candidates[0].raw_content
+        self.author_name = data['author']['name']
+        self.raw_content = data['candidates'][0]['raw_content']
 
         self.formatted_text = self.format_text(self.raw_content)
 
@@ -152,7 +152,7 @@ class MessageWidget(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.translated:
                 if not self.formatted_tr_text:
-                    tr_text = ts.translate_text(self.raw_content, to_language=trls.slang)
+                    tr_text = ts.translate_text(self.raw_content, to_language=trls.slang, translator="google")
                     self.formatted_tr_text = self.format_text(tr_text)
                 self.text_label.setText(self.formatted_tr_text)
                 self.translated = True
@@ -188,15 +188,22 @@ class ChatWithCharacter(QWidget):
 
     def load_chat(self):
         self.load_chat_thread = LoadChatThread(self, self.client, self.character_id)
-        self.load_chat_thread.finished.connect(self.on_chat_load_finish)
         self.load_chat_thread.chatLoaded.connect(self.populate_list)
+        self.load_chat_thread.chatLoaded.connect(lambda data: self.list_widget.setEnabled(True))
+        self.load_chat_thread.errorOccurred.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
         self.load_chat_thread.start()
 
     def populate_list(self, data):
         self.list_widget.clear()
+
+        if data == []:
+            QMessageBox.information(self, "Problem", "The chat history is empty")
+            self.close()
+            return
+
         for turn in data:
-            if turn.author.is_human:
-                self.account_id = turn.author.author_id
+            if turn['author'].get('is_human', False):
+                self.account_id = turn['author']['author_id']
                 custom_widget = MessageWidget(self, turn, True)
             else:
                 custom_widget = MessageWidget(self, turn, None)
@@ -222,7 +229,6 @@ class ChatWithCharacter(QWidget):
             async with await self.client.connect() as chat:
                 await chat.new_chat(self.character_id, self.account_id)
         except Exception as e:
-            print(f"An error occurred while starting new chat: {e}")
             QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error starting new chat: {str(e)}")
         finally:
             self.on_new_chat_finish()
@@ -367,7 +373,7 @@ class NewCharacterEditor(QWidget):
         text = trls.tr("CharEditor", "yourchar") + character["name"] + trls.tr("CharEditor", "withid") + charid + trls.tr("CharEditor", "added")
 
         thread = ImageLoaderThread(f"https://characterai.io/i/80/static/avatars/{character['avatar_file_name']}?webp=true&anim=0")
-        thread.image_loaded.connect(lambda image: MessageBox(trls.tr("CharEditor", "character_added"), text, image, image, self))
+        thread.image_loaded.connect(lambda image: message_box(trls.tr("CharEditor", "character_added"), text, image, image, self))
         thread.error.connect(lambda error: QMessageBox.critical(self, "Error", error))
         thread.start()
 
@@ -897,7 +903,8 @@ class CharacterSearch(QWidget):
         for data in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
             self.populate_list(data, "network")
 
-        self.add_another_charcter_button.setVisible(False)
+        self.network_list_widget.setEnabled(True)
+        self.network_search_input.returnPressed.connect(self.search_and_load)
 
     def populate_recent_list(self):
         self.populate_category_header(trls.tr(self.trl, "recent_chats"))
@@ -937,14 +944,17 @@ class CharacterSearch(QWidget):
         
         self.add_another_charcter_button.setVisible(False)
 
+        self.network_list_widget.setEnabled(False)
+        self.network_search_input.returnPressed.disconnect()
+
         try:
             url = f"https://character.ai/api/trpc/search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{search_query}%22%7D%7D%7D"
 
-            thread = SearchLoaderThread(url, query=search_query, cache_dir="cache/search_character")
-            thread.data.connect(lambda data: self.populate_network_list(data))
-            thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+            search_thread = SearchLoaderThread(url, query=search_query, cache_dir="cache/search_character")
+            search_thread.data.connect(lambda data: self.populate_network_list(data))
+            search_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
 
-            thread.start()
+            search_thread.start()
 
         except Exception as e:
             QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
@@ -1141,6 +1151,7 @@ class VoiceSearch(QWidget):
 
     def search_and_load(self):
         self.search_input.returnPressed.disconnect()
+        self.list_widget.setEnabled(False)
         search_query = self.search_input.text().strip()
         if not search_query:
             search_query = self.character_name
@@ -1158,12 +1169,13 @@ class VoiceSearch(QWidget):
 
             search_thread = SearchLoaderThread(url, headers, search_query, self.cache_dir)
             search_thread.data.connect(lambda data: self.populate_list(data))
+            search_thread.data.connect(lambda data: self.list_widget.setEnabled(True))
+            search_thread.data.connect(lambda data: self.search_input.returnPressed.connect(self.search_and_load))
             search_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
             search_thread.start()
 
         except Exception as e:
             QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error when executing the request: {e}")
-        self.search_input.returnPressed.connect(self.search_and_load)
 
     def addcharvoice(self):
         try:

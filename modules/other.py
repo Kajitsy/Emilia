@@ -2,9 +2,7 @@ import requests, os
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
 
-emiliaicon = "images/emilia.png"
-
-def MessageBox(title = "Emilia", text = "Hm?", icon = emiliaicon, pixmap = None, self = None): 
+def message_box(title ="Emilia", text ="Hm?", icon = "images/emilia.png", pixmap = None, self = None):
     msg = QMessageBox()
     msg.setWindowTitle(title)
     if self: msg.setStyleSheet(self.styleSheet())
@@ -13,9 +11,9 @@ def MessageBox(title = "Emilia", text = "Hm?", icon = emiliaicon, pixmap = None,
     msg.setText(text)
     msg.exec()
 
-def Emote_File():
+def emote_file():
     if not os.path.exists("Emotes.json"):
-        emotesjson = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/Emotes.json")
-        emotesjson.raise_for_status()
-        with open("Emotes.json", "wb") as f:
-            f.write(emotesjson.content)
+        emotes_json = requests.get("https://raw.githubusercontent.com/Kajitsy/Emilia/emilia/Emotes.json")
+        if emotes_json.status_code == 200:
+            with open("Emotes.json", "wb") as f:
+                f.write(emotes_json.content)

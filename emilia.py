@@ -32,18 +32,17 @@ from modules.character_search import (CharacterSearch,
                                       VoiceSearch)
 from modules.config import getconfig, writeconfig, exe_check, getchardata
 from modules.ets import translations
-from modules.other import MessageBox, Emote_File
+from modules.other import message_box, emote_file
 from modules.QCustom import ResizableButton
 from modules.QThreads import MainThreadCharAI, MainThreadGemini, ChatDataWorker
 
 try:
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("emilia_beta.app")
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("emilia.app")
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.4b1dev4"
-pre = True
-sample_rate = 48000
+version = "2.3.1"
+pre = False
 
 # Global Variables
 autoupdate_enable = getconfig("autoupdate_enable", False)
@@ -220,9 +219,21 @@ class OptionsWindow(QWidget):
 
         langlayout = QHBoxLayout()
         self.languagechange = QComboBox()
-        self.languagechange.addItems([trls.tr(self.trl, "english"), trls.tr(self.trl, "russian")])
+        self.languagechange.addItems([trls.tr(self.trl, "english"), trls.tr(self.trl, "russian"),
+                                      "Spanish", "French", "Bosnian (Latin)",
+                                      "Serbian (Cyrillic)", "Croatian"])
         if lang == "ru_RU":
             self.languagechange.setCurrentIndex(1)
+        elif lang == "es_ES":
+            self.languagechange.setCurrentIndex(2)
+        elif lang == "fr_FR":
+            self.languagechange.setCurrentIndex(3)
+        elif lang == "bs_Latn_BA":
+            self.languagechange.setCurrentIndex(4)
+        elif lang == "sr_Cyrl_CS":
+            self.languagechange.setCurrentIndex(5)
+        elif lang == "hr_BA":
+            self.languagechange.setCurrentIndex(6)
         self.languagechange.currentIndexChanged.connect(self.langchange)
 
         langlayout.addWidget(QLabel(trls.tr(self.trl, "select_language")))
@@ -513,6 +524,17 @@ class OptionsWindow(QWidget):
             writeconfig("language", "en_US")
         elif value == 1:
             writeconfig("language", "ru_RU")
+        elif value == 2:
+            writeconfig("language", "es_ES")
+        elif value == 3:
+            writeconfig("language", "fr_FR")
+        elif value == 4:
+            writeconfig("language", "bs_Latn_BA")
+        elif value == 5:
+            writeconfig("language", "sr_Cyrl_CS")
+        elif value == 6:
+            writeconfig("language", "hr_BA")
+
         print("Restart required")
         if not exe_check():
             os.execv(sys.executable, ["python"] + sys.argv)
@@ -812,6 +834,8 @@ class EmiliaAuth(QWidget):
         email_layout = QHBoxLayout()
         self.email_label = QLabel(trls.tr("GetToken","your_email"))
         self.email_entry = QLineEdit()
+        self.email_entry.setFocus()
+        self.email_entry.returnPressed.connect(self.getlink)
         self.email_entry.setPlaceholderText("example@example.com")
 
         email_layout.addWidget(self.email_label)
@@ -827,6 +851,7 @@ class EmiliaAuth(QWidget):
         self.link_layout = QHBoxLayout()
         self.link_label = QLabel(trls.tr("GetToken", "link_from_email"))
         self.link_entry = QLineEdit()
+        self.link_entry.returnPressed.connect(self.gettoken)
         self.link_entry.setPlaceholderText("https...")
 
         self.link_layout.addWidget(self.link_label)
@@ -1276,7 +1301,7 @@ class Emilia(QMainWindow):
         window.show()
 
     def open_chat(self):
-        window = ChatWithCharacter()
+        window = ChatWithCharacter(self.charai_char_entry.text())
         window.show()
 
     def optionsopen(self):
@@ -1395,7 +1420,7 @@ class Emilia(QMainWindow):
             text += " <br>• " + new
         text += otherversions
         text = text.replace("\n", "<br>")
-        MessageBox(title, text, pixmap=pixmap, self=self)
+        message_box(title, text, pixmap=pixmap, self=self)
 
     def start_main(self, tts):
         if tts == "elevenlabs" and self.elevenlabs_voice_entry.text() == "":
@@ -1470,6 +1495,6 @@ if __name__ == "__main__":
     if autoupdate_enable:
         check_for_updates(version, "Emilia.zip", pre, window)
     if vtube_enable:
-        Emote_File()
+        emote_file()
     window.show()
     sys.exit(app.exec())
