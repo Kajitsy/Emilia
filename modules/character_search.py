@@ -14,7 +14,8 @@ from PyQt6.QtWidgets import (QTabWidget,
                              QWidget, QMessageBox,
                              QListWidget, 
                              QListWidgetItem,
-                             QGraphicsOpacityEffect)
+                             QGraphicsOpacityEffect,
+                             QGridLayout, QScrollArea)
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush, QMouseEvent
 from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
 
@@ -677,10 +678,13 @@ class CharacterWidget(QWidget):
     def load_image_async(self, url):
         def set_image(self, pixmap):
             rounded_pixmap = self.round_corners(pixmap, 90)
-            if self.mode == "network" or self.mode == "local" or self.mode == "firstlaunch":
-                self.image_label.setPixmap(rounded_pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-            elif self.mode == "recent" or self.mode == "recommend":
-                self.image_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            try:
+                if self.mode == "network" or self.mode == "local" or self.mode == "firstlaunch":
+                    self.image_label.setPixmap(rounded_pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                elif self.mode == "recent" or self.mode == "recommend":
+                    self.image_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            except:
+                pass
 
         self.image_loader_thread = ImageLoaderThread(url)
         self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
@@ -809,7 +813,9 @@ class CharacterSearch(QWidget):
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Character Search")
-        self.setGeometry(300, 300, 800, 400)
+        # self.setGeometry(300, 300, 800, 400)
+        self.setMinimumHeight(700)
+        self.setMinimumWidth(1200)
 
         self.addchar_button = QPushButton(trls.tr("CharEditor", "add_character"))
         self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
@@ -825,14 +831,16 @@ class CharacterSearch(QWidget):
 
         self.network_tab = QWidget()
         self.network_layout = QVBoxLayout(self.network_tab)
-
         self.network_search_input = QLineEdit()
         self.network_search_input.setPlaceholderText(trls.tr(self.trl, "network_search_input"))
         self.network_search_input.returnPressed.connect(self.search_and_load)
         self.network_layout.addWidget(self.network_search_input)
-
-        self.network_list_widget = QListWidget()
-        self.network_layout.addWidget(self.network_list_widget)
+        self.network_scroll_area = QScrollArea()
+        self.network_scroll_area.setWidgetResizable(True)
+        self.network_content_widget = QWidget()
+        self.network_list_widget = QGridLayout(self.network_content_widget)
+        self.network_scroll_area.setWidget(self.network_content_widget)
+        self.network_layout.addWidget(self.network_scroll_area)
 
         self.add_another_charcter_button = QPushButton(trls.tr(self.trl, "add_another_charcter_button"))
         self.add_another_charcter_button.clicked.connect(self.open_NewCharacherEditor)
@@ -840,9 +848,12 @@ class CharacterSearch(QWidget):
 
         self.local_tab = QWidget()
         self.local_layout = QVBoxLayout(self.local_tab)
-
-        self.local_list_widget = QListWidget()
-        self.local_layout.addWidget(self.local_list_widget)
+        self.local_scroll_area = QScrollArea()
+        self.local_scroll_area.setWidgetResizable(True)
+        self.local_content_widget = QWidget()
+        self.local_list_widget = QGridLayout(self.local_content_widget)
+        self.local_scroll_area.setWidget(self.local_content_widget)
+        self.local_layout.addWidget(self.local_scroll_area)
 
         self.tab_widget.addTab(self.network_tab, trls.tr(self.trl, "network_tab"))
         self.tab_widget.addTab(self.local_tab, trls.tr(self.trl, "local_tab"))
@@ -871,17 +882,33 @@ class CharacterSearch(QWidget):
         window.show()
         self.close()
 
-    def populate_list(self, data, mode):
-        item = QListWidgetItem()
-        custom_widget = CharacterWidget(self, data, mode)
-        
-        item.setSizeHint(custom_widget.sizeHint())
-        if mode == "local":
-            self.local_list_widget.addItem(item)
-            self.local_list_widget.setItemWidget(item, custom_widget)
-            return
-        self.network_list_widget.addItem(item)
-        self.network_list_widget.setItemWidget(item, custom_widget)
+    def populate_list(self, data_list, mode, grid_layout):
+        print(self.width(), self.height())
+        while grid_layout.count():
+            item = grid_layout.takeAt(0)
+            if item is not None:
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+
+        column = 0
+        row = 0
+        if type(data_list) == list:
+            for data in data_list:
+                character_widget = CharacterWidget(self, data, mode)
+                grid_layout.addWidget(character_widget, row, column)
+                column += 1
+                if column >= 3:
+                    column = 0
+                    row += 1
+        else:
+            for data in data_list:
+                character_widget = CharacterWidget(self, data_list[data], mode)
+                grid_layout.addWidget(character_widget, row, column)
+                column += 1
+                if column >= 3:
+                    column = 0
+                    row += 1
 
     def populate_category_header(self, category_name):
         header_item = QListWidgetItem()
@@ -891,17 +918,15 @@ class CharacterSearch(QWidget):
         header_widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         header_item.setSizeHint(header_widget.sizeHint())
-        self.network_list_widget.addItem(header_item)
-        self.network_list_widget.setItemWidget(header_item, header_widget)
+        # self.network_list_widget.addItem(header_item)
+        # self.network_list_widget.setItemWidget(header_item, header_widget)
 
     def populate_network_list(self, data):
-        self.network_list_widget.clear()
         self.network_data = data
         if not self.network_data or not isinstance(self.network_data, list):
             return
 
-        for data in self.network_data[0].get("result", {}).get("data", {}).get("json", []):
-            self.populate_list(data, "network")
+        self.populate_list(self.network_data[0].get("result", {}).get("data", {}).get("json", []), "network", self.network_list_widget)
 
         self.network_list_widget.setEnabled(True)
         self.network_search_input.returnPressed.connect(self.search_and_load)
@@ -909,29 +934,22 @@ class CharacterSearch(QWidget):
     def populate_recent_list(self):
         self.populate_category_header(trls.tr(self.trl, "recent_chats"))
         if self.parent.recent_chats:
-            for chats in self.parent.recent_chats:
-                    if chats["character_id"] not in self.recommend_recent_items:
-                        self.recommend_recent_items.append(chats["character_id"])
-                        self.populate_list(chats, "recent")
+            self.populate_list(self.parent.recent_chats, "recent", self.network_list_widget)
         else:
             self.populate_category_header(f"{trls.tr(self.trl, 'empty_chats')}... <(＿　＿)>")
 
     def populate_recommend_list(self):
         self.populate_category_header(trls.tr(self.trl, "recommend_chats"))
         if self.parent.recommend_chats:
-            for recommend in self.parent.recommend_chats:
-                if recommend["external_id"] not in self.recommend_recent_items:
-                    self.recommend_recent_items.append(recommend["external_id"])
-                    self.populate_list(recommend, "recommend")
+            self.populate_list(self.parent.recommend_chats, "recommend", self.network_list_widget)
         else:
             self.populate_category_header(f"{trls.tr(self.trl, 'empty_chats')}... <(＿　＿)>")
 
     def populate_local_list(self):
-        self.local_list_widget.clear()
         if not self.local_data:
             return
-        for charid, char_data in self.local_data.items():
-            self.populate_list(char_data, "local")
+        print(self.local_data)
+        self.populate_list(self.local_data, "local", self.local_list_widget)
 
     def on_tab_changed(self, index):
         if index == 1:

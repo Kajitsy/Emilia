@@ -42,19 +42,14 @@
   },
   "About": {
     "about_emilia": "À propos d'Emilia",
-    "language_from": "\n\nTraduction française par <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
-    "new_in": "\n\nNouveautés dans",
+    "language_from": "\n\nTraduction française par <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "new_in": "\n\nNouveautés dans ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Cliquez ici pour toutes les versions précédentes</a>",
     "emilia_is_open_source": "Emilia est un projet open source permettant de discuter avec votre waifu préférée.<br> Vous utilisez actuellement la version ",
     "use_version": ", entièrement gratuite et disponible sur <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> sous la <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>licence MIT</a>",
     "new": [
-      "Gestion du cache et des éléments en cache\nLes avatars des bots, les résultats de recherche des personnages et des voix ainsi que des exemples de voix sont désormais sauvegardés",
-      "Améliorations dans EmiliaAuth\nLa touche Entrée fonctionne maintenant, plus besoin de cliquer manuellement",
-      "L'affichage du chat montre désormais tous les messages, pas seulement les derniers",
-      "Un double clic droit dans l'éditeur de personnages ouvre le chat avec ce personnage",
-      "Chaque recherche s'effectue dans un thread distinct\nLe programme ne se figera pas pendant la recherche",
-      "Nouvelles localisations",
-      "Autres modifications visuelles et techniques"
+      "Modèle Live2D directement dans Emilia - VModel !\nOui, plus besoin de garder VTube Studio ouvert\nPour utiliser VModel, vous devrez tout de même télécharger Steam et VTube Studio pour trouver des modèles, mais tout le reste est au même endroit",
+      "Bien sûr, diverses corrections de bugs"
     ]
   },
   "Main": {
@@ -141,6 +136,13 @@
     "refresh_list": "Actualiser la liste",
     "delete_selected_folder": "Supprimer le dossier sélectionné",
     "clear_all_cache": "Effacer tout le cache"
+  },
+  "VModel": {
+    "top_button": "Au-dessus des autres fenêtres",
+    "blink_button": "Clignement",
+    "cursor_button": "Suivi",
+    "on": "Act",
+    "off": "Dés"
   },
   "Errors": {
     "Label": "Erreur",

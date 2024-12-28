@@ -7,6 +7,7 @@
 - Python-версия
 1. Для установки Emilia нужен Python 3.10 и выше
 2. Скачайте [исходный код](https://github.com/Kajitsy/Emilia/archive/refs/heads/emilia.zip)
+2.1. С версии 2.4 обязательно установите ffmpeg и переместите его исполняемые файлы в папку с emilia.py
 3. Установите все необходимые библиотеки с помощью файла `install.bat` либо `python -m pip install -r .\requirements.txt`
 - Exe-версия
 1. Просто скачайте Emilia.exe со страницы [последнего релиза](https://github.com/Kajitsy/Emilia/releases/latest)

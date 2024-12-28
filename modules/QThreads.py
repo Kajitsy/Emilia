@@ -8,9 +8,10 @@ import google.generativeai as genai
 import translators as ts
 from PyQt6.QtWidgets import QMessageBox
 
+from pydub import AudioSegment
 from elevenlabs.client import ElevenLabs
 from characterai import aiocai
-from elevenlabs import VoiceSettings, play
+from elevenlabs import VoiceSettings, play, save
 from google.generativeai.types import HarmCategory
 
 from PyQt6.QtCore import QThread, pyqtSignal, QLocale
@@ -22,16 +23,20 @@ from modules.CustomCharAI import Async as ccaa
 from modules.eec import EEC
 from modules.ets import translations as ets
 
+AudioSegment.converter = './ffmpeg.exe'
+
 class MainThreadCharAI(QThread):
     ouinput_signal = pyqtSignal(str, object, str, int, object, object)
     chatLoaded = pyqtSignal(list)
+    audio_is_completed = pyqtSignal(bool)
 
-    def __init__(self, parent, tts):
+    def __init__(self, parent, tts, get_chat_history=True):
         super().__init__()
         self._running = True
 
         self.client = aiocai.Client(getconfig("client", configfile="charaiconfig.json"))
         self.parent = parent
+        self.get_chat_history = get_chat_history
         self.tts = tts
         self.vts = EEC()
         self.ccaa = ccaa()
@@ -43,6 +48,11 @@ class MainThreadCharAI(QThread):
         self.show_system_messages = getconfig("show_system_messages", True)
         self.lang = getconfig("language", QLocale.system().name())
         self.trls = ets(self.lang)
+
+    def convert_mp3_to_wav(self, wav_filepath):
+        audio = AudioSegment.from_mp3("./temp_audio.mp3")
+        audio.export(wav_filepath, format="wav")
+        os.remove("./temp_audio.mp3")
 
     async def generate_ai_response(self, text):
         while True:
@@ -92,6 +102,9 @@ class MainThreadCharAI(QThread):
         if download.status_code == 200: 
             audio_bytes = io.BytesIO(download.content)
             audio_array, samplerate = sf.read(audio_bytes)
+            with open("temp_audio.mp3", 'wb') as file:
+                for chunk in download.iter_content(chunk_size=8192):
+                    file.write(chunk)
             return audio_array, samplerate
 
     async def play_audio_response(self, text):
@@ -118,23 +131,31 @@ class MainThreadCharAI(QThread):
                 if self.vtube_enable:
                     await self.vts.UseEmote("Says")
 
+                save(audio, "temp_audio.wav")
                 self.ouinput_signal.emit("zxc", "ai", text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text, len(text), True, True if self.aimtranslate and self.show_notranslate_message else False)
-
+                self.audio_is_completed.emit(False)
                 play(audio, use_ffmpeg=False)
+                self.audio_is_completed.emit(True)
                 return
 
             if self.vtube_enable:
                 await self.vts.UseEmote("Says")
 
             audio_len = len(audio)
-            self.ouinput_signal.emit("zxc", "ai", text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text, audio_len, True, True if self.aimtranslate and self.show_notranslate_message else False)
-
+            self.convert_mp3_to_wav('./temp_audio.wav')
+            self.ouinput_signal.emit("zxc", "ai",
+                                     text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text,
+                                     audio_len, True,
+                                     True if self.aimtranslate and self.show_notranslate_message else False)
+            self.audio_is_completed.emit(False)
             sd.play(audio, sample_rate)
             await asyncio.sleep(len(audio) / sample_rate)
             sd.stop()
+            self.audio_is_completed.emit(True)
+
         except Exception as e:
             print(e)
-            QMessageBox.critical(self, self.trls.tr("Errors", "Label"), str(e))
+            QMessageBox.critical(self.parent, self.trls.tr("Errors", "Label"), str(e))
 
     async def process_user_input(self):
         self.recognizer = sr.Recognizer()
@@ -146,11 +167,12 @@ class MainThreadCharAI(QThread):
 
             self.chat = await self.client.get_chat(self.character)
 
-            if self.show_system_messages:
-                self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "your_recent_messages"), 0, False, False)
-
-            history = await self.client.get_history(self.chat.chat_id)
-            self.chatLoaded.emit(list(reversed(history.turns)))
+            if self.get_chat_history:
+                if self.show_system_messages:
+                    self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "your_recent_messages"), 0, False,
+                                             False)
+                history = await self.client.get_history(self.chat.chat_id)
+                self.chatLoaded.emit(list(reversed(history.turns)))
 
             if self.tts == "elevenlabs":
                 self.elevenlabs = ElevenLabs(api_key=getconfig("elevenlabs_api_key"))
@@ -222,6 +244,7 @@ class MainThreadCharAI(QThread):
 
 class MainThreadGemini(QThread):
     ouinput_signal = pyqtSignal(str, object, str, int, object, object)
+    audio_is_completed = pyqtSignal(bool)
 
     def __init__(self, parent, tts):
         super().__init__()
@@ -247,8 +270,10 @@ class MainThreadGemini(QThread):
         self.gemini_se_exlicit = getconfig("se_exlicit", 3, "geminiconfig.json")
         self.gemini_dangerous_content = getconfig("dangerous_content", 3, "geminiconfig.json")
 
-        self.parent.send_user_message_button.clicked.connect(self.handle_button_clicked)
-        self.parent.user_input.returnPressed.connect(self.handle_return_pressed)
+    def convert_mp3_to_wav(self, wav_filepath):
+        audio = AudioSegment.from_mp3("./temp_audio.mp3")
+        audio.export(wav_filepath, format="wav")
+        os.remove("./temp_audio.mp3")
 
     async def generate_ai_response(self, text):
         try:
@@ -310,12 +335,14 @@ class MainThreadGemini(QThread):
                 if self.vtube_enable:
                     await self.vts.UseEmote("Says")
 
+                save(audio, "temp_audio.wav")
                 self.ouinput_signal.emit("zxc", "ai", text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text, len(text), True, True if self.aimtranslate and self.show_notranslate_message else False)
-
+                self.audio_is_completed.emit(False)
                 play(audio, use_ffmpeg=False)
+                self.audio_is_completed.emit(True)
         except Exception as e:
             print(e)
-            QMessageBox.critical(self, self.trls.tr("Errors", "Label"), str(e))
+            QMessageBox.critical(self.parent, self.trls.tr("Errors", "Label"), str(e))
 
     async def process_user_input(self):
         recognizer = sr.Recognizer()

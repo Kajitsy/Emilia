@@ -42,19 +42,14 @@
   },
   "About": {
     "about_emilia": "Sobre Emilia",
-    "language_from": "\n\nTraducción al español por <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
-    "new_in": "\n\nNovedades en",
+    "language_from": "\n\nTraducción al español por <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "new_in": "\n\nNovedades en ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Haz clic aquí para ver todas las versiones anteriores</a>",
     "emilia_is_open_source": "Emilia es un proyecto de código abierto que permite conversar con tu waifu favorita.<br> Actualmente estás utilizando la versión ",
     "use_version": ", que es completamente gratuita y está disponible en <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> bajo la <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>licencia MIT</a>",
     "new": [
-      "Gestión de caché y el propio caché\nAhora se guardan los avatares de los bots, los resultados de búsqueda de personajes y voces, así como ejemplos de voces",
-      "Mejoras en EmiliaAuth\nAhora funciona la tecla Enter, no necesitarás usar el ratón para hacer clic en el botón",
-      "El chat ahora muestra todos los mensajes, no solo los últimos",
-      "Doble clic derecho en el editor de personajes abrirá el chat con ese personaje",
-      "Cada búsqueda se realiza en un thread separado\nEl programa no se congelará durante la búsqueda",
-      "Nuevas localizaciones",
-      "Otras modificaciones visuales y técnicas"
+      "¡Modelo Live2D directamente en Emilia - VModel!\nSí, ya no necesitarás tener abierto VTube Studio\nPara usar VModel, tendrás que descargar Steam y VTube Studio para encontrar modelos, pero todo lo demás está en un solo lugar",
+      "Por supuesto, diversas correcciones de errores"
     ]
   },
   "Main": {
@@ -141,6 +136,13 @@
     "refresh_list": "Actualizar lista",
     "delete_selected_folder": "Eliminar carpeta seleccionada",
     "clear_all_cache": "Borrar todo el caché"
+  },
+  "VModel": {
+    "top_button": "Encima de otras ventanas",
+    "blink_button": "Parpadeo",
+    "cursor_button": "Seguimiento",
+    "on": "Enc",
+    "off": "Apag"
   },
   "Errors": {
     "Label": "Error",

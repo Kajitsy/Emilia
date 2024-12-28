@@ -1,12 +1,4 @@
-import sys, os, json
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
+import os, json
 
 def writeconfig(variable, value, configfile = "config.json"):
     try:
@@ -53,7 +45,7 @@ def getchardata(character, variable, char_data_file = "data.json"):
         return None
 
 def exe_check():
-    if os.path.exists('emilia.py'):
-        return False
-    else:
+    if os.path.exists("emilia.exe") and not os.path.exists("emilia.py"):
         return True
+    else:
+        return False

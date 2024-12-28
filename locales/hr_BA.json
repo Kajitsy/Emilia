@@ -42,19 +42,14 @@
   },
   "About": {
     "about_emilia": "O Emilii",
-    "language_from": "\n\nPrijevod na hrvatski od <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
-    "new_in": "\n\nNovo u",
+    "language_from": "\n\nPrijevod na hrvatski od <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "new_in": "\n\nNovo u ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Kliknite ovdje za sve prethodne verzije</a>",
     "emilia_is_open_source": "Emilia je projekt otvorenog koda koji omogućava razgovor s vašim omiljenim waifu.<br> Trenutno koristite verziju ",
     "use_version": ", koja je potpuno besplatna i dostupna na <a href='https://github.com/Kajitsy/Emilia'>GitHub-u</a> pod <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT licencom</a>",
     "new": [
-      "Upravljanje cacheom i sam cache\nSada se spremaju avatari botova, rezultati pretraživanja likova i glasova, kao i primjeri glasova",
-      "Poboljšanja u EmiliaAuth\nTipka Enter sada radi, nećete morati koristiti miš za klik na gumb",
-      "Prikaz razgovora sada pokazuje sve poruke, a ne samo posljednje",
-      "Dvaput desni klik miša u uređivaču likova otvorit će razgovor s njim",
-      "Svako pretraživanje se izvodi u posebnom threadu\nProgram neće zamrzavati tijekom pretrage",
-      "Nove lokalizacije",
-      "Ostale vizualne i tehničke izmjene"
+      "Live2D model direktno u Emilia - VModel!\nDa, više ne morate držati otvoren VTube Studio\nZa korištenje VModel morat ćete preuzeti Steam i VTube Studio za pronalazak modela, ali sve ostalo je na jednom mjestu",
+      "Naravno, razna ispravljanja grešaka"
     ]
   },
   "Main": {
@@ -141,6 +136,13 @@
     "refresh_list": "Osvježi popis",
     "delete_selected_folder": "Obriši odabranu mapu",
     "clear_all_cache": "Obriši sav cache"
+  },
+  "VModel": {
+    "top_button": "Iznad ostalih prozora",
+    "blink_button": "Treptanje",
+    "cursor_button": "Praćenje",
+    "on": "Uklj",
+    "off": "Isklj"
   },
   "Errors": {
     "Label": "Greška",

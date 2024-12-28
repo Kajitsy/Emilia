@@ -20,7 +20,8 @@ from PyQt6.QtWidgets import (QColorDialog,
                              QGroupBox,
                              QSizePolicy,
                              QStackedLayout,
-                             QSlider, QMessageBox)
+                             QSlider, QMessageBox,
+                             QFileDialog)
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
 from PyQt6.QtCore import QLocale, Qt
 from PyQt6.QtMultimedia import QMediaDevices
@@ -41,12 +42,14 @@ try:
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.3.1"
+version = "2.4"
 pre = False
 
 # Global Variables
 autoupdate_enable = getconfig("autoupdate_enable", False)
 vtube_enable = getconfig("vtubeenable", False)
+vmodel_enable = getconfig("vmodel_enable", False)
+vmodel_path = getconfig("vmodel_path")
 umtranslate = getconfig("umtranslate", False)
 aimtranslate = getconfig("aimtranslate", False)
 show_notranslate_message = getconfig("show_notranslate_message", True)
@@ -221,7 +224,7 @@ class OptionsWindow(QWidget):
         self.languagechange = QComboBox()
         self.languagechange.addItems([trls.tr(self.trl, "english"), trls.tr(self.trl, "russian"),
                                       "Spanish", "French", "Bosnian (Latin)",
-                                      "Serbian (Cyrillic)", "Croatian"])
+                                      "Serbian (Cyrillic)", "Croatian", "Kazakh (Kazakhstan)", "Ukrainian (Ukraine)"])
         if lang == "ru_RU":
             self.languagechange.setCurrentIndex(1)
         elif lang == "es_ES":
@@ -234,6 +237,10 @@ class OptionsWindow(QWidget):
             self.languagechange.setCurrentIndex(5)
         elif lang == "hr_BA":
             self.languagechange.setCurrentIndex(6)
+        elif lang == "kk_KZ":
+            self.languagechange.setCurrentIndex(7)
+        elif lang == "uk_UA":
+            self.languagechange.setCurrentIndex(8)
         self.languagechange.currentIndexChanged.connect(self.langchange)
 
         langlayout.addWidget(QLabel(trls.tr(self.trl, "select_language")))
@@ -305,6 +312,20 @@ class OptionsWindow(QWidget):
         vtubelayout.addWidget(self.vtubecheck)
         vtubelayout.addWidget(self.vtubewiki)
         self.other_options_layout.addLayout(vtubelayout)
+
+        vmodellayout = QHBoxLayout()
+        self.vmodelcheck = QCheckBox()
+        if vmodel_enable:
+            self.vmodelcheck.setChecked(True)
+        self.vmodelcheck.stateChanged.connect(self.vmodelchange)
+        self.select_vmodel_button = QPushButton("Select Model")
+        self.select_vmodel_button.clicked.connect(self.vmodel_get_file)
+
+
+        vmodellayout.addWidget(QLabel("VModel"))
+        vmodellayout.addWidget(self.vmodelcheck)
+        vmodellayout.addWidget(self.select_vmodel_button)
+        self.other_options_layout.addLayout(vmodellayout)
 
         self.cache_options = QGroupBox(trls.tr(self.trl, "cache_options"))
         self.cache_options_layout = QVBoxLayout()
@@ -479,6 +500,24 @@ class OptionsWindow(QWidget):
             vtube_enable = False
         writeconfig("vtubeenable", vtube_enable)
 
+    def vmodelchange(self, state):
+        global vmodel_enable
+        if state == 2:
+            vmodel_enable = True
+        else:
+            vmodel_enable = False
+        writeconfig("vmodel_enable", vmodel_enable)
+
+    def vmodel_get_file(self):
+        global vmodel_path
+        vmodel_path, _ = QFileDialog.getOpenFileName(
+            None,
+            "Select *.model3.json",
+            "",
+            "Live2D Model3 JSON (*.model3.json)"
+        )
+        writeconfig("vmodel_path", vmodel_path)
+
     def autoupdatechange(self, state):
         global autoupdate_enable
         if state == 2:
@@ -534,7 +573,10 @@ class OptionsWindow(QWidget):
             writeconfig("language", "sr_Cyrl_CS")
         elif value == 6:
             writeconfig("language", "hr_BA")
-
+        elif value == 7:
+            writeconfig("language", "kk_KZ")
+        elif value == 8:
+            writeconfig("language", "uk_UA")
         print("Restart required")
         if not exe_check():
             os.execv(sys.executable, ["python"] + sys.argv)
@@ -945,7 +987,6 @@ class Emilia(QMainWindow):
         self.characters_list = []
         self.connect = None
         self.microphone_muted = False
-        self.ev_close = False
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -995,7 +1036,7 @@ class Emilia(QMainWindow):
 
         self.gemini_model_box = QComboBox()
         self.gemini_model_box.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.gemini_model_box.addItems(["Gemini 1.5 Flash", "Gemini 1.5 Pro"])
+        self.gemini_model_box.addItems(["Gemini 1.5 Flash", "Gemini 1.5 Pro", "Gemini 1.5 Flash 8B"])
         self.gemini_model_box.currentIndexChanged.connect(self.select_gemini_model)
         gemini_model_layout.addWidget(self.gemini_model_box)
 
@@ -1049,6 +1090,8 @@ class Emilia(QMainWindow):
                 self.gemini_model_box.setCurrentIndex(0)
             elif gemini_model == "gemini-1.5-pro":
                 self.gemini_model_box.setCurrentIndex(1)
+            elif gemini_model == "gemini-1.5-flash-8b":
+                self.gemini_model_box.setCurrentIndex(2)
             elif gemini_model == "gemini-1.0-pro":
                 self.gemini_model_box.setCurrentIndex(1)
         elif aitype == 'charai':
@@ -1235,6 +1278,8 @@ class Emilia(QMainWindow):
             gemini_model = "gemini-1.5-flash"
         elif index == 1:
             gemini_model = "gemini-1.5-pro"
+        elif index == 2:
+            gemini_model = "gemini-1.5-flash-8b"
         writeconfig("gemini_model", gemini_model, "geminiconfig.json")
         
     def select_ai(self, index):
@@ -1426,7 +1471,24 @@ class Emilia(QMainWindow):
         if tts == "elevenlabs" and self.elevenlabs_voice_entry.text() == "":
             QMessageBox.question(self, "Voice?", "Voice")
             return
-        
+        if vmodel_enable and vtube_enable:
+            QMessageBox.critical(self, 'Error', 'You cannot use both VTube and VModel at the same time')
+            return
+
+        if vmodel_enable:
+            from modules.vmodel import Win
+            if vmodel_path == "":
+                QMessageBox.critical(self, 'Error', 'VModel cannot be used without a sample model.')
+                return
+            self.vmodel = Win()
+            self.vmodel.model_path = vmodel_path
+            if os.path.exists('Emotes.json'):
+                with open('Emotes.json', "r", encoding="utf-8") as file:
+                    self.vmodel.emote_data = json.load(file)
+            else:
+                QMessageBox.critical(self, 'Error', 'Where <a href="https://github.com/Kajitsy/Emilia/blob/emilia/Emotes.json">Emotes.json</a>?')
+                return
+
         for actions in self.emi_menu.actions():
             actions.setVisible(False)
         
@@ -1446,6 +1508,15 @@ class Emilia(QMainWindow):
             self.gemini_start_main(tts)
 
     def charai_start_main(self, tts):
+        if vmodel_enable:
+            self.vmodel.show()
+            self.close()
+            self.main_thread_charai = MainThreadCharAI(self, tts, False)
+            self.main_thread_charai.chatLoaded.connect(self.populate_list)
+            self.main_thread_charai.ouinput_signal.connect(self.populate_list)
+            self.main_thread_charai.audio_is_completed.connect(self.set_talking_vmodel)
+            self.main_thread_charai.start()
+            return
         self.layout.addWidget(self.chat_widget)
         self.layout.addWidget(self.mute_microphone_button)
         self.main_thread_charai = MainThreadCharAI(self, tts)
@@ -1459,8 +1530,20 @@ class Emilia(QMainWindow):
         self.main_thread_charai = MainThreadGemini(self, tts)
         self.main_thread_charai.ouinput_signal.connect(self.populate_list)
         self.main_thread_charai.start()
+        if vmodel_enable:
+            self.vmodel.show()
+
+    def set_talking_vmodel(self, value=True):
+        self.vmodel.talking = not value
 
     def populate_list(self, data = "zxc", is_human = "zxc", text = None, audio_len = 100, new = False, translated = False):
+        if vmodel_enable and is_human == 'ai':
+            self.vmodel.wavhandler.Start('./temp_audio.wav')
+            self.vmodel.text_in_model_center = text
+            return
+        elif is_human == 'sys':
+            self.vmodel.text_in_model_center = text
+            return
         if data != "zxc":
             for turn in data:
                 if is_human == "zxc":
@@ -1485,7 +1568,7 @@ class Emilia(QMainWindow):
         self.chat_widget.scrollToBottom()
 
     def closeEvent(self, event):
-        self.ev_close = True
+        print('emiclose')
         super().closeEvent(event)
 
 if __name__ == "__main__":

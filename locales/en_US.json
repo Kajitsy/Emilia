@@ -39,7 +39,7 @@
   },
   "About": {
     "about_emilia": "About Emilia ",
-    "language_from": "\n\nEnglish from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
+    "language_from": "\n\nEnglish from <a href='https://github.com/Kajitsy'>@Rikyn</a>",
     "new_in": "\n\nNew in ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
     "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.\n At the moment you are using the ",
@@ -138,6 +138,13 @@
     "refresh_list": "Refresh List",
     "delete_selected_folder": "Delete Selected Folder",
     "clear_all_cache": "Clear All Cache"
+  },
+  "VModel": {
+    "top_button": "Top of other windows",
+    "blink_button": "Blinking",
+    "cursor_button": "Tracking",
+    "on": "On",
+    "off": "Off"
   },
   "Errors": {
     "Label": "Error",
