@@ -10,7 +10,7 @@
 3. С версии 2.4 обязательно установите ffmpeg и переместите его исполняемые файлы в папку с emilia.py
 4. Установите все необходимые библиотеки с помощью файла `install.bat` либо `python -m pip install -r .\requirements.txt`
 - Exe-версия
-1. Просто скачайте Emilia.exe со страницы [последнего релиза](https://github.com/Kajitsy/Emilia/releases/latest)
+1. Просто скачайте Emilia.zip со страницы [последнего релиза](https://github.com/Kajitsy/Emilia/releases/latest)
 2. Распакуйте архив в нужное Вам место
 3. Запускаете Emilia.exe и радуетесь жизни
 
