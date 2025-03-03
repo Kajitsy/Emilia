@@ -39,19 +39,14 @@
   },
   "About": {
     "about_emilia": "About Emilia ",
-    "language_from": "\n\nEnglish from <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "language_from": "\n\nEnglish from <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nNew in ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>To view all previous releases, click here</a>",
     "emilia_is_open_source": "Emilia is an open source project that allows you to talk to your favorite Waifu.\n At the moment you are using the ",
     "use_version": ", which is distributed completely free of charge on <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> under the <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>",
     "new": [
-      "Cache management and the cache itself\nNow bot avatars, character search results, and voice samples, as well as voice examples, are saved",
-      "Improvements in EmiliaAuth\nThe Enter button now works, so you don’t have to grab the mouse and aim at the button",
-      "Chat display now shows all messages, not just the latest ones",
-      "Double right-clicking in the character editor will open a chat with the character",
-      "Each search is performed in a separate thread\nThis prevents the program from freezing during searches",
-      "New localizations",
-      "Other visual and technical changes"
+      "Keyboard shortcut to mute microphone",
+      "Bug fixes, library updates"
     ]
   },
   "Main": {
@@ -129,7 +124,9 @@
     "customization_options": "Customization",
     "cache_options": "Cache",
     "cache_manager": "Cache Manager",
-    "save_cache": "Save cache"
+    "save_cache": "Save cache",
+    "save_shortcut": "Save Shortcut",
+    "microphone_mute_bind": "Microphone Mute Bind"
   },
   "CacheManager": {
     "avatars": "Folder with avatars",

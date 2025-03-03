@@ -42,14 +42,14 @@
   },
   "About": {
     "about_emilia": "O Emilii",
-    "language_from": "\n\nBosanski prijevod od <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "language_from": "\n\nBosanski prijevod od <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nNovo u ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Kliknite ovdje za sve prethodne verzije</a>",
     "emilia_is_open_source": "Emilia je projekt otvorenog koda koji omogućava razgovor s vašom omiljenom waifu.<br> Trenutno koristite verziju ",
     "use_version": ", koja je potpuno besplatna i dostupna na <a href='https://github.com/Kajitsy/Emilia'>GitHubu</a> pod <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT licencom</a>",
     "new": [
-      "Live2D model direktno u Emilia - VModel!\nDa, sada ne morate imati otvoren VTube Studio\nZa korištenje VModel ipak ćete morati preuzeti Steam, VTube Studio za pronalaženje modela, ali sve ostalo je na jednom mjestu",
-      "Naravno, razna ispravljanja grešaka"
+      "Prečica za isključivanje mikrofona",
+      "Ispravke grešaka, ažuriranje biblioteka"
     ]
   },
   "Main": {
@@ -127,7 +127,9 @@
     "customization_options": "Izgled",
     "cache_options": "Postavke keša",
     "cache_manager": "Upravljanje kešom",
-    "save_cache": "Spremi keš"
+    "save_cache": "Spremi keš",
+    "save_shortcut": "Sačuvaj Prečicu",
+    "microphone_mute_bind": "Prečica za Isključivanje Mikrofona"
   },
   "CacheManager": {
     "avatars": "Folder s avatarima",

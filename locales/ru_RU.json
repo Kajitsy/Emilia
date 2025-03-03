@@ -42,14 +42,14 @@
   },
   "About": {
     "about_emilia": "Об Emilia ",
-    "language_from": "\n\nРусский язык от <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "language_from": "\n\nРусский язык от <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nНовое в ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Чтобы посмотреть все прошлые релизы кликай сюда</a>",
     "emilia_is_open_source": "Emilia - проект с открытым исходным кодом, позволяющий разговаривать с твоей любимой Вайфу.<br> На данный момент вы используете версию ",
     "use_version": ", которая полностью бесплатно распространяется на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> под <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>",
     "new": [
-      "Моделька Live2D прямо в Emilia - VModel!\nДа, теперь не придётся держать открытой VTube Studio\nДля использования VModel Вам придётся всё равно скачивать Steam, VTube Studio для поиска моделек, но в остальном всё в одном месте",
-      "Ну и конечно же различные исправления багов"
+      "Сочетание клавиш для отлючения микрофона",
+      "Исправление багов, обновление библиотек"
     ]
   },
   "Main": {
@@ -127,7 +127,9 @@
     "customization_options": "Внешний вид",
     "cache_options": "Настройки кэша",
     "cache_manager": "Управление кэшом",
-    "save_cache": "Сохранять кэш"
+    "save_cache": "Сохранять кэш",
+    "save_shortcut": "Сохранить Сочетание",
+    "microphone_mute_bind": "Горячая клавиша отключения микрофона"
   },
   "CacheManager": {
     "avatars": "Папка с аватарами",

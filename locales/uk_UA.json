@@ -48,8 +48,8 @@
     "emilia_is_open_source": "Emilia - проєкт з відкритим вихідним кодом, що дозволяє розмовляти з твоєю улюбленою Вайфу.<br> На даний момент ви використовуєте версію ",
     "use_version": ", яка повністю безкоштовно розповсюджується на <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> під <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>MIT License</a>",
     "new": [
-      "Моделька Live2D прямо в Emilia - VModel!\nТак, тепер не доведеться тримати відкритою VTube Studio\nДля використання VModel Вам доведеться все одно завантажувати Steam, VTube Studio для пошуку моделек, але в іншому все в одному місці",
-      "Ну і звичайно ж, різні виправлення багів"
+      "Гаряча клавіша вимкнення мікрофона",
+      "Виправлення багів, оновлення бібліотек"
     ]
   },
   "Main": {
@@ -127,7 +127,9 @@
     "customization_options": "Зовнішній вигляд",
     "cache_options": "Налаштування кешу",
     "cache_manager": "Керування кешем",
-    "save_cache": "Зберігати кеш"
+    "save_cache": "Зберігати кеш",
+    "save_shortcut": "Зберегти ярлик",
+    "microphone_mute_bind": "Гаряча клавіша вимкнення мікрофона"
   },
   "CacheManager": {
     "avatars": "Папка з аватарами",

@@ -42,14 +42,14 @@
   },
   "About": {
     "about_emilia": "À propos d'Emilia",
-    "language_from": "\n\nTraduction française par <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "language_from": "\n\nTraduction française par <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nNouveautés dans ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Cliquez ici pour toutes les versions précédentes</a>",
     "emilia_is_open_source": "Emilia est un projet open source permettant de discuter avec votre waifu préférée.<br> Vous utilisez actuellement la version ",
     "use_version": ", entièrement gratuite et disponible sur <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> sous la <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>licence MIT</a>",
     "new": [
-      "Modèle Live2D directement dans Emilia - VModel !\nOui, plus besoin de garder VTube Studio ouvert\nPour utiliser VModel, vous devrez tout de même télécharger Steam et VTube Studio pour trouver des modèles, mais tout le reste est au même endroit",
-      "Bien sûr, diverses corrections de bugs"
+      "Raccourci pour couper le microphone",
+      "Correction de bugs, mise à jour des bibliothèques"
     ]
   },
   "Main": {
@@ -127,7 +127,9 @@
     "customization_options": "Apparence",
     "cache_options": "Options du cache",
     "cache_manager": "Gestionnaire de cache",
-    "save_cache": "Sauvegarder le cache"
+    "save_cache": "Sauvegarder le cache",
+    "save_shortcut": "Enregistrer Raccourci",
+    "microphone_mute_bind": "Raccourci pour Couper le Microphone"
   },
   "CacheManager": {
     "avatars": "Dossier des avatars",

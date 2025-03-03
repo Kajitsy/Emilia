@@ -16,8 +16,8 @@ from PyQt6.QtWidgets import (QTabWidget,
                              QListWidgetItem,
                              QGraphicsOpacityEffect,
                              QGridLayout, QScrollArea)
-from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush, QMouseEvent
-from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer
+from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter, QBrush, QMouseEvent, QLinearGradient, QPainterPath, QFont
+from PyQt6.QtCore import QLocale, Qt, QPropertyAnimation, QTimer, QRectF
 
 from modules.config import getconfig
 from modules.CustomCharAI import Sync as ccas
@@ -35,9 +35,52 @@ labelcolor = getconfig("labelcolor")
 emiliaicon = "images/emilia.png"
 trls = translations(lang)
 
+def color_avatar(avatar_label, avatar_w, avatar_h, name, radius=100, label=True):
+    pixmap = QPixmap(avatar_w, avatar_h)
+    pixmap.fill(Qt.GlobalColor.transparent)
+
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+    gradient = QLinearGradient(0, 0, avatar_w, avatar_h * 0.7)
+    gradient.setColorAt(0, QColor("#f47c3b"))
+    gradient.setColorAt(1, Qt.GlobalColor.transparent)
+
+    painter.fillRect(pixmap.rect(), QBrush(gradient))
+
+    font = QFont("Arial", int(avatar_h / 3))
+    font.setBold(True)
+    painter.setFont(font)
+    painter.setPen(QColor(255, 255, 255))
+
+    first_letter = name[0].upper() if name else ""
+    painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, first_letter)
+    painter.end()
+
+    def round_pixmap(source_pixmap: QPixmap) -> QPixmap:
+        rounded = QPixmap(avatar_w, avatar_h)
+        rounded.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(rounded)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(0, 0, source_pixmap.width(), source_pixmap.height()), radius, radius)
+        painter.setClipPath(path)
+
+        painter.drawPixmap(0, 0, source_pixmap)
+        painter.end()
+
+        return rounded
+
+    rounded_pixmap = round_pixmap(pixmap)
+    if label: avatar_label.setPixmap(rounded_pixmap)
+    return rounded_pixmap
+
 class MessageWidget(QWidget):
     def __init__(self, chat, data = None, message_type = None):
         super().__init__()
+        self.threads = []
         self.data = data
         self.chat = chat
         self.message_type = message_type
@@ -95,24 +138,19 @@ class MessageWidget(QWidget):
                 layout.addWidget(self.avatar_label)
             layout.addLayout(text_layout)
         self.setLayout(layout)
-
-        self.threads = []
-        if self.character_id:
-            thread = threading.Thread(self.load_image_async())
-            thread.start()
-            self.threads.append(thread)
-        
-        self.animate(self.text_label)
+        self.load_image_async()
 
     def load_image_async(self):
-        def set_image(self, pixmap):
-            rounded_pixmap = self.round_corners(pixmap, 25)
-            self.avatar_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))        
-        self.avatar_url = self.chat.character.get("avatar_file_name", "")
-        url = f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0"
-        self.image_loader_thread = ImageLoaderThread(url)
-        self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
-        self.image_loader_thread.start()
+        self.avatar_url = self.chat.character.get("avatar_file_name")
+        if self.avatar_url:
+            url = f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0"
+            thread = ImageLoaderThread(url, 50, 50)
+            thread.radius = 25
+            thread.image_loaded.connect(self.avatar_label.setPixmap)
+            self.threads.append(thread)
+            thread.start()
+        else:
+            color_avatar(self.avatar_label, 50, 50, self.author_name)
 
     def round_corners(self, pixmap, radius):
         size = pixmap.size()
@@ -133,16 +171,6 @@ class MessageWidget(QWidget):
         html_text = pattern.sub(r"<i>\1</i>", text)
         html_text = html_text.replace("\n", "<br>")
         return html_text
-
-    def animate(self, widget):
-        self.effect = QGraphicsOpacityEffect()
-        widget.setGraphicsEffect(self.effect)
-
-        self.animation = QPropertyAnimation(self.effect, b"opacity")
-        self.animation.setDuration(400)
-        self.animation.setStartValue(0)
-        self.animation.setEndValue(1)
-        self.animation.start()
 
     def adjust_size(self):
         item = self.chat.list_widget.itemAt(self.pos())
@@ -191,7 +219,7 @@ class ChatWithCharacter(QWidget):
         self.load_chat_thread = LoadChatThread(self, self.client, self.character_id)
         self.load_chat_thread.chatLoaded.connect(self.populate_list)
         self.load_chat_thread.chatLoaded.connect(lambda data: self.list_widget.setEnabled(True))
-        self.load_chat_thread.errorOccurred.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+        self.load_chat_thread.errorOccurred.connect(lambda error: self.new_chat())
         self.load_chat_thread.start()
 
     def populate_list(self, data):
@@ -223,15 +251,11 @@ class ChatWithCharacter(QWidget):
         threading.Thread(target=lambda: asyncio.run(self.start_new_chat())).start()
 
     async def start_new_chat(self):
-        try:
             if self.account_id is None:
                 self.account = await self.ccaa.get_me()
                 self.account_id = self.account["id"]
             async with await self.client.connect() as chat:
                 await chat.new_chat(self.character_id, self.account_id)
-        except Exception as e:
-            QMessageBox.critical(self, trls.tr("Errors", "Label"), f"Error starting new chat: {str(e)}")
-        finally:
             self.on_new_chat_finish()
 
     def on_new_chat_finish(self):
@@ -373,10 +397,14 @@ class NewCharacterEditor(QWidget):
         pixmap = QPixmap()
         text = trls.tr("CharEditor", "yourchar") + character["name"] + trls.tr("CharEditor", "withid") + charid + trls.tr("CharEditor", "added")
 
-        thread = ImageLoaderThread(f"https://characterai.io/i/80/static/avatars/{character['avatar_file_name']}?webp=true&anim=0")
-        thread.image_loaded.connect(lambda image: message_box(trls.tr("CharEditor", "character_added"), text, image, image, self))
-        thread.error.connect(lambda error: QMessageBox.critical(self, "Error", error))
-        thread.start()
+        if character.get('avatar_file_name'):
+            thread = ImageLoaderThread(f"https://characterai.io/i/80/static/avatars/{character['avatar_file_name']}?webp=true&anim=0", 80, 80)
+            thread.image_loaded.connect(lambda image: message_box(trls.tr("CharEditor", "character_added"), text, image, image, self))
+            thread.error.connect(lambda error: QMessageBox.critical(self, "Error", error))
+            thread.start()
+        else:
+            avatar = color_avatar(QMessageBox, 80, 80, character["name"], False)
+            message_box(trls.tr("CharEditor", "character_added"), text, avatar, avatar, self)
 
         self.close()
 
@@ -427,6 +455,7 @@ class NewCharacterEditor(QWidget):
 class CharacterWidget(QWidget):
     def __init__(self, parent, data, mode):
         super().__init__()
+        self.threads = []
         self.data = data
         self.local_data = None
         if mode != "firstlaunch":
@@ -460,7 +489,7 @@ class CharacterWidget(QWidget):
 
         self.voice_entry_button = ResizableLineEdit()
         self.voice_entry_button.setFixedWidth(200)
-        self.voice_entry_button.setText(data.get("elevenlabs_voice", ""))
+        self.voice_entry_button.setText(self.data.get("elevenlabs_voice", ""))
         self.voice_entry_button.textChanged.connect(self.speaker_entry)
         self.voice_entry_button.setPlaceholderText("Enter the name of the voice")
 
@@ -653,9 +682,12 @@ class CharacterWidget(QWidget):
 
         self.threads = []
         if f"{self.avatar_url}" != "None" and f"{self.avatar_url}" != "" :
-            thread = threading.Thread(self.load_image_async(f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0"))
-            thread.start()
+            thread = ImageLoaderThread(f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", 80, 80)
+            thread.image_loaded.connect(self.image_label.setPixmap)
             self.threads.append(thread)
+            thread.start()
+        else:
+            color_avatar(self.image_label, 80, 80, self.name)
         self.text_label.setText(text)
 
         text_buttons_layout.addLayout(buttons_layout)
@@ -676,19 +708,13 @@ class CharacterWidget(QWidget):
         window.show()
 
     def load_image_async(self, url):
-        def set_image(self, pixmap):
-            rounded_pixmap = self.round_corners(pixmap, 90)
-            try:
-                if self.mode == "network" or self.mode == "local" or self.mode == "firstlaunch":
-                    self.image_label.setPixmap(rounded_pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-                elif self.mode == "recent" or self.mode == "recommend":
-                    self.image_label.setPixmap(rounded_pixmap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-            except:
-                pass
-
-        self.image_loader_thread = ImageLoaderThread(url)
-        self.image_loader_thread.image_loaded.connect(lambda image: set_image(self, image))
-        self.image_loader_thread.start()
+        if url:
+            thread = ImageLoaderThread(url, 80, 80)
+            thread.image_loaded.connect(self.image_label.setPixmap)
+            self.threads.append(thread)
+            thread.start()
+        else:
+            color_avatar(self.image_label, 80, 80, self.name)
 
     def round_corners(self, pixmap, radius):
         size = pixmap.size()
@@ -813,7 +839,6 @@ class CharacterSearch(QWidget):
         super().__init__()
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia: Character Search")
-        # self.setGeometry(300, 300, 800, 400)
         self.setMinimumHeight(700)
         self.setMinimumWidth(1200)
 
@@ -821,6 +846,7 @@ class CharacterSearch(QWidget):
         self.addchar_button.clicked.connect(lambda: asyncio.run(self.addchar()))
 
         self.trl = "CharEditor"
+        self.threads = []
 
         main_layout = QVBoxLayout(self)
         self.parent = parent
@@ -838,7 +864,7 @@ class CharacterSearch(QWidget):
         self.network_scroll_area = QScrollArea()
         self.network_scroll_area.setWidgetResizable(True)
         self.network_content_widget = QWidget()
-        self.network_list_widget = QGridLayout(self.network_content_widget)
+        self.network_list_layout = QVBoxLayout(self.network_content_widget)
         self.network_scroll_area.setWidget(self.network_content_widget)
         self.network_layout.addWidget(self.network_scroll_area)
 
@@ -883,7 +909,6 @@ class CharacterSearch(QWidget):
         self.close()
 
     def populate_list(self, data_list, mode, grid_layout):
-        print(self.width(), self.height())
         while grid_layout.count():
             item = grid_layout.takeAt(0)
             if item is not None:
@@ -891,24 +916,19 @@ class CharacterSearch(QWidget):
                 if widget is not None:
                     widget.deleteLater()
 
-        column = 0
-        row = 0
-        if type(data_list) == list:
+        if isinstance(data_list, list):
             for data in data_list:
                 character_widget = CharacterWidget(self, data, mode)
-                grid_layout.addWidget(character_widget, row, column)
-                column += 1
-                if column >= 3:
-                    column = 0
-                    row += 1
+                grid_layout.addWidget(character_widget)
         else:
-            for data in data_list:
-                character_widget = CharacterWidget(self, data_list[data], mode)
-                grid_layout.addWidget(character_widget, row, column)
-                column += 1
-                if column >= 3:
-                    column = 0
-                    row += 1
+            if data_list.get('characters'):
+                for data in data_list.get('characters', {}):
+                    character_widget = CharacterWidget(self, data, mode)
+                    grid_layout.addWidget(character_widget)
+            else:
+                for key, data in data_list.items():
+                    character_widget = CharacterWidget(self, data, mode)
+                    grid_layout.addWidget(character_widget)
 
     def populate_category_header(self, category_name):
         header_item = QListWidgetItem()
@@ -918,37 +938,34 @@ class CharacterSearch(QWidget):
         header_widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         header_item.setSizeHint(header_widget.sizeHint())
-        # self.network_list_widget.addItem(header_item)
-        # self.network_list_widget.setItemWidget(header_item, header_widget)
 
     def populate_network_list(self, data):
         self.network_data = data
         if not self.network_data or not isinstance(self.network_data, list):
             return
 
-        self.populate_list(self.network_data[0].get("result", {}).get("data", {}).get("json", []), "network", self.network_list_widget)
+        self.populate_list(self.network_data[0].get("result", {}).get("data", {}).get("json", []).get('characters', []), "network", self.network_list_layout)
 
-        self.network_list_widget.setEnabled(True)
+        self.network_list_layout.setEnabled(True)
         self.network_search_input.returnPressed.connect(self.search_and_load)
 
     def populate_recent_list(self):
         self.populate_category_header(trls.tr(self.trl, "recent_chats"))
         if self.parent.recent_chats:
-            self.populate_list(self.parent.recent_chats, "recent", self.network_list_widget)
+            self.populate_list(self.parent.recent_chats, "recent", self.network_list_layout)
         else:
             self.populate_category_header(f"{trls.tr(self.trl, 'empty_chats')}... <(＿　＿)>")
 
     def populate_recommend_list(self):
         self.populate_category_header(trls.tr(self.trl, "recommend_chats"))
         if self.parent.recommend_chats:
-            self.populate_list(self.parent.recommend_chats, "recommend", self.network_list_widget)
+            self.populate_list(self.parent.recommend_chats, "recommend", self.network_list_layout)
         else:
             self.populate_category_header(f"{trls.tr(self.trl, 'empty_chats')}... <(＿　＿)>")
 
     def populate_local_list(self):
         if not self.local_data:
             return
-        print(self.local_data)
         self.populate_list(self.local_data, "local", self.local_list_widget)
 
     def on_tab_changed(self, index):
@@ -962,7 +979,7 @@ class CharacterSearch(QWidget):
         
         self.add_another_charcter_button.setVisible(False)
 
-        self.network_list_widget.setEnabled(False)
+        self.network_list_layout.setEnabled(False)
         self.network_search_input.returnPressed.disconnect()
 
         try:
@@ -971,7 +988,7 @@ class CharacterSearch(QWidget):
             search_thread = SearchLoaderThread(url, query=search_query, cache_dir="cache/search_character")
             search_thread.data.connect(lambda data: self.populate_network_list(data))
             search_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
-
+            self.threads.append(search_thread)
             search_thread.start()
 
         except Exception as e:
@@ -1051,6 +1068,7 @@ class VoiceSearch(QWidget):
         self.played = False
         self.audio_thread = None
         self.trl = "CharEditor"
+        self.threads = []
 
         self.CACHE_TTL = 86400 # in seconds
 
@@ -1190,6 +1208,7 @@ class VoiceSearch(QWidget):
             search_thread.data.connect(lambda data: self.list_widget.setEnabled(True))
             search_thread.data.connect(lambda data: self.search_input.returnPressed.connect(self.search_and_load))
             search_thread.error.connect(lambda error: QMessageBox.critical(self, trls.tr("Errors", "Label"), error))
+            self.threads.append(search_thread)
             search_thread.start()
 
         except Exception as e:

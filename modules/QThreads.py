@@ -8,22 +8,19 @@ import google.generativeai as genai
 import translators as ts
 from PyQt6.QtWidgets import QMessageBox
 
-from pydub import AudioSegment
 from elevenlabs.client import ElevenLabs
 from characterai import aiocai
 from elevenlabs import VoiceSettings, play, save
 from google.generativeai.types import HarmCategory
 
-from PyQt6.QtCore import QThread, pyqtSignal, QLocale
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import QThread, pyqtSignal, QLocale, Qt, QRectF
+from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
 
 from modules.config import getconfig
 from modules.CustomCharAI import Sync as ccas
 from modules.CustomCharAI import Async as ccaa
 from modules.eec import EEC
 from modules.ets import translations as ets
-
-AudioSegment.converter = './ffmpeg.exe'
 
 class MainThreadCharAI(QThread):
     ouinput_signal = pyqtSignal(str, object, str, int, object, object)
@@ -48,11 +45,6 @@ class MainThreadCharAI(QThread):
         self.show_system_messages = getconfig("show_system_messages", True)
         self.lang = getconfig("language", QLocale.system().name())
         self.trls = ets(self.lang)
-
-    def convert_mp3_to_wav(self, wav_filepath):
-        audio = AudioSegment.from_mp3("./temp_audio.mp3")
-        audio.export(wav_filepath, format="wav")
-        os.remove("./temp_audio.mp3")
 
     async def generate_ai_response(self, text):
         while True:
@@ -142,7 +134,6 @@ class MainThreadCharAI(QThread):
                 await self.vts.UseEmote("Says")
 
             audio_len = len(audio)
-            self.convert_mp3_to_wav('./temp_audio.wav')
             self.ouinput_signal.emit("zxc", "ai",
                                      text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text,
                                      audio_len, True,
@@ -154,7 +145,6 @@ class MainThreadCharAI(QThread):
             self.audio_is_completed.emit(True)
 
         except Exception as e:
-            print(e)
             QMessageBox.critical(self.parent, self.trls.tr("Errors", "Label"), str(e))
 
     async def process_user_input(self):
@@ -270,11 +260,6 @@ class MainThreadGemini(QThread):
         self.gemini_se_exlicit = getconfig("se_exlicit", 3, "geminiconfig.json")
         self.gemini_dangerous_content = getconfig("dangerous_content", 3, "geminiconfig.json")
 
-    def convert_mp3_to_wav(self, wav_filepath):
-        audio = AudioSegment.from_mp3("./temp_audio.mp3")
-        audio.export(wav_filepath, format="wav")
-        os.remove("./temp_audio.mp3")
-
     async def generate_ai_response(self, text):
         try:
             self.chunk = self.chat.send_message(text, safety_settings={
@@ -341,7 +326,6 @@ class MainThreadGemini(QThread):
                 play(audio, use_ffmpeg=False)
                 self.audio_is_completed.emit(True)
         except Exception as e:
-            print(e)
             QMessageBox.critical(self.parent, self.trls.tr("Errors", "Label"), str(e))
 
     async def process_user_input(self):
@@ -445,37 +429,64 @@ class ImageLoaderThread(QThread):
     error = pyqtSignal(str)
     save_cache = getconfig("save_cache", True)
 
-    def __init__(self, url, cache_dir="cache/avatars"):
+    def __init__(self, url, width, height, cache_dir="cache/avatars"):
         super().__init__()
         self.url = url
         self.cache_dir = cache_dir
+        self.width = width
+        self.height = height
+        self.radius: int or float | None = 100
 
         os.makedirs(self.cache_dir, exist_ok=True)
+
+    def round_qpixmap(self, pixmap: QPixmap):
+        target = QPixmap(self.width, self.height)
+        target.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(target)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(0, 0, self.width, self.height), self.radius, self.radius)
+        painter.setClipPath(path)
+
+        scaled_pixmap = pixmap.scaled(self.width, self.height,
+                                      Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                                      Qt.TransformationMode.SmoothTransformation)
+
+        x = (self.width - scaled_pixmap.width()) // 2
+        y = (self.height - scaled_pixmap.height()) // 2
+        painter.drawPixmap(x, y, scaled_pixmap)
+
+        painter.end()
+        return target
 
     def get_cache_path(self):
         filename = hashlib.md5(self.url.encode('utf-8')).hexdigest() + ".png"
         return os.path.join(self.cache_dir, filename)
 
     def run(self):
-        print("\nDownloading an image", self.url, end="")
         cache_path = self.get_cache_path()
-
-        if os.path.exists(cache_path):
-            image = QPixmap(cache_path)
-            self.image_loaded.emit(image)
-            print("; Using a cached image", end="")
+        pixmap = QPixmap()
+        if os.path.exists(cache_path) and self.save_cache:
+            pixmap.load(cache_path)
+            pixmap = pixmap.scaled(self.width, self.height,
+                                   Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                                   Qt.TransformationMode.SmoothTransformation)
+            self.image_loaded.emit(self.round_qpixmap(pixmap))
             return
 
         try:
-            response = requests.get(self.url)
+            response = requests.get(self.url, stream=True)
             response.raise_for_status()
-            image = QPixmap()
-            if self.save_cache and image.loadFromData(response.content):
-                if not image.save(cache_path):
+            if pixmap.loadFromData(response.content) and self.save_cache:
+                if not pixmap.save(cache_path):
                     self.error.emit(f"File saving error: {cache_path}")
-                self.image_loaded.emit(image)
-            else:
-                self.image_loaded.emit(QPixmap())
+
+            pixmap = pixmap.scaled(self.width, self.height,
+                                   Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                                   Qt.TransformationMode.SmoothTransformation)
+            self.image_loaded.emit(self.round_qpixmap(pixmap))
         except Exception as e:
             self.error.emit(f"Image download error: {e}")
             self.image_loaded.emit(QPixmap())
@@ -483,7 +494,6 @@ class ImageLoaderThread(QThread):
 class SearchLoaderThread(QThread):
     data = pyqtSignal(object)
     error = pyqtSignal(str)
-
     save_cache_status = getconfig("save_cache", True)
 
     def __init__(self, url, headers={}, query="", cache_dir="", cache_ttl=86400):
@@ -514,24 +524,29 @@ class SearchLoaderThread(QThread):
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     def run(self):
-        print("\nLoading the search", self.url, end="")
-        cached_data = self.load_cache(self.query)
-
-        if cached_data:
-            data = cached_data
-            self.data.emit(data)
-            print("; Using Cached Search", end="")
-            return
-
         try:
-            response = requests.get(self.url, headers=self.headers)
+            if self.save_cache_status:
+                cached_data = self.load_cache(self.query)
+                if cached_data:
+                    self.data.emit(cached_data)
+                else:
+                    response = requests.get(self.url, headers=self.headers)
 
-            if response.status_code == 200:
-                data = response.json()
-                if self.save_cache_status and self.query: self.save_cache(self.query, data)
-                self.data.emit(data)
+                    if response.status_code == 200:
+                        data = response.json()
+                        if self.query: self.save_cache(self.query, data)
+                        self.data.emit(data)
+                    else:
+                        self.error.emit(f"Error receiving data: {response.status_code}")
             else:
-                self.error.emit(f"Error receiving data: {response.status_code}")
+                response = requests.get(self.url, headers=self.headers)
+
+                if response.status_code == 200:
+                    data = response.json()
+                    if self.save_cache_status and self.query: self.save_cache(self.query, data)
+                    self.data.emit(data)
+                else:
+                    self.error.emit(f"Error receiving data: {response.status_code}")
 
         except Exception as e:
             self.error.emit(str(e))
@@ -546,7 +561,6 @@ class FileLoaderThread(QThread):
         self.headers = headers
 
     def run(self):
-        print("Downloading a file", self.url)
         try:
             response = requests.get(self.url, headers=self.headers)
             if response.status_code == 200:
@@ -567,7 +581,6 @@ class AudioPlayerThread(QThread):
         self.samplerate = samplerate
 
     def run(self):
-        print("Audio playback")
         try:
             self.played.emit(True)
             sd.play(self.audio_array, self.samplerate)

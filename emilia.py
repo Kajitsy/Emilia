@@ -1,4 +1,4 @@
-import os, asyncio, winreg, json, sys, webbrowser, ctypes, shutil
+import os, asyncio, winreg, json, sys, webbrowser, ctypes, shutil, keyboard
 
 import sounddevice as sd
 import speech_recognition as sr
@@ -21,8 +21,8 @@ from PyQt6.QtWidgets import (QColorDialog,
                              QSizePolicy,
                              QStackedLayout,
                              QSlider, QMessageBox,
-                             QFileDialog)
-from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor
+                             QKeySequenceEdit)
+from PyQt6.QtGui import QIcon, QAction, QPixmap, QColor, QKeySequence
 from PyQt6.QtCore import QLocale, Qt
 from PyQt6.QtMultimedia import QMediaDevices
 
@@ -42,14 +42,13 @@ try:
 except Exception as e:
     print(f"Ctypes error {e}")
 
-version = "2.4"
+version = "2.5"
 pre = False
 
 # Global Variables
 autoupdate_enable = getconfig("autoupdate_enable", False)
 vtube_enable = getconfig("vtubeenable", False)
-vmodel_enable = getconfig("vmodel_enable", False)
-vmodel_path = getconfig("vmodel_path")
+mute_shortcut = getconfig("mute_shortcut", "Ctrl+M")
 umtranslate = getconfig("umtranslate", False)
 aimtranslate = getconfig("aimtranslate", False)
 show_notranslate_message = getconfig("show_notranslate_message", True)
@@ -313,19 +312,18 @@ class OptionsWindow(QWidget):
         vtubelayout.addWidget(self.vtubewiki)
         self.other_options_layout.addLayout(vtubelayout)
 
-        vmodellayout = QHBoxLayout()
-        self.vmodelcheck = QCheckBox()
-        if vmodel_enable:
-            self.vmodelcheck.setChecked(True)
-        self.vmodelcheck.stateChanged.connect(self.vmodelchange)
-        self.select_vmodel_button = QPushButton("Select Model")
-        self.select_vmodel_button.clicked.connect(self.vmodel_get_file)
 
+        muteshortcut_layout = QVBoxLayout()
+        self.muteshortcut_edit = QKeySequenceEdit()
+        self.muteshortcut_edit.setKeySequence(QKeySequence(mute_shortcut))
 
-        vmodellayout.addWidget(QLabel("VModel"))
-        vmodellayout.addWidget(self.vmodelcheck)
-        vmodellayout.addWidget(self.select_vmodel_button)
-        self.other_options_layout.addLayout(vmodellayout)
+        self.muteshortcut_save = QPushButton(trls.tr(self.trl, "save_shortcut"))
+        self.muteshortcut_save.clicked.connect(self.save_mute_shortcut)
+
+        muteshortcut_layout.addWidget(QLabel(trls.tr(self.trl, "microphone_mute_bind")))
+        muteshortcut_layout.addWidget(self.muteshortcut_edit)
+        muteshortcut_layout.addWidget(self.muteshortcut_save)
+        self.other_options_layout.addLayout(muteshortcut_layout)
 
         self.cache_options = QGroupBox(trls.tr(self.trl, "cache_options"))
         self.cache_options_layout = QVBoxLayout()
@@ -441,6 +439,14 @@ class OptionsWindow(QWidget):
         if buttontextcolor:
             self.set_button_text_color(QColor(buttontextcolor))
 
+    def save_mute_shortcut(self):
+        global mute_shortcut
+        key_sequence = self.muteshortcut_edit.keySequence()
+        if not key_sequence.isEmpty():
+            mute_shortcut = key_sequence.toString()
+            QMessageBox.information(self, "Saved", "Shortcut saved!")
+            writeconfig("mute_shortcut", mute_shortcut)
+
     def clear_cache(self):
         CacheManagerWindow("cache").show()
         self.close()
@@ -499,24 +505,6 @@ class OptionsWindow(QWidget):
         else:
             vtube_enable = False
         writeconfig("vtubeenable", vtube_enable)
-
-    def vmodelchange(self, state):
-        global vmodel_enable
-        if state == 2:
-            vmodel_enable = True
-        else:
-            vmodel_enable = False
-        writeconfig("vmodel_enable", vmodel_enable)
-
-    def vmodel_get_file(self):
-        global vmodel_path
-        vmodel_path, _ = QFileDialog.getOpenFileName(
-            None,
-            "Select *.model3.json",
-            "",
-            "Live2D Model3 JSON (*.model3.json)"
-        )
-        writeconfig("vmodel_path", vmodel_path)
 
     def autoupdatechange(self, state):
         global autoupdate_enable
@@ -981,6 +969,8 @@ class EmiliaAuth(QWidget):
 class Emilia(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.threads = []
+
         self.setWindowIcon(QIcon(emiliaicon))
         self.setWindowTitle("Emilia")
 
@@ -1340,6 +1330,8 @@ class Emilia(QMainWindow):
             self.mute_microphone_button.setIcon(QIcon(micofficon))
         else:
             self.mute_microphone_button.setIcon(QIcon(micicon))
+        self.mute_microphone_action.setChecked(self.microphone_muted)
+        self.mute_microphone_button.setChecked(self.microphone_muted)
 
     def open_gemini_safety_settings(self):
         window = Gemini_Safety_Settings()
@@ -1471,23 +1463,6 @@ class Emilia(QMainWindow):
         if tts == "elevenlabs" and self.elevenlabs_voice_entry.text() == "":
             QMessageBox.question(self, "Voice?", "Voice")
             return
-        if vmodel_enable and vtube_enable:
-            QMessageBox.critical(self, 'Error', 'You cannot use both VTube and VModel at the same time')
-            return
-
-        if vmodel_enable:
-            from modules.vmodel import Win
-            if vmodel_path == "":
-                QMessageBox.critical(self, 'Error', 'VModel cannot be used without a sample model.')
-                return
-            self.vmodel = Win()
-            self.vmodel.model_path = vmodel_path
-            if os.path.exists('Emotes.json'):
-                with open('Emotes.json', "r", encoding="utf-8") as file:
-                    self.vmodel.emote_data = json.load(file)
-            else:
-                QMessageBox.critical(self, 'Error', 'Where <a href="https://github.com/Kajitsy/Emilia/blob/emilia/Emotes.json">Emotes.json</a>?')
-                return
 
         for actions in self.emi_menu.actions():
             actions.setVisible(False)
@@ -1498,6 +1473,7 @@ class Emilia(QMainWindow):
 
         self.emi_menu.addAction(self.mute_microphone_action)
         self.mute_microphone_action.setVisible(True)
+        keyboard.add_hotkey(mute_shortcut, lambda: self.toggle_microphone_mute(not self.microphone_muted))
         self.setGeometry(300, 300, 800, 400)
 
         writeconfig("tts", tts)
@@ -1508,15 +1484,6 @@ class Emilia(QMainWindow):
             self.gemini_start_main(tts)
 
     def charai_start_main(self, tts):
-        if vmodel_enable:
-            self.vmodel.show()
-            self.close()
-            self.main_thread_charai = MainThreadCharAI(self, tts, False)
-            self.main_thread_charai.chatLoaded.connect(self.populate_list)
-            self.main_thread_charai.ouinput_signal.connect(self.populate_list)
-            self.main_thread_charai.audio_is_completed.connect(self.set_talking_vmodel)
-            self.main_thread_charai.start()
-            return
         self.layout.addWidget(self.chat_widget)
         self.layout.addWidget(self.mute_microphone_button)
         self.main_thread_charai = MainThreadCharAI(self, tts)
@@ -1530,20 +1497,8 @@ class Emilia(QMainWindow):
         self.main_thread_charai = MainThreadGemini(self, tts)
         self.main_thread_charai.ouinput_signal.connect(self.populate_list)
         self.main_thread_charai.start()
-        if vmodel_enable:
-            self.vmodel.show()
-
-    def set_talking_vmodel(self, value=True):
-        self.vmodel.talking = not value
 
     def populate_list(self, data = "zxc", is_human = "zxc", text = None, audio_len = 100, new = False, translated = False):
-        if vmodel_enable and is_human == 'ai':
-            self.vmodel.wavhandler.Start('./temp_audio.wav')
-            self.vmodel.text_in_model_center = text
-            return
-        elif is_human == 'sys':
-            self.vmodel.text_in_model_center = text
-            return
         if data != "zxc":
             for turn in data:
                 if is_human == "zxc":

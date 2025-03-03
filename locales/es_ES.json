@@ -42,14 +42,14 @@
   },
   "About": {
     "about_emilia": "Sobre Emilia",
-    "language_from": "\n\nTraducción al español por <a href='https://github.com/Kajitsy'>@Rikyn</a>",
+    "language_from": "\n\nTraducción al español por <a href='https://github.com/Kajitsy'>@Kajitsy</a>",
     "new_in": "\n\nNovedades en ",
     "show_all_releases": "\n\n<a href='https://github.com/Kajitsy/Emilia/releases'>Haz clic aquí para ver todas las versiones anteriores</a>",
     "emilia_is_open_source": "Emilia es un proyecto de código abierto que permite conversar con tu waifu favorita.<br> Actualmente estás utilizando la versión ",
     "use_version": ", que es completamente gratuita y está disponible en <a href='https://github.com/Kajitsy/Emilia'>GitHub</a> bajo la <a href='https://github.com/Kajitsy/Emilia/blob/emilia/LICENSE'>licencia MIT</a>",
     "new": [
-      "¡Modelo Live2D directamente en Emilia - VModel!\nSí, ya no necesitarás tener abierto VTube Studio\nPara usar VModel, tendrás que descargar Steam y VTube Studio para encontrar modelos, pero todo lo demás está en un solo lugar",
-      "Por supuesto, diversas correcciones de errores"
+      "Atajo para silenciar el micrófono",
+      "Corrección de errores, actualización de bibliotecas"
     ]
   },
   "Main": {
@@ -127,7 +127,9 @@
     "customization_options": "Apariencia",
     "cache_options": "Opciones de caché",
     "cache_manager": "Gestión de caché",
-    "save_cache": "Guardar caché"
+    "save_cache": "Guardar caché",
+    "save_shortcut": "Guardar Atajo",
+    "microphone_mute_bind": "Atajo de Silencio del Micrófono"
   },
   "CacheManager": {
     "avatars": "Carpeta de avatares",
