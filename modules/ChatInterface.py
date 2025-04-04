@@ -87,7 +87,6 @@ class ChatInterface(QWidget):
         self.initUI()
         self.createRightSidebar()
 
-        # self.mw.chat_thread.message_signal.connect(lambda message: self.addMessage(message['candidates'][0]['raw_content'], message['turn_key']['turn_id'], is_user=False))
         self.mw.chat_thread.message_signal.connect(self.charMessageSignal)
         self.mw.chat_thread.user_message_signal.connect(self.userMessageSignal)
 
@@ -105,7 +104,6 @@ class ChatInterface(QWidget):
         self.messages_area = QScrollArea()
         self.messages_area.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.messages_area.setWidgetResizable(True)
-        self.messages_area.setStyleSheet(scroll_style())
         self.messages_area.verticalScrollBar().rangeChanged.connect(self.scrollToBottomIfNeeded)
         self.messages_content = QWidget()
         self.messages_layout = QVBoxLayout(self.messages_content)
@@ -115,9 +113,7 @@ class ChatInterface(QWidget):
 
         self.layout.addLayout(main_area_layout)
 
-        input_widget = QWidget()
         input_layout = QHBoxLayout()
-        input_widget.setLayout(input_layout)
         self.message_input = CustomTextEdit()
         self.message_input.setFixedHeight(32)
         self.message_input.horizontalScrollBar().setVisible(False)
@@ -139,7 +135,7 @@ class ChatInterface(QWidget):
         call_button.setStyleSheet(icon_button_style())
         call_button.clicked.connect(self.callCharacter)
         input_layout.addWidget(call_button, alignment=Qt.AlignmentFlag.AlignBottom)
-        self.layout.addWidget(input_widget)
+        self.layout.addLayout(input_layout)
 
         self.setLayout(self.layout)
 
@@ -286,10 +282,6 @@ class ChatInterface(QWidget):
         self.chat_theme_button.setStyleSheet(button_style())
         self.chat_theme_button.clicked.connect(self.openColorPickerOverlay)
         self.char_info_layout.addWidget(self.chat_theme_button, alignment=Qt.AlignmentFlag.AlignLeft)
-
-        # self.greeting_title = QLabel()
-        # self.greeting_title.setWordWrap(True)
-        # self.char_info_layout.addWidget(self.greeting_title, alignment=Qt.AlignmentFlag.AlignBottom)
 
         self.chat_style_button = QPushButton(self.tr("Chat Style"))
         self.chat_style_button.setIcon(self.svg_icons.style())
