@@ -1280,6 +1280,21 @@ class SettingsPage(QWidget):
                     {"type": "checkbox", "label": self.tr("Translate character messages"), "key": "tr_char_msg"},
                     {"type": "combobox", "label": self.tr("Translate character messages to"), "items": [lang["title"] for lang in self.languages.values()], "key": "tr_char_msg_to"},
                 ]
+            }, {
+                "label": self.tr("Other"),
+                "settings": [
+                    {"type": "pushbutton", "label": self.tr("Did you find a problem?"),
+                     "buttonlabel": self.tr("Report a Problem"),
+                     "key": "other/report_a_problem", "click": lambda: webbrowser.open("https://github.com/Kajitsy/Emilia/issues")},
+                    {"type": "pushbutton", "label": self.tr("Settings Folder"),
+                     "buttonlabel": self.tr("Open"),
+                     "key": "other/settings_folder",
+                     "click": lambda: os.startfile(os.path.dirname(self.mw.settings.fileName()))},
+                    {"type": "pushbutton", "label": self.tr("Logs Folder"),
+                     "buttonlabel": self.tr("Open"),
+                     "key": "other/logs_folder",
+                     "click": lambda: os.startfile(os.path.join(os.getcwd(), "logs"))},
+                ]
             },
         ]
 
@@ -1578,15 +1593,11 @@ class SettingsPage(QWidget):
         self.save_button = QPushButton(self.tr("Save"))
         self.save_button.clicked.connect(self.saveSettings)
         self.save_button.setStyleSheet(button_style())
-        self.report_button = QPushButton(self.tr("Report a Problem"))
-        self.report_button.clicked.connect(lambda: webbrowser.open("https://github.com/Kajitsy/Emilia/issues"))
-        self.report_button.setStyleSheet(button_style())
         self.cancel_button = QPushButton(self.tr("Cancel"))
         self.cancel_button.clicked.connect(self.loadSettings)
         self.cancel_button.setStyleSheet(button_style())
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.cancel_button)
-        button_layout.addWidget(self.report_button)
 
         return button_bar, button_layout
 
@@ -2153,7 +2164,7 @@ if __name__ == "__main__":
     quit_action.triggered.connect(lambda event: sys.exit(app.exec()))
     tray_menu.addAction(quit_action)
 
-    if main_window.settings.value("main_window/maximized", False):
+    if main_window.settings.value("main_window/maximized", False, type=bool):
         main_window.showMaximized()
     else:
         main_window.show()
