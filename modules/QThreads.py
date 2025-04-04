@@ -1,433 +1,15 @@
-import io, asyncio, re, os, hashlib, json, time
-import requests, websockets
-
-import sounddevice as sd
-import soundfile as sf
-import speech_recognition as sr
-import google.generativeai as genai
-import translators as ts
-from PyQt6.QtWidgets import QMessageBox
-
-from elevenlabs.client import ElevenLabs
-from characterai import aiocai
-from elevenlabs import VoiceSettings, play, save
-from google.generativeai.types import HarmCategory
-
-from PyQt6.QtCore import QThread, pyqtSignal, QLocale, Qt, QRectF
+import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.signal
+import requests, websockets, speech_recognition
+from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRectF, QLocale
 from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
+from qasync import asyncSlot
+from gpytranslate import Translator
 
-from modules.config import getconfig
-from modules.CustomCharAI import Sync as ccas
 from modules.CustomCharAI import Async as ccaa
-from modules.eec import EEC
-from modules.ets import translations as ets
-
-class MainThreadCharAI(QThread):
-    ouinput_signal = pyqtSignal(str, object, str, int, object, object)
-    chatLoaded = pyqtSignal(list)
-    audio_is_completed = pyqtSignal(bool)
-
-    def __init__(self, parent, tts, get_chat_history=True):
-        super().__init__()
-        self._running = True
-
-        self.client = aiocai.Client(getconfig("client", configfile="charaiconfig.json"))
-        self.parent = parent
-        self.get_chat_history = get_chat_history
-        self.tts = tts
-        self.vts = EEC()
-        self.ccaa = ccaa()
-
-        self.vtube_enable = getconfig("vtubeenable", False)
-        self.umtranslate = getconfig("umtranslate", False)
-        self.aimtranslate = getconfig("aimtranslate", False)
-        self.show_notranslate_message = getconfig("show_notranslate_message", True)
-        self.show_system_messages = getconfig("show_system_messages", True)
-        self.lang = getconfig("language", QLocale.system().name())
-        self.trls = ets(self.lang)
-
-    async def generate_ai_response(self, text):
-        while True:
-            try:
-                message = await self.connect.send_message(self.character, self.chat.chat_id, text)
-                return message
-            except websockets.exceptions.ConnectionClosedError:
-                self.connect = await self.client.connect()
-
-    async def recognize_speech(self, recognizer):
-        while True:
-            if not self.parent.microphone_muted:
-                try:
-                    audio = await self.listen_to_microphone(recognizer)
-                    result = recognizer.recognize_google(audio, language=self.lang)
-                    if not self.parent.microphone_muted:
-                        return result
-                    else:
-                        await asyncio.sleep(0.5)
-                except sr.UnknownValueError:
-                    if self.show_system_messages:
-                        self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "repeat"), 0, False, False)
-                    pass
-            else:
-                await asyncio.sleep(0.5)
-
-    async def listen_to_microphone(self, recognizer):
-        if self.parent.microphone:
-            with self.parent.microphone as source:
-                return recognizer.listen(source)
-        else:
-            with sr.Microphone() as source:
-                return recognizer.listen(source)
-
-    async def charai_tts(self):
-        message = self.message
-
-        candidateId = re.search(r"candidate_id='([^']*)'", (str(message.candidates))).group(1)
-        roomId = message.turn_key.chat_id
-        turnId = message.turn_key.turn_id
-        voiceId = self.parent.charaitts_voice_entry.text()
-        voiceQuery = message.name
-
-        response = await self.ccaa.tts(candidateId, roomId, turnId, voiceId, voiceQuery)
-        link = response["replayUrl"]
-        download = requests.get(link, stream=True)
-        if download.status_code == 200: 
-            audio_bytes = io.BytesIO(download.content)
-            audio_array, samplerate = sf.read(audio_bytes)
-            with open("temp_audio.mp3", 'wb') as file:
-                for chunk in download.iter_content(chunk_size=8192):
-                    file.write(chunk)
-            return audio_array, samplerate
-
-    async def play_audio_response(self, text):
-        if self.vtube_enable:
-            await self.vts.UseEmote("Thinks")
-
-        try:
-            if self.tts == "charai":
-                audio, sample_rate = await self.charai_tts()
-            elif self.tts == "elevenlabs":
-                audio = self.elevenlabs.generate(
-                    voice=getconfig("elevenlabs_voice", configfile="charaiconfig.json"),
-                    output_format="mp3_22050_32",
-                    text=text,
-                    model="eleven_multilingual_v2",
-                    voice_settings=VoiceSettings(
-                        stability=0.2,
-                        similarity_boost=0.8,
-                        style=0.4,
-                        use_speaker_boost=True,
-                    )
-                )
-
-                if self.vtube_enable:
-                    await self.vts.UseEmote("Says")
-
-                save(audio, "temp_audio.wav")
-                self.ouinput_signal.emit("zxc", "ai", text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text, len(text), True, True if self.aimtranslate and self.show_notranslate_message else False)
-                self.audio_is_completed.emit(False)
-                play(audio, use_ffmpeg=False)
-                self.audio_is_completed.emit(True)
-                return
-
-            if self.vtube_enable:
-                await self.vts.UseEmote("Says")
-
-            audio_len = len(audio)
-            self.ouinput_signal.emit("zxc", "ai",
-                                     text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text,
-                                     audio_len, True,
-                                     True if self.aimtranslate and self.show_notranslate_message else False)
-            self.audio_is_completed.emit(False)
-            sd.play(audio, sample_rate)
-            await asyncio.sleep(len(audio) / sample_rate)
-            sd.stop()
-            self.audio_is_completed.emit(True)
-
-        except Exception as e:
-            QMessageBox.critical(self.parent, self.trls.tr("Errors", "Label"), str(e))
-
-    async def process_user_input(self):
-        self.recognizer = sr.Recognizer()
-        self.character = getconfig("char", configfile="charaiconfig.json")
-        async with await self.client.connect() as self.connect:
-
-            if self.vtube_enable:
-                await self.vts.VTubeConnect()
-
-            self.chat = await self.client.get_chat(self.character)
-
-            if self.get_chat_history:
-                if self.show_system_messages:
-                    self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "your_recent_messages"), 0, False,
-                                             False)
-                history = await self.client.get_history(self.chat.chat_id)
-                self.chatLoaded.emit(list(reversed(history.turns)))
-
-            if self.tts == "elevenlabs":
-                self.elevenlabs = ElevenLabs(api_key=getconfig("elevenlabs_api_key"))
-
-            if self.show_system_messages:
-                self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "you_can_start"), 0, False, False)
-
-            while self._running:
-                if not self._running:
-                    break
-
-                if self.vtube_enable:
-                    await self.vts.UseEmote("Listening")
-
-                user_message = await self.recognize_speech(self.recognizer)
-
-                if not self._running:
-                    break
-
-                if self.umtranslate:
-                    while True:
-                        try:
-                            user_message_translate = ts.translate_text(user_message, to_language="en", translator="google")
-                            break
-                        except:
-                            if not self._running:
-                                break
-                            pass
-                    user_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{user_message}</p>"
-                    user_message = user_message_translate
-
-                self.ouinput_signal.emit(
-                    "zxc", "human",
-                    user_message + user_message_before_translate
-                    if self.umtranslate and self.show_notranslate_message else user_message,
-                    len(user_message), True,
-                    True if self.aimtranslate and self.show_notranslate_message else False
-                )
-
-                if not self._running:
-                    break
-
-                self.message = await self.generate_ai_response(user_message)
-
-                if not self._running:
-                    break
-
-                self.ai_message = self.message.text
-
-                if self.aimtranslate:
-                    while True:
-                        try:
-                            self.ai_message_translate = ts.translate_text(self.ai_message, to_language=self.trls.slang, translator="google")
-                            break
-                        except:
-                            pass
-                    self.ai_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{self.ai_message}</p>"
-                    self.ai_message = self.ai_message_translate
-
-                if not self._running:
-                    break
-
-                await self.play_audio_response(self.ai_message)
-
-    def run(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-        self.loop.run_until_complete(self.process_user_input())
-
-class MainThreadGemini(QThread):
-    ouinput_signal = pyqtSignal(str, object, str, int, object, object)
-    audio_is_completed = pyqtSignal(bool)
-
-    def __init__(self, parent, tts):
-        super().__init__()
-        self._running = True
-
-        self.gemini_model = getconfig("gemini_model", "gemini-1.5-flash", "geminiconfig.json")
-        self.model = genai.GenerativeModel(self.gemini_model)
-        self.chat = self.model.start_chat(history=[])
-        self.parent = parent
-        genai.configure(api_key=self.parent.gemini_token_entry.text())
-        self.tts = tts
-
-        self.vtube_enable = getconfig("vtubeenable", False)
-        self.umtranslate = getconfig("umtranslate", False)
-        self.aimtranslate = getconfig("aimtranslate", False)
-        self.show_notranslate_message = getconfig("show_notranslate_message", True)
-        self.show_system_messages = getconfig("show_system_messages", True)
-        self.lang = getconfig("language", QLocale.system().name())
-        self.trls = ets(self.lang)
-
-        self.gemini_harassment = getconfig("harassment", 3, "geminiconfig.json")
-        self.gemini_hate = getconfig("hate", 3, "geminiconfig.json")
-        self.gemini_se_exlicit = getconfig("se_exlicit", 3, "geminiconfig.json")
-        self.gemini_dangerous_content = getconfig("dangerous_content", 3, "geminiconfig.json")
-
-    async def generate_ai_response(self, text):
-        try:
-            self.chunk = self.chat.send_message(text, safety_settings={
-                HarmCategory.HARM_CATEGORY_HARASSMENT: self.gemini_harassment,
-                HarmCategory.HARM_CATEGORY_HATE_SPEECH: self.gemini_hate,
-                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: self.gemini_se_exlicit,
-                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: self.gemini_dangerous_content
-                })
-            return self.chunk
-        except Exception as e:
-            if e.code == 400 and "User location is not supported" in e.message:
-                QMessageBox.critical(self, self.trls.tr("Errors", "Label") + self.trls.tr("Errors", "Gemini 400"))
-            else:
-                QMessageBox.critical(self, self.trls.tr("Errors", "Label") + str(e))
-            return ""
-
-    async def recognize_speech(self, recognizer):
-        while True:
-            if not self.parent.microphone_muted:
-                try:
-                    audio = await self.listen_to_microphone(recognizer)
-                    result = recognizer.recognize_google(audio, language=self.lang)
-                    if not self.parent.microphone_muted:
-                        return result
-                    else:
-                        await asyncio.sleep(0.5)
-                except sr.UnknownValueError:
-                    if self.show_system_messages:
-                        self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "repeat"), 0, False, False)
-                    pass
-            else:
-                await asyncio.sleep(0.5)
-
-    async def listen_to_microphone(self, recognizer):
-        if self.parent.microphone:
-            with self.parent.microphone as source:
-                return recognizer.listen(source)
-        else:
-            with sr.Microphone() as source:
-                return recognizer.listen(source)
-
-    async def play_audio_response(self, text):
-        try:
-            if self.tts == "elevenlabs":
-                audio = self.elevenlabs.generate(
-                    voice=getconfig("elevenlabs_voice", configfile="charaiconfig.json"),
-                    output_format="mp3_22050_32",
-                    text=text,
-                    model="eleven_multilingual_v2",
-                    voice_settings=VoiceSettings(
-                        stability=0.2,
-                        similarity_boost=0.8,
-                        style=0.4,
-                        use_speaker_boost=True,
-                    )
-                )
-
-                if self.vtube_enable:
-                    await self.vts.UseEmote("Says")
-
-                save(audio, "temp_audio.wav")
-                self.ouinput_signal.emit("zxc", "ai", text + self.ai_message_before_translate if self.aimtranslate and self.show_notranslate_message else text, len(text), True, True if self.aimtranslate and self.show_notranslate_message else False)
-                self.audio_is_completed.emit(False)
-                play(audio, use_ffmpeg=False)
-                self.audio_is_completed.emit(True)
-        except Exception as e:
-            QMessageBox.critical(self.parent, self.trls.tr("Errors", "Label"), str(e))
-
-    async def process_user_input(self):
-        recognizer = sr.Recognizer()
-
-        if self.vtube_enable:
-            await self.vts.VTubeConnect()
-
-        if self.tts == "elevenlabs":
-            self.elevenlabs = ElevenLabs(api_key=getconfig("elevenlabs_api_key"))
-
-        if self.show_system_messages:
-            self.ouinput_signal.emit("zxc", "sys", self.trls.tr("Main", "you_can_start"), 0, False, False)
-
-        while self._running:
-            if self.vtube_enable:
-                await self.vts.UseEmote("Listening")
-
-            user_message = await self.recognize_speech(recognizer)
-
-            if self.umtranslate:
-                try:
-                    user_message_translate = ts.translate_text(user_message, to_language="en", translator="google")
-                    break
-                except:
-                    pass
-                user_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{user_message}</p>"
-                user_message = user_message_translate
-
-            self.ouinput_signal.emit("zxc", "human", user_message + user_message_before_translate if self.umtranslate and self.show_notranslate_message else user_message, len(user_message), True, True if self.aimtranslate and self.show_notranslate_message else False)
-
-            self.message = await self.generate_ai_response(user_message)
-            self.ai_message = self.message.text
-
-            if self.aimtranslate:
-                while True:
-                    try:
-                        self.ai_message_translate = ts.translate_text(self.ai_message, to_languaget=self.trls.slang, translator="google")
-                        break
-                    except:
-                        pass
-                self.ai_message_before_translate = f"<p style='color: gray; font-style: italic; font-size: 12px;'>{self.ai_message}</p>"
-                self.ai_message = self.ai_message_translate
-
-            await self.play_audio_response(self.ai_message)
-
-    def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.process_user_input())
-
-class ChatDataWorker(QThread):
-    recommend_chats_signal = pyqtSignal(object)
-    recent_chats_signal = pyqtSignal(object)
-    error_signal = pyqtSignal(str)
-
-    def __init__(self):
-        super().__init__()
-        self.ccas = ccas()
-
-    def fetch_data(self):
-        try:
-            recommend_chats = self.ccas.get_recommend_chats()
-            recent_chats = self.ccas.get_recent_chats()
-            self.recommend_chats_signal.emit(recommend_chats)
-            self.recent_chats_signal.emit(recent_chats)
-        except Exception as e:
-            self.error_signal.emit(str(e))
-
-    def run(self):
-        self.fetch_data()
-
-class LoadChatThread(QThread):
-    chatLoaded = pyqtSignal(list)
-    errorOccurred = pyqtSignal(str)
-
-    def __init__(self, parent, client, character_id):
-        super().__init__(parent)
-        self.parent = parent
-        self.client = client
-        self.character_id = character_id
-
-        self.ccas = ccas()
-
-    def run(self):
-        try:
-            self.parent.character = self.ccas.get_character(self.character_id)
-            self.parent.setWindowTitle(f"Emilia: Chat With {self.parent.character['name']}")
-            chat = self.ccas.get_recent_chat(self.character_id)
-            if chat == {}: self.chatLoaded.emit([]); return
-            turns = self.ccas.get_all_messages(chat[0]['chat_id'])
-            self.chatLoaded.emit(list(reversed(turns)))
-        except Exception as e:
-            if str(e) == "Failed to get data, status code: 404":
-                self.chatLoaded.emit([]); return
-            else:
-                self.errorOccurred.emit(str(e))
+from modules.VTubeCore import EEC
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
-    error = pyqtSignal(str)
-    save_cache = getconfig("save_cache", True)
 
     def __init__(self, url, width, height, cache_dir="cache/avatars"):
         super().__init__()
@@ -468,7 +50,7 @@ class ImageLoaderThread(QThread):
     def run(self):
         cache_path = self.get_cache_path()
         pixmap = QPixmap()
-        if os.path.exists(cache_path) and self.save_cache:
+        if os.path.exists(cache_path):
             pixmap.load(cache_path)
             pixmap = pixmap.scaled(self.width, self.height,
                                    Qt.AspectRatioMode.KeepAspectRatioByExpanding,
@@ -479,77 +61,17 @@ class ImageLoaderThread(QThread):
         try:
             response = requests.get(self.url, stream=True)
             response.raise_for_status()
-            if pixmap.loadFromData(response.content) and self.save_cache:
+            if pixmap.loadFromData(response.content):
                 if not pixmap.save(cache_path):
-                    self.error.emit(f"File saving error: {cache_path}")
+                    logging.debug(f"QThreads.py: File saving error: {cache_path}")
 
             pixmap = pixmap.scaled(self.width, self.height,
                                    Qt.AspectRatioMode.KeepAspectRatioByExpanding,
                                    Qt.TransformationMode.SmoothTransformation)
             self.image_loaded.emit(self.round_qpixmap(pixmap))
         except Exception as e:
-            self.error.emit(f"Image download error: {e}")
+            logging.debug(f"QThreads.py: Image download error: {e}")
             self.image_loaded.emit(QPixmap())
-
-class SearchLoaderThread(QThread):
-    data = pyqtSignal(object)
-    error = pyqtSignal(str)
-    save_cache_status = getconfig("save_cache", True)
-
-    def __init__(self, url, headers={}, query="", cache_dir="", cache_ttl=86400):
-        super().__init__()
-        self.url = url
-        self.headers = headers
-        self.query = query.lower()
-        self.cache_dir = cache_dir
-        self.cache_ttl = cache_ttl
-
-        os.makedirs(self.cache_dir, exist_ok=True)
-
-    def get_cache_path(self, query):
-        safe_query = query.replace(" ", "_")
-        return os.path.join(self.cache_dir, f"{safe_query}.json")
-
-    def load_cache(self, query):
-        cache_path = self.get_cache_path(query)
-        if os.path.exists(cache_path):
-            if time.time() - os.path.getmtime(cache_path) < self.cache_ttl:
-                with open(cache_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-        return None
-
-    def save_cache(self, query, data):
-        cache_path = self.get_cache_path(query)
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-    def run(self):
-        try:
-            if self.save_cache_status:
-                cached_data = self.load_cache(self.query)
-                if cached_data:
-                    self.data.emit(cached_data)
-                else:
-                    response = requests.get(self.url, headers=self.headers)
-
-                    if response.status_code == 200:
-                        data = response.json()
-                        if self.query: self.save_cache(self.query, data)
-                        self.data.emit(data)
-                    else:
-                        self.error.emit(f"Error receiving data: {response.status_code}")
-            else:
-                response = requests.get(self.url, headers=self.headers)
-
-                if response.status_code == 200:
-                    data = response.json()
-                    if self.save_cache_status and self.query: self.save_cache(self.query, data)
-                    self.data.emit(data)
-                else:
-                    self.error.emit(f"Error receiving data: {response.status_code}")
-
-        except Exception as e:
-            self.error.emit(str(e))
 
 class FileLoaderThread(QThread):
     file = pyqtSignal(object)
@@ -566,26 +88,510 @@ class FileLoaderThread(QThread):
             if response.status_code == 200:
                 self.file.emit(response.content)
             else:
-                self.error.emit(f"File download error: {response.status_code}")
+                logging.debug(f"QThreads.py: File download error: {response.status_code}")
         except Exception as e:
-            self.error.emit(f"File download error: {e}")
+            logging.debug(f"QThreads.py: File download error: {e}")
 
-class AudioPlayerThread(QThread):
-    played = pyqtSignal(object)
-    error = pyqtSignal(str)
+class DownloadThread(QThread):
+    progress = pyqtSignal(int)
+    finished = pyqtSignal(str)
 
-    def __init__(self, parent, audio_array, samplerate):
+    def __init__(self, url, save_path):
         super().__init__()
-        self.parent = parent
-        self.audio_array = audio_array
-        self.samplerate = samplerate
+        self.url = url
+        self.save_path = save_path
 
     def run(self):
         try:
-            self.played.emit(True)
-            sd.play(self.audio_array, self.samplerate)
-            time.sleep(len(self.audio_array) / self.samplerate)
-            sd.stop()
-            self.played.emit(False)
+            response = requests.get(self.url, stream=True)
+            total_size = int(response.headers.get('content-length', 0))
+            downloaded_size = 0
+
+            with open(self.save_path, 'wb') as file:
+                for chunk in response.iter_content(4096):
+                    if chunk:
+                        file.write(chunk)
+                        downloaded_size += len(chunk)
+                        percent = int((downloaded_size / total_size) * 100)
+                        self.progress.emit(percent)
+
+            self.finished.emit(self.save_path)
         except Exception as e:
-            self.error.emit(f"Audio playback error: {e}")
+            self.finished.emit(str(e))
+
+class PlayerThread(QThread):
+    play_signal = pyqtSignal(object)
+    stop_signal = pyqtSignal(object)
+
+    def __init__(self, data):
+        super().__init__()
+        self.data = data
+
+    def run(self):
+        self.play(self.data)
+
+    def play(self, data):
+        audio_bytes = io.BytesIO(data)
+        audio_array, sample_rate = soundfile.read(audio_bytes)
+
+        new_length = int(round(len(audio_array) * 44100 / sample_rate))
+        audio_array = scipy.signal.resample(audio_array, new_length)
+        sample_rate = 44100
+
+        self.play_signal.emit(True)
+        sounddevice.play(audio_array, sample_rate)
+        time.sleep(len(audio_array) / sample_rate)
+        sounddevice.stop()
+        self.stop_signal.emit(True)
+
+    def stop(self):
+        sounddevice.stop()
+        self.stop_signal.emit(True)
+
+class ChatThread(QThread):
+    finished = pyqtSignal(object)
+    connected_signal = pyqtSignal(bool)
+    user_message_signal = pyqtSignal(object)
+    message_signal = pyqtSignal(object)
+    turn_remove_signal = pyqtSignal(object)
+    new_chat_created_signal = pyqtSignal(object)
+    chat_signal = pyqtSignal(object)
+    get_history_signal = pyqtSignal(object)
+    get_char_signal = pyqtSignal(object)
+    get_chat_by_id_signal = pyqtSignal(object)
+    get_me_signal = pyqtSignal(object)
+    get_user_settings_signal = pyqtSignal(object)
+    get_available_models_signal = pyqtSignal(object)
+    get_user_signal = pyqtSignal(object)
+    hide_chat_signal = pyqtSignal(object)
+
+    recent_chats_signal = pyqtSignal(object)
+    featured_chats_signal = pyqtSignal(object)
+    recommended_chats_signal = pyqtSignal(object)
+    trythis_chats_signal = pyqtSignal(object)
+    category_characters_signal = pyqtSignal(object)
+    character_chats_signal = pyqtSignal(object)
+    copy_chat_signal = pyqtSignal(object)
+
+    character_vote_signal = pyqtSignal(object)
+    user_follow_signal = pyqtSignal(object)
+    user_unfollow_signal = pyqtSignal(object)
+    user_following_signal = pyqtSignal(object)
+    user_followers_signal = pyqtSignal(object)
+    me_following_signal = pyqtSignal(object)
+    join_or_create_session_signal = pyqtSignal(object)
+
+    character_search_signal = pyqtSignal(object)
+    voices_search_signal = pyqtSignal(object)
+    voices_search_username_signal = pyqtSignal(object)
+    featured_voices_signal = pyqtSignal(object)
+    replay_signal = pyqtSignal(object)
+    get_voice_signal = pyqtSignal(object)
+    voice_override_signal = pyqtSignal(object)
+    voice_override_update_signal = pyqtSignal(object)
+    voice_override_delete_signal = pyqtSignal(object)
+
+    recognize_speech_signal = pyqtSignal(object)
+
+    vtube_connect_signal = pyqtSignal(object)
+    def __init__(self, main_window):
+        super().__init__()
+        self.mw = main_window
+        self.token: str | None = None
+        self.cookie: str | None = None
+        self._ccaa: ccaa | None = None
+        self.connect: ccaa().connect() | None = {}
+        self.me = {}
+        self.connect = {}
+        self.eec = EEC(self.mw, self.mw.settings.value("vtube/port", 8001))
+
+        self.microphone_muted = True
+        self.voiced = False
+        self.lang = QLocale.system().name().split('_')[0]
+        self.translator = Translator()
+
+        self.chat_histories = {}
+        self.category_characters = {}
+        self.characters = {}
+
+    def run(self):
+        pass
+
+    @property
+    def client(self):
+        return self._client
+
+    @client.setter
+    def client(self, value):
+        self._client = value
+
+    @property
+    def ccaa(self):
+        return self._ccaa
+
+    @ccaa.setter
+    def ccaa(self, value):
+        self._ccaa = value
+
+    @asyncSlot()
+    async def create_connect(self):
+        self.connect = await self.ccaa.connect()
+        self.connected_signal.emit(True)
+
+    @asyncSlot()
+    async def check_vtube_connect(self):
+        try:
+            await self.eec.connect()
+            self.vtube_connect_signal.emit(self.tr("Successful connection!"))
+            await self.eec.close()
+        except Exception as e:
+            self.vtube_connect_signal.emit(self.tr("Connection error: ") + str(e))
+            logging.debug(f"QThreads.py: VTube Check Error: {e}")
+
+    def create_client(self, token):
+        self.token = token
+        self.ccaa = ccaa(token)
+
+    def set_cookie(self, cookie):
+        self.cookie = cookie
+        self._ccaa = ccaa(self.token, cookie)
+        logging.debug("QThreads.py: Cookies are installed")
+
+    async def _call_ccaa(self, method, signal, *args, **kwargs):
+        if self.ccaa:
+            response = await getattr(self.ccaa, method)(*args, **kwargs)
+            signal.emit(response)
+            logging.debug(f"QThreads.py: The {method} was used")
+
+    @asyncSlot()
+    async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id=""):
+        used_emotes = []
+        vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
+        if vtube_studio:
+            await self.eec.connect()
+            await self.eec.UseEmote("Thinks")
+            used_emotes.append("Thinks")
+            logging.debug('QThreads.py: The emotion "Thinks" is used')
+        if self.mw.settings.value("tr_user_msg", False, type=bool):
+            translation = await self.translator.translate(text, targetlang=self.mw.settings_page.languages.get(self.mw.settings.value("tr_user_msg_to", "en_US"))['google_code'])
+            text = translation.text
+            logging.debug("QThreads.py: The translator is used on user message")
+        while True:
+            if self.connect:
+                try:
+                    async for response in self.connect.send_message(char, chat_id, text):
+                        if response['turn']['author']['author_id'].isdigit() and response['turn']['author']['is_human']:
+                            logging.debug("QThreads.py: The message has been sent")
+                            self.chat_histories.get(chat_id, []).append({
+                                'author': {
+                                    'is_human': True
+                                },
+                                'candidates': [{
+                                    'raw_content': text,
+                                    'is_final': True
+                                }],
+                                'turn_key': {
+                                    'chat_id': chat_id,
+                                    'turn_id': response['turn']['turn_key']['turn_id']
+                                }
+                            })
+                            self.user_message_signal.emit(response)
+                        if vtube_studio and "Says" not in used_emotes:
+                            logging.debug('QThreads.py: The emotion "Says" is used')
+                            await self.eec.UseEmote("Says")
+                            used_emotes.append("Says")
+                        if not response['turn']['author']['author_id'].isdigit():
+                            if response.get('turn', {}).get('candidates', [])[0].get('is_final'):
+                                if tts_enabled:
+                                    char_name = ""
+                                    if self.characters.get(char, {}):
+                                        char_name = self.characters[char]['character']['name']
+                                    await self.replay(response['turn']['primary_candidate_id'], chat_id, response['turn']['turn_key']['turn_id'], voice_id, char_name)
+                                self.chat_histories.get(chat_id, []).append({
+                                    'author': {
+                                        'is_human': False
+                                    },
+                                    'candidates': [{
+                                        'raw_content': response['turn']['candidates'][0]['raw_content'],
+                                        'is_final': True
+                                    }],
+                                    'turn_key': {
+                                        'chat_id': chat_id,
+                                        'turn_id': response['turn']['turn_key']['turn_id']
+                                    }
+                                })
+                                if self.mw.settings.value("tr_char_msg", False, type=bool):
+                                    translation = await self.translator.translate(response['turn']['candidates'][0]['raw_content'], targetlang=self.mw.settings_page.languages.get(self.mw.settings.value("tr_char_msg_to", self.mw.current_language))['google_code'])
+                                    response['turn']['candidates'][0]['raw_content'] = translation.text
+                                    logging.debug("QThreads.py: The translator is used on character message")
+
+                                self.message_signal.emit(response)
+                                logging.debug("QThreads.py: The message has been received in full")
+                                return
+                            self.message_signal.emit(response)
+                            logging.debug("QThreads.py: The message has been updated")
+                except websockets.WebSocketException:
+                    self.connect = await self.ccaa.connect()
+                    logging.warning("QThreads.py: Reconnecting to websockets...")
+
+    @asyncSlot()
+    async def turn_remove(self, chat_id, turn_ids):
+        await self._call_ccaa('turn_remove', self.turn_remove_signal, chat_id, turn_ids)
+
+    @asyncSlot()
+    async def replay(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):
+        await self._call_ccaa('tts', self.replay_signal, candidateId, roomId, turnId, voiceId, voiceQuery)
+
+    @asyncSlot()
+    async def get_me(self):
+        await self._call_ccaa('get_me', self.get_me_signal)
+
+    @asyncSlot()
+    async def get_user_settings(self):
+        await self._call_ccaa('get_user_settings', self.get_user_settings_signal)
+
+    @asyncSlot()
+    async def get_user(self, username):
+        await self._call_ccaa('get_user', self.get_user_signal, username)
+
+    @asyncSlot()
+    async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED"):
+        if not self.me and self.ccaa: self.me = await self.ccaa.get_me()
+        if self.connect:
+            response = await self.connect.new_chat(char, self.me['id'], preferred_model_type=preferred_model_type)
+            self.new_chat_created_signal.emit(response)
+            if chat_id: del self.chat_histories[chat_id]
+            logging.debug("QThreads.py: New chat started")
+
+    @asyncSlot()
+    async def get_chat(self, char):
+        await self._call_ccaa('get_recent_chat', self.chat_signal, char)
+
+    @asyncSlot()
+    async def get_chat_by_id(self, chat_id, load_metadata=False):
+        await self._call_ccaa('get_chat_by_id', self.get_chat_by_id_signal, chat_id, load_metadata)
+
+    @asyncSlot()
+    async def get_available_models(self):
+        await self._call_ccaa('get_available_models', self.get_available_models_signal)
+
+    @asyncSlot()
+    async def copy_chat(self, chat_id, end_turn_id):
+        await self._call_ccaa('copy_chat', self.copy_chat_signal, chat_id, end_turn_id)
+
+    @asyncSlot()
+    async def hide_chat(self, character_external_id):
+        await self._call_ccaa('hide_recent_chat', self.hide_chat_signal, character_external_id)
+
+    @asyncSlot()
+    async def get_history(self, chat_id):
+        if self.ccaa:
+            if not chat_id in self.chat_histories:
+                chat, next_token = await self.ccaa.get_messages(chat_id)
+                self.chat_histories[chat_id] = list(reversed(chat))
+            self.get_history_signal.emit(self.chat_histories[chat_id])
+
+    @asyncSlot()
+    async def get_recent_chats(self):
+        await self._call_ccaa('get_recent_chats', self.recent_chats_signal)
+
+    @asyncSlot()
+    async def get_featured_chats(self):
+        await self._call_ccaa('get_featured_chats', self.featured_chats_signal)
+
+    @asyncSlot()
+    async def get_featured_voices(self):
+        await self._call_ccaa('get_featured_voices', self.featured_voices_signal)
+
+    @asyncSlot()
+    async def get_trythis_chats(self):
+        await self._call_ccaa('get_trythis_chats', self.trythis_chats_signal)
+
+    @asyncSlot()
+    async def get_category_characters(self, category):
+        if not self.category_characters.get(category, []) and self.ccaa:
+                response = await self.ccaa.get_category_characters(category)
+                self.category_characters[category] = response
+        self.category_characters_signal.emit(self.category_characters[category])
+
+    @asyncSlot()
+    async def get_character_chats(self, character_id):
+        await self._call_ccaa('get_chats_with_character', self.character_chats_signal, character_id)
+
+    @asyncSlot()
+    async def get_recommend_chats(self):
+        await self._call_ccaa('get_recommend_chats', self.recommended_chats_signal)
+
+    @asyncSlot()
+    async def get_full_chats(self):
+        await self._call_ccaa('get_recommend_chats', self.recommended_chats_signal)
+
+    @asyncSlot()
+    async def get_character(self, character_id):
+        if self.ccaa:
+            if not character_id in self.characters:
+                character = await self.ccaa.get_character(character_id)
+                voted = await self.ccaa.voted(character_id)
+                self.characters[character_id] = {
+                    "character": character,
+                    "voted": voted
+                }
+            self.get_char_signal.emit(self.characters[character_id])
+
+    @asyncSlot()
+    async def get_user_following(self, pageParam=1, username=""):
+        await self._call_ccaa('get_following', self.user_following_signal, pageParam, username)
+
+    @asyncSlot()
+    async def get_user_followers(self, pageParam=1, username=""):
+        await self._call_ccaa('get_followers', self.user_followers_signal, pageParam, username)
+
+    @asyncSlot()
+    async def get_me_following(self):
+        await self._call_ccaa('get_me_following', self.me_following_signal)
+
+    @asyncSlot()
+    async def user_follow(self, username):
+        await self._call_ccaa('follow', self.user_follow_signal, username)
+
+    @asyncSlot()
+    async def user_unfollow(self, username):
+        await self._call_ccaa('unfollow', self.user_unfollow_signal, username)
+
+    @asyncSlot()
+    async def character_vote(self, character_id, vote):
+        await self._call_ccaa('vote', self.character_vote_signal, character_id, vote)
+
+    @asyncSlot()
+    async def character_search(self, query: str | None = None):
+        await self._call_ccaa('character_search', self.character_search_signal, query)
+
+    @asyncSlot()
+    async def voices_search(self, query: str | None = None, character_name: str| None = None):
+        await self._call_ccaa('voices_search', self.voices_search_signal, query, character_name)
+
+    @asyncSlot()
+    async def voices_search_username(self, username: str | None = None):
+        await self._call_ccaa('voices_search_username', self.voices_search_username_signal, username)
+
+    @asyncSlot()
+    async def get_voice(self, voice_id):
+        await self._call_ccaa('get_voice', self.get_voice_signal, voice_id)
+
+    @asyncSlot()
+    async def voice_override(self, character_id):
+        await self._call_ccaa('voice_override', self.voice_override_signal, character_id)
+
+    @asyncSlot()
+    async def voice_override_update(self, character_id, voice_id):
+        await self._call_ccaa('voice_override_update', self.voice_override_update_signal, character_id, voice_id)
+
+    @asyncSlot()
+    async def voice_override_delete(self, character_id):
+        await self._call_ccaa('voice_override_delete', self.voice_override_delete_signal, character_id)
+
+    @asyncSlot()
+    async def vtube_use_emote(self, emote):
+        await self.eec.connect()
+        await self.eec.UseEmote(emote)
+        await self.eec.close()
+        logging.debug(f'QThreads.py: The emotion of "{emote}" was used')
+
+class VoiceModeThread(QThread):
+    connected_signal = pyqtSignal(bool)
+    speech_signal = pyqtSignal(object)
+    speech_error_signal = pyqtSignal(object)
+
+    user_message = pyqtSignal(str)
+    char_message = pyqtSignal(object)
+
+    def __init__(self, parent, token, char, chat_id, voice_id):
+        super().__init__()
+        self.parent = parent
+        self.mw = self.parent.mw
+        self.char = char
+        self.chat_id = chat_id
+        self.voice_id = voice_id
+        self.muted = parent.muted
+        self.lang = self.mw.current_language
+        self.used_emotes = []
+
+        self.connect = None
+        self.ccaa = ccaa(token)
+        self.recognizer = speech_recognition.Recognizer()
+        self.eec = EEC(self.mw)
+        self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
+        if self.mw.settings.value('input_device', False) is False:
+            self.input_index = 0
+        else:
+            self.input_index = self.mw.settings.value('input_device', 0, type=int) + 1
+
+    def sd_stop(self):
+        sounddevice.stop()
+
+    def run(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(self.process_user_input())
+
+    async def recognize_speech(self):
+        while True:
+            if not self.muted:
+                try:
+                    audio = self.listen_to_microphone(self.recognizer)
+                    result = self.recognizer.recognize_google(audio, language=self.lang.split('_')[0])
+                    if not self.muted:
+                        self.speech_signal.emit(False)
+                        return result
+                    else:
+                        QThread.sleep(3)
+                except speech_recognition.UnknownValueError:
+                    self.speech_error_signal.emit(True)
+                    logging.warning("QThreads.py: Error converting speech to text")
+                    pass
+            else:
+                QThread.sleep(1)
+
+    def listen_to_microphone(self, recognizer):
+        self.speech_signal.emit(True)
+        with speech_recognition.Microphone(device_index=self.input_index) as source:
+            return recognizer.listen(source)
+
+    async def tts(self, candidateId, roomId, turnId, voiceId: str = "", voiceQuery: str = ""):
+        response = await self.ccaa.tts(candidateId, roomId, turnId, voiceId, voiceQuery)
+        link = response["replayUrl"]
+        download = requests.get(link, stream=True)
+        if download.status_code == 200:
+            audio_bytes = io.BytesIO(download.content)
+            audio_array, sample_rate = soundfile.read(audio_bytes)
+            return audio_array, sample_rate
+
+    async def send_message(self, text):
+        if self.connect:
+            while True:
+                try:
+                    async for response in self.connect.send_message(self.char, self.chat_id, text):
+                        if not response['turn']['author']['author_id'].isdigit():
+                                if response.get('turn', {}).get('candidates', [])[0].get('is_final'):
+                                    return response['turn']
+                except websockets.WebSocketException:
+                    self.connected_signal.emit(False)
+                    self.connect = await self.ccaa.connect()
+                    self.connected_signal.emit(True)
+
+    async def process_user_input(self):
+        self.connect = await self.ccaa.connect()
+        if self.vtube_studio: await self.eec.connect()
+        self.connected_signal.emit(True)
+        while True:
+            if self.vtube_studio: await self.eec.UseEmote("Listening")
+            user_input = await self.recognize_speech()
+            self.user_message.emit(str(user_input))
+            if self.vtube_studio: await self.eec.UseEmote("Thinks")
+            ai_message = await self.send_message(user_input)
+            audio_array, sample_rate = await self.tts(ai_message['primary_candidate_id'], self.chat_id, ai_message['turn_key']['turn_id'], self.voice_id, ai_message['author']['name'])
+            self.char_message.emit(ai_message)
+            if self.vtube_studio: await self.eec.UseEmote("Says")
+            sounddevice.play(audio_array, sample_rate)
+            sounddevice.wait()
+            sounddevice.stop()

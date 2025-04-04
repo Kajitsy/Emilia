@@ -1,5 +1,4 @@
-echo Creating virtual environment...
-python -m venv .venv
+echo Updating libraries
 call .venv\Scripts\activate
 
 echo Installing dependencies... Please wait.

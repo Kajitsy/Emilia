@@ -1,11 +1,7 @@
-config.json
-geminiconfig.json
-charaiconfig.json
-chat_history.json
-data.json
-voice.pt
+
 /.idea
-/testing_files
-/modules/__pycache__
-/output
 /cache
+/__pycache__
+/modules/__pycache__
+data/VTube_Token.txt
+installer.iss
