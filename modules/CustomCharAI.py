@@ -131,9 +131,9 @@ class Async():
         response = await self.request("recommendation/v1/user", neo=True)
         return response.get("characters", None)
 
-    async def get_recent_chats(self):
-        response = await self.request("chats/recent", neo=True)
-        return response.get("chats", [])
+    async def get_recent_chats(self, userCanUseRooms: bool = False):
+        response = await self.trpc_request(f"discovery.recent?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22userCanUseRooms%22%3A{str(userCanUseRooms).lower()}%7D%7D%7D")
+        return response[0].get("result", {}).get("data", {}).get("json", [])
 
     async def get_featured_chats(self):
         response = await self.custom_request("https://character.ai/api/trpc/discovery.recommended?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22lang%22%3A%22none%22%7D%7D%7D")
@@ -161,10 +161,6 @@ class Async():
     async def get_recent_chat(self, character_id):
         response = await self.request(f"chats/recent/{character_id}", neo=True)
         return response.get("chats", [])
-
-    async def get_inviteSenderReward(self):
-        response = await self.trpc_request(f"social.inviteSenderRewardEligibility,discovery.recent?batch=1&input=%7B%220%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%2C%221%22%3A%7B%22json%22%3A%7B%22userCanUseRooms%22%3Afalse%7D%7D%7D")
-        return response
 
     async def copy_chat(self, chat_id, end_turn_id):
         data = {

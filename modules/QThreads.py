@@ -392,8 +392,8 @@ class ChatThread(QThread):
             self.get_history_signal.emit(self.chat_histories[chat_id])
 
     @asyncSlot()
-    async def get_recent_chats(self):
-        await self._call_ccaa('get_recent_chats', self.recent_chats_signal)
+    async def get_recent_chats(self, userCanUseRooms: bool = False):
+        await self._call_ccaa('get_recent_chats', self.recent_chats_signal, userCanUseRooms)
 
     @asyncSlot()
     async def get_featured_chats(self):

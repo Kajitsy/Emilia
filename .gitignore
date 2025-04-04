@@ -5,3 +5,4 @@
 /modules/__pycache__
 data/VTube_Token.txt
 installer.iss
+/logs
