@@ -1,3 +1,5 @@
+from modulefinder import replacePackageMap
+
 import aiohttp, websockets, json, uuid, logging
 from websockets import exceptions
 
@@ -415,6 +417,33 @@ class ChatClient:
                         }
                     ]
                 }
+            }
+        }
+
+        await self.ws.send(json.dumps(message))
+
+        async def response_stream():
+            while True:
+                response = json.loads(await self.ws.recv())
+
+                if 'turn' not in response:
+                    raise Exception(response['comment'])
+
+                yield response
+
+        async for result in response_stream():
+            yield result
+
+    async def generate_turn_candidate(self, char: str, chat_id: str, turn_id: str, user_name: str = ""):
+        message = {
+            'command': 'generate_turn_candidate',
+            'payload': {
+                'character_id': char,
+                'turn_key': {
+                    'chat_id': chat_id,
+                    'turn_id': turn_id
+                },
+                'user_name': user_name
             }
         }
 

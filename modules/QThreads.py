@@ -160,6 +160,7 @@ class ChatThread(QThread):
     user_message_signal = pyqtSignal(object)
     message_signal = pyqtSignal(object)
     turn_remove_signal = pyqtSignal(object)
+    turn_regenerate_signal = pyqtSignal(object, object, object)
     new_chat_created_signal = pyqtSignal(object)
     chat_signal = pyqtSignal(object)
     get_history_signal = pyqtSignal(object)
@@ -343,6 +344,69 @@ class ChatThread(QThread):
     @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):
         await self._call_ccaa('turn_remove', self.turn_remove_signal, chat_id, turn_ids)
+        for i, turn in enumerate(self.chat_histories.get(chat_id, [])):
+            if turn.get('turn_key', {}).get('turn_id') in turn_ids:
+                del self.chat_histories[chat_id][i]
+
+    @asyncSlot
+    async def turn_regenerate(self, char, chat_id, turn_id, user_name="", tts_enabled=False, voice_id=""):
+        used_emotes = []
+        message_bubble_added = False
+        vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
+        logging.debug('QThreads.py: Message Regeneration')
+        if vtube_studio:
+            await self.eec.connect()
+            await self.eec.UseEmote("Thinks")
+            used_emotes.append("Thinks")
+            logging.debug('QThreads.py: The emotion "Thinks" is used')
+        while True:
+            if self.connect:
+                try:
+                    async for response in self.connect.generate_turn_candidate(char, chat_id, turn_id, user_name):
+                        if vtube_studio and "Says" not in used_emotes:
+                            logging.debug('QThreads.py: The emotion "Says" is used')
+                            await self.eec.UseEmote("Says")
+                            used_emotes.append("Says")
+                        if not response['turn']['author']['author_id'].isdigit():
+                            if response.get('turn', {}).get('candidates', [])[0].get('is_final'):
+                                if tts_enabled:
+                                    char_name = ""
+                                    if self.characters.get(char, {}):
+                                        char_name = self.characters[char]['character']['name']
+                                    await self.replay(response['turn']['primary_candidate_id'], chat_id,
+                                                      response['turn']['turn_key']['turn_id'], voice_id, char_name)
+                                self.chat_histories.get(chat_id, []).append({
+                                    'author': {
+                                        'is_human': False
+                                    },
+                                    'candidates': [{
+                                        'raw_content': response['turn']['candidates'][0]['raw_content'],
+                                        'is_final': True
+                                    }],
+                                    'turn_key': {
+                                        'chat_id': chat_id,
+                                        'turn_id': response['turn']['turn_key']['turn_id']
+                                    }
+                                })
+                                if self.mw.settings.value("tr_char_msg", False, type=bool):
+                                    translation = await self.translator.translate(
+                                        response['turn']['candidates'][0]['raw_content'], targetlang=
+                                        self.mw.settings_page.languages.get(
+                                            self.mw.settings.value("tr_char_msg_to", self.mw.current_language))[
+                                            'google_code'])
+                                    response['turn']['candidates'][0]['raw_content'] = translation.text
+                                    logging.debug("QThreads.py: The translator is used on character message")
+
+                                self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
+                                logging.debug("QThreads.py: The message has been received in full")
+                                return
+                            self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
+                            message_bubble_added = True
+                            turn_id = response['turn']['turn_key']['turn_id']
+                            logging.debug("QThreads.py: The message has been updated")
+                except websockets.WebSocketException:
+                    self.connect = await self.ccaa.connect()
+                    logging.warning("QThreads.py: Reconnecting to websockets...")
 
     @asyncSlot
     async def replay(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):

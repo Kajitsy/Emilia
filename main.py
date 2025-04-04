@@ -1047,7 +1047,7 @@ class EmiliaNext(QMainWindow):
     def moveEvent(self, a0):
         super().moveEvent(a0)
         self.settings.setValue("main_window/x", self.x())
-        self.settings.setValue("main_window/y", self.y() + 8)
+        self.settings.setValue("main_window/y", self.y())
 
     def showEvent(self, a0):
         super().showEvent(a0)
