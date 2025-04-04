@@ -90,15 +90,15 @@ class EmiliaNext(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Emilia")
-        self.setGeometry(100, 100, 1200, 800)
         self.setStyleSheet(main_window_style())
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
-        self.logger = logging.getLogger()
         self.svg_icons = SvgIcons()
-        self.version = "3.0"
+        self.version = "3.0.1dev"
         self.beta = version.parse(self.version).is_prerelease
 
+        self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
+                         self.settings.value("main_window/width", 1360, type=int), self.settings.value("main_window/height", 800, type=int))
         self.left_sidebar_visible = True
         self.left_sidebar_hide_user = False
         self.left_sidebar_hide_auto = False
@@ -1035,6 +1035,14 @@ class EmiliaNext(QMainWindow):
             self.overlay.setGeometry(self.rect())
         if hasattr(self, 'notification_message_label'):
             self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), self.notification_message_label.y(), 300, 50))
+        print(self.rect())
+        self.settings.setValue("main_window/height", self.height())
+        self.settings.setValue("main_window/width", self.width())
+
+    def moveEvent(self, a0):
+        super().moveEvent(a0)
+        self.settings.setValue("main_window/x", self.x())
+        self.settings.setValue("main_window/y", self.y())
 
     def showEvent(self, a0):
         super().showEvent(a0)
@@ -2112,8 +2120,9 @@ if __name__ == "__main__":
         f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
     app.installTranslator(translator)
 
-    loop = QEventLoop(app)
-    asyncio.set_event_loop(loop)
+    loop = asyncio.SelectorEventLoop()
+    qloop = QEventLoop(app, set_running_loop=loop)
+    asyncio.set_event_loop(qloop)
 
     tray_icon = QSystemTrayIcon()
     tray_menu = QMenu()
@@ -2143,5 +2152,5 @@ if __name__ == "__main__":
     main_window.show()
     tray_icon.show()
 
-    with loop:
-        loop.run_forever()
+    with qloop:
+        qloop.run_forever()
