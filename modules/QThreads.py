@@ -2,11 +2,17 @@ import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.si
 import requests, websockets, speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRectF, QLocale
 from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
-from qasync import asyncSlot
 from gpytranslate import Translator
+from functools import wraps
 
 from modules.CustomCharAI import Async as ccaa
 from modules.VTubeCore import EEC
+
+def asyncSlot(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        asyncio.ensure_future(func(*args, **kwargs))
+    return wrapper
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
@@ -233,12 +239,12 @@ class ChatThread(QThread):
     def ccaa(self, value):
         self._ccaa = value
 
-    @asyncSlot()
+    @asyncSlot
     async def create_connect(self):
         self.connect = await self.ccaa.connect()
         self.connected_signal.emit(True)
 
-    @asyncSlot()
+    @asyncSlot
     async def check_vtube_connect(self):
         try:
             await self.eec.connect()
@@ -263,7 +269,7 @@ class ChatThread(QThread):
             signal.emit(response)
             logging.debug(f"QThreads.py: The {method} was used")
 
-    @asyncSlot()
+    @asyncSlot
     async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id=""):
         used_emotes = []
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
@@ -334,27 +340,27 @@ class ChatThread(QThread):
                     self.connect = await self.ccaa.connect()
                     logging.warning("QThreads.py: Reconnecting to websockets...")
 
-    @asyncSlot()
+    @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):
         await self._call_ccaa('turn_remove', self.turn_remove_signal, chat_id, turn_ids)
 
-    @asyncSlot()
+    @asyncSlot
     async def replay(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):
         await self._call_ccaa('tts', self.replay_signal, candidateId, roomId, turnId, voiceId, voiceQuery)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_me(self):
         await self._call_ccaa('get_me', self.get_me_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_user_settings(self):
         await self._call_ccaa('get_user_settings', self.get_user_settings_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_user(self, username):
         await self._call_ccaa('get_user', self.get_user_signal, username)
 
-    @asyncSlot()
+    @asyncSlot
     async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED"):
         if not self.me and self.ccaa: self.me = await self.ccaa.get_me()
         if self.connect:
@@ -363,27 +369,27 @@ class ChatThread(QThread):
             if chat_id: del self.chat_histories[chat_id]
             logging.debug("QThreads.py: New chat started")
 
-    @asyncSlot()
+    @asyncSlot
     async def get_chat(self, char):
         await self._call_ccaa('get_recent_chat', self.chat_signal, char)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_chat_by_id(self, chat_id, load_metadata=False):
         await self._call_ccaa('get_chat_by_id', self.get_chat_by_id_signal, chat_id, load_metadata)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_available_models(self):
         await self._call_ccaa('get_available_models', self.get_available_models_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def copy_chat(self, chat_id, end_turn_id):
         await self._call_ccaa('copy_chat', self.copy_chat_signal, chat_id, end_turn_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def hide_chat(self, character_external_id):
         await self._call_ccaa('hide_recent_chat', self.hide_chat_signal, character_external_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_history(self, chat_id):
         if self.ccaa:
             if not chat_id in self.chat_histories:
@@ -391,42 +397,42 @@ class ChatThread(QThread):
                 self.chat_histories[chat_id] = list(reversed(chat))
             self.get_history_signal.emit(self.chat_histories[chat_id])
 
-    @asyncSlot()
+    @asyncSlot
     async def get_recent_chats(self, userCanUseRooms: bool = False):
         await self._call_ccaa('get_recent_chats', self.recent_chats_signal, userCanUseRooms)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_featured_chats(self):
         await self._call_ccaa('get_featured_chats', self.featured_chats_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_featured_voices(self):
         await self._call_ccaa('get_featured_voices', self.featured_voices_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_trythis_chats(self):
         await self._call_ccaa('get_trythis_chats', self.trythis_chats_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_category_characters(self, category):
         if not self.category_characters.get(category, []) and self.ccaa:
                 response = await self.ccaa.get_category_characters(category)
                 self.category_characters[category] = response
-        self.category_characters_signal.emit(self.category_characters[category])
+        self.category_characters_signal.emit(self.category_characters.get(category, {}))
 
-    @asyncSlot()
+    @asyncSlot
     async def get_character_chats(self, character_id):
         await self._call_ccaa('get_chats_with_character', self.character_chats_signal, character_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_recommend_chats(self):
         await self._call_ccaa('get_recommend_chats', self.recommended_chats_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_full_chats(self):
         await self._call_ccaa('get_recommend_chats', self.recommended_chats_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_character(self, character_id):
         if self.ccaa:
             if not character_id in self.characters:
@@ -438,59 +444,59 @@ class ChatThread(QThread):
                 }
             self.get_char_signal.emit(self.characters[character_id])
 
-    @asyncSlot()
+    @asyncSlot
     async def get_user_following(self, pageParam=1, username=""):
         await self._call_ccaa('get_following', self.user_following_signal, pageParam, username)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_user_followers(self, pageParam=1, username=""):
         await self._call_ccaa('get_followers', self.user_followers_signal, pageParam, username)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_me_following(self):
         await self._call_ccaa('get_me_following', self.me_following_signal)
 
-    @asyncSlot()
+    @asyncSlot
     async def user_follow(self, username):
         await self._call_ccaa('follow', self.user_follow_signal, username)
 
-    @asyncSlot()
+    @asyncSlot
     async def user_unfollow(self, username):
         await self._call_ccaa('unfollow', self.user_unfollow_signal, username)
 
-    @asyncSlot()
+    @asyncSlot
     async def character_vote(self, character_id, vote):
         await self._call_ccaa('vote', self.character_vote_signal, character_id, vote)
 
-    @asyncSlot()
+    @asyncSlot
     async def character_search(self, query: str | None = None):
         await self._call_ccaa('character_search', self.character_search_signal, query)
 
-    @asyncSlot()
+    @asyncSlot
     async def voices_search(self, query: str | None = None, character_name: str| None = None):
         await self._call_ccaa('voices_search', self.voices_search_signal, query, character_name)
 
-    @asyncSlot()
+    @asyncSlot
     async def voices_search_username(self, username: str | None = None):
         await self._call_ccaa('voices_search_username', self.voices_search_username_signal, username)
 
-    @asyncSlot()
+    @asyncSlot
     async def get_voice(self, voice_id):
         await self._call_ccaa('get_voice', self.get_voice_signal, voice_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def voice_override(self, character_id):
         await self._call_ccaa('voice_override', self.voice_override_signal, character_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def voice_override_update(self, character_id, voice_id):
         await self._call_ccaa('voice_override_update', self.voice_override_update_signal, character_id, voice_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def voice_override_delete(self, character_id):
         await self._call_ccaa('voice_override_delete', self.voice_override_delete_signal, character_id)
 
-    @asyncSlot()
+    @asyncSlot
     async def vtube_use_emote(self, emote):
         await self.eec.connect()
         await self.eec.UseEmote(emote)

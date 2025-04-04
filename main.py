@@ -64,7 +64,7 @@ from PyQt6.QtGui import (
     QRegularExpressionValidator,
     QKeySequence)
 from PyQt6.QtCore import (
-    QFile, QSettings,
+    QEvent, QSettings,
     QRect, QDateTime,
     QPropertyAnimation,
     QEasingCurve, QTimer,
@@ -1039,10 +1039,15 @@ class EmiliaNext(QMainWindow):
         self.settings.setValue("main_window/height", self.height())
         self.settings.setValue("main_window/width", self.width())
 
+    def changeEvent(self, a0):
+        super().changeEvent(a0)
+        if a0.type() == QEvent.Type.WindowStateChange:
+            self.settings.setValue("main_window/maximized", self.isMaximized())
+
     def moveEvent(self, a0):
         super().moveEvent(a0)
         self.settings.setValue("main_window/x", self.x())
-        self.settings.setValue("main_window/y", self.y())
+        self.settings.setValue("main_window/y", self.y() + 8)
 
     def showEvent(self, a0):
         super().showEvent(a0)
@@ -2112,7 +2117,6 @@ class UserProfile(QWidget):
         self.mw.profile_button.setChecked(False)
         self.mw.profile_button_2.setChecked(False)
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/lang.ts
@@ -2138,7 +2142,7 @@ if __name__ == "__main__":
     tray_icon.setIcon(QIcon("icon.ico"))
 
     show_action = QAction(tray_icon.tr("Show"))
-    show_action.triggered.connect(lambda: main_window.show())
+    show_action.triggered.connect(lambda: main_window.showMaximized() if main_window.isMaximized() else main_window.show())
     tray_menu.addAction(show_action)
 
     hide_action = QAction(tray_icon.tr("Hide"))
@@ -2149,7 +2153,10 @@ if __name__ == "__main__":
     quit_action.triggered.connect(lambda event: sys.exit(app.exec()))
     tray_menu.addAction(quit_action)
 
-    main_window.show()
+    if main_window.settings.value("main_window/maximized", False):
+        main_window.showMaximized()
+    else:
+        main_window.show()
     tray_icon.show()
 
     with qloop:
