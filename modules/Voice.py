@@ -128,7 +128,7 @@ class VoiceCard(QWidget):
         character_scroll_area.setWidget(character_container)
         if not self.search:
             for chat in self.main_window.recent_chats:
-                card = self.createCard(chat.get('character_name'), chat.get('character_avatar_uri'), chat.get('character_id'), chat.get('chat_id'))
+                card = self.createCard(chat.get('name'), chat.get('avatar_file_name'), chat.get('character_id'), chat.get('id'))
                 self.character_layout.addWidget(card)
             layout.addWidget(recent_label, alignment=Qt.AlignmentFlag.AlignHCenter)
             layout.addWidget(character_scroll_area)
@@ -136,15 +136,15 @@ class VoiceCard(QWidget):
         character_page.setLayout(character_page_layout)
 
     def createCard(self, name, avatar_url, character_id, chat_id=""):
-        def openChat(self):
-            self.mw.chat_thread.voice_override_update_signal.connect(_openChat)
-            self.mw.chat_thread.voice_override_update(character_id, self.data.get('id'))
+        def openChat():
+            self.main_window.chat_thread.voice_override_update_signal.connect(_openChat)
+            self.main_window.chat_thread.voice_override_update(character_id, self.data.get('id'))
         def _openChat(data):
             self.main_window.openChat(character_id, name, chat_id)
             self.main_window.hideOverlay()
         card = QFrame()
         card.setStyleSheet(card_style())
-        card.mousePressEvent = lambda event: openChat(self)
+        card.mousePressEvent = lambda event: openChat()
         card.setCursor(Qt.CursorShape.PointingHandCursor)
 
         card_layout = QHBoxLayout()

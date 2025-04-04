@@ -929,7 +929,7 @@ class EmiliaNext(QMainWindow):
 
         self.recent_chats = chats
         for chat in self.recent_chats:
-            self.addRecentChatCard(chat.get('character_id'), chat.get('character_name'), chat.get('chat_id'), chat.get('character_avatar_uri'))
+            self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'))
         self.left_sidebar.resizeCards()
     def addFeaturedVoices(self, voices):
         for i in reversed(range(self.featured_voices_layout.count())):
