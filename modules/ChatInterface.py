@@ -622,7 +622,7 @@ class ChatInterface(QWidget):
             chat_time.setStyleSheet("color: #dbdbdb; font-size: 12px;")
             card_layout.addWidget(chat_time, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
-            chat_text = QLabel(data.get('preview_turns')[0].get('candidates')[0].get('raw_content'))
+            chat_text = QLabel(format_text(data.get('preview_turns')[0].get('candidates')[0].get('raw_content'), self.mw.username))
             chat_text.setStyleSheet("color: #a2a2ac; font-size: 14px;")
             chat_text.setWordWrap(True)
             card_layout.addWidget(chat_text)
@@ -648,7 +648,7 @@ class ChatInterface(QWidget):
         chats_cards_viewport = QWidget()
         self.chats_cards_layout = QVBoxLayout()
         chats_cards_viewport.setStyleSheet("background-color: transparent; border: none;")
-        self.chats_cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.chats_cards_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         chats_cards_viewport.setLayout(self.chats_cards_layout)
         chats_scroll_area.setWidget(chats_cards_viewport)
         chats_history_layout.addWidget(chats_scroll_area)

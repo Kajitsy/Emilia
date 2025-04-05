@@ -42,6 +42,15 @@ class Async():
                             pass
                         else:
                             raise Exception(f"Failed to get data, status code: {response.status}")
+                elif method == "put":
+                    async with session.put(url, headers=headers, json=data, timeout=100) as response:
+                        logging.debug(f"CustomCharAI.py: Async put request: {url}")
+                        if response.status == 200:
+                            return await response.json() if not text else json.loads(await response.text())
+                        elif response.status == 400:
+                            pass
+                        else:
+                            raise Exception(f"Failed to get data, status code: {response.status}")
                 else:
                     raise ValueError("Invalid method")
 
@@ -68,6 +77,15 @@ class Async():
                 elif method == "post":
                     async with session.post(url, headers=headers, json=data, timeout=100) as response:
                         logging.debug(f"CustomCharAI.py: Async post request: {url}")
+                        if response.status == 200:
+                            return await response.json()
+                        elif response.status == 400:
+                            pass
+                        else:
+                            raise Exception(f"Failed to get data, status code: {response.status}")
+                elif method == "put":
+                    async with session.put(url, headers=headers, json=data, timeout=100) as response:
+                        logging.debug(f"CustomCharAI.py: Async put request: {url}")
                         if response.status == 200:
                             return await response.json()
                         elif response.status == 400:
@@ -204,6 +222,7 @@ class Async():
         data = {
             "character_external_id": character_external_id
         }
+        response_2 = await self.request(f"chats/recent/{character_external_id}/hide", "put", neo=True)
         response = await self.request(f"chat/history/hide/", data, "post")
         return response
 

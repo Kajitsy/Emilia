@@ -533,7 +533,7 @@ class VoiceMode(QWidget):
             'candidates': [{'raw_content': raw_text, 'is_final': True}],
             'turn_key': {'chat_id': self.chat_id, 'turn_id': message['turn_key']['turn_id']}
         })
-        self.animateCharacterMessage(raw_text)
+        self.animateCharacterMessage(format_text(raw_text, self.mw.username))
 
     def handleSpeechError(self, is_error):
         if is_error:
