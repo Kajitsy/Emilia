@@ -230,7 +230,7 @@ class EmiliaNext(QMainWindow):
             if event.button() == Qt.MouseButton.LeftButton:
                 self.openChat(character_id, character_name, chat_id, card)
             elif event.button() == Qt.MouseButton.RightButton:
-                showContextMenu(self, QPoint(avatar_label.pos().x() + 45 , avatar_label.pos().y() + 22), card)
+                showContextMenu(QPoint(avatar_label.pos().x() + 45 , avatar_label.pos().y() + 22), card)
 
         card = ClickableFrame()
         card.setObjectName(chat_id)
@@ -244,8 +244,9 @@ class EmiliaNext(QMainWindow):
         card.setCursor(Qt.CursorShape.PointingHandCursor)
 
 
-        def showContextMenu(self, pos, card):
+        def showContextMenu(pos, card):
             def deleteCard():
+                self.showMainPage(self.current_chat_interface)
                 self.chat_thread.hide_chat(character_id)
                 card.setParent(None)
                 card.deleteLater()
@@ -305,7 +306,7 @@ class EmiliaNext(QMainWindow):
         menu_button.setIcon(self.svg_icons.ellipsis())
         menu_button.setStyleSheet(recent_delete_button_style())
         menu_button.setVisible(False)
-        menu_button.clicked.connect(lambda: showContextMenu(self, menu_button.pos(), card))
+        menu_button.clicked.connect(lambda: showContextMenu(menu_button.pos(), card))
         chat_layout.addWidget(menu_button, 0, Qt.AlignmentFlag.AlignRight)
         setattr(card, 'menu_button', menu_button)
 
