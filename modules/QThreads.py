@@ -273,7 +273,6 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id=""):
-        await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
         used_emotes = []
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
         if vtube_studio:
@@ -336,6 +335,7 @@ class ChatThread(QThread):
 
                                 self.message_signal.emit(response)
                                 logging.debug("QThreads.py: The message has been received in full")
+                                await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
                                 return
                             self.message_signal.emit(response)
                             logging.debug("QThreads.py: The message has been updated")
@@ -401,6 +401,7 @@ class ChatThread(QThread):
 
                                 self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
                                 logging.debug("QThreads.py: The message has been received in full")
+                                await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
                                 return
                             self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
                             message_bubble_added = True
