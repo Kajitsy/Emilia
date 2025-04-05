@@ -108,8 +108,11 @@ class EmiliaNext(QMainWindow):
         self.threads = []
         self.overlays = []
         self.recent_chats = []
+        self.try_this_chats = []
         self.featured_chats = []
         self.recommended_chats = []
+        self.popular_chats = []
+        self.trending_chats = []
         self.tray = tray_icon
 
         self.token = self.settings.value("cai_auth/token", "", type=str)
@@ -129,10 +132,9 @@ class EmiliaNext(QMainWindow):
         self.chat_thread.start()
         self.threads.append(self.chat_thread)
         self.chat_thread.recent_chats_signal.connect(self.addRecentChats)
-        self.chat_thread.featured_chats_signal.connect(self.addFeaturedChats)
         self.chat_thread.featured_voices_signal.connect(self.addFeaturedVoices)
-        self.chat_thread.recommended_chats_signal.connect(self.addRecommendedChats)
         self.chat_thread.trythis_chats_signal.connect(self.addTryThisChats)
+        self.chat_thread.get_main_page_chats_signal.connect(self.addMainPageChats)
         self.chat_thread.category_characters_signal.connect(self.addCharacterByCategory)
         self.chat_thread.get_me_signal.connect(self.getMe)
         self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
@@ -145,11 +147,10 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.create_connect()
 
                 self.chat_thread.get_recent_chats()
-                self.chat_thread.get_recommend_chats()
-                self.chat_thread.get_featured_chats()
                 self.chat_thread.get_trythis_chats()
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_me()
+                self.chat_thread.get_main_page_chats()
                 # self.chat_thread.get_user_settings()
                 self.chat_thread.get_available_models()
 
@@ -456,6 +457,12 @@ class EmiliaNext(QMainWindow):
         recommended_section, self.recommended_layout = self.createSection(self.tr("Recommended"))
         scroll_layout.addWidget(recommended_section)
 
+        popular_section, self.popular_layout = self.createSection(self.tr("Popular"))
+        scroll_layout.addWidget(popular_section)
+
+        trending_section, self.trending_layout = self.createSection(self.tr("Trending"))
+        scroll_layout.addWidget(trending_section)
+
         try_this_section, self.try_this_odd_layout, self.try_this_even_layout = self.createTryThisSection(self.tr("Try This"))
         scroll_layout.addWidget(try_this_section)
 
@@ -523,26 +530,6 @@ class EmiliaNext(QMainWindow):
         t_layout.addWidget(top_bar_stacked_widget)
 
         return top_widget, top_bar_stacked_widget, top_bar
-
-    def createWelcomeSection(self):
-        welcome_frame = QFrame()
-        welcome_frame.setStyleSheet("background-color: #3c3d3f; border-radius: 15px;")
-        welcome_layout = QHBoxLayout()
-        welcome_layout.setContentsMargins(15, 15, 15, 15)
-
-        text_area = QWidget()
-        text_layout = QVBoxLayout()
-        welcome_text = QLabel("welcome_text")
-        welcome_text.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        main_text = QLabel("main_text")
-        main_text.setFont(QFont("Arial", 20, QFont.Weight.Bold))
-        text_layout.addWidget(welcome_text)
-        text_layout.addWidget(main_text)
-        text_area.setLayout(text_layout)
-        welcome_layout.addWidget(text_area, 1)
-
-        welcome_frame.setLayout(welcome_layout)
-        return welcome_frame
 
     def createSection(self, title):
         section_frame = QFrame()
@@ -948,17 +935,46 @@ class EmiliaNext(QMainWindow):
             card.setFixedWidth(200)
             self.featured_voices_layout.addWidget(card)
 
-    def addFeaturedChats(self, chats):
+    def addMainPageChats(self, results):
+        for i in reversed(range(self.popular_layout.count())):
+            item = self.popular_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
+        for i in reversed(range(self.trending_layout.count())):
+            item = self.trending_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
         for i in reversed(range(self.for_you_layout.count())):
             item = self.for_you_layout.itemAt(i)
             if item and item.widget():
                 item.widget().deleteLater()
+        for i in reversed(range(self.recommended_layout.count())):
+            item = self.recommended_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
 
-        self.featured_chats = chats
+
+        self.featured_chats = results[0].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+        self.trending_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_popular_characters_l30d_v1', [])
+        self.recommended_chats = results[2].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+        self.popular_chats = results[3].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+
+        for character in self.popular_chats:
+            card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card.setFixedSize(244, 134)
+            self.popular_layout.addWidget(card)
+        for character in self.trending_chats:
+            card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card.setFixedSize(244, 134)
+            self.trending_layout.addWidget(card)
         for character in self.featured_chats:
-            card = self.createCard(character.get('participant__name', "Unknown"), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(244, 134)
             self.for_you_layout.addWidget(card)
+        for character in self.recommended_chats:
+            card = self.createCard(character.get('name'), character.get('avatar_file_name'),character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card.setFixedSize(244, 134)
+            self.recommended_layout.addWidget(card)
 
     def addTryThisChats(self, chats):
         for layout in (self.try_this_odd_layout, self.try_this_even_layout):
@@ -967,8 +983,8 @@ class EmiliaNext(QMainWindow):
                 if item and item.widget():
                     item.widget().deleteLater()
 
-        self.featured_chats = chats
-        for index, character in enumerate(self.featured_chats):
+        self.try_this_chats = chats
+        for index, character in enumerate(self.try_this_chats):
             card = self.createMiniCard(
                 character.get('name', "Unknown"),
                 character.get('avatar_file_name'),
@@ -980,18 +996,6 @@ class EmiliaNext(QMainWindow):
                 self.try_this_even_layout.addWidget(card)
             else:
                 self.try_this_odd_layout.addWidget(card)
-
-    def addRecommendedChats(self, chats):
-        for i in reversed(range(self.recommended_layout.count())):
-            item = self.recommended_layout.itemAt(i)
-            if item and item.widget():
-                item.widget().deleteLater()
-
-        self.recommended_chats = chats
-        for character in self.recommended_chats:
-            card = self.createCard(character.get('participant__name', "Unknown"), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
-            card.setFixedSize(244, 134)
-            self.recommended_layout.addWidget(card)
 
     def getMe(self, data):
         self.me = data
@@ -1644,8 +1648,7 @@ class SettingsPage(QWidget):
             self.mw.chat_thread.create_connect()
 
             self.mw.chat_thread.get_recent_chats()
-            self.mw.chat_thread.get_featured_chats()
-            self.mw.chat_thread.get_recommend_chats()
+            self.mw.chat_thread.get_main_page_chats()
             self.mw.chat_thread.get_me()
         def get(auth_token, expiration_date: QDateTime):
             self.cookie_available = True

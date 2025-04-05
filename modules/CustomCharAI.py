@@ -129,17 +129,22 @@ class Async():
         response = await self.request("multimodal/api/v1/memo/replay", data, "post", neo=True)
         return response
 
-    async def get_recommend_chats(self):
-        response = await self.request("recommendation/v1/user", neo=True)
-        return response.get("characters", None)
-
     async def get_recent_chats(self, userCanUseRooms: bool = False):
         response = await self.trpc_request(f"discovery.recent?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22userCanUseRooms%22%3A{str(userCanUseRooms).lower()}%7D%7D%7D")
         return response[0].get("result", {}).get("data", {}).get("json", [])
 
+    async def get_recommend_chats(self):
+        response = await self.request("recommendation/v1/user", neo=True)
+        return response.get("characters", None)
+
     async def get_featured_chats(self):
-        response = await self.custom_request("https://character.ai/api/trpc/discovery.recommended?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22lang%22%3A%22none%22%7D%7D%7D")
+        response = await self.trpc_request("discovery.recommended?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22lang%22%3A%22none%22%7D%7D%7D")
         return response[0].get("result", {}).get("data", {}).get("json", {}).get("characters", [])
+
+    async def get_main_page_chats(self, short_lang):
+        response = await self.trpc_request(
+            f"discovery.recommended,discovery.curatedLists,discovery.recommended,character.infos?batch=1&input={{%220%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%221%22:{{%22json%22:{{%22listIds%22:[%22cold_start_popular_characters_l30d_v1%22,%22cold_start_trending_characters_v1%22]}}}},%222%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%223%22:{{%22json%22:{{%22externalIds%22:[%22q0KukI6MnGQm_vDr9tG8YIyBJr8pNs8Wf6eKGh_yldw%22,%22edOuK6q8jN1kbv_QXnx25gfqpL0k0v2ByTbET5HCsgs%22,%22o6GGF93x8zFmPL1f2lT7d0iRhRZquc1x6h4KJ00g9Ck%22,%22U0UEmkGE3HBSuZAXchwcwO4HDWwPV8qhlsmO38YkO3k%22,%22DI1yer-gTAG_SvdxR-bu23eCCz4BMgsLTKp-NJ0vV3s%22,%22H4Y7Db2ALtZCm2yI8Ai9TT_hjyskGASBgKy6VSxhtak%22,%225MNwesgXRtUm0is6KXZ7ii2U0aaopVDyGa1N5-DwHrc%22,%228wk86EGdQ7LLbu8I1nadKL1giiYGLfE4DaryTdSyv9w%22,%22VAe__mrIOgaos1AgKQqTLe2lbe3E1JU8WXmTWxm45gw%22,%22EeNI0LbMJXSNUrlFaaAmEq5OfVXMY73A_GplJtGZ-pU%22,%22QD9um3txuc-oDVMmMB3rg9KFzmYR_JBMo8wEVwPDlRE%22,%22gFWL2jo3N1FHiLihknz1f_nwFBq6xBiAdGyuSmw_cTc%22,%22JzdwtXZNEqHoSsVf8sQ2P26WZRv7f_IQGSWZQAcT3pY%22,%22n3xkV_EptnZ0euflSos8Ylq_corcjZfaYEcfSOmu9to%22,%22f3vvWne0fuUL20eHVNRjAxk1a0CzbtjA6sFlgIU6p2g%22,%22VAxMSGSUghPurx28geTtgXWZYbm07vX7kGKJlaKw4Vg%22]}}}}}}")
+        return response
 
     async def get_featured_voices(self):
         response = await self.request("multimodal/api/v1/voices/featured", neo=True)

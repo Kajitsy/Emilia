@@ -174,6 +174,8 @@ class ChatThread(QThread):
     hide_chat_signal = pyqtSignal(object)
 
     recent_chats_signal = pyqtSignal(object)
+    get_popular_and_trending_chars_signal = pyqtSignal(object)
+    get_main_page_chats_signal = pyqtSignal(object)
     featured_chats_signal = pyqtSignal(object)
     recommended_chats_signal = pyqtSignal(object)
     trythis_chats_signal = pyqtSignal(object)
@@ -469,10 +471,6 @@ class ChatThread(QThread):
         await self._call_ccaa('get_recent_chats', self.recent_chats_signal, userCanUseRooms)
 
     @asyncSlot
-    async def get_featured_chats(self):
-        await self._call_ccaa('get_featured_chats', self.featured_chats_signal)
-
-    @asyncSlot
     async def get_featured_voices(self):
         await self._call_ccaa('get_featured_voices', self.featured_voices_signal)
 
@@ -492,12 +490,8 @@ class ChatThread(QThread):
         await self._call_ccaa('get_chats_with_character', self.character_chats_signal, character_id)
 
     @asyncSlot
-    async def get_recommend_chats(self):
-        await self._call_ccaa('get_recommend_chats', self.recommended_chats_signal)
-
-    @asyncSlot
-    async def get_full_chats(self):
-        await self._call_ccaa('get_recommend_chats', self.recommended_chats_signal)
+    async def get_main_page_chats(self):
+        await self._call_ccaa('get_main_page_chats', self.get_main_page_chats_signal, self.mw.current_language.split("_")[0])
 
     @asyncSlot
     async def get_character(self, character_id):
