@@ -447,13 +447,15 @@ class ChatInterface(QWidget):
                 setattr(self, key, value)
             for i in range(self.messages_layout.count()):
                 item = self.messages_layout.itemAt(i)
+                item = self.messages_layout.itemAt(i)
                 if item.widget():
-                    if item.widget().objectName() == 'user_message':
-                        self.setBackMessageColor(item.widget(), self.user_back_message)
-                        self.setTextMessageColor(item.widget(), self.user_text_message)
-                    elif item.widget().objectName() == 'char_message':
-                        self.setBackMessageColor(item.widget(), self.char_back_message)
-                        self.setTextMessageColor(item.widget(), self.char_text_message)
+                    item = item.widget()
+                    if item.currentWidget().objectName() == 'user_message':
+                        self.setBackMessageColor(item.currentWidget(), self.user_back_message)
+                        self.setTextMessageColor(item.currentWidget(), self.user_text_message)
+                    elif item.currentWidget().objectName() == 'char_message':
+                        self.setBackMessageColor(item.currentWidget(), self.char_back_message)
+                        self.setTextMessageColor(item.currentWidget(), self.char_text_message)
             self.mw.hideOverlay()
 
         def pickCharBackMessageColor():
@@ -492,12 +494,13 @@ class ChatInterface(QWidget):
             for i in range(self.messages_layout.count()):
                 item = self.messages_layout.itemAt(i)
                 if item.widget():
-                    if item.widget().objectName() == 'user_message':
-                        self.setBackMessageColor(item.widget(), self.user_back_message)
-                        self.setTextMessageColor(item.widget(), self.user_text_message)
-                    elif item.widget().objectName() == 'char_message':
-                        self.setBackMessageColor(item.widget(), self.char_back_message)
-                        self.setTextMessageColor(item.widget(), self.char_text_message)
+                    item = item.widget()
+                    if item.currentWidget().objectName() == 'user_message':
+                        self.setBackMessageColor(item.currentWidget(), self.user_back_message)
+                        self.setTextMessageColor(item.currentWidget(), self.user_text_message)
+                    elif item.currentWidget().objectName() == 'char_message':
+                        self.setBackMessageColor(item.currentWidget(), self.char_back_message)
+                        self.setTextMessageColor(item.currentWidget(), self.char_text_message)
             self.mw.hideOverlay()
 
         color_picker_widget = QWidget()
@@ -868,6 +871,15 @@ class ChatInterface(QWidget):
             self.mw.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
             self.mw.chat_thread.get_history(self.chat_id)
             self.mw.chat_thread.get_chat_by_id(self.chat_id)
+            if self.mw.recent_chats:
+                for i in range(self.mw.recent_chat_layout.count()):
+                    item = self.mw.recent_chat_layout.itemAt(i)
+                    if item and item.widget():
+                        card = item.widget()
+                        if card.objectName() == self.chat_id:
+                            setattr(self, 'recent_card', card)
+                            card.setStyleSheet(card.press_style)
+                        break
         else:
             self.mw.chat_thread.new_chat_created_signal.connect(self._newChatCreated)
             self.mw.chat_thread.new_chat(self.character_id)
@@ -1039,6 +1051,11 @@ class ChatInterface(QWidget):
                 self.hideCharacterInfoSidebar()
 
         super().mousePressEvent(event)
+
+    def hideEvent(self, a0):
+        super().hideEvent(a0)
+        if hasattr(self, 'recent_card'):
+            self.recent_card.setCheckable(False)
 
     def toggleLeftSidebar(self):
         self.mw.left_sidebar_hide_user = not self.mw.left_sidebar_hide_user

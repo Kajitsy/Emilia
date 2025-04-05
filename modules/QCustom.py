@@ -170,17 +170,20 @@ class LeftSidebar(QFrame):
         for i in range(self.recent_chat_layout.count()):
             card = self.recent_chat_layout.itemAt(i)
             card_widget = card.widget()
-            card_widget.setFixedWidth(self.width() - 30)
-            if card_widget.width() <= 66:
-                card_widget.avatar_label.setVisible(False)
-                card_widget.name_label.setVisible(False)
-                card_widget.menu_button.visibility = False
-                card_widget.avatar_label_2.setVisible(True)
-            else:
-                card_widget.avatar_label.setVisible(True)
-                card_widget.name_label.setVisible(True)
-                card_widget.menu_button.visibility = True
-                card_widget.avatar_label_2.setVisible(False)
+            self.resizeCard(card_widget)
+
+    def resizeCard(self, card_widget):
+        card_widget.setFixedWidth(self.width() - 30)
+        if card_widget.width() <= 66:
+            card_widget.avatar_label.setVisible(False)
+            card_widget.name_label.setVisible(False)
+            card_widget.menu_button.visibility = False
+            card_widget.avatar_label_2.setVisible(True)
+        else:
+            card_widget.avatar_label.setVisible(True)
+            card_widget.name_label.setVisible(True)
+            card_widget.menu_button.visibility = True
+            card_widget.avatar_label_2.setVisible(False)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:

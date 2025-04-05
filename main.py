@@ -265,7 +265,7 @@ class EmiliaNext(QMainWindow):
         avatar_label.setFixedSize(50, 50)
         avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         chat_layout.addWidget(avatar_label)
-        card.avatar_label = avatar_label
+        setattr(card, 'avatar_label', avatar_label)
 
         if character_avatar_url:
             load_avatar_thread = ImageLoaderThread(
@@ -281,7 +281,7 @@ class EmiliaNext(QMainWindow):
         avatar_label_2.setFixedSize(60, 60)
         avatar_label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         chat_layout.addWidget(avatar_label_2)
-        card.avatar_label_2 = avatar_label_2
+        setattr(card, 'avatar_label_2', avatar_label_2)
 
         if character_avatar_url:
             load_avatar_thread = ImageLoaderThread(
@@ -297,7 +297,7 @@ class EmiliaNext(QMainWindow):
         name_label = QLabel(character_name)
         name_label.setStyleSheet("background-color: transparent; border: none; color: white;")
         chat_layout.addWidget(name_label, 1)
-        card.name_label = name_label
+        setattr(card, 'name_label', name_label)
 
         menu_button = QPushButton()
         menu_button.visibility = True
@@ -306,12 +306,14 @@ class EmiliaNext(QMainWindow):
         menu_button.setVisible(False)
         menu_button.clicked.connect(lambda: showContextMenu(self, menu_button.pos(), card))
         chat_layout.addWidget(menu_button, 0, Qt.AlignmentFlag.AlignRight)
-        card.menu_button = menu_button
+        setattr(card, 'menu_button', menu_button)
 
         chat_layout.addStretch()
         card.setLayout(chat_layout)
 
         self.recent_chat_layout.addWidget(card)
+        self.left_sidebar.resizeCard(card)
+        return card
 
     def leftSidebarAnim(self):
         self.left_sidebar.setVisible(self.left_sidebar_visible)
@@ -885,13 +887,11 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.replay_signal.disconnect()
             self.current_chat_interface = None
 
-        def hideEvent():
-            if card:
-                card.setCheckable(False)
 
         self.current_chat_interface = ChatInterface(main_window, character_name, character_id, chat_id)
         self.current_chat_interface.chat_id = chat_id
-        self.current_chat_interface.hideEvent = lambda event: hideEvent()
+        if card:
+            setattr(self.current_chat_interface, 'recent_card', card)
         self.main_content_area.addWidget(self.current_chat_interface)
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
@@ -929,8 +929,12 @@ class EmiliaNext(QMainWindow):
 
         self.recent_chats = chats
         for chat in self.recent_chats:
-            self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'))
-        self.left_sidebar.resizeCards()
+            card = self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'))
+            if self.current_chat_interface is not None:
+                if self.current_chat_interface.chat_id == chat.get('id'):
+                    setattr(self.current_chat_interface, 'recent_card', card)
+                    card.setStyleSheet(card.press_style)
+
     def addFeaturedVoices(self, voices):
         for i in reversed(range(self.featured_voices_layout.count())):
             item = self.featured_voices_layout.itemAt(i)
