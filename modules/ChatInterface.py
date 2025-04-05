@@ -350,7 +350,7 @@ class ChatInterface(QWidget):
             card.press_style = card_pressed_style()
             card.setStyleSheet(card_style())
             card.setCursor(Qt.CursorShape.PointingHandCursor)
-            card.mousePress = lambda: onCardClicked(card)
+            card.mousePress = lambda x: onCardClicked(card)
 
             card_layout = QHBoxLayout()
 
@@ -406,7 +406,6 @@ class ChatInterface(QWidget):
                               self.available_models.get(model_type).get('description'),
                               self.available_models.get(model_type).get('plus'),
                               self.available_models.get(model_type).get('beta'))
-            # card.mousePress = lambda: onCardClicked(card)
             if model_type == self.preferred_model_type: card.setCheckable(True)
             models_layout.addWidget(card)
             card_list.append(card)
@@ -436,6 +435,71 @@ class ChatInterface(QWidget):
         pass
 
     def openColorPickerOverlay(self):
+        def restoreDefaultColors():
+            data = {
+                "char_back_message": "#26272b",
+                "char_text_message": "#e8eaed",
+                "user_back_message": "#303136",
+                "user_text_message": "#e8eaed"
+            }
+            for key, value in data.items():
+                self.chat_settings.setValue(f"colors/{key}", value)
+                setattr(self, key, value)
+            for i in range(self.messages_layout.count()):
+                item = self.messages_layout.itemAt(i)
+                if item.widget():
+                    if item.widget().objectName() == 'user_message':
+                        self.setBackMessageColor(item.widget(), self.user_back_message)
+                        self.setTextMessageColor(item.widget(), self.user_text_message)
+                    elif item.widget().objectName() == 'char_message':
+                        self.setBackMessageColor(item.widget(), self.char_back_message)
+                        self.setTextMessageColor(item.widget(), self.char_text_message)
+            self.mw.hideOverlay()
+
+        def pickCharBackMessageColor():
+            color = QColorDialog.getColor()
+            if color.isValid():
+                self.char_back_message_picker.setStyleSheet(f"background-color: {color.name()};")
+
+        def pickCharTextMessageColor():
+            color = QColorDialog.getColor()
+            if color.isValid():
+                self.char_text_message_picker.setStyleSheet(f"background-color: {color.name()};")
+
+        def pickUserBackMessageColor():
+            color = QColorDialog.getColor()
+            if color.isValid():
+                self.user_back_message_picker.setStyleSheet(f"background-color: {color.name()};")
+
+        def pickUserTextMessageColor():
+            color = QColorDialog.getColor()
+            if color.isValid():
+                self.user_text_message_picker.setStyleSheet(f"background-color: {color.name()};")
+
+        def applyColors():
+            self.char_back_message = self.char_back_message_picker.styleSheet().split(": ")[1][:-1]
+            self.char_text_message = self.char_text_message_picker.styleSheet().split(": ")[1][:-1]
+            self.user_back_message = self.user_back_message_picker.styleSheet().split(": ")[1][:-1]
+            self.user_text_message = self.user_text_message_picker.styleSheet().split(": ")[1][:-1]
+            data = {
+                'char_back_message': self.char_back_message,
+                'char_text_message': self.char_text_message,
+                'user_back_message': self.user_back_message,
+                'user_text_message': self.user_text_message
+            }
+            for key, value in data.items():
+                self.chat_settings.setValue(f"colors/{key}", value)
+            for i in range(self.messages_layout.count()):
+                item = self.messages_layout.itemAt(i)
+                if item.widget():
+                    if item.widget().objectName() == 'user_message':
+                        self.setBackMessageColor(item.widget(), self.user_back_message)
+                        self.setTextMessageColor(item.widget(), self.user_text_message)
+                    elif item.widget().objectName() == 'char_message':
+                        self.setBackMessageColor(item.widget(), self.char_back_message)
+                        self.setTextMessageColor(item.widget(), self.char_text_message)
+            self.mw.hideOverlay()
+
         color_picker_widget = QWidget()
         color_picker_widget.setFixedWidth(250)
         color_picker_widget.setFixedHeight(200)
@@ -450,7 +514,7 @@ class ChatInterface(QWidget):
         char_text_message_label = QLabel(self.tr("Character Text Color:"))
         self.char_text_message_picker = QPushButton()
         self.char_text_message_picker.setStyleSheet(f"background-color: {self.char_text_message};")
-        self.char_text_message_picker.clicked.connect(self.pickCharTextMessageColor)
+        self.char_text_message_picker.clicked.connect(pickCharTextMessageColor)
         char_text_message_layout.addWidget(char_text_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
         char_text_message_layout.addWidget(self.char_text_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
         color_pickers_layout.addLayout(char_text_message_layout)
@@ -459,7 +523,7 @@ class ChatInterface(QWidget):
         char_back_message_label = QLabel(self.tr("Character Background Color:"))
         self.char_back_message_picker = QPushButton()
         self.char_back_message_picker.setStyleSheet(f"background-color: {self.char_back_message};")
-        self.char_back_message_picker.clicked.connect(self.pickCharBackMessageColor)
+        self.char_back_message_picker.clicked.connect(pickCharBackMessageColor)
         char_back_message_layout.addWidget(char_back_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
         char_back_message_layout.addWidget(self.char_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
         color_pickers_layout.addLayout(char_back_message_layout)
@@ -468,7 +532,7 @@ class ChatInterface(QWidget):
         user_text_message_label = QLabel(self.tr("User Text Color:"))
         self.user_text_message_picker = QPushButton()
         self.user_text_message_picker.setStyleSheet(f"background-color: {self.user_text_message};")
-        self.user_text_message_picker.clicked.connect(self.pickUserTextMessageColor)
+        self.user_text_message_picker.clicked.connect(pickUserTextMessageColor)
         user_text_message_layout.addWidget(user_text_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
         user_text_message_layout.addWidget(self.user_text_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
         color_pickers_layout.addLayout(user_text_message_layout)
@@ -477,7 +541,7 @@ class ChatInterface(QWidget):
         user_back_message_label = QLabel(self.tr("User Background Color:"))
         self.user_back_message_picker = QPushButton()
         self.user_back_message_picker.setStyleSheet(f"background-color: {self.user_back_message};")
-        self.user_back_message_picker.clicked.connect(self.pickUserBackMessageColor)
+        self.user_back_message_picker.clicked.connect(pickUserBackMessageColor)
         user_back_message_layout.addWidget(user_back_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
         user_back_message_layout.addWidget(self.user_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
         color_pickers_layout.addLayout(user_back_message_layout)
@@ -486,80 +550,15 @@ class ChatInterface(QWidget):
         buttons_layout = QHBoxLayout()
         apply_button = QPushButton(self.tr("Apply"))
         apply_button.setStyleSheet(button_style())
-        apply_button.clicked.connect(self.applyColors)
+        apply_button.clicked.connect(applyColors)
         buttons_layout.addWidget(apply_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         restore_button = QPushButton(self.tr("Restore"))
         restore_button.setStyleSheet(button_style())
-        restore_button.clicked.connect(self.restoreDefaultColors)
+        restore_button.clicked.connect(restoreDefaultColors)
         buttons_layout.addWidget(restore_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         color_picker_layout.addLayout(buttons_layout)
 
         self.mw.showOverlay(color_picker_widget)
-
-    def restoreDefaultColors(self):
-        data = {
-            "char_back_message": "#26272b",
-            "char_text_message": "#e8eaed",
-            "user_back_message": "#303136",
-            "user_text_message": "#e8eaed"
-        }
-        for key, value in data.items():
-            self.chat_settings.setValue(f"colors/{key}", value)
-            setattr(self, key, value)
-        for i in range(self.messages_layout.count()):
-            item = self.messages_layout.itemAt(i)
-            if item.widget():
-                if item.widget().objectName() == 'user_message':
-                    self.setBackMessageColor(item.widget(), self.user_back_message)
-                    self.setTextMessageColor(item.widget(), self.user_text_message)
-                elif item.widget().objectName() == 'char_message':
-                    self.setBackMessageColor(item.widget(), self.char_back_message)
-                    self.setTextMessageColor(item.widget(), self.char_text_message)
-        self.mw.hideOverlay()
-
-    def pickCharBackMessageColor(self):
-        color = QColorDialog.getColor()
-        if color.isValid():
-            self.char_back_message_picker.setStyleSheet(f"background-color: {color.name()};")
-
-    def pickCharTextMessageColor(self):
-        color = QColorDialog.getColor()
-        if color.isValid():
-            self.char_text_message_picker.setStyleSheet(f"background-color: {color.name()};")
-
-    def pickUserBackMessageColor(self):
-        color = QColorDialog.getColor()
-        if color.isValid():
-            self.user_back_message_picker.setStyleSheet(f"background-color: {color.name()};")
-
-    def pickUserTextMessageColor(self):
-        color = QColorDialog.getColor()
-        if color.isValid():
-            self.user_text_message_picker.setStyleSheet(f"background-color: {color.name()};")
-
-    def applyColors(self):
-        self.char_back_message = self.char_back_message_picker.styleSheet().split(": ")[1][:-1]
-        self.char_text_message = self.char_text_message_picker.styleSheet().split(": ")[1][:-1]
-        self.user_back_message = self.user_back_message_picker.styleSheet().split(": ")[1][:-1]
-        self.user_text_message = self.user_text_message_picker.styleSheet().split(": ")[1][:-1]
-        data = {
-            'char_back_message': self.char_back_message,
-            'char_text_message': self.char_text_message,
-            'user_back_message': self.user_back_message,
-            'user_text_message': self.user_text_message
-        }
-        for key, value in data.items():
-            self.chat_settings.setValue(f"colors/{key}", value)
-        for i in range(self.messages_layout.count()):
-            item = self.messages_layout.itemAt(i)
-            if item.widget():
-                if item.widget().objectName() == 'user_message':
-                    self.setBackMessageColor(item.widget(), self.user_back_message)
-                    self.setTextMessageColor(item.widget(), self.user_text_message)
-                elif item.widget().objectName() == 'char_message':
-                    self.setBackMessageColor(item.widget(), self.char_back_message)
-                    self.setTextMessageColor(item.widget(), self.char_text_message)
-        self.mw.hideOverlay()
 
     def startFormat(self):
         text = self.message_input.toPlainText()
@@ -904,6 +903,7 @@ class ChatInterface(QWidget):
 
     def addMessage(self, text, turn_id, is_user=False):
         message_widget = QStackedWidget()
+        message_widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         message_widget.turn_id = turn_id
         message_widget.is_user = is_user
         message_bubble = self.createMessage(text, turn_id, is_user)
@@ -945,6 +945,14 @@ class ChatInterface(QWidget):
             self.addMessage(text, "", is_user=True)
             self.message_input.setHtml('<span style="color: white;"></span>')
             self.mw.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id))
+            if self.mw.recent_chats:
+                for i in range(self.mw.recent_chat_layout.count()):
+                    item = self.mw.recent_chat_layout.itemAt(i)
+                    if item and item.widget() and item.widget().objectName() == self.chat_id:
+                        recent_card = item.widget()
+                        self.mw.recent_chat_layout.removeWidget(recent_card)
+                        self.mw.recent_chat_layout.insertWidget(0, recent_card)
+                        break
 
     def _copyChat(self, data):
         self.mw.chat_thread.copy_chat_signal.disconnect()

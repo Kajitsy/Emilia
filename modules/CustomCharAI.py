@@ -342,6 +342,10 @@ class Async():
         response = await self.request("multimodal/api/v1/sessions/discardCandidate/", data, "post", True)
         return response
 
+    async def resurrect(self, chat_id):
+        response = await self.request(f"chat/{chat_id}/resurrect", method="get", neo=True)
+        return response
+
 class ChatClient:
     def __init__(self, token: str = ""):
         self.token = token

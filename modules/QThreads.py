@@ -161,6 +161,7 @@ class ChatThread(QThread):
     message_signal = pyqtSignal(object)
     turn_remove_signal = pyqtSignal(object)
     turn_regenerate_signal = pyqtSignal(object, object, object)
+    resurrect_signal = pyqtSignal(object)
     new_chat_created_signal = pyqtSignal(object)
     chat_signal = pyqtSignal(object)
     get_history_signal = pyqtSignal(object)
@@ -272,6 +273,7 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id=""):
+        await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
         used_emotes = []
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
         if vtube_studio:
