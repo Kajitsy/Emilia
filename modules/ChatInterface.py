@@ -115,6 +115,7 @@ class ChatInterface(QWidget):
 
         input_layout = QHBoxLayout()
         self.message_input = CustomTextEdit()
+        self.message_input.mousePressEvent = lambda _: self.hideCharacterInfoSidebar2()
         self.message_input.setFixedHeight(32)
         self.message_input.horizontalScrollBar().setVisible(False)
         self.message_input.verticalScrollBar().setVisible(False)
@@ -685,8 +686,7 @@ class ChatInterface(QWidget):
 
     def toggleCharacterInfoSidebar(self):
         if self.cis_visible:
-            self.hideCharacterInfoSidebar()
-            self.cis_visible = False
+            self.hideCharacterInfoSidebar2()
         else:
             self.showCharacterInfoSidebar()
             self.cis_visible = True
@@ -701,7 +701,13 @@ class ChatInterface(QWidget):
         self.animation.finished.connect(self.character_info_sidebar.hide)
         self.animation.start()
 
+    def hideCharacterInfoSidebar2(self):
+        if self.cis_visible:
+            self.hideCharacterInfoSidebar()
+            self.cis_visible = False
+
     def callCharacter(self):
+        self.hideCharacterInfoSidebar2()
         self.mw.hide_overlay = False
         vsmode = VoiceMode(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
         vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
@@ -953,6 +959,7 @@ class ChatInterface(QWidget):
 
     def sendMessage(self):
         text = self.message_input.toPlainText()
+        self.hideCharacterInfoSidebar2()
         if text:
             self.addMessage(text, "", is_user=True)
             self.message_input.setHtml('<span style="color: white;"></span>')
@@ -1042,15 +1049,13 @@ class ChatInterface(QWidget):
         context_menu.exec(message_bubble.mapToGlobal(pos))
 
     def mousePressEvent(self, event: QMouseEvent):
+        super().mousePressEvent(event)
         if self.cis_visible:
             global_click_pos = event.globalPosition().toPoint()
             sidebar_global_pos = self.character_info_sidebar.mapToGlobal(self.character_info_sidebar.rect().topLeft())
             sidebar_rect = QRect(sidebar_global_pos, self.character_info_sidebar.size())
             if not sidebar_rect.contains(global_click_pos):
-                self.cis_visible = False
-                self.hideCharacterInfoSidebar()
-
-        super().mousePressEvent(event)
+                self.hideCharacterInfoSidebar2()
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
