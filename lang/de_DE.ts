@@ -403,9 +403,19 @@
 <context>
     <name>GetCookies</name>
     <message>
-        <location filename="../modules/GetCAICookies.py" line="40"/>
+        <location filename="../modules/GetCAICookies.py" line="41"/>
+        <source>You can also insert a link from the email</source>
+        <translation>Sie können auch einen Link aus einer E-Mail einfügen</translation>
+    </message>
+    <message>
+        <location filename="../modules/GetCAICookies.py" line="55"/>
         <source>Please log in to your account</source>
         <translation>Bitte gehen Sie in Ihr Konto</translation>
+    </message>
+    <message>
+        <location filename="../modules/GetCAICookies.py" line="57"/>
+        <source>(To log in via Apple/Google, specify the email address of your Apple/Google account.)</source>
+        <translation>Um sich über Apple/Google anzumelden, geben Sie die E-Mail Ihres Apple/Google-Kontos an</translation>
     </message>
 </context>
 <context>

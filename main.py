@@ -39,9 +39,9 @@ class LoggerWriter:
     def flush(self):
         self.stream.flush()
 
-if not getattr(sys, 'frozen', False):
-    sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
-    sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
+# if not getattr(sys, 'frozen', False):
+#     sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
+#     sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
 
 logging.info(f"""
 OS: {platform.system()} {platform.release()} {platform.version()} {platform.architecture()[0]}
@@ -1645,7 +1645,7 @@ class SettingsPage(QWidget):
                         item.widget().deleteLater()
 
             self.mw.chat_thread.create_client(self.mw.token)
-            self.mw.chat_thread.set_cookie(self.cookie)
+            self.mw.chat_thread.set_cookie(self.mw.cookie)
             self.mw.chat_thread.create_connect()
 
             self.mw.chat_thread.get_recent_chats()

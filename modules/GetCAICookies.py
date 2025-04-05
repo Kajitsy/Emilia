@@ -1,9 +1,10 @@
 import sys, logging
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QLineEdit, QHBoxLayout, QPushButton
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineUrlRequestInterceptor
 from PyQt6.QtCore import QUrl, QDateTime, pyqtSignal, Qt
 from PyQt6.QtNetwork import QNetworkCookie
+from modules.styles import icon_button_style, SvgIcons, lineedit_style
 
 class RequestInterceptor(QWebEngineUrlRequestInterceptor):
     authorization_signal = pyqtSignal(str)
@@ -29,6 +30,7 @@ class GetCookies(QWidget):
         self.browser = QWebEngineView()
         self.profile = QWebEngineProfile.defaultProfile()
         self.interceptor = RequestInterceptor()
+        self.svg_icons = SvgIcons()
 
         self.interceptor.authorization_signal.connect(self.on_authorization_received)
         self.profile.setUrlRequestInterceptor(self.interceptor)
@@ -36,11 +38,34 @@ class GetCookies(QWidget):
         self.profile.cookieStore().cookieAdded.connect(self.on_cookie_added)
         self.browser.load(QUrl("https://character.ai"))
 
+        self.link_label = QLabel(self.tr("You can also insert a link from the email"))
+
+        link_layout = QHBoxLayout()
+        self.link_edit = QLineEdit()
+        self.link_edit.setStyleSheet(lineedit_style())
+        self.link_edit.keyPress = lambda: self.open_link()
+        self.link_button = QPushButton()
+        self.link_button.setIcon(self.svg_icons.send())
+        self.link_button.setStyleSheet(icon_button_style())
+        self.link_button.clicked.connect(self.open_link)
+        link_layout.addWidget(self.link_edit)
+        link_layout.addWidget(self.link_button)
+
         layout = QVBoxLayout()
         layout.addWidget(QLabel(self.tr("Please log in to your account")),
                          alignment=Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(QLabel(self.tr("(To log in via Apple/Google, specify the email address of your Apple/Google account.)")),
+                         alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.browser)
+        layout.addStretch()
+        layout.addWidget(self.link_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addLayout(link_layout)
         self.setLayout(layout)
+
+    def open_link(self):
+        link = self.link_edit.text()
+        if link:
+            self.browser.load(QUrl(link))
 
     def on_cookie_added(self, cookie: QNetworkCookie):
         name = cookie.name().data().decode()
