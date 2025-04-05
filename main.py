@@ -587,14 +587,15 @@ class EmiliaNext(QMainWindow):
         cards_layout_main = QVBoxLayout()
 
         cards_layout_odd = QHBoxLayout()
-        cards_layout_odd.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+
         cards_layout_even = QHBoxLayout()
-        cards_layout_even.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
         cards_layout_main.addLayout(cards_layout_odd)
         cards_layout_main.addLayout(cards_layout_even)
 
         cards_viewport.setLayout(cards_layout_main)
+        cards_viewport.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+
         scroll_area.setWidget(cards_viewport)
 
         section_layout.addWidget(scroll_area)
@@ -973,7 +974,8 @@ class EmiliaNext(QMainWindow):
                 character.get('avatar_file_name'),
                 character.get('external_id')
             )
-            card.setFixedSize(250, 70)
+            card.setFixedHeight(70)
+            card.setMinimumWidth(250)
             if (index + 1) % 2 == 0:
                 self.try_this_even_layout.addWidget(card)
             else:
