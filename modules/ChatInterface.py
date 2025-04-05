@@ -96,7 +96,6 @@ class ChatInterface(QWidget):
 
         self.top_bar_frame, self.top_bar_layout = self.createTopBar()
         self.mw.top_bar_stacked_widget.setFixedHeight(75)
-        self.mw.t_bar.setStyleSheet(top_bar_style())
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar_frame)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar_frame)
 
@@ -158,6 +157,7 @@ class ChatInterface(QWidget):
     def createTopBar(self):
         header_frame = QWidget()
         header_frame.hideEvent = lambda event: self.mw.t_bar.setStyleSheet(None)
+        header_frame.showEvent = lambda _: self.mw.t_bar.setStyleSheet(top_bar_style())
         header_frame.setFixedHeight(75)
         header_layout = QHBoxLayout()
 
