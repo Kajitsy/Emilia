@@ -1035,9 +1035,8 @@ class EmiliaNext(QMainWindow):
             self.overlay.setGeometry(self.rect())
         if hasattr(self, 'notification_message_label'):
             self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), self.notification_message_label.y(), 300, 50))
-        print(self.rect())
-        self.settings.setValue("main_window/height", self.height())
-        self.settings.setValue("main_window/width", self.width())
+        self.settings.setValue("main_window/height", self.geometry().height())
+        self.settings.setValue("main_window/width", self.geometry().width())
 
     def changeEvent(self, a0):
         super().changeEvent(a0)
@@ -1046,8 +1045,8 @@ class EmiliaNext(QMainWindow):
 
     def moveEvent(self, a0):
         super().moveEvent(a0)
-        self.settings.setValue("main_window/x", self.x())
-        self.settings.setValue("main_window/y", self.y())
+        self.settings.setValue("main_window/x", self.geometry().x())
+        self.settings.setValue("main_window/y", self.geometry().y())
 
     def showEvent(self, a0):
         super().showEvent(a0)
