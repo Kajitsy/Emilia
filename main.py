@@ -94,7 +94,7 @@ class EmiliaNext(QMainWindow):
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.svg_icons = SvgIcons()
-        self.version = "3.0.1dev"
+        self.version = "3.0.1"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
