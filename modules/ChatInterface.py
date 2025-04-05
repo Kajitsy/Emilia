@@ -294,7 +294,8 @@ class ChatInterface(QWidget):
         self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
 
     def userMessageSignal(self, response):
-        message = next((x for x in reversed(self.messages) if x.is_user), None)
+        message_stacked = next((x for x in reversed(self.messages) if x.is_user), QStackedWidget)
+        message = message_stacked.currentWidget()
         message.turn_id = response['turn']['turn_key']['turn_id']
         message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
         message.customContextMenuRequested.disconnect()
@@ -855,7 +856,7 @@ class ChatInterface(QWidget):
             older = []
             pci = turn.get('primary_candidate_id')
             for candidate in turn.get('candidates', []):
-                if candidate['candidate_id'] == pci:
+                if candidate.get('candidate_id', pci) == pci:
                     message_stacked = self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False))
                 else:
                     older.append(candidate)
@@ -990,7 +991,7 @@ class ChatInterface(QWidget):
         turn_ids = [turn_id]
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)
-            if item and item.widget() and item.widget().turn_id == turn_id:
+            if item and item.widget() and item.widget().currentWidget().turn_id == turn_id:
                 self.mw.chat_thread.turn_remove_signal.connect(self._turnRemove)
                 self.mw.chat_thread.turn_remove(self.chat_id, turn_ids)
                 item.widget().deleteLater()
@@ -1044,7 +1045,7 @@ class ChatInterface(QWidget):
 
             regenerate_action = QAction(self.tr("Regenerate"), self)
             regenerate_action.triggered.connect(lambda event: self.turnRegenerate(message_bubble.turn_id))
-            context_menu.addAction(regenerate_action)
+            if not message_bubble.is_user: context_menu.addAction(regenerate_action)
 
         context_menu.exec(message_bubble.mapToGlobal(pos))
 
