@@ -121,11 +121,9 @@ class Async():
                 raise ValueError("Invalid method")
 
     async def get_character(self, character_id):
-        data = {
-            "external_id": character_id
-        }
-        response = await self.request("chat/character/info/", data, "post", text=True)
-        return response.get("character", None)
+        response = await self.trpc_request(
+            f"character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22{character_id}%22%7D%7D%7D")
+        return response[0].get("result", {}).get("data", {}).get("json", {}).get("character", {})
 
     async def tts(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):
         """voiceId or voiceQuery (Character Name) required"""
