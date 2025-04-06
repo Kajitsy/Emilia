@@ -855,7 +855,7 @@ class ChatInterface(QWidget):
         if self.character.get('visibility') == "PUBLIC":
             if self.character.get('avatar_file_name'):
                 self.discord_thread.update(
-                    details=self.tr("Chatting with... ") + self.character_name,
+                    details=self.tr("Chatting with ") + self.character_name,
                     large_image="https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0',
                     buttons=[{
                         "label": self.tr("Open character"),
@@ -864,7 +864,7 @@ class ChatInterface(QWidget):
                 )
             else:
                 self.discord_thread.update(
-                    details=self.tr("Chatting with... ") + self.character_name,
+                    details=self.tr("Chatting with ") + self.character_name,
                     buttons=[{
                         "label": self.tr("Open character"),
                         "url": f"https://character.ai/character/{self.character['short_hash']}"
@@ -872,7 +872,7 @@ class ChatInterface(QWidget):
                 )
         else:
             self.discord_thread.update(
-                details=self.tr("Chatting with...") + self.tr("Secret 🤫")
+                details=self.tr("Chatting with ") + self.tr("Secret 🤫")
             )
 
     def _addMessagesFromHistory(self, turns):
