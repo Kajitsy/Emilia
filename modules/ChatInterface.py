@@ -16,7 +16,8 @@ from datetime import datetime
 from modules.QCustom import ClickableFrame, CustomTextEdit
 from modules.QThreads import (
     PlayerThread, FileLoaderThread,
-    ImageLoaderThread)
+    ImageLoaderThread, ChatThread,
+    DiscordRPC)
 from modules.styles import *
 from modules.Voice import VoiceMode, VoiceSearch
 
@@ -41,6 +42,8 @@ class ChatInterface(QWidget):
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None):
         super().__init__()
         self.mw = main_window
+        self.chat_thread: ChatThread | None = self.mw.chat_thread
+        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
         self.character_name = character_name
         self.character_id = character_id
         self.chat_id = chat_id
@@ -88,8 +91,8 @@ class ChatInterface(QWidget):
         self.initUI()
         self.createRightSidebar()
 
-        self.mw.chat_thread.message_signal.connect(self.charMessageSignal)
-        self.mw.chat_thread.user_message_signal.connect(self.userMessageSignal)
+        self.chat_thread.message_signal.connect(self.charMessageSignal)
+        self.chat_thread.user_message_signal.connect(self.userMessageSignal)
 
     def initUI(self):
         self.layout = QVBoxLayout(self)
@@ -141,19 +144,19 @@ class ChatInterface(QWidget):
         self.setLayout(self.layout)
 
         if self.chat_id:
-            self.mw.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-            self.mw.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-            self.mw.chat_thread.get_history(self.chat_id)
-            self.mw.chat_thread.get_chat_by_id(self.chat_id)
+            self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+            self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
+            self.chat_thread.get_history(self.chat_id)
+            self.chat_thread.get_chat_by_id(self.chat_id)
         else:
-            self.mw.chat_thread.chat_signal.connect(self._getChat)
-            self.mw.chat_thread.get_chat(self.character_id)
+            self.chat_thread.chat_signal.connect(self._getChat)
+            self.chat_thread.get_chat(self.character_id)
 
         if not self.character:
-            self.mw.chat_thread.get_char_signal.connect(self._getCharacter)
-            self.mw.chat_thread.get_character(self.character_id)
-        self.mw.chat_thread.voice_override_signal.connect(self._voiceOverride)
-        self.mw.chat_thread.voice_override(self.character_id)
+            self.chat_thread.get_char_signal.connect(self._getCharacter)
+            self.chat_thread.get_character(self.character_id)
+        self.chat_thread.voice_override_signal.connect(self._voiceOverride)
+        self.chat_thread.voice_override(self.character_id)
 
     def createTopBar(self):
         header_frame = QWidget()
@@ -634,7 +637,7 @@ class ChatInterface(QWidget):
             for data in chats:
                 card = createCard(self, data)
                 self.chats_cards_layout.addWidget(card)
-            self.mw.chat_thread.character_chats_signal.disconnect()
+            self.chat_thread.character_chats_signal.disconnect()
 
         chats_history_widget = QWidget()
         chats_history_layout = QVBoxLayout()
@@ -655,8 +658,8 @@ class ChatInterface(QWidget):
 
         self.mw.showOverlay(chats_history_widget)
 
-        self.mw.chat_thread.character_chats_signal.connect(lambda chats: showChats(self, chats))
-        self.mw.chat_thread.get_character_chats(self.character_id)
+        self.chat_thread.character_chats_signal.connect(lambda chats: showChats(self, chats))
+        self.chat_thread.get_character_chats(self.character_id)
 
     def _getVoice(self, response):
         voice_name = response.get('voice', {}).get('name', '')
@@ -731,24 +734,24 @@ class ChatInterface(QWidget):
         self.enable_char_voice_button.setIcon(self.svg_icons.with_voice('#7d9aff'))
         self.enable_char_voice_button.disconnect()
         self.enable_char_voice_button.clicked.connect(self.disableVoice)
-        self.mw.chat_thread.replay_signal.connect(self._voiceProcess)
+        self.chat_thread.replay_signal.connect(self._voiceProcess)
 
     def disableVoice(self):
         self.voice_enabled = False
         self.enable_char_voice_button.setIcon(self.svg_icons.no_voice())
         self.enable_char_voice_button.disconnect()
         self.enable_char_voice_button.clicked.connect(self.enableVoice)
-        self.mw.chat_thread.replay_signal.disconnect()
+        self.chat_thread.replay_signal.disconnect()
 
     def _voiceOverride(self, response):
-        self.mw.chat_thread.voice_override_signal.disconnect()
+        self.chat_thread.voice_override_signal.disconnect()
         self.voice_id = response.get('voice_id')
         if not self.voice_id:
             self.enable_char_voice_button.setVisible(False)
             self.select_char_voice_button.setText(self.tr("Search Voice"))
         else:
-            self.mw.chat_thread.get_voice_signal.connect(self._getVoice)
-            self.mw.chat_thread.get_voice(self.voice_id)
+            self.chat_thread.get_voice_signal.connect(self._getVoice)
+            self.chat_thread.get_voice(self.voice_id)
 
     def _createNewChat(self, botanswer):
         self.clearMessages()
@@ -764,38 +767,38 @@ class ChatInterface(QWidget):
         self.chat_id = botanswer[0]['chat_id']
         recent_card.mousePressEvent = lambda event: self.mw.openChat(self.character_id, self.character_name, self.chat_id)
         recent_card.setObjectName(self.chat_id)
-        self.mw.chat_thread.new_chat_created_signal.disconnect()
-        self.mw.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-        self.mw.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-        self.mw.chat_thread.get_history(self.chat_id)
-        self.mw.chat_thread.get_chat_by_id(self.chat_id)
+        self.chat_thread.new_chat_created_signal.disconnect()
+        self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+        self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
+        self.chat_thread.get_history(self.chat_id)
+        self.chat_thread.get_chat_by_id(self.chat_id)
 
     def createNewChat(self, model_type=None):
         if model_type is None:
             model_type = self.preferred_model_type
-        self.mw.chat_thread.new_chat(self.character_id, self.chat_id, model_type)
-        self.mw.chat_thread.new_chat_created_signal.connect(self._createNewChat)
+        self.chat_thread.new_chat(self.character_id, self.chat_id, model_type)
+        self.chat_thread.new_chat_created_signal.connect(self._createNewChat)
 
     def dislikeCharacter(self):
         self.like_button.setIcon(self.svg_icons.like())
         if self.vote == False:
             self.vote = None
-            self.mw.chat_thread.character_vote(self.character_id, None)
+            self.chat_thread.character_vote(self.character_id, None)
             self.dislike_button.setIcon(self.svg_icons.dislike())
         else:
             self.vote = False
-            self.mw.chat_thread.character_vote(self.character_id, False)
+            self.chat_thread.character_vote(self.character_id, False)
             self.dislike_button.setIcon(self.svg_icons.disliked())
 
     def likeCharacter(self):
         self.dislike_button.setIcon(self.svg_icons.dislike())
         if self.vote:
             self.vote = None
-            self.mw.chat_thread.character_vote(self.character_id, None)
+            self.chat_thread.character_vote(self.character_id, None)
             self.like_button.setIcon(self.svg_icons.like())
         else:
             self.vote = True
-            self.mw.chat_thread.character_vote(self.character_id, True)
+            self.chat_thread.character_vote(self.character_id, True)
             self.like_button.setIcon(self.svg_icons.liked())
 
     def shareCharacter(self):
@@ -803,10 +806,11 @@ class ChatInterface(QWidget):
         self.mw.showNotification(self.tr("Link copied to clipboard"))
 
     def _getCharacter(self, character):
-        self.mw.chat_thread.get_char_signal.disconnect()
+        self.chat_thread.get_char_signal.disconnect()
         self.voted = character.get('voted', {}).get('voted', False)
         self.vote = character.get('voted', {}).get('vote', None)
         self.character = character.get('character', {})
+        self.character_name = self.character['name']
 
         if self.character.get('avatar_file_name'):
             load_avatar_thread = ImageLoaderThread(
@@ -848,9 +852,32 @@ class ChatInterface(QWidget):
         self.toggle_info_button.setEnabled(True)
         self.header_character_frame.setVisible(True)
 
+        if self.character.get('visibility') == "PUBLIC":
+            if self.character.get('avatar_file_name'):
+                self.discord_thread.update(
+                    details=self.tr("Chatting with... ") + self.character_name,
+                    large_image="https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0',
+                    buttons=[{
+                        "label": self.tr("Open character"),
+                        "url": f"https://character.ai/character/{self.character['short_hash']}"
+                    }]
+                )
+            else:
+                self.discord_thread.update(
+                    details=self.tr("Chatting with... ") + self.character_name,
+                    buttons=[{
+                        "label": self.tr("Open character"),
+                        "url": f"https://character.ai/character/{self.character['short_hash']}"
+                    }]
+                )
+        else:
+            self.discord_thread.update(
+                details=self.tr("Chatting with...") + self.tr("Secret 🤫")
+            )
+
     def _addMessagesFromHistory(self, turns):
         self.clearMessages()
-        self.mw.chat_thread.get_history_signal.disconnect()
+        self.chat_thread.get_history_signal.disconnect()
         message_stacked = QStackedWidget
         for turn in turns:
             older = []
@@ -870,14 +897,14 @@ class ChatInterface(QWidget):
                     message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False)))
 
     def _getChat(self, chat):
-        self.mw.chat_thread.chat_signal.disconnect()
+        self.chat_thread.chat_signal.disconnect()
         if chat:
             for chats in chat:
                 self.chat_id = chats.get('chat_id')
-            self.mw.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-            self.mw.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-            self.mw.chat_thread.get_history(self.chat_id)
-            self.mw.chat_thread.get_chat_by_id(self.chat_id)
+            self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+            self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
+            self.chat_thread.get_history(self.chat_id)
+            self.chat_thread.get_chat_by_id(self.chat_id)
             if self.mw.recent_chats:
                 for i in range(self.mw.recent_chat_layout.count()):
                     item = self.mw.recent_chat_layout.itemAt(i)
@@ -888,25 +915,25 @@ class ChatInterface(QWidget):
                             card.setStyleSheet(card.press_style)
                         break
         else:
-            self.mw.chat_thread.new_chat_created_signal.connect(self._newChatCreated)
-            self.mw.chat_thread.new_chat(self.character_id)
+            self.chat_thread.new_chat_created_signal.connect(self._newChatCreated)
+            self.chat_thread.new_chat(self.character_id)
 
     def _getChatById(self, data):
-        self.mw.chat_thread.get_chat_by_id_signal.disconnect()
+        self.chat_thread.get_chat_by_id_signal.disconnect()
         self.chat_data = data.get('chat', {})
         self.preferred_model_type = self.chat_data.get('preferred_model_type', 'MODEL_TYPE_BALANCED')
 
     def _newChatCreated(self, botanswer):
         self.clearMessages()
-        self.mw.chat_thread.new_chat_created_signal.disconnect()
+        self.chat_thread.new_chat_created_signal.disconnect()
         self.chat_id = botanswer[0]['chat_id']
-        self.mw.chat_thread.get_char_signal.connect(self._getCharacter)
-        self.mw.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-        self.mw.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-        self.mw.chat_thread.get_history(self.chat_id)
-        self.mw.chat_thread.get_chat_by_id(self.chat_id)
-        self.mw.chat_thread.get_character(self.character_id)
-        self.mw.chat_thread.get_recent_chats()
+        self.chat_thread.get_char_signal.connect(self._getCharacter)
+        self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+        self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
+        self.chat_thread.get_history(self.chat_id)
+        self.chat_thread.get_chat_by_id(self.chat_id)
+        self.chat_thread.get_character(self.character_id)
+        self.chat_thread.get_recent_chats()
 
     def clearMessages(self):
         for i in range(self.messages_layout.count()):
@@ -964,7 +991,7 @@ class ChatInterface(QWidget):
         if text:
             self.addMessage(text, "", is_user=True)
             self.message_input.setHtml('<span style="color: white;"></span>')
-            self.mw.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id))
+            self.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id))
             if self.mw.recent_chats:
                 for i in range(self.mw.recent_chat_layout.count()):
                     item = self.mw.recent_chat_layout.itemAt(i)
@@ -975,25 +1002,25 @@ class ChatInterface(QWidget):
                         break
 
     def _copyChat(self, data):
-        self.mw.chat_thread.copy_chat_signal.disconnect()
+        self.chat_thread.copy_chat_signal.disconnect()
         self.mw.openChat(self.character_id, self.character_name, data.get('new_chat_id'))
         self.mw.showNotification(self.tr("New chat started"))
 
     def copyChat(self, turn_id):
-        self.mw.chat_thread.copy_chat_signal.connect(self._copyChat)
-        self.mw.chat_thread.copy_chat(self.chat_id, turn_id)
+        self.chat_thread.copy_chat_signal.connect(self._copyChat)
+        self.chat_thread.copy_chat(self.chat_id, turn_id)
 
     def _turnRemove(self, data):
         self.mw.showNotification(self.tr("The message was deleted"))
-        self.mw.chat_thread.turn_remove_signal.disconnect()
+        self.chat_thread.turn_remove_signal.disconnect()
 
     def turnRemove(self, turn_id):
         turn_ids = [turn_id]
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)
             if item and item.widget() and item.widget().currentWidget().turn_id == turn_id:
-                self.mw.chat_thread.turn_remove_signal.connect(self._turnRemove)
-                self.mw.chat_thread.turn_remove(self.chat_id, turn_ids)
+                self.chat_thread.turn_remove_signal.connect(self._turnRemove)
+                self.chat_thread.turn_remove(self.chat_id, turn_ids)
                 item.widget().deleteLater()
             elif item and item.spacerItem():
                 pass
@@ -1017,8 +1044,8 @@ class ChatInterface(QWidget):
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)
             if item and item.widget() and item.widget().turn_id == turn_id:
-                self.mw.chat_thread.turn_regenerate_signal.connect(self._turnRegenerate)
-                self.mw.chat_thread.turn_regenerate(self.character_id, self.chat_id, turn_id, tts_enabled=self.voice_enabled)
+                self.chat_thread.turn_regenerate_signal.connect(self._turnRegenerate)
+                self.chat_thread.turn_regenerate(self.character_id, self.chat_id, turn_id, tts_enabled=self.voice_enabled)
             elif item and item.spacerItem():
                 pass
 

@@ -39,9 +39,9 @@ class LoggerWriter:
     def flush(self):
         self.stream.flush()
 
-# if not getattr(sys, 'frozen', False):
-#     sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
-#     sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
+if not getattr(sys, 'frozen', False):
+    sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
+    sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
 
 logging.info(f"""
 OS: {platform.system()} {platform.release()} {platform.version()} {platform.architecture()[0]}
@@ -93,8 +93,9 @@ class EmiliaNext(QMainWindow):
         self.setStyleSheet(main_window_style())
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
+        self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
         self.svg_icons = SvgIcons()
-        self.version = "3.0.1"
+        self.version = "3.0.2dev"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -139,6 +140,11 @@ class EmiliaNext(QMainWindow):
         self.chat_thread.get_me_signal.connect(self.getMe)
         self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
         self.chat_thread.get_available_models_signal.connect(self.getAvailableModels)
+        self.discord_thread = DiscordRPC(self)
+        self.discord_thread.start()
+        self.threads.append(self.discord_thread)
+        if self.drpc_enable:
+            self.discord_thread.connect()
         self.initUI()
 
         if QDateTime.fromString(self.settings.value("cai_auth/expiration_date")) < QDateTime.currentDateTime():
@@ -414,6 +420,7 @@ class EmiliaNext(QMainWindow):
     def runInstaller(self, save_path):
         if save_path:
             self.download_overlay_label.setText(self.tr("Download complete. Running installer..."))
+            self.closeEvent = lambda a0: None
             self.close()
             subprocess.Popen(save_path, shell=True)
         else:
@@ -440,6 +447,8 @@ class EmiliaNext(QMainWindow):
         def show(event):
             self.top_bar_stacked_widget.addWidget(self.top_widget)
             self.top_bar_stacked_widget.setCurrentWidget(self.top_widget)
+            self.discord_thread.update(
+                details=self.tr("Looking at the main page"))
         main_content_area = QWidget()
         main_content_area.showEvent = show
         self.main_content_layout = QVBoxLayout()
@@ -1063,27 +1072,39 @@ class EmiliaNext(QMainWindow):
         super().showEvent(a0)
         hide_action.setVisible(True)
         show_action.setVisible(False)
+        self.discord_thread.update_wlrpc()
 
     def hideEvent(self, a0):
+        super().hideEvent(a0)
         hide_action.setVisible(False)
         show_action.setVisible(True)
-        super().hideEvent(a0)
+        self.discord_thread.clear()
+
+    def closeEvent(self, a0):
+        super().closeEvent(a0)
+        if self.settings.value("backwork", False, type=bool):
+            a0.ignore()
+            self.hide()
 
 class SearchPage(QWidget):
     def __init__(self, main_window):
         super().__init__(main_window)
         self.mw = main_window
+        self.chat_thread: ChatThread | None = self.mw.chat_thread
+        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
         self.svg_icons = SvgIcons()
         self.setStyleSheet("background-color: transparent; border: none;")
 
         self.initUI()
+        self.discord_thread.update(
+            details=self.tr("Looking for a character...")
+        )
 
     def initUI(self):
         self.layout = QVBoxLayout(self.mw)
 
         self.scroll_area, self.cards_viewport, self.cards_layout = self.createMainContentPage()
         self.top_bar, self.top_bar_layout = self.createTopBar()
-
 
         self.layout.addWidget(self.scroll_area, alignment=Qt.AlignmentFlag.AlignHCenter)
 
@@ -1133,8 +1154,8 @@ class SearchPage(QWidget):
         self.mw.main_content_area.addWidget(search_page)
         self.mw.main_content_area.setCurrentWidget(search_page)
 
-        self.mw.chat_thread.character_search_signal.connect(search_page.populate)
-        self.mw.chat_thread.character_search(search_query)
+        self.chat_thread.character_search_signal.connect(search_page.populate)
+        self.chat_thread.character_search(search_query)
         self.deleteLater()
 
     def populate(self, data):
@@ -1151,7 +1172,7 @@ class SearchPage(QWidget):
             no_results_label = QLabel(self.tr("Characters not found"))
             no_results_label.setFont(QFont("Arial", 20, QFont.Weight.Bold))
             self.cards_layout.addWidget(no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.mw.chat_thread.character_search_signal.disconnect()
+        self.chat_thread.character_search_signal.disconnect()
 
     def createTopBar(self):
         top_bar = QWidget()
@@ -1184,6 +1205,8 @@ class SettingsPage(QWidget):
         self.setStyleSheet("background-color: transparent; border: none;")
         main_layout = QVBoxLayout()
         self.mw: EmiliaNext | None = parent
+        self.chat_thread: ChatThread | None = self.mw.chat_thread
+        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.languages = {
             "en_US": {"title": self.tr("English"), "lang_available": True, "google_code": "en"},
@@ -1264,7 +1287,7 @@ class SettingsPage(QWidget):
                 "label": self.tr("Emilia Settings"),
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
-                    {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork"},
+                    {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
                     {"type": "combobox", "label": self.tr("Input Device"), "items": self.mw.input_devices.values(), "key": "input_device"},
                     {"type": "combobox", "label": self.tr("Output Device"), "items": self.mw.output_devices.values(), "key": "output_device"},
                     {"type": "keybind", "label": self.tr("Microphone mute key"), "def_value": "Ctrl+M", "key": "microphone_mute_key_bind"},
@@ -1272,7 +1295,7 @@ class SettingsPage(QWidget):
             }, {
                 "label": self.tr("VTube Studio Plugin"),
                 "settings": [
-                    {"type": "checkbox", "label": self.tr("Use VTube Studio"), "key": "vtube/use"},
+                    {"type": "checkbox", "label": self.tr("Use VTube Studio"), "key": "vtube/use", "def_value": False},
                     {"type": "lineedit", "label": self.tr("VTube Studio Port"), "key": "vtube/port",
                      "validator": QIntValidator(0, 99999999), "def_value": 8001, "may_be_empty": False},
                     {"type": "pushbutton", "label": self.tr("VTube Emotes Editor"),
@@ -1280,6 +1303,11 @@ class SettingsPage(QWidget):
                      "key": "vtube/emotes_editor", "click": self.openEmotesEditor},
                     {"type": "pushbutton", "label": self.tr("Check the connection to VTube Studio"), "buttonlabel": self.tr("Check"),
                      "key": "vtube/check_connect", "click": self.vtubeCheck},
+                ]
+            }, {
+                "label": self.tr("Discord Rich Presence (Beta)"),
+                "settings": [
+                    {"type": "checkbox", "label": self.tr("Enable DiscordRPC"), "key": "discord_rpc/enable", "def_value": True}
                 ]
             }, {
                 "label": self.tr("Languages of Emilia"),
@@ -1475,7 +1503,7 @@ class SettingsPage(QWidget):
             head_layout.addWidget(group_label)
             test_emote_button = QPushButton(self.tr(" | Test"))
             test_emote_button.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-            test_emote_button.clicked.connect(lambda _, e=emote_name: self.mw.chat_thread.vtube_use_emote(e))
+            test_emote_button.clicked.connect(lambda _, e=emote_name: self.chat_thread.vtube_use_emote(e))
             head_layout.addWidget(test_emote_button)
             e_layout.addLayout(head_layout)
 
@@ -1519,11 +1547,11 @@ class SettingsPage(QWidget):
 
     def _vtubeCheck(self, text):
         self.mw.showNotification(text)
-        self.mw.chat_thread.vtube_connect_signal.disconnect()
+        self.chat_thread.vtube_connect_signal.disconnect()
 
     def vtubeCheck(self):
-        self.mw.chat_thread.vtube_connect_signal.connect(self._vtubeCheck)
-        self.mw.chat_thread.check_vtube_connect()
+        self.chat_thread.vtube_connect_signal.connect(self._vtubeCheck)
+        self.chat_thread.check_vtube_connect()
 
     def createTopBar(self):
         top_bar = QWidget()
@@ -1627,8 +1655,8 @@ class SettingsPage(QWidget):
             self.loadSettings()
             self.mw.showNotification(self.tr("The token is being updated..."))
 
-            self.mw.chat_thread.chat_histories = {}
-            self.mw.chat_thread.me = None
+            self.chat_thread.chat_histories = {}
+            self.chat_thread.me = None
             for i in range(self.mw.recommended_layout.count()):
                 item = self.mw.recommended_layout.itemAt(i)
                 if item and item.widget():
@@ -1644,13 +1672,13 @@ class SettingsPage(QWidget):
                     if item and item.widget():
                         item.widget().deleteLater()
 
-            self.mw.chat_thread.create_client(self.mw.token)
-            self.mw.chat_thread.set_cookie(self.mw.cookie)
-            self.mw.chat_thread.create_connect()
+            self.chat_thread.create_client(self.mw.token)
+            self.chat_thread.set_cookie(self.mw.cookie)
+            self.chat_thread.create_connect()
 
-            self.mw.chat_thread.get_recent_chats()
-            self.mw.chat_thread.get_main_page_chats()
-            self.mw.chat_thread.get_me()
+            self.chat_thread.get_recent_chats()
+            self.chat_thread.get_main_page_chats()
+            self.chat_thread.get_me()
         def get(auth_token, expiration_date: QDateTime):
             self.cookie_available = True
             self.mw.settings.setValue("cai_auth/cookie", auth_token)
@@ -1676,6 +1704,9 @@ class SettingsPage(QWidget):
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
         self.loadSettings()
+        self.discord_thread.update(
+            details=self.tr("Looking at the settings ...")
+        )
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
@@ -1687,7 +1718,8 @@ class SettingsPage(QWidget):
             if isinstance(widget, QLineEdit):
                 widget.setText(value if value is not None else "")
             elif isinstance(widget, CheckablePushButton):
-                widget.setChecked(value == 'true' if value is not None else False)
+                value = self.mw.settings.value(key, self.setting_data[key].get('def_value'), type=bool)
+                widget.setChecked(value)
             elif isinstance(widget, QComboBox):
                 if key == "emilia_language":
                     widget.setCurrentText(self.languages.get(self.mw.current_language, {}).get("title", self.tr("English")))
@@ -1713,9 +1745,20 @@ class SettingsPage(QWidget):
                     return
                 self.mw.settings.setValue(key, widget.text())
                 if key == "vtube/port":
-                    self.mw.chat_thread.eec.create_vts_with_port(int(widget.text()))
+                    self.chat_thread.eec.create_vts_with_port(int(widget.text()))
             elif isinstance(widget, CheckablePushButton):
                 self.mw.settings.setValue(key, 'true' if widget.isChecked() else 'false')
+                if key == "discord_rpc/enable":
+                    self.mw.drpc_enable = widget.isChecked()
+                    self.mw.drpc_available = widget.isChecked()
+                    if widget.isChecked():
+                        self.discord_thread.connect()
+                        self.discord_thread.update(
+                            state=self.tr("Customizing...")
+                        )
+                    else:
+                        self.discord_thread.clear()
+                        self.discord_thread.close()
             elif isinstance(widget, QComboBox):
                 if key == "emilia_language":
                     lang = next((k for k, v in self.languages.items() if v["title"] == widget.currentText() and v.get("lang_available", False)), None)
@@ -1752,6 +1795,8 @@ class UserProfile(QWidget):
         self.data = {}
         self.me_following = []
         self.mw = main_window
+        self.chat_thread: ChatThread | None = self.mw.chat_thread
+        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
         self.svg_icons = SvgIcons()
 
         self.initUI()
@@ -1880,13 +1925,13 @@ class UserProfile(QWidget):
 
         self.profile_id = username
         self.is_me = self.profile_id == self.mw.username
-        self.mw.chat_thread.get_user_signal.connect(self._getUser)
-        self.mw.chat_thread.get_user(self.profile_id)
-        self.mw.chat_thread.voices_search_username_signal.connect(self._getVoices)
-        self.mw.chat_thread.voices_search_username(self.profile_id)
+        self.chat_thread.get_user_signal.connect(self._getUser)
+        self.chat_thread.get_user(self.profile_id)
+        self.chat_thread.voices_search_username_signal.connect(self._getVoices)
+        self.chat_thread.voices_search_username(self.profile_id)
 
     def _getFollowing(self, data):
-        self.mw.chat_thread.me_following_signal.disconnect()
+        self.chat_thread.me_following_signal.disconnect()
         self.me_following = data.get('following', [])
 
         if self.username == self.mw.username:
@@ -1901,11 +1946,11 @@ class UserProfile(QWidget):
             self.follow_button.clicked.connect(self.follow)
 
     def getFollowing(self):
-        self.mw.chat_thread.me_following_signal.connect(self._getFollowing)
-        self.mw.chat_thread.get_me_following()
+        self.chat_thread.me_following_signal.connect(self._getFollowing)
+        self.chat_thread.get_me_following()
 
     def _getVoices(self, data):
-        self.mw.chat_thread.voices_search_username_signal.disconnect()
+        self.chat_thread.voices_search_username_signal.disconnect()
         self.voice_data = data
 
         if self.voice_data:
@@ -1917,7 +1962,7 @@ class UserProfile(QWidget):
             self.voice_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     def _getUser(self, data):
-        self.mw.chat_thread.get_user_signal.disconnect()
+        self.chat_thread.get_user_signal.disconnect()
         self.getFollowing()
         self.data = data
         self.username = self.data.get('username')
@@ -1928,8 +1973,24 @@ class UserProfile(QWidget):
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
+            self.discord_thread.update(
+                details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
+                large_image="https://characterai.io/i/80/static/avatars/" + self.data.get(
+                    'avatar_file_name') + '?webp=true&anim=0',
+                buttons=[{
+                    "label": "Open profile",
+                    "url": f"https://character.ai/profile/{self.username}"
+                }]
+            )
         else:
             color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
+            self.discord_thread.update(
+                details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
+                buttons=[{
+                    "label": "Open profile",
+                    "url": f"https://character.ai/profile/{self.username}"
+                }]
+            )
 
         chats_count = 0
         for character in self.data.get('characters', []):
@@ -1980,16 +2041,16 @@ class UserProfile(QWidget):
             self.follow_button.setText(self.tr("Follow"))
             self.follow_button.clicked.disconnect()
             self.follow_button.clicked.connect(self.follow)
-        self.mw.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(self, data))
-        self.mw.chat_thread.user_unfollow(self.username)
+        self.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(self, data))
+        self.chat_thread.user_unfollow(self.username)
 
     def follow(self):
         def follow(self, data):
             self.follow_button.setText(self.tr("Unfollow"))
             self.follow_button.clicked.disconnect()
             self.follow_button.clicked.connect(self.unfollow)
-        self.mw.chat_thread.user_follow_signal.connect(lambda data: follow(self, data))
-        self.mw.chat_thread.user_follow(self.username)
+        self.chat_thread.user_follow_signal.connect(lambda data: follow(self, data))
+        self.chat_thread.user_follow(self.username)
 
     def showFollowingFollowers(self, open_page="followers"):
         def openUser(username):
@@ -2002,8 +2063,8 @@ class UserProfile(QWidget):
                 button.clicked.disconnect()
                 button.clicked.connect(lambda: unfollow(username, button))
 
-            self.mw.chat_thread.user_follow_signal.connect(lambda data: follow(data))
-            self.mw.chat_thread.user_follow(username)
+            self.chat_thread.user_follow_signal.connect(lambda data: follow(data))
+            self.chat_thread.user_follow(username)
 
         def unfollow(username, button: QPushButton):
             def unfollow(data):
@@ -2011,18 +2072,18 @@ class UserProfile(QWidget):
                 button.clicked.disconnect()
                 button.clicked.connect(lambda: follow(username, button))
 
-            self.mw.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(data))
-            self.mw.chat_thread.user_unfollow(username)
+            self.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(data))
+            self.chat_thread.user_unfollow(username)
 
         def _followers(data):
-            self.mw.chat_thread.user_followers_signal.disconnect()
+            self.chat_thread.user_followers_signal.disconnect()
             for user in data.get('users', {}):
                 card = createCard(self, user)
                 card.setFixedWidth(435)
                 followers_users_layout.addWidget(card)
 
         def _following(data):
-            self.mw.chat_thread.user_following_signal.disconnect()
+            self.chat_thread.user_following_signal.disconnect()
             for user in data.get('users', {}):
                 card = createCard(self, user)
                 card.setFixedWidth(435)
@@ -2111,10 +2172,10 @@ class UserProfile(QWidget):
             pages_widget.setCurrentWidget(followers_page)
             followers_button.setChecked(True)
 
-        self.mw.chat_thread.user_followers_signal.connect(_followers)
-        self.mw.chat_thread.user_following_signal.connect(_following)
-        self.mw.chat_thread.get_user_followers(username=self.username)
-        self.mw.chat_thread.get_user_following(username=self.username)
+        self.chat_thread.user_followers_signal.connect(_followers)
+        self.chat_thread.user_following_signal.connect(_following)
+        self.chat_thread.get_user_followers(username=self.username)
+        self.chat_thread.get_user_following(username=self.username)
 
         layout.addWidget(buttons_frame)
         layout.addWidget(pages_widget, 1)

@@ -4,6 +4,7 @@ from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRectF, QLocale
 from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
 from gpytranslate import Translator
 from functools import wraps
+from pypresence import AioPresence
 
 from modules.CustomCharAI import Async as ccaa
 from modules.VTubeCore import EEC
@@ -154,6 +155,86 @@ class PlayerThread(QThread):
         sounddevice.stop()
         self.stop_signal.emit(True)
 
+class DiscordRPC(QThread):
+    rpc_connected = pyqtSignal(object)
+
+    def __init__(self, main_window):
+        super().__init__()
+        self.mw = main_window
+        self.discord_rpc: AioPresence | None = None
+        self.start_time = time.time()
+        self.latest_rpc = {}
+
+    @property
+    def rpc_check(self):
+        return True if self.discord_rpc and self.mw.settings.value("discord_rpc/enable", True, type=bool) else False
+
+    @asyncSlot
+    async def connect(self):
+        try:
+            self.discord_rpc = AioPresence('1358471829165047819')
+            self.rpc_connected.emit(await self.discord_rpc.connect())
+            logging.debug("QThreads.py (DiscordRPC.connect): DiscordRPC connected!")
+        except Exception as e:
+            self.mw.settings.setValue("discord_rpc/enable", False)
+            logging.error(f"QThreads.py (DiscordRPC.connect): {e}")
+
+    @asyncSlot
+    async def update(self, *args, **kwargs):
+        if self.rpc_check:
+            try:
+                self.latest_rpc = {
+                    "args": args,
+                    "kwargs": kwargs
+                }
+                await getattr(self.discord_rpc, "update")(*self.latest_rpc["args"], **self.latest_rpc["kwargs"], start=self.start_time)
+                logging.debug("QThreads.py (DiscordRPC.update): DiscordRPC updated!")
+            except RuntimeError:
+                logging.warning("QThreads.py (DiscordRPC.update): DiscordRPC updated, but RuntimeError!")
+            except Exception as e:
+                self.mw.settings.setValue("discord_rpc/enable", False)
+                logging.error(f"QThreads.py (DiscordRPC.update): {e}")
+        else:
+            logging.warning(f"QThreads.py (DiscordRPC.update): DiscordRPC not initialized")
+
+    @asyncSlot
+    async def update_wlrpc(self):
+        if self.rpc_check:
+            try:
+                await getattr(self.discord_rpc, "update")(*self.latest_rpc["args"], **self.latest_rpc["kwargs"], start=self.start_time)
+                logging.debug("QThreads.py (DiscordRPC.update): DiscordRPC updated!")
+            except RuntimeError:
+                logging.warning("QThreads.py (DiscordRPC.update): DiscordRPC updated, but RuntimeError!")
+            except Exception as e:
+                self.mw.settings.setValue("discord_rpc/enable", False)
+                logging.error(f"QThreads.py (DiscordRPC.update): {e}")
+        else:
+            logging.warning(f"QThreads.py (DiscordRPC.update): DiscordRPC not initialized")
+
+    @asyncSlot
+    async def clear(self):
+        if self.rpc_check:
+            try:
+                await self.discord_rpc.clear()
+                logging.debug("QThreads.py (DiscordRPC.clear): DiscordRPC cleared!")
+            except Exception as e:
+                self.mw.settings.setValue("discord_rpc/enable", False)
+                logging.error(f"QThreads.py (DiscordRPC.clear): {e}")
+        else:
+            logging.warning(f"QThreads.py (DiscordRPC.clear): DiscordRPC not initialized")
+
+    @asyncSlot
+    async def close(self):
+        if self.rpc_check:
+            try:
+                await self.discord_rpc.close()
+                logging.debug("QThreads.py (DiscordRPC.close): DiscordRPC closed!")
+            except Exception as e:
+                self.mw.settings.setValue("discord_rpc/enable", False)
+                logging.error(f"QThreads.py (DiscordRPC.close): {e}")
+        else:
+            logging.warning(f"QThreads.py (DiscordRPC.close): DiscordRPC not initialized")
+
 class ChatThread(QThread):
     finished = pyqtSignal(object)
     connected_signal = pyqtSignal(bool)
@@ -209,7 +290,7 @@ class ChatThread(QThread):
         self.mw = main_window
         self.token: str | None = None
         self.cookie: str | None = None
-        self._ccaa: ccaa | None = None
+        self.ccaa: ccaa | None = None
         self.connect: ccaa().connect() | None = {}
         self.me = {}
         self.connect = {}
@@ -223,25 +304,6 @@ class ChatThread(QThread):
         self.chat_histories = {}
         self.category_characters = {}
         self.characters = {}
-
-    def run(self):
-        pass
-
-    @property
-    def client(self):
-        return self._client
-
-    @client.setter
-    def client(self, value):
-        self._client = value
-
-    @property
-    def ccaa(self):
-        return self._ccaa
-
-    @ccaa.setter
-    def ccaa(self, value):
-        self._ccaa = value
 
     @asyncSlot
     async def create_connect(self):
@@ -264,7 +326,7 @@ class ChatThread(QThread):
 
     def set_cookie(self, cookie):
         self.cookie = cookie
-        self._ccaa = ccaa(self.token, cookie)
+        self.ccaa = ccaa(self.token, cookie)
         logging.debug("QThreads.py: Cookies are installed")
 
     async def _call_ccaa(self, method, signal, *args, **kwargs):
