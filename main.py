@@ -40,8 +40,8 @@ class LoggerWriter:
         self.stream.flush()
 
 if not getattr(sys, 'frozen', False):
-    sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
-    sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
+   sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
+   sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
 
 logging.info(f"""
 OS: {platform.system()} {platform.release()} {platform.version()} {platform.architecture()[0]}
@@ -194,7 +194,6 @@ class EmiliaNext(QMainWindow):
         self.search_results_layout = QVBoxLayout(self.search_results_page)
         self.settings_page = SettingsPage(self)
         self.settings_page.save_button.clicked.connect(self.updateAutoCollapseSidebar)
-        self.user_page = UserProfile(self)
 
         self.main_content_area_animation = QPropertyAnimation(self.main_content_area, b"geometry")
         self.main_content_area_animation.setDuration(500)
@@ -203,7 +202,6 @@ class EmiliaNext(QMainWindow):
         self.main_content_area.addWidget(self.main_page)
         self.main_content_area.addWidget(self.search_results_page)
         self.main_content_area.addWidget(self.settings_page)
-        self.main_content_area.addWidget(self.user_page)
 
         self.main_layout.addWidget(self.main_content_area, 1)
 
@@ -900,7 +898,8 @@ class EmiliaNext(QMainWindow):
             self.search_bar.setText("")
 
     def openUserPage(self, username):
-        self.user_page.refresh(username)
+        self.user_page = UserProfile(self, username)
+        self.main_content_area.addWidget(self.user_page)
         self.main_content_area.setCurrentWidget(self.user_page)
         if self.current_chat_interface:
             self.current_chat_interface.setVisible(False)
@@ -1788,7 +1787,7 @@ class SettingsPage(QWidget):
         logging.debug("main.py: Settings saved successfully")
 
 class UserProfile(QWidget):
-    def __init__(self, main_window):
+    def __init__(self, main_window, username):
         super().__init__(main_window)
         self.profile_id = None
         self.is_me = False
@@ -1800,6 +1799,13 @@ class UserProfile(QWidget):
         self.svg_icons = SvgIcons()
 
         self.initUI()
+
+        self.profile_id = username
+        self.is_me = self.profile_id == self.mw.username
+        self.chat_thread.get_user_signal.connect(self._getUser)
+        self.chat_thread.get_user(self.profile_id)
+        self.chat_thread.voices_search_username_signal.connect(self._getVoices)
+        self.chat_thread.voices_search_username(self.profile_id)
 
     def initUI(self):
         self.top_bar, self.top_bar_layout = self.createTopBar()
@@ -1816,11 +1822,11 @@ class UserProfile(QWidget):
         self.avatar_label.setFixedSize(80, 80)
         main_info_layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.name_label = QLabel(self.tr("Name"))
+        self.name_label = QLabel()
         self.name_label.setStyleSheet("font-size: 18px;")
         main_info_layout.addWidget(self.name_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
-        self.username_label = QLabel("@username")
+        self.username_label = QLabel()
         self.username_label.setStyleSheet("color: #a2a2ac; font-size: 12px;")
         main_info_layout.addWidget(self.username_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
@@ -1905,30 +1911,6 @@ class UserProfile(QWidget):
         layout.addLayout(content_layout)
 
         self.setLayout(layout)
-
-    def refresh(self, username):
-        self.avatar_label.setPixmap(QPixmap())
-        self.name_label.setText("")
-        self.username_label.setText("")
-        self.followers_label.setText("")
-        self.following_label.setText("")
-        self.chats_label.setText("")
-        self.follow_button.setVisible(False)
-        for i in range(self.character_list_layout.count()):
-            item = self.character_list_layout.itemAt(i)
-            if item and item.widget():
-                item.widget().deleteLater()
-        for i in range(self.voice_list_layout.count()):
-            item = self.voice_list_layout.itemAt(i)
-            if item and item.widget():
-                item.widget().deleteLater()
-
-        self.profile_id = username
-        self.is_me = self.profile_id == self.mw.username
-        self.chat_thread.get_user_signal.connect(self._getUser)
-        self.chat_thread.get_user(self.profile_id)
-        self.chat_thread.voices_search_username_signal.connect(self._getVoices)
-        self.chat_thread.voices_search_username(self.profile_id)
 
     def _getFollowing(self, data):
         self.chat_thread.me_following_signal.disconnect()
@@ -2078,18 +2060,18 @@ class UserProfile(QWidget):
         def _followers(data):
             self.chat_thread.user_followers_signal.disconnect()
             for user in data.get('users', {}):
-                card = createCard(self, user)
+                card = createCard(user)
                 card.setFixedWidth(435)
                 followers_users_layout.addWidget(card)
 
         def _following(data):
             self.chat_thread.user_following_signal.disconnect()
             for user in data.get('users', {}):
-                card = createCard(self, user)
+                card = createCard(user)
                 card.setFixedWidth(435)
                 following_users_layout.addWidget(card)
 
-        def createCard(self: UserProfile, data):
+        def createCard(data):
             username = data.get("username")
             u_widget = QFrame()
             u_widget.setStyleSheet(card_style())
@@ -2197,6 +2179,7 @@ class UserProfile(QWidget):
         super().hideEvent(a0)
         self.mw.profile_button.setChecked(False)
         self.mw.profile_button_2.setChecked(False)
+        self.deleteLater()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
