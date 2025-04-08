@@ -86,7 +86,6 @@ class ChatInterface(QWidget):
                 "beta": True
             }
         }
-        self.messages = []
 
         self.initUI()
         self.createRightSidebar()
@@ -297,7 +296,12 @@ class ChatInterface(QWidget):
         self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
 
     def userMessageSignal(self, response):
-        message_stacked = next((x for x in reversed(self.messages) if x.is_user), QStackedWidget)
+        for i in reversed(range(self.messages_layout.count())):
+            item = self.messages_layout.itemAt(i)
+            widget = item.widget()
+            if hasattr(widget, 'is_user') and widget.is_user:
+                message_stacked = widget
+                break
         message = message_stacked.currentWidget()
         message.turn_id = response['turn']['turn_key']['turn_id']
         message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
@@ -309,7 +313,12 @@ class ChatInterface(QWidget):
         if command == 'add_turn':
             self.addMessage(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username), response['turn']['turn_key']['turn_id'],is_user=False)
         elif command == 'update_turn':
-            message_stacked = next((x for x in reversed(self.messages) if x.turn_id == response['turn']['turn_key']['turn_id']), None)
+            for i in reversed(range(self.messages_layout.count())):
+                item = self.messages_layout.itemAt(i)
+                widget = item.widget()
+                if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                    message_stacked = widget
+                    break
             message = message_stacked.currentWidget()
             message.message_label.setText(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username))
             message.adjustSize()
@@ -451,7 +460,6 @@ class ChatInterface(QWidget):
                 self.chat_settings.setValue(f"colors/{key}", value)
                 setattr(self, key, value)
             for i in range(self.messages_layout.count()):
-                item = self.messages_layout.itemAt(i)
                 item = self.messages_layout.itemAt(i)
                 if item.widget():
                     item = item.widget()
@@ -957,7 +965,6 @@ class ChatInterface(QWidget):
         self.messages_layout.addWidget(message_widget, 1,
                                        Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft)
         self.messages_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
-        self.messages.append(message_widget)
         message_widget.addWidget(message_bubble)
         message_widget.setCurrentWidget(message_bubble)
         return message_widget
@@ -1022,13 +1029,38 @@ class ChatInterface(QWidget):
                 self.chat_thread.turn_remove_signal.connect(self._turnRemove)
                 self.chat_thread.turn_remove(self.chat_id, turn_ids)
                 item.widget().deleteLater()
-            elif item and item.spacerItem():
-                pass
+
+    def _rewind(self, data):
+        self.mw.showNotification(self.tr("Rewind successfully"))
+        self.chat_thread.turn_remove_signal.disconnect()
+
+    def rewind(self, turn_id):
+        index = next((i for i, turn in enumerate(self.chat_thread.chat_histories.get(self.chat_id, [])) if turn.get('turn_key', {}).get('turn_id') == turn_id), None)
+        turn_ids_for_remove = []
+
+        if index is not None:
+            for turn in self.chat_thread.chat_histories[self.chat_id][index + 1:]:
+                turn_ids_for_remove.append(turn.get('turn_key', {}).get('turn_id'))
+            self.chat_thread.chat_histories[self.chat_id] = self.chat_thread.chat_histories[self.chat_id][:index + 1]
+        print(self.chat_thread.chat_histories[self.chat_id])
+        print(turn_ids_for_remove)
+
+        for i in range(self.messages_layout.count()):
+            item = self.messages_layout.itemAt(i)
+            if item and item.widget() and item.widget().currentWidget().turn_id in turn_ids_for_remove:
+                self.chat_thread.turn_remove_signal.connect(self._rewind)
+                self.chat_thread.turn_remove(self.chat_id, turn_ids_for_remove)
+                item.widget().deleteLater()
 
     def _turnRegenerate(self, response, turn_id, message_bubble_added):
         command = response['command']
         if command == 'update_turn':
-            message_stacked = next((x for x in reversed(self.messages) if x.turn_id == turn_id), QStackedWidget)
+            for i in reversed(range(self.messages_layout.count())):
+                item = self.messages_layout.itemAt(i)
+                widget = item.widget()
+                if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                    message_stacked = widget
+                    break
             message_stacked.turn_id = response['turn']['turn_key']['turn_id']
             if not message_bubble_added:
                 message = self.createMessage(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username), response['turn']['turn_key']['turn_id'], False)
@@ -1065,6 +1097,10 @@ class ChatInterface(QWidget):
             delete_action = QAction(self.tr("Delete Message"), self)
             delete_action.triggered.connect(lambda event: self.turnRemove(message_bubble.turn_id))
             context_menu.addAction(delete_action)
+
+            rewind_action = QAction(self.tr("Rewind to here"), self)
+            rewind_action.triggered.connect(lambda event: self.rewind(message_bubble.turn_id))
+            context_menu.addAction(rewind_action)
 
             new_chat_here_action = QAction(self.tr("New chat from here"), self)
             new_chat_here_action.triggered.connect(lambda event: self.copyChat(message_bubble.turn_id))
