@@ -204,7 +204,7 @@ class DiscordRPC(QThread):
                 await getattr(self.discord_rpc, "update")(*self.latest_rpc["args"], **self.latest_rpc["kwargs"], start=self.start_time)
                 logging.debug("QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated!")
             except RuntimeError:
-                logging.warning("QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated, but RuntimeError!")
+                logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated, but RuntimeError!")
             except Exception as e:
                 self.mw.settings.setValue("discord_rpc/enable", False)
                 logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
@@ -225,15 +225,12 @@ class DiscordRPC(QThread):
 
     @asyncSlot
     async def close(self):
-        if self.rpc_check:
-            try:
-                await self.discord_rpc.close()
-                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC closed!")
-            except Exception as e:
-                self.mw.settings.setValue("discord_rpc/enable", False)
-                logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
-        else:
-            logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC not initialized")
+        try:
+            await self.discord_rpc.close()
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC closed!")
+        except Exception as e:
+            self.mw.settings.setValue("discord_rpc/enable", False)
+            logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
 
 class ChatThread(QThread):
     finished = pyqtSignal(object)

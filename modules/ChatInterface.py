@@ -860,28 +860,27 @@ class ChatInterface(QWidget):
         self.toggle_info_button.setEnabled(True)
         self.header_character_frame.setVisible(True)
 
-        if self.character.get('visibility') == "PUBLIC":
-            if self.character.get('avatar_file_name'):
-                self.discord_thread.update(
-                    details=self.tr("Chatting with ") + self.character_name,
-                    large_image="https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0',
-                    buttons=[{
-                        "label": self.tr("Open character"),
-                        "url": f"https://character.ai/character/{self.character['short_hash']}"
-                    }]
-                )
+        if self.mw.drpc_enable and self.mw.drpc_show_current_page:
+            if self.character.get('visibility') == "PUBLIC" and self.mw.drpc_show_chat_name:
+                if self.character.get('avatar_file_name'):
+                    self.discord_thread.update(
+                        details=self.tr("Chatting with ") + self.character_name,
+                        large_image="https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0',
+                        buttons=[{
+                            "label": self.tr("Open character"),
+                            "url": f"https://character.ai/character/{self.character['short_hash']}"
+                        }]
+                    )
+                else:
+                    self.discord_thread.update(
+                        details=self.tr("Chatting with ") + self.character_name,
+                        buttons=[{
+                            "label": self.tr("Open character"),
+                            "url": f"https://character.ai/character/{self.character['short_hash']}"
+                        }]
+                    )
             else:
-                self.discord_thread.update(
-                    details=self.tr("Chatting with ") + self.character_name,
-                    buttons=[{
-                        "label": self.tr("Open character"),
-                        "url": f"https://character.ai/character/{self.character['short_hash']}"
-                    }]
-                )
-        else:
-            self.discord_thread.update(
-                details=self.tr("Chatting with ") + self.tr("Secret 🤫")
-            )
+                self.discord_thread.update(details=self.tr("Chatting"))
 
     def _addMessagesFromHistory(self, turns):
         self.clearMessages()

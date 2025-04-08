@@ -94,6 +94,9 @@ class EmiliaNext(QMainWindow):
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
+        self.drpc_show_chat_name = self.settings.value("discord_rpc/show_chat_name", False, type=bool)
+        self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
+        self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = SvgIcons()
         self.version = "3.0.2dev"
         self.beta = version.parse(self.version).is_prerelease
@@ -143,8 +146,7 @@ class EmiliaNext(QMainWindow):
         self.discord_thread = DiscordRPC(self)
         self.discord_thread.start()
         self.threads.append(self.discord_thread)
-        if self.drpc_enable:
-            self.discord_thread.connect()
+        if self.drpc_enable: self.discord_thread.connect()
         self.initUI()
 
         if QDateTime.fromString(self.settings.value("cai_auth/expiration_date")) < QDateTime.currentDateTime():
@@ -445,8 +447,11 @@ class EmiliaNext(QMainWindow):
         def show(event):
             self.top_bar_stacked_widget.addWidget(self.top_widget)
             self.top_bar_stacked_widget.setCurrentWidget(self.top_widget)
-            self.discord_thread.update(
-                details=self.tr("Looking at the main page"))
+            if self.drpc_enable:
+                if self.drpc_show_current_page:
+                    self.discord_thread.update(details=self.tr("Looking at the main page"))
+                else:
+                    self.discord_thread.update()
         main_content_area = QWidget()
         main_content_area.showEvent = show
         self.main_content_layout = QVBoxLayout()
@@ -1095,9 +1100,8 @@ class SearchPage(QWidget):
         self.setStyleSheet("background-color: transparent; border: none;")
 
         self.initUI()
-        self.discord_thread.update(
-            details=self.tr("Looking for a character...")
-        )
+        if self.mw.drpc_enable and self.mw.drpc_show_current_page:
+            self.discord_thread.update(details=self.tr("Search characters..."))
 
     def initUI(self):
         self.layout = QVBoxLayout(self.mw)
@@ -1306,7 +1310,10 @@ class SettingsPage(QWidget):
             }, {
                 "label": self.tr("Discord Rich Presence (Beta)"),
                 "settings": [
-                    {"type": "checkbox", "label": self.tr("Enable DiscordRPC"), "key": "discord_rpc/enable", "def_value": True}
+                    {"type": "checkbox", "label": self.tr("Enable DiscordRPC"), "key": "discord_rpc/enable", "def_value": True},
+                    {"type": "checkbox", "label": self.tr("Display the current page"), "key": "discord_rpc/show_current_page", "def_value": True},
+                    {"type": "checkbox", "label": self.tr("Displaying the chat name"), "key": "discord_rpc/show_chat_name", "def_value": False},
+                    {"type": "checkbox", "label": self.tr("Displaying the nickname of the profile being viewed"), "key": "discord_rpc/show_username", "def_value": False}
                 ]
             }, {
                 "label": self.tr("Languages of Emilia"),
@@ -1703,9 +1710,7 @@ class SettingsPage(QWidget):
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
         self.loadSettings()
-        self.discord_thread.update(
-            details=self.tr("Looking at the settings ...")
-        )
+        if self.mw.drpc_enable and self.mw.drpc_show_current_page: self.discord_thread.update(details=self.tr("Looking at the settings..."))
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
@@ -1749,15 +1754,22 @@ class SettingsPage(QWidget):
                 self.mw.settings.setValue(key, 'true' if widget.isChecked() else 'false')
                 if key == "discord_rpc/enable":
                     self.mw.drpc_enable = widget.isChecked()
-                    self.mw.drpc_available = widget.isChecked()
-                    if widget.isChecked():
+                    if self.mw.drpc_enable:
                         self.discord_thread.connect()
-                        self.discord_thread.update(
-                            state=self.tr("Customizing...")
-                        )
                     else:
                         self.discord_thread.clear()
                         self.discord_thread.close()
+                if key == "discord_rpc/show_chat_name":
+                    self.mw.drpc_show_chat_name = widget.isChecked()
+                if key == "discord_rpc/show_username":
+                    self.mw.drpc_show_username = widget.isChecked()
+                if key == "discord_rpc/show_current_page":
+                    self.mw.drpc_show_current_page = widget.isChecked()
+                if self.mw.drpc_enable:
+                    if self.mw.drpc_show_current_page:
+                        self.discord_thread.update(state=self.tr("Looking at the settings..."))
+                    else:
+                        self.discord_thread.update()
             elif isinstance(widget, QComboBox):
                 if key == "emilia_language":
                     lang = next((k for k, v in self.languages.items() if v["title"] == widget.currentText() and v.get("lang_available", False)), None)
@@ -1951,28 +1963,35 @@ class UserProfile(QWidget):
 
         if self.data.get('avatar_file_name'):
             load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get('avatar_file_name') + '?webp=true&anim=0', 80, 80)
+                "https://characterai.io/i/80/static/avatars/" + self.data.get('avatar_file_name') + '?webp=true&anim=0',
+                80, 80)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
-            self.discord_thread.update(
-                details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
-                large_image="https://characterai.io/i/80/static/avatars/" + self.data.get(
-                    'avatar_file_name') + '?webp=true&anim=0',
-                buttons=[{
-                    "label": "Open profile",
-                    "url": f"https://character.ai/profile/{self.username}"
-                }]
-            )
         else:
             color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
-            self.discord_thread.update(
-                details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
-                buttons=[{
-                    "label": "Open profile",
-                    "url": f"https://character.ai/profile/{self.username}"
-                }]
-            )
+
+        if self.mw.drpc_enable and self.mw.drpc_show_current_page:
+            if self.data.get('avatar_file_name') and self.mw.drpc_show_username:
+                self.discord_thread.update(
+                    details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
+                    large_image="https://characterai.io/i/80/static/avatars/" + self.data.get(
+                        'avatar_file_name') + '?webp=true&anim=0',
+                    buttons=[{
+                        "label": "Open profile",
+                        "url": f"https://character.ai/profile/{self.username}"
+                    }]
+                )
+            elif self.mw.drpc_show_username:
+                self.discord_thread.update(
+                    details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
+                    buttons=[{
+                        "label": "Open profile",
+                        "url": f"https://character.ai/profile/{self.username}"
+                    }]
+                )
+            else:
+                self.discord_thread.update(details=self.tr("Looks at user profile"))
 
         chats_count = 0
         for character in self.data.get('characters', []):
