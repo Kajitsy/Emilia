@@ -1,5 +1,5 @@
 import sys, ctypes, platform, webbrowser, subprocess, datetime, os, json
-import logging
+import logging, inspect
 
 os.makedirs("logs", exist_ok=True)
 
@@ -39,14 +39,14 @@ class LoggerWriter:
     def flush(self):
         self.stream.flush()
 
-if not getattr(sys, 'frozen', False):
-   sys.stdout = LoggerWriter(logging.info, sys.__stdout__)
-   sys.stderr = LoggerWriter(logging.error, sys.__stderr__)
-
 logging.info(f"""
-OS: {platform.system()} {platform.release()} {platform.version()} {platform.architecture()[0]}
-EXE-version: {getattr(sys, 'frozen', False)}
-Python: {sys.version.split()[0]} """)
+OS:           {platform.system()} {platform.release()} {platform.version()} ({platform.architecture()[0]})
+Script Path:  {os.path.abspath(sys.argv[0])}
+Started at:   {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Python:       {sys.version.split()[0]} ({platform.architecture()[0]})
+Frozen EXE:   {getattr(sys, 'frozen', False)}
+Python Path:  {sys.executable}
+Process ID:   {os.getpid()}""")
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow,
@@ -1734,7 +1734,7 @@ class SettingsPage(QWidget):
                     widget.setCurrentText(value)
             elif isinstance(widget, QKeySequenceEdit):
                 widget.setKeySequence(QKeySequence(value))
-        logging.debug("main.py: Settings are loaded")
+        logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings are loaded")
 
     def saveSettings(self):
         for key, widget in self.setting_widgets.items():
@@ -1784,7 +1784,7 @@ class SettingsPage(QWidget):
             elif isinstance(widget, QKeySequenceEdit):
                 self.mw.settings.setValue(key, widget.keySequence().toString())
         self.mw.showNotification(self.tr("Settings saved successfully"))
-        logging.debug("main.py: Settings saved successfully")
+        logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings saved successfully")
 
 class UserProfile(QWidget):
     def __init__(self, main_window, username):

@@ -1,4 +1,4 @@
-import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.signal
+import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.signal, inspect
 import requests, websockets, speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRectF, QLocale
 from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
@@ -70,14 +70,14 @@ class ImageLoaderThread(QThread):
             response.raise_for_status()
             if pixmap.loadFromData(response.content):
                 if not pixmap.save(cache_path):
-                    logging.debug(f"QThreads.py: File saving error: {cache_path}")
+                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File saving error: {cache_path}")
 
             pixmap = pixmap.scaled(self.width, self.height,
                                    Qt.AspectRatioMode.KeepAspectRatioByExpanding,
                                    Qt.TransformationMode.SmoothTransformation)
             self.image_loaded.emit(self.round_qpixmap(pixmap))
         except Exception as e:
-            logging.debug(f"QThreads.py: Image download error: {e}")
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Image download error: {e}")
             self.image_loaded.emit(QPixmap())
 
 class FileLoaderThread(QThread):
@@ -95,9 +95,9 @@ class FileLoaderThread(QThread):
             if response.status_code == 200:
                 self.file.emit(response.content)
             else:
-                logging.debug(f"QThreads.py: File download error: {response.status_code}")
+                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File download error: {response.status_code}")
         except Exception as e:
-            logging.debug(f"QThreads.py: File download error: {e}")
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File download error: {e}")
 
 class DownloadThread(QThread):
     progress = pyqtSignal(int)
@@ -174,10 +174,10 @@ class DiscordRPC(QThread):
         try:
             self.discord_rpc = AioPresence('1358471829165047819')
             self.rpc_connected.emit(await self.discord_rpc.connect())
-            logging.debug("QThreads.py (DiscordRPC.connect): DiscordRPC connected!")
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC connected!")
         except Exception as e:
             self.mw.settings.setValue("discord_rpc/enable", False)
-            logging.error(f"QThreads.py (DiscordRPC.connect): {e}")
+            logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
 
     @asyncSlot
     async def update(self, *args, **kwargs):
@@ -188,52 +188,52 @@ class DiscordRPC(QThread):
                     "kwargs": kwargs
                 }
                 await getattr(self.discord_rpc, "update")(*self.latest_rpc["args"], **self.latest_rpc["kwargs"], start=self.start_time)
-                logging.debug("QThreads.py (DiscordRPC.update): DiscordRPC updated!")
+                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated!")
             except RuntimeError:
-                logging.warning("QThreads.py (DiscordRPC.update): DiscordRPC updated, but RuntimeError!")
+                logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated, but RuntimeError!")
             except Exception as e:
                 self.mw.settings.setValue("discord_rpc/enable", False)
-                logging.error(f"QThreads.py (DiscordRPC.update): {e}")
+                logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
         else:
-            logging.warning(f"QThreads.py (DiscordRPC.update): DiscordRPC not initialized")
+            logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC not initialized")
 
     @asyncSlot
     async def update_wlrpc(self):
         if self.rpc_check:
             try:
                 await getattr(self.discord_rpc, "update")(*self.latest_rpc["args"], **self.latest_rpc["kwargs"], start=self.start_time)
-                logging.debug("QThreads.py (DiscordRPC.update): DiscordRPC updated!")
+                logging.debug("QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated!")
             except RuntimeError:
-                logging.warning("QThreads.py (DiscordRPC.update): DiscordRPC updated, but RuntimeError!")
+                logging.warning("QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC updated, but RuntimeError!")
             except Exception as e:
                 self.mw.settings.setValue("discord_rpc/enable", False)
-                logging.error(f"QThreads.py (DiscordRPC.update): {e}")
+                logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
         else:
-            logging.warning(f"QThreads.py (DiscordRPC.update): DiscordRPC not initialized")
+            logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC not initialized")
 
     @asyncSlot
     async def clear(self):
         if self.rpc_check:
             try:
                 await self.discord_rpc.clear()
-                logging.debug("QThreads.py (DiscordRPC.clear): DiscordRPC cleared!")
+                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC cleared!")
             except Exception as e:
                 self.mw.settings.setValue("discord_rpc/enable", False)
-                logging.error(f"QThreads.py (DiscordRPC.clear): {e}")
+                logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
         else:
-            logging.warning(f"QThreads.py (DiscordRPC.clear): DiscordRPC not initialized")
+            logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC not initialized")
 
     @asyncSlot
     async def close(self):
         if self.rpc_check:
             try:
                 await self.discord_rpc.close()
-                logging.debug("QThreads.py (DiscordRPC.close): DiscordRPC closed!")
+                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC closed!")
             except Exception as e:
                 self.mw.settings.setValue("discord_rpc/enable", False)
-                logging.error(f"QThreads.py (DiscordRPC.close): {e}")
+                logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
         else:
-            logging.warning(f"QThreads.py (DiscordRPC.close): DiscordRPC not initialized")
+            logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): DiscordRPC not initialized")
 
 class ChatThread(QThread):
     finished = pyqtSignal(object)
@@ -318,7 +318,7 @@ class ChatThread(QThread):
             await self.eec.close()
         except Exception as e:
             self.vtube_connect_signal.emit(self.tr("Connection error: ") + str(e))
-            logging.debug(f"QThreads.py: VTube Check Error: {e}")
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): VTube Check Error: {e}")
 
     def create_client(self, token):
         self.token = token
@@ -327,13 +327,12 @@ class ChatThread(QThread):
     def set_cookie(self, cookie):
         self.cookie = cookie
         self.ccaa = ccaa(self.token, cookie)
-        logging.debug("QThreads.py: Cookies are installed")
+        logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Cookies are installed")
 
     async def _call_ccaa(self, method, signal, *args, **kwargs):
         if self.ccaa:
             response = await getattr(self.ccaa, method)(*args, **kwargs)
             signal.emit(response)
-            logging.debug(f"QThreads.py: The {method} was used")
 
     @asyncSlot
     async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id=""):
@@ -343,17 +342,16 @@ class ChatThread(QThread):
             await self.eec.connect()
             await self.eec.UseEmote("Thinks")
             used_emotes.append("Thinks")
-            logging.debug('QThreads.py: The emotion "Thinks" is used')
         if self.mw.settings.value("tr_user_msg", False, type=bool):
             translation = await self.translator.translate(text, targetlang=self.mw.settings_page.languages.get(self.mw.settings.value("tr_user_msg_to", "en_US"))['google_code'])
             text = translation.text
-            logging.debug("QThreads.py: The translator is used on user message")
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on user message")
         while True:
             if self.connect:
                 try:
                     async for response in self.connect.send_message(char, chat_id, text):
                         if response['turn']['author']['author_id'].isdigit() and response['turn']['author']['is_human']:
-                            logging.debug("QThreads.py: The message has been sent")
+                            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been sent")
                             self.chat_histories.get(chat_id, []).append({
                                 'author': {
                                     'is_human': True
@@ -369,7 +367,6 @@ class ChatThread(QThread):
                             })
                             self.user_message_signal.emit(response)
                         if vtube_studio and "Says" not in used_emotes:
-                            logging.debug('QThreads.py: The emotion "Says" is used')
                             await self.eec.UseEmote("Says")
                             used_emotes.append("Says")
                         if not response['turn']['author']['author_id'].isdigit():
@@ -395,17 +392,17 @@ class ChatThread(QThread):
                                 if self.mw.settings.value("tr_char_msg", False, type=bool):
                                     translation = await self.translator.translate(response['turn']['candidates'][0]['raw_content'], targetlang=self.mw.settings_page.languages.get(self.mw.settings.value("tr_char_msg_to", self.mw.current_language))['google_code'])
                                     response['turn']['candidates'][0]['raw_content'] = translation.text
-                                    logging.debug("QThreads.py: The translator is used on character message")
+                                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on character message")
 
                                 self.message_signal.emit(response)
-                                logging.debug("QThreads.py: The message has been received in full")
+                                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been received in full")
                                 await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
                                 return
                             self.message_signal.emit(response)
-                            logging.debug("QThreads.py: The message has been updated")
+                            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except websockets.WebSocketException:
                     self.connect = await self.ccaa.connect()
-                    logging.warning("QThreads.py: Reconnecting to websockets...")
+                    logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
 
     @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):
@@ -419,18 +416,17 @@ class ChatThread(QThread):
         used_emotes = []
         message_bubble_added = False
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
-        logging.debug('QThreads.py: Message Regeneration')
+        logging.debug(f'QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Message Regeneration')
         if vtube_studio:
             await self.eec.connect()
             await self.eec.UseEmote("Thinks")
             used_emotes.append("Thinks")
-            logging.debug('QThreads.py: The emotion "Thinks" is used')
         while True:
             if self.connect:
                 try:
                     async for response in self.connect.generate_turn_candidate(char, chat_id, turn_id, user_name):
                         if vtube_studio and "Says" not in used_emotes:
-                            logging.debug('QThreads.py: The emotion "Says" is used')
+                            logging.debug(f'QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The emotion "Says" is used')
                             await self.eec.UseEmote("Says")
                             used_emotes.append("Says")
                         if not response['turn']['author']['author_id'].isdigit():
@@ -461,19 +457,19 @@ class ChatThread(QThread):
                                             self.mw.settings.value("tr_char_msg_to", self.mw.current_language))[
                                             'google_code'])
                                     response['turn']['candidates'][0]['raw_content'] = translation.text
-                                    logging.debug("QThreads.py: The translator is used on character message")
+                                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on character message")
 
                                 self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
-                                logging.debug("QThreads.py: The message has been received in full")
+                                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been received in full")
                                 await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
                                 return
                             self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
                             message_bubble_added = True
                             turn_id = response['turn']['turn_key']['turn_id']
-                            logging.debug("QThreads.py: The message has been updated")
+                            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except websockets.WebSocketException:
                     self.connect = await self.ccaa.connect()
-                    logging.warning("QThreads.py: Reconnecting to websockets...")
+                    logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
     async def replay(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):
@@ -498,7 +494,7 @@ class ChatThread(QThread):
             response = await self.connect.new_chat(char, self.me['id'], preferred_model_type=preferred_model_type)
             self.new_chat_created_signal.emit(response)
             if chat_id: del self.chat_histories[chat_id]
-            logging.debug("QThreads.py: New chat started")
+            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
 
     @asyncSlot
     async def get_chat(self, char):
@@ -624,7 +620,7 @@ class ChatThread(QThread):
         await self.eec.connect()
         await self.eec.UseEmote(emote)
         await self.eec.close()
-        logging.debug(f'QThreads.py: The emotion of "{emote}" was used')
+        logging.debug(f'QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The emotion of "{emote}" was used')
 
 class VoiceModeThread(QThread):
     connected_signal = pyqtSignal(bool)
@@ -676,7 +672,7 @@ class VoiceModeThread(QThread):
                         QThread.sleep(3)
                 except speech_recognition.UnknownValueError:
                     self.speech_error_signal.emit(True)
-                    logging.warning("QThreads.py: Error converting speech to text")
+                    logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Error converting speech to text")
                     pass
             else:
                 QThread.sleep(1)

@@ -1,6 +1,4 @@
-from modulefinder import replacePackageMap
-
-import aiohttp, websockets, json, uuid, logging
+import aiohttp, websockets, json, uuid, logging, inspect
 from websockets import exceptions
 
 class Async():
@@ -26,7 +24,7 @@ class Async():
             while True:
                 if method == "get":
                     async with session.get(url, headers=headers, params=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py: Async get request: {url}")
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
                         if response.status == 200:
                             return await response.json() if not text else json.loads(await response.text())
                         elif response.status == 400:
@@ -35,7 +33,7 @@ class Async():
                             raise Exception(f"Failed to get data, status code: {response.status}")
                 elif method == "post":
                     async with session.post(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py: Async post request: {url}")
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
                         if response.status == 200:
                             return await response.json() if not text else json.loads(await response.text())
                         elif response.status == 400:
@@ -44,7 +42,7 @@ class Async():
                             raise Exception(f"Failed to get data, status code: {response.status}")
                 elif method == "put":
                     async with session.put(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py: Async put request: {url}")
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
                         if response.status == 200:
                             return await response.json() if not text else json.loads(await response.text())
                         elif response.status == 400:
@@ -67,7 +65,7 @@ class Async():
             while True:
                 if method == "get":
                     async with session.get(url, headers=headers, params=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py: Async get request: {url}")
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
                         if response.status == 200:
                             return await response.json()
                         elif response.status == 400:
@@ -76,7 +74,7 @@ class Async():
                             raise Exception(f"Failed to get data, status code: {response.status}")
                 elif method == "post":
                     async with session.post(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py: Async post request: {url}")
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
                         if response.status == 200:
                             return await response.json()
                         elif response.status == 400:
@@ -85,7 +83,7 @@ class Async():
                             raise Exception(f"Failed to get data, status code: {response.status}")
                 elif method == "put":
                     async with session.put(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py: Async put request: {url}")
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
                         if response.status == 200:
                             return await response.json()
                         elif response.status == 400:
@@ -105,14 +103,14 @@ class Async():
         async with aiohttp.ClientSession() as session:
             if method == "get":
                 async with session.get(url, headers=headers, params=data, timeout=10) as response:
-                    logging.debug(f"CustomCharAI.py: Async get request: {url}")
+                    logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
                     if response.status == 200:
                         return await response.json()
                     else:
                         raise Exception(f"Failed to get data, status code: {response.status}")
             elif method == "post":
                 async with session.post(url, headers=headers, json=data, timeout=10) as response:
-                    logging.debug(f"CustomCharAI.py: Async post request: {url}")
+                    logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
                     if response.status == 200:
                         return await response.json()
                     else:

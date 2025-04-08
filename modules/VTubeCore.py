@@ -19,7 +19,6 @@ class EEC():
 
     def create_vts_with_port(self, port):
         self.vts_api_info['port'] = port
-
         self.vts = vts(self.plugin_info, self.vts_api_info)
 
     async def connect(self):

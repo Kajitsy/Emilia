@@ -57,3 +57,4 @@ gpytranslate==2.0.0
 pyvts==0.3.3
 opencv-python==4.11.0.86
 keyboard==0.13.5
+pypresence==4.3.0
