@@ -29,10 +29,10 @@ pycparser==2.22
 pydantic==2.11.3
 pydantic_core==2.33.1
 pyparsing==3.2.3
-PyQt6==6.8.1
-PyQt6-Qt6==6.8.2
-PyQt6-WebEngine==6.8.0
-PyQt6-WebEngine-Qt6==6.8.2
+PyQt6==6.9.0
+PyQt6-Qt6==6.9.0
+PyQt6-WebEngine==6.9.0
+PyQt6-WebEngine-Qt6==6.9.0
 PyQt6_sip==13.10.0
 pywin32-ctypes==0.2.3
 qasync==0.27.1
@@ -50,7 +50,7 @@ typing-inspection==0.4.0
 typing_extensions==4.13.1
 urllib3==2.3.0
 websockets==13.1
-yarl==1.18.3
+yarl==1.19.0
 zope.event==5.0
 zope.interface==7.2
 gpytranslate==2.0.0

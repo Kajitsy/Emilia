@@ -1,8 +1,8 @@
 
 /.idea
 /cache
-/__pycache__
-/modules/__pycache__
+*__pycache__
 data/VTube_Token.txt
-installer.iss
 /logs
+/dist
+/build
