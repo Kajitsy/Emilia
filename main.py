@@ -661,7 +661,28 @@ class EmiliaNext(QMainWindow):
 
         for key, value in categories.items():
             btn = QPushButton(value)
-            btn.setStyleSheet(tab_button_style())
+            btn.setStyleSheet("""
+        QPushButton {
+            background-color: #494a4d;
+            color: #e8eaed;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            text-align: center;
+        }
+        QPushButton:disabled {
+            background-color: #555;
+            color: #a2a2ac;
+        }
+        QPushButton:hover {
+            background-color: #5f6368;
+        }
+        QPushButton:pressed, QPushButton:checked {
+            background-color: #494a4d;
+            border-bottom: 5px solid #555;
+            padding-bottom: 3px;
+        }
+    """)
             btn.setObjectName(key)
             btn.setCheckable(True)
             btn.clicked.connect(lambda checked, b=btn, cat=key: self.onCategoryClicked(b, cat))
@@ -971,8 +992,8 @@ class EmiliaNext(QMainWindow):
 
         self.featured_chats = results[0].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
         self.trending_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_popular_characters_l30d_v1', [])
-        self.recommended_chats = results[2].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
-        self.popular_chats = results[3].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+        self.popular_chats = results[2].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+        self.recommended_chats = results[3].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
 
         for character in self.popular_chats:
             card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
