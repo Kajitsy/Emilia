@@ -49,7 +49,6 @@ standard-chunk==3.13.0
 typing-inspection==0.4.0
 typing_extensions==4.13.1
 urllib3==2.3.0
-websockets==13.1
 yarl==1.19.0
 zope.event==5.0
 zope.interface==7.2

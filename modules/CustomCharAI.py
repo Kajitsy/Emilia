@@ -1,5 +1,4 @@
-import aiohttp, websockets, json, uuid, logging, inspect
-from websockets import exceptions
+import aiohttp, json, uuid, logging, inspect
 
 class Async():
     def __init__(self, token, auth_cookie=""):
@@ -365,21 +364,22 @@ class Async():
     async def resurrect(self, chat_id):
         response = await self.request(f"chat/{chat_id}/resurrect", method="get", neo=True)
         return response
-
 class ChatClient:
     def __init__(self, token: str = ""):
         self.token = token
+        self.session = None
         self.ws = None
 
     async def __aenter__(self):
+        self.session = aiohttp.ClientSession()
         cookie = f'HTTP_AUTHORIZATION="Token {self.token}"'
         try:
-            self.ws = await websockets.connect(
+            self.ws = await self.session.ws_connect(
                 'wss://neo.character.ai/ws/',
-                extra_headers={'Cookie': cookie}
+                headers={'Cookie': cookie}
             )
-        except exceptions.InvalidStatusCode as e:
-            if e.status_code == 403:
+        except aiohttp.WSServerHandshakeError as e:
+            if e.status == 403:
                 raise Exception('Invalid token')
             else:
                 raise e
@@ -391,6 +391,8 @@ class ChatClient:
     async def close(self):
         if self.ws:
             await self.ws.close()
+        if self.session:
+            await self.session.close()
 
     async def __call__(self, token: str = None):
         if token:
@@ -416,13 +418,13 @@ class ChatClient:
             }
         }
 
-        await self.ws.send(json.dumps(payload))
-        response = json.loads(await self.ws.recv())
+        await self.ws.send_str(json.dumps(payload))
+        response = json.loads((await self.ws.receive()).data)
 
         if 'chat' not in response:
-            raise Exception(response['comment'])
+            raise Exception(response.get('comment', 'Unknown error'))
 
-        answer = json.loads(await self.ws.recv())['turn']
+        answer = json.loads((await self.ws.receive()).data)['turn']
         return response['chat'], answer
 
     async def send_message(self, char: str, chat_id: str, text: str, author: dict = {}):
@@ -444,16 +446,20 @@ class ChatClient:
             }
         }
 
-        await self.ws.send(json.dumps(message))
+        await self.ws.send_str(json.dumps(message))
 
         async def response_stream():
             while True:
-                response = json.loads(await self.ws.recv())
-
-                if 'turn' not in response:
-                    raise Exception(response['comment'])
-
-                yield response
+                msg = await self.ws.receive()
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    response = json.loads(msg.data)
+                    if 'turn' not in response:
+                        raise Exception(response['comment'])
+                    yield response
+                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                    break
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    raise Exception("WebSocket Error")
 
         async for result in response_stream():
             yield result
@@ -471,16 +477,20 @@ class ChatClient:
             }
         }
 
-        await self.ws.send(json.dumps(message))
+        await self.ws.send_str(json.dumps(message))
 
         async def response_stream():
             while True:
-                response = json.loads(await self.ws.recv())
-
-                if 'turn' not in response:
-                    raise Exception(response['comment'])
-
-                yield response
+                msg = await self.ws.receive()
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    response = json.loads(msg.data)
+                    if 'turn' not in response:
+                        raise Exception(response['comment'])
+                    yield response
+                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                    break
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    raise Exception("WebSocket Error")
 
         async for result in response_stream():
             yield result
@@ -496,8 +506,8 @@ class ChatClient:
                 'new_candidate_raw_content': text
             }
         }
-        await self.ws.send(json.dumps(payload))
-        response = json.loads(await self.ws.recv())
+        await self.ws.send_str(json.dumps(payload))
+        response = json.loads((await self.ws.receive()).data)
         if 'turn' not in response:
             raise Exception(response['comment'])
         return response['turn']
