@@ -57,7 +57,8 @@ from PyQt6.QtWidgets import (
     QSizePolicy, QStackedWidget,
     QComboBox, QSpacerItem,
     QMenu, QSystemTrayIcon,
-    QProgressBar, QKeySequenceEdit,)
+    QProgressBar, QKeySequenceEdit,
+    QPlainTextEdit)
 from PyQt6.QtGui import (
     QMouseEvent, QAction,
     QFontMetrics, QIntValidator,
@@ -1282,7 +1283,7 @@ class SettingsPage(QWidget):
             {
                 "label": self.tr("Character.AI Settings"),
                 "settings": [
-                    {"type": "pushbutton", "label": self.tr("Character.AI Login") + " | " + self.tr("Valid until: ") + self.mw.settings.value('cai_auth/expiration_date') if self.mw.settings.value('cai_auth/expiration_date') else self.tr("Character.AI Login"),
+                    {"type": "pushbutton", "label": self.tr("Character.AI Login") + "\n" + self.tr("Valid until: ") + self.mw.settings.value('cai_auth/expiration_date') if self.mw.settings.value('cai_auth/expiration_date') else self.tr("Character.AI Login"),
                      "buttonlabel": self.tr("Re-Auth with Character.AI") if self.mw.token else self.tr("Auth with Character.AI") ,
                      "key": "auth_cookie_get", "click": self.getCookies}
                 ]
@@ -1308,13 +1309,14 @@ class SettingsPage(QWidget):
                      "key": "vtube/check_connect", "click": self.vtubeCheck},
                 ]
             }, {
-                "label": self.tr("Discord Rich Presence (Beta)"),
+                "label": self.tr("Discord Rich Presence"),
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Enable DiscordRPC"), "key": "discord_rpc/enable", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Display the current page"), "key": "discord_rpc/show_current_page", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Displaying the chat name"), "key": "discord_rpc/show_chat_name", "def_value": False},
                     {"type": "checkbox", "label": self.tr("Displaying the nickname of the profile being viewed"), "key": "discord_rpc/show_username", "def_value": False}
-                ]
+                ],
+                "beta": True
             }, {
                 "label": self.tr("Languages of Emilia"),
                 "settings": [
@@ -1339,9 +1341,14 @@ class SettingsPage(QWidget):
                      "key": "other/logs_folder",
                      "click": lambda: os.startfile(os.path.join(os.getcwd(), "logs"))},
                 ]
+            }, {
+                "label": "",
+                "settings": [
+                    {"label": self.tr("(Beta)"), "key": "about/beta"}
+                ],
+                "beta": True
             },
         ]
-
 
         self.setting_widgets = {}
         self.setting_data = {}
@@ -1575,6 +1582,7 @@ class SettingsPage(QWidget):
 
         settings_viewport = QWidget()
         settings_viewport.setStyleSheet("background-color: transparent; border: none;")
+        settings_viewport.setFixedWidth(780)
         settings_layout = QVBoxLayout()
         settings_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         settings_viewport.setLayout(settings_layout)
@@ -1582,51 +1590,71 @@ class SettingsPage(QWidget):
 
         for setting_group in self.settings_data:
             group_layout = QVBoxLayout()
+            group_beta = setting_group.get('beta', False)
             group_label = QLabel(setting_group["label"])
+            if group_beta:
+                group_label.setText(f'{setting_group["label"]} {self.tr("(Beta)")}')
             group_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
             group_layout.addWidget(group_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
             for setting in setting_group["settings"]:
                 layout = QHBoxLayout()
                 if setting.get("label"):
-                    label = QLabel(setting["label"])
+                    label = QPlainTextEdit()
+                    label.setReadOnly(True)
+
+                    label.setPlainText(setting["label"])
                     layout.addWidget(label)
-                    layout.addStretch(1)
+
                 key = setting["key"]
 
-                if setting["type"] == "lineedit":
-                    widget = QLineEdit()
-                    if setting.get("validator"):
-                        widget.setValidator(setting["validator"])
-                    widget.setObjectName(key)
-                    widget.setEchoMode(setting.get("echo", QLineEdit.EchoMode.Normal))
-                    widget.setStyleSheet(lineedit_style())
-                elif setting["type"] == "checkbox":
-                    widget = CheckablePushButton()
-                    widget.setObjectName(key)
-                elif setting["type"] == "pushbutton":
-                    widget = QPushButton(setting["buttonlabel"])
-                    widget.setObjectName(key)
-                    widget.setStyleSheet(button_style())
-                    widget.clicked.connect(setting["click"])
-                elif setting["type"] == "combobox":
-                    widget = QComboBox()
-                    widget.setObjectName(key)
-                    widget.setStyleSheet(combobox_style())
-                    widget.addItems(setting['items'])
-                elif setting["type"] == "keybind":
-                    widget = QKeySequenceEdit()
-                    widget.setObjectName(key)
-                    widget.setStyleSheet(keysequenceedit_style())
-                    widget.keySequenceChanged.connect(lambda seq, edit=widget: edit.setKeySequence(QKeySequence(seq[0])) if seq.count() > 1 else None)
+                if setting.get('type'):
+                    layout.addStretch(1)
+                    if setting["type"] == "lineedit":
+                        widget = QLineEdit()
+                        if setting.get("validator"):
+                            widget.setValidator(setting["validator"])
+                        widget.setObjectName(key)
+                        widget.setEchoMode(setting.get("echo", QLineEdit.EchoMode.Normal))
+                        widget.setStyleSheet(lineedit_style())
+                    elif setting["type"] == "checkbox":
+                        widget = CheckablePushButton()
+                        widget.setObjectName(key)
+                    elif setting["type"] == "pushbutton":
+                        widget = QPushButton(setting["buttonlabel"])
+                        widget.setObjectName(key)
+                        widget.setStyleSheet(button_style())
+                        widget.clicked.connect(setting["click"])
+                    elif setting["type"] == "combobox":
+                        widget = QComboBox()
+                        widget.setObjectName(key)
+                        widget.setStyleSheet(combobox_style())
+                        widget.addItems(setting['items'])
+                    elif setting["type"] == "keybind":
+                        widget = QKeySequenceEdit()
+                        widget.setObjectName(key)
+                        widget.setStyleSheet(keysequenceedit_style())
+                        widget.keySequenceChanged.connect(lambda seq, edit=widget: edit.setKeySequence(QKeySequence(seq[0])) if seq.count() > 1 else None)
 
-                layout.addWidget(widget)
-                group_layout.addLayout(layout)
-                self.setting_widgets[setting["key"]] = widget
-                self.setting_data[setting["key"]] = setting
+                    layout.addWidget(widget)
 
-            settings_layout.addLayout(group_layout)
-            settings_layout.addWidget(QFrame())
+                if group_beta:
+                    if self.mw.beta:
+                        group_layout.addLayout(layout)
+                        self.setting_widgets[setting["key"]] = widget
+                        self.setting_data[setting["key"]] = setting
+                else:
+                    group_layout.addLayout(layout)
+                    self.setting_widgets[setting["key"]] = widget
+                    self.setting_data[setting["key"]] = setting
+
+            if group_beta:
+                if self.mw.beta:
+                    settings_layout.addLayout(group_layout)
+                    settings_layout.addWidget(QFrame())
+            else:
+                settings_layout.addLayout(group_layout)
+                settings_layout.addWidget(QFrame())
 
         return scroll_area, settings_viewport, settings_layout
 
