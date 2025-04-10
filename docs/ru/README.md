@@ -11,7 +11,7 @@
 
 
 2. из исходного кода:
-- Требуется Python 3.10-3.13.2
+- Требуется Python 3.10-3.13.3
 - [Сам исходный код](https://github.com/Kajitsy/Emilia/archive/refs/heads/emilia.zip)
 - 1. Установите Python
 - - Проверьте доступноть Python в командной строке командой `python --version`
