@@ -1,5 +1,5 @@
 #define MyAppName "Emilia"
-#define MyAppVersion "3.0.2"
+#define MyAppVersion "3.0.3"
 #define MyAppPublisher "Kajitsy"
 #define MyAppURL "https://github.com/Kajitsy/Emilia"
 #define MyAppExeName "emilia.exe"
