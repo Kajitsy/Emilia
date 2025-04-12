@@ -76,7 +76,7 @@ from PyQt6.QtMultimedia import QMediaDevices
 from qasync import QEventLoop
 from packaging import version
 
-from modules.ChatInterface import ChatInterface
+from modules.ChatInterface import ChatInterface, GroupChatInterface
 from modules.GetCAICookies import GetCookies
 from modules.QCustom import HorizontalScrollArea, CheckablePushButton, ClickableFrame, LeftSidebar
 from modules.QThreads import *
@@ -156,7 +156,7 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.create_client(self.token)
                 self.chat_thread.create_connect()
 
-                self.chat_thread.get_recent_chats()
+                self.chat_thread.get_recent_chats(True)
                 self.chat_thread.get_trythis_chats()
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_me()
@@ -316,6 +316,81 @@ class EmiliaNext(QMainWindow):
         menu_button.setStyleSheet(recent_delete_button_style())
         menu_button.setVisible(False)
         menu_button.clicked.connect(lambda: showContextMenu(menu_button.pos(), card))
+        chat_layout.addWidget(menu_button, 0, Qt.AlignmentFlag.AlignRight)
+        setattr(card, 'menu_button', menu_button)
+
+        chat_layout.addStretch()
+        card.setLayout(chat_layout)
+
+        self.recent_chat_layout.addWidget(card)
+        self.left_sidebar.resizeCard(card)
+        return card
+
+    def addRecentGroupChatCard(self, chat_data):
+        def openChat(event):
+            if event.button() == Qt.MouseButton.LeftButton:
+                self.openGroupChat(chat_data)
+                pass
+
+        card = ClickableFrame()
+        card.setObjectName(chat_data['id'])
+        card.setFixedWidth(self.settings.value("left_sidebar_width", 255, type=int))
+        card.setStyleSheet(card_style())
+        card.default_style = card_style()
+        card.press_style = card_pressed_style()
+        card.mousePress = openChat
+        card.enterEvent = lambda event: menu_button.setVisible(True) if menu_button.visibility else None
+        card.leaveEvent = lambda event: menu_button.setVisible(False)
+        card.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        picture = chat_data.get('picture')
+
+        chat_layout = QHBoxLayout()
+        chat_layout.setContentsMargins(0, 0, 0, 0)
+
+        avatar_label = QLabel()
+        avatar_label.setFixedSize(50, 50)
+        avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        chat_layout.addWidget(avatar_label)
+        setattr(card, 'avatar_label', avatar_label)
+
+        if picture:
+            load_avatar_thread = ImageLoaderThread(
+                "https://characterai.io/i/80/static/avatars/" + picture + '?webp=true&anim=0',
+                45, 45)
+            load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
+            load_avatar_thread.start()
+            self.threads.append(load_avatar_thread)
+        else:
+            color_avatar(avatar_label, 45, 45, chat_data["title"])
+
+        avatar_label_2 = QLabel()
+        avatar_label_2.setFixedSize(60, 60)
+        avatar_label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        chat_layout.addWidget(avatar_label_2)
+        setattr(card, 'avatar_label_2', avatar_label_2)
+
+        if picture:
+            load_avatar_thread = ImageLoaderThread(
+                "https://characterai.io/i/80/static/avatars/" + picture + '?webp=true&anim=0',
+                55, 55)
+            load_avatar_thread.image_loaded.connect(avatar_label_2.setPixmap)
+            load_avatar_thread.start()
+            self.threads.append(load_avatar_thread)
+        else:
+            color_avatar(avatar_label_2, 55, 55, chat_data["title"])
+        avatar_label_2.setVisible(False)
+
+        name_label = QLabel(chat_data["title"])
+        name_label.setStyleSheet("background-color: transparent; border: none; color: white;")
+        chat_layout.addWidget(name_label, 1)
+        setattr(card, 'name_label', name_label)
+
+        menu_button = QPushButton()
+        menu_button.visibility = True
+        menu_button.setIcon(self.svg_icons.ellipsis())
+        menu_button.setStyleSheet(recent_delete_button_style())
+        menu_button.setVisible(False)
         chat_layout.addWidget(menu_button, 0, Qt.AlignmentFlag.AlignRight)
         setattr(card, 'menu_button', menu_button)
 
@@ -903,7 +978,7 @@ class EmiliaNext(QMainWindow):
         self.current_chat_interface = None
         self.top_widget.setVisible(True)
 
-    def openChat(self, character_id, character_name, chat_id, card=None):
+    def openChat(self, character_id=None, character_name=None, chat_id=None, card=None):
         if self.current_chat_interface:
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
@@ -917,6 +992,20 @@ class EmiliaNext(QMainWindow):
         self.current_chat_interface.chat_id = chat_id
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
+        self.main_content_area.addWidget(self.current_chat_interface)
+        self.main_content_area.setCurrentWidget(self.current_chat_interface)
+
+    def openGroupChat(self, chat_data):
+        if self.current_chat_interface:
+            self.main_content_area.removeWidget(self.current_chat_interface)
+            self.current_chat_interface.deleteLater()
+            self.chat_thread.message_signal.disconnect()
+            if self.current_chat_interface.voice_enabled:
+                self.chat_thread.replay_signal.disconnect()
+            self.current_chat_interface = None
+
+
+        self.current_chat_interface = GroupChatInterface(self, chat_data)
         self.main_content_area.addWidget(self.current_chat_interface)
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
@@ -955,11 +1044,18 @@ class EmiliaNext(QMainWindow):
 
         self.recent_chats = chats
         for chat in self.recent_chats:
-            card = self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'))
-            if self.current_chat_interface is not None:
-                if self.current_chat_interface.chat_id == chat.get('id'):
-                    setattr(self.current_chat_interface, 'recent_card', card)
-                    card.setStyleSheet(card.press_style)
+            if chat.get("character_id"):
+                card = self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'))
+                if self.current_chat_interface is not None:
+                    if self.current_chat_interface.chat_id == chat.get('id'):
+                        setattr(self.current_chat_interface, 'recent_card', card)
+                        card.setStyleSheet(card.press_style)
+            else:
+                card = self.addRecentGroupChatCard(chat)
+                if self.current_chat_interface is not None:
+                    if self.current_chat_interface.chat_id == chat.get('id'):
+                        setattr(self.current_chat_interface, 'recent_card', card)
+                        card.setStyleSheet(card.press_style)
 
     def addFeaturedVoices(self, voices):
         for i in reversed(range(self.featured_voices_layout.count())):

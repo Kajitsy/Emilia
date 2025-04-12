@@ -462,6 +462,43 @@ class ChatClient:
         async for result in response_stream():
             yield result
 
+    async def send_group_message(self, chat_id: str, text: str, author: dict = {}):
+        message = {
+            'command': 'create_turn',
+            'payload': {
+                'turn': {
+                    'turn_key': {
+                        'chat_id': chat_id
+                    },
+                    'author': author,
+                    'candidates': [
+                        {
+                            'raw_content': text
+                        }
+                    ]
+                }
+            }
+        }
+
+        await self.ws.send_str(json.dumps(message))
+
+        async def response_stream():
+            while True:
+                msg = await self.ws.receive()
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    response = json.loads(msg.data)
+                    print(response)
+                    if 'turn' not in response:
+                        raise Exception(response['comment'])
+                    yield response
+                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                    break
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    raise Exception("WebSocket Error")
+
+        async for result in response_stream():
+            yield result
+
     async def generate_turn_candidate(self, char: str, chat_id: str, turn_id: str, user_name: str = ""):
         message = {
             'command': 'generate_turn_candidate',
