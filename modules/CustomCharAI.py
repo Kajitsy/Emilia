@@ -48,6 +48,24 @@ class Async():
                             pass
                         else:
                             raise Exception(f"Failed to get data, status code: {response.status}")
+                elif method == "delete":
+                    async with session.delete(url, headers=headers, json=data, timeout=100) as response:
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async delete request: {url}")
+                        if response.status == 200:
+                            return await response.json() if not text else json.loads(await response.text())
+                        elif response.status == 400:
+                            pass
+                        else:
+                            raise Exception(f"Failed to get data, status code: {response.status}")
+                elif method == "patch":
+                    async with session.patch(url, headers=headers, json=data, timeout=100) as response:
+                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async delete request: {url}")
+                        if response.status == 200:
+                            return await response.json() if not text else json.loads(await response.text())
+                        elif response.status == 400:
+                            pass
+                        else:
+                            raise Exception(f"Failed to get data, status code: {response.status}")
                 else:
                     raise ValueError("Invalid method")
 
@@ -362,6 +380,67 @@ class Async():
     async def resurrect(self, chat_id):
         response = await self.request(f"chat/{chat_id}/resurrect", method="get", neo=True)
         return response
+
+    async def gc_create(self, title: str, character_ids: list):
+        data = {
+            'characters': character_ids,
+            'title': title,
+            'settings': {
+                'anyone_can_join': True,
+                'require_approval': False
+            },
+            'visibility': 'VISIBILITY_UNLISTED',
+            'with_greeting': True
+        }
+        response = await self.request(f"muroom/create", data, "post", True)
+        return response
+
+    async def gc_delete(self, chat_id):
+        response = await self.request(f"muroom/{chat_id}", method="delete", neo=True)
+        return response
+
+    async def gc_rename(self, chat_id, new_title):
+        data = [
+            {
+                "op": "replace",
+                "path": f"/muroom/{chat_id}",
+                "value": {
+                    "title": new_title
+                }
+            }
+        ]
+
+        response = await self.request(f"muroom/{chat_id}/", data, method="patch", neo=True)
+        return response
+
+    async def gc_add(self, chat_id, char_ids: list):
+        data = [
+            {
+                "op": "add",
+                "path": f"/muroom/{chat_id}/characters",
+                "value": {
+                    "id": cid
+                }
+            } for cid in char_ids
+        ]
+
+        response = await self.request(f"muroom/{chat_id}/", data, method="patch", neo=True)
+        return response
+
+    async def gc_remove(self, chat_id, char_ids: list):
+        data = [
+            {
+                "op": "remove",
+                "path": f"/muroom/{chat_id}/characters",
+                "value": {
+                    "id": cid
+                }
+            } for cid in char_ids
+        ]
+
+        response = await self.request(f"muroom/{chat_id}/", data, method="patch", neo=True)
+        return response
+
 class ChatClient:
     def __init__(self, token: str = ""):
         self.token = token
@@ -487,7 +566,6 @@ class ChatClient:
                 msg = await self.ws.receive()
                 if msg.type == aiohttp.WSMsgType.TEXT:
                     response = json.loads(msg.data)
-                    print(response)
                     if 'turn' not in response:
                         raise Exception(response['comment'])
                     yield response
