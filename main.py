@@ -161,7 +161,6 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_me()
                 self.chat_thread.get_main_page_chats()
-                # self.chat_thread.get_user_settings()
                 self.chat_thread.get_available_models()
                 self.chat_thread.get_available_models_git()
 

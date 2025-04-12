@@ -541,43 +541,7 @@ class ChatClient:
         async for result in response_stream():
             yield result
 
-    async def send_group_message(self, chat_id: str, text: str, author: dict = {}):
-        message = {
-            'command': 'create_turn',
-            'payload': {
-                'turn': {
-                    'turn_key': {
-                        'chat_id': chat_id
-                    },
-                    'author': author,
-                    'candidates': [
-                        {
-                            'raw_content': text
-                        }
-                    ]
-                }
-            }
-        }
-
-        await self.ws.send_str(json.dumps(message))
-
-        async def response_stream():
-            while True:
-                msg = await self.ws.receive()
-                if msg.type == aiohttp.WSMsgType.TEXT:
-                    response = json.loads(msg.data)
-                    if 'turn' not in response:
-                        raise Exception(response['comment'])
-                    yield response
-                elif msg.type == aiohttp.WSMsgType.CLOSED:
-                    break
-                elif msg.type == aiohttp.WSMsgType.ERROR:
-                    raise Exception("WebSocket Error")
-
-        async for result in response_stream():
-            yield result
-
-    async def generate_turn_candidate(self, char: str, chat_id: str, turn_id: str, user_name: str = ""):
+    async def generate_turn_candidate(self, char: str, chat_id: str, turn_id, user_name: str = ""):
         message = {
             'command': 'generate_turn_candidate',
             'payload': {
@@ -624,3 +588,85 @@ class ChatClient:
         if 'turn' not in response:
             raise Exception(response['comment'])
         return response['turn']
+
+    async def gc_reset_chat(self, chat_id: str, username: str = ""):
+        payload = {
+            'command': 'create_turn',
+            'payload': {
+                'turn': {
+                    'context_reset': True,
+                    'turn_key': {
+                        'chat_id': chat_id
+                    },
+                    'author': {
+                        'name': username
+                    },
+                    'candidates': [{
+                        'raw_content': 'restart'
+                    }]
+                },
+            }
+        }
+
+        await self.ws.send_str(json.dumps(payload))
+        response = json.loads((await self.ws.receive()).data)
+        return response
+
+    async def gc_send_message(self, chat_id: str, text: str, author: dict = {}):
+        message = {
+            'command': 'create_turn',
+            'payload': {
+                'turn': {
+                    'turn_key': {
+                        'chat_id': chat_id
+                    },
+                    'author': author,
+                    'candidates': [
+                        {
+                            'raw_content': text
+                        }
+                    ]
+                }
+            }
+        }
+
+        await self.ws.send_str(json.dumps(message))
+
+        response = json.loads((await self.ws.receive()).data)
+        return response
+
+    async def gc_generate_turn(self, char: str, chat_id: str, user_name: str = ""):
+        message = {
+            'command': 'generate_turn',
+            'payload': {
+                "chat_type": "TYPE_MU_ROOM",
+                'chat_id': chat_id,
+                'user_name': user_name,
+                'smart_reply': 'CHARACTERS',
+                'smart_reply_delay': 0,
+                'character_id': char
+            },
+            'character_id': char
+        }
+        print(message)
+
+        await self.ws.send_str(json.dumps(message))
+
+        async def response_stream():
+            while True:
+                msg = await self.ws.receive()
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    response = json.loads(msg.data)
+                    print(response)
+                    if 'turn' not in response:
+                        raise Exception(response['comment'])
+                    yield response
+                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                    break
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    raise Exception("WebSocket Error")
+
+        async for result in response_stream():
+            yield result
+
+

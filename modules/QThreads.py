@@ -307,6 +307,7 @@ class ChatThread(QThread):
     async def create_connect(self):
         self.connect = await self.ccaa.connect()
         self.connected_signal.emit(True)
+        print(await self.connect.gc_reset_chat("a145475a-87dc-40ea-aa3b-91ef21dec746"))
 
     @asyncSlot
     async def check_vtube_connect(self):
@@ -403,38 +404,47 @@ class ChatThread(QThread):
                     logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
 
     @asyncSlot
-    async def send_group_message(self, chat_id, text, tts_enabled=False, voice_id=""):
+    async def gc_send_message(self, chat_id, text):
         if self.mw.settings.value("tr_user_msg", False, type=bool):
             translation = await self.translator.translate(text, targetlang=self.mw.settings_page.languages.get(self.mw.settings.value("tr_user_msg_to", "en_US"))['google_code'])
             text = translation.text
             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on user message")
+        if self.connect:
+            try:
+                response = await self.connect.gc_send_message(chat_id, text)
+                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been sent")
+                self.chat_histories.get(chat_id, []).append({
+                    'author': {
+                        'is_human': True
+                    },
+                    'candidates': [{
+                        'raw_content': text,
+                        'is_final': True
+                    }],
+                    'turn_key': {
+                        'chat_id': chat_id,
+                        'turn_id': response['turn']['turn_key']['turn_id']
+                    }
+                })
+                self.user_message_signal.emit(response)
+            except websockets.WebSocketException:
+                self.connect = await self.ccaa.connect()
+                logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
+
+    @asyncSlot
+    async def gc_turn_generate(self, char, chat_id, user_name="", tts_enabled=False, voice_id=""):
         while True:
             if self.connect:
                 try:
-                    async for response in self.connect.send_group_message(chat_id, text):
-                        if response['turn']['author']['author_id'].isdigit() and response['turn']['author']['is_human']:
-                            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been sent")
-                            self.chat_histories.get(chat_id, []).append({
-                                'author': {
-                                    'is_human': True
-                                },
-                                'candidates': [{
-                                    'raw_content': text,
-                                    'is_final': True
-                                }],
-                                'turn_key': {
-                                    'chat_id': chat_id,
-                                    'turn_id': response['turn']['turn_key']['turn_id']
-                                }
-                            })
-                            self.user_message_signal.emit(response)
+                    async for response in self.connect.gc_generate_turn(char, chat_id, user_name=user_name):
                         if not response['turn']['author']['author_id'].isdigit():
                             if response.get('turn', {}).get('candidates', [])[0].get('is_final'):
-                                # if tts_enabled:
-                                #     char_name = ""
-                                #     if self.characters.get(char, {}):
-                                #         char_name = self.characters[char]['character']['name']
-                                #     await self.replay(response['turn']['primary_candidate_id'], chat_id, response['turn']['turn_key']['turn_id'], voice_id, char_name)
+                                if tts_enabled:
+                                    char_name = ""
+                                    if self.characters.get(char, {}):
+                                        char_name = self.characters[char]['character']['name']
+                                    await self.replay(response['turn']['primary_candidate_id'], chat_id,
+                                                      response['turn']['turn_key']['turn_id'], voice_id, char_name)
                                 self.chat_histories.get(chat_id, []).append({
                                     'author': {
                                         'is_human': False
@@ -449,19 +459,26 @@ class ChatThread(QThread):
                                     }
                                 })
                                 if self.mw.settings.value("tr_char_msg", False, type=bool):
-                                    translation = await self.translator.translate(response['turn']['candidates'][0]['raw_content'], targetlang=self.mw.settings_page.languages.get(self.mw.settings.value("tr_char_msg_to", self.mw.current_language))['google_code'])
+                                    translation = await self.translator.translate(
+                                        response['turn']['candidates'][0]['raw_content'], targetlang=
+                                        self.mw.settings_page.languages.get(
+                                            self.mw.settings.value("tr_char_msg_to", self.mw.current_language))[
+                                            'google_code'])
                                     response['turn']['candidates'][0]['raw_content'] = translation.text
-                                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on character message")
+                                    logging.debug(
+                                        f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on character message")
 
                                 self.message_signal.emit(response)
-                                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been received in full")
-                                await self._call_ccaa('resurrect', self.resurrect_signal, chat_id)
+                                logging.debug(
+                                    f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been received in full")
                                 return
                             self.message_signal.emit(response)
-                            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
+                            logging.debug(
+                                f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except websockets.WebSocketException:
                     self.connect = await self.ccaa.connect()
-                    logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
+                    logging.warning(
+                        f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
 
     @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):
