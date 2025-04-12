@@ -92,26 +92,20 @@ class Async():
                 else:
                     raise ValueError("Invalid method")
 
-    async def custom_request(self, url, data = None, method = "get"):
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Token {self.token}",
-            "Cookie": f"web-next-auth={self.auth_cookie}"
-        }
-
+    async def custom_request(self, url, data = None, method = "get", text=False,headers={}):
         async with aiohttp.ClientSession() as session:
             if method == "get":
                 async with session.get(url, headers=headers, params=data, timeout=10) as response:
                     logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
                     if response.status == 200:
-                        return await response.json()
+                        return await response.json() if not text else json.loads(await response.text())
                     else:
                         raise Exception(f"Failed to get data, status code: {response.status}")
             elif method == "post":
                 async with session.post(url, headers=headers, json=data, timeout=10) as response:
                     logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
                     if response.status == 200:
-                        return await response.json()
+                        return await response.json() if not text else json.loads(await response.text())
                     else:
                         raise Exception(f"Failed to get data, status code: {response.status}")
             else:
@@ -212,6 +206,10 @@ class Async():
     async def get_available_models(self):
         response = await self.request(f"get-available-models", neo=True)
         return response.get('available_models', [])
+
+    async def get_available_models_git(self):
+        response = await self.custom_request("https://raw.githubusercontent.com/Kajitsy/Emilia/refs/heads/emilia/data/CAI_Available_Models.json", text=True)
+        return response
 
     async def hide_recent_chat(self, character_external_id):
         data = {

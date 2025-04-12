@@ -99,7 +99,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = SvgIcons()
-        self.version = "3.0.2"
+        self.version = "3.0.3"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -144,6 +144,7 @@ class EmiliaNext(QMainWindow):
         self.chat_thread.get_me_signal.connect(self.getMe)
         self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
         self.chat_thread.get_available_models_signal.connect(self.getAvailableModels)
+        self.chat_thread.get_available_models_git_signal.connect(self.getAvailableModelsGit)
         self.discord_thread = DiscordRPC(self)
         self.discord_thread.start()
         self.threads.append(self.discord_thread)
@@ -162,6 +163,7 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.get_main_page_chats()
                 # self.chat_thread.get_user_settings()
                 self.chat_thread.get_available_models()
+                self.chat_thread.get_available_models_git()
 
             if self.cookie:
                 self.chat_thread.set_cookie(self.cookie)
@@ -1047,6 +1049,9 @@ class EmiliaNext(QMainWindow):
 
     def getAvailableModels(self, data):
         self.available_models = data
+
+    def getAvailableModelsGit(self, data):
+        self.available_models_git = data
 
     def setOutputDevice(self, index):
         device_name = self.output_devices.get(index)

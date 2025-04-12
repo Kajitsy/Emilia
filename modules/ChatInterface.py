@@ -328,7 +328,7 @@ class ChatInterface(QWidget):
     def openModelOverlay(self):
         overlay_widget = QWidget()
         overlay_widget.setFixedWidth(350)
-        overlay_widget.setFixedHeight(450)
+        overlay_widget.setFixedHeight(550)
         overlay_layout = QVBoxLayout()
         overlay_widget.setLayout(overlay_layout)
 
@@ -413,13 +413,15 @@ class ChatInterface(QWidget):
             else:
                 apply_button.setText(self.tr("Start new chat"))
 
-        for model_type in self.mw.available_models:
+        for model_type in self.mw.available_models_git:
+            m_d = self.mw.available_models_git.get(model_type, {})
+            _ = m_d.get('description', {})
             card = createCard(model_type,
-                              self.available_models.get(model_type).get('name'),
-                              self.svg_icons.model_type_icon(model_type, pixmap_ret=True),
-                              self.available_models.get(model_type).get('description'),
-                              self.available_models.get(model_type).get('plus'),
-                              self.available_models.get(model_type).get('beta'))
+                              m_d.get('name'),
+                              self.svg_icons.model_type_icon(m_d.get('svg'), pixmap_ret=True),
+                              _.get(self.mw.current_language.split("_")[0],_.get("en", "")),
+                              m_d.get('plus'),
+                              m_d.get('beta'))
             if model_type == self.preferred_model_type: card.setCheckable(True)
             models_layout.addWidget(card)
             card_list.append(card)

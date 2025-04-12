@@ -248,6 +248,7 @@ class ChatThread(QThread):
     get_me_signal = pyqtSignal(object)
     get_user_settings_signal = pyqtSignal(object)
     get_available_models_signal = pyqtSignal(object)
+    get_available_models_git_signal = pyqtSignal(object)
     get_user_signal = pyqtSignal(object)
     hide_chat_signal = pyqtSignal(object)
 
@@ -504,6 +505,10 @@ class ChatThread(QThread):
     @asyncSlot
     async def get_available_models(self):
         await self._call_ccaa('get_available_models', self.get_available_models_signal)
+
+    @asyncSlot
+    async def get_available_models_git(self):
+        await self._call_ccaa('get_available_models_git', self.get_available_models_git_signal)
 
     @asyncSlot
     async def copy_chat(self, chat_id, end_turn_id):
