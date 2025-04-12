@@ -2260,9 +2260,8 @@ if __name__ == "__main__":
         f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
     app.installTranslator(translator)
 
-    loop = asyncio.SelectorEventLoop()
-    qloop = QEventLoop(app, set_running_loop=loop)
-    asyncio.set_event_loop(qloop)
+    loop = QEventLoop(app)
+    asyncio.set_event_loop(loop)
 
     tray_icon = QSystemTrayIcon()
     tray_menu = QMenu()
@@ -2295,5 +2294,4 @@ if __name__ == "__main__":
         main_window.show()
     tray_icon.show()
 
-    with qloop:
-        qloop.run_forever()
+    loop.run_forever()
