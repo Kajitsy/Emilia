@@ -58,7 +58,7 @@ from PyQt6.QtWidgets import (
     QComboBox, QSpacerItem,
     QMenu, QSystemTrayIcon,
     QProgressBar, QKeySequenceEdit,
-    QPlainTextEdit)
+    QTextEdit)
 from PyQt6.QtGui import (
     QMouseEvent, QAction,
     QFontMetrics, QIntValidator,
@@ -99,7 +99,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = SvgIcons()
-        self.version = "3.0.2dev"
+        self.version = "3.0.2"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -1336,8 +1336,7 @@ class SettingsPage(QWidget):
                     {"type": "checkbox", "label": self.tr("Display the current page"), "key": "discord_rpc/show_current_page", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Displaying the chat name"), "key": "discord_rpc/show_chat_name", "def_value": False},
                     {"type": "checkbox", "label": self.tr("Displaying the nickname of the profile being viewed"), "key": "discord_rpc/show_username", "def_value": False}
-                ],
-                "beta": True
+                ]
             }, {
                 "label": self.tr("Languages of Emilia"),
                 "settings": [
@@ -1363,11 +1362,17 @@ class SettingsPage(QWidget):
                      "click": lambda: os.startfile(os.path.join(os.getcwd(), "logs"))},
                 ]
             }, {
-                "label": "",
+                "label": self.tr("About Emilia"),
                 "settings": [
-                    {"label": self.tr("(Beta)"), "key": "about/beta"}
-                ],
-                "beta": True
+                    {
+                        "label": self.tr("Emilia is a desktop version of Character.AI with several improvements and additional features.")+
+                                 "\n"+self.tr("The program is distributed free of charge under the MIT License."),
+                        "key": "about/title"},
+                    {
+                        "label": self.tr("By using Emilia, you accept the Terms of Use Character.AI and confirm that you have read the Privacy Policy Character.AI"),
+                        "key": "about/tos"
+                    }
+                ]
             },
         ]
 
@@ -1612,19 +1617,18 @@ class SettingsPage(QWidget):
         for setting_group in self.settings_data:
             group_layout = QVBoxLayout()
             group_beta = setting_group.get('beta', False)
-            group_label = QLabel(setting_group["label"])
+            group_label = QLabel(format_text(setting_group["label"]))
             if group_beta:
-                group_label.setText(f'{setting_group["label"]} {self.tr("(Beta)")}')
+                group_label.setText(f'{format_text(setting_group["label"])} {self.tr("(Beta)")}')
             group_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
             group_layout.addWidget(group_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
             for setting in setting_group["settings"]:
                 layout = QHBoxLayout()
                 if setting.get("label"):
-                    label = QPlainTextEdit()
+                    label = QTextEdit()
                     label.setReadOnly(True)
-
-                    label.setPlainText(setting["label"])
+                    label.setHtml(format_text(setting["label"]))
                     layout.addWidget(label)
 
                 key = setting["key"]
@@ -2251,7 +2255,7 @@ class UserProfile(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/lang.ts
+    translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
     translator.load(
         f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
     app.installTranslator(translator)

@@ -40,7 +40,7 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Root: HKCU; Subkey: "Software\{#MyAppName}"; ValueName: "InstallPath"; ValueData: "{app}"
 
 [UninstallRun]
-Filename: "{cmd}"; Parameters: "/C ""taskkill /im emilia.exe /f /t"
+Filename: "{cmd}"; Parameters: "/C ""taskkill /im {#MyAppExeName} /f /t"
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\*"
