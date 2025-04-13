@@ -22,18 +22,85 @@ from modules.styles import *
 from modules.Voice import VoiceMode, VoiceSearch
 
 class MessageBubble(QFrame):
-    def __init__(self, mw, parent, text, is_user=False):
+    def __init__(self, main_window, parent, text, name, avatar, is_user=False):
         super().__init__()
-        self.main_window = mw
+        self.mw = main_window
         self.parent = parent
         self.is_user = is_user
-        layout = QVBoxLayout()
         self.turn_id = None
+
+        layout = QVBoxLayout()
+        head_layout = QHBoxLayout()
+        head_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        head_widget = QFrame()
+        head_widget.setLayout(head_layout)
+
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(25, 25)
+        self.name_label = QLabel(name)
+        self.name_label.setFixedHeight(25)
+        if is_user:
+            head_layout.addWidget(self.name_label)
+            head_layout.addWidget(self.avatar_label)
+        else:
+            head_layout.addWidget(self.avatar_label)
+            head_layout.addWidget(self.name_label)
+
         self.message_label = QLabel(text)
         self.message_label.setWordWrap(True)
         self.message_label.setMaximumWidth(int(parent.width()/2.25))
+        self.message_label.setStyleSheet(
+            f"background-color: {self.parent.user_back_message if is_user else self.parent.char_back_message}; border-radius: 4px; color: {self.parent.user_text_message if is_user else self.parent.char_text_message}; padding: 4px;")
 
+        if avatar:
+            load_avatar_thread = ImageLoaderThread(
+                "https://characterai.io/i/80/static/avatars/" + avatar + '?webp=true&anim=0', 25, 25)
+            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
+            load_avatar_thread.radius = 180
+            load_avatar_thread.start()
+            self.mw.threads.append(load_avatar_thread)
+        else:
+            color_avatar(self.avatar_label, 25, 25, name, 180)
+
+        layout.addWidget(head_widget)
         layout.addWidget(self.message_label)
+        self.setLayout(layout)
+        self.adjustSize()
+        self.setMinimumHeight(self.height())
+
+class GroupMessageBubble(QFrame):
+    def __init__(self, mw, parent, text, name="", avatar=None, is_user=False):
+        super().__init__()
+        self.mw = mw
+        self.parent = parent
+        self.is_user = is_user
+        self.avatar = avatar
+        self.name = name
+        layout = QHBoxLayout()
+        self.turn_id = None
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(30, 30)
+        self.message_label = QLabel(text)
+        self.message_label.setWordWrap(True)
+        self.message_label.setMaximumWidth(int(parent.width()/2.25))
+        self.message_label.setStyleSheet(
+            f"background-color: {self.parent.user_back_message if is_user else self.parent.char_back_message}; border-radius: 4px; color: {self.parent.user_text_message if is_user else self.parent.char_text_message}; padding: 4px;")
+
+        if self.avatar:
+            load_avatar_thread = ImageLoaderThread(
+                "https://characterai.io/i/80/static/avatars/" + avatar + '?webp=true&anim=0', 30, 30)
+            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
+            load_avatar_thread.radius = 4
+            load_avatar_thread.start()
+            self.mw.threads.append(load_avatar_thread)
+        else:
+            color_avatar(self.avatar_label, 30, 30, self.name, 4)
+
+        if not is_user:
+            layout.addWidget(self.avatar_label)
+        layout.addWidget(self.message_label)
+        if is_user:
+            layout.addWidget(self.avatar_label)
         self.setLayout(layout)
         self.adjustSize()
         self.setMinimumHeight(self.height())
@@ -115,18 +182,19 @@ class ChatInterface(QWidget):
 
         self.setLayout(self.layout)
 
-        if self.chat_id:
-            self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-            self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-            self.chat_thread.get_history(self.chat_id)
-            self.chat_thread.get_chat_by_id(self.chat_id)
-        else:
-            self.chat_thread.chat_signal.connect(self._getChat)
-            self.chat_thread.get_chat(self.character_id)
+        def chat(data):
+            self._getCharacter(data)
+            if self.chat_id:
+                self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+                self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
+                self.chat_thread.get_history(self.chat_id)
+                self.chat_thread.get_chat_by_id(self.chat_id)
+            else:
+                self.chat_thread.chat_signal.connect(self._getChat)
+                self.chat_thread.get_chat(self.character_id)
 
-        if not self.character:
-            self.chat_thread.get_char_signal.connect(self._getCharacter)
-            self.chat_thread.get_character(self.character_id)
+        self.chat_thread.get_char_signal.connect(chat)
+        self.chat_thread.get_character(self.character_id)
         self.chat_thread.voice_override_signal.connect(self._voiceOverride)
         self.chat_thread.voice_override(self.character_id)
 
@@ -794,10 +862,11 @@ class ChatInterface(QWidget):
         self.vote = character.get('voted', {}).get('vote', None)
         self.character = character.get('character', {})
         self.character_name = self.character['name']
+        self.character_avatar = self.character.get('avatar_file_name', '')
 
-        if self.character.get('avatar_file_name'):
+        if self.character_avatar:
             load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0', 70, 70)
+                "https://characterai.io/i/80/static/avatars/" + self.character_avatar + '?webp=true&anim=0', 70, 70)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
@@ -805,9 +874,9 @@ class ChatInterface(QWidget):
         else:
             color_avatar(self.avatar_label, 70, 70, self.character_name, 4)
 
-        if self.character.get('avatar_file_name'):
+        if self.character_avatar:
             load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0', 40, 40)
+                "https://characterai.io/i/80/static/avatars/" + self.character_avatar + '?webp=true&anim=0', 40, 40)
             load_avatar_thread.image_loaded.connect(self.header_avatar_label.setPixmap)
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
@@ -837,10 +906,10 @@ class ChatInterface(QWidget):
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
             if self.character.get('visibility') == "PUBLIC" and self.mw.drpc_show_chat_name:
-                if self.character.get('avatar_file_name'):
+                if self.character_avatar:
                     self.discord_thread.update(
                         details=self.tr("Chatting with ") + self.character_name,
-                        large_image="https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0',
+                        large_image="https://characterai.io/i/80/static/avatars/" + self.character_avatar + '?webp=true&anim=0',
                         buttons=[{
                             "label": self.tr("Open character"),
                             "url": f"https://character.ai/character/{self.character['short_hash']}"
@@ -881,7 +950,6 @@ class ChatInterface(QWidget):
     def _getChat(self, chat):
         self.chat_thread.chat_signal.disconnect()
         if chat:
-            print(chat)
             for chats in chat:
                 self.chat_id = chats.get('chat_id')
             self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
@@ -945,12 +1013,9 @@ class ChatInterface(QWidget):
         return message_widget
 
     def createMessage(self, text, turn_id, is_user=False):
-        message_bubble = MessageBubble(self.mw, self, format_text(text), is_user)
+        message_bubble = MessageBubble(self.mw, self, format_text(text), self.mw.name if is_user else self.character_name,
+                                        self.mw.avatar if is_user else self.character_avatar , is_user)
         message_bubble.turn_id = turn_id
-        message_bubble.setStyleSheet(
-            f"background-color: {self.user_back_message if is_user else self.char_back_message}; border-radius: 4px;")
-        message_bubble.message_label.setStyleSheet(
-            f"color: {self.user_text_message if is_user else self.char_text_message};")
         message_bubble.setObjectName('user_message' if is_user else 'char_message')
         message_bubble.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
@@ -1017,8 +1082,6 @@ class ChatInterface(QWidget):
             for turn in self.chat_thread.chat_histories[self.chat_id][index + 1:]:
                 turn_ids_for_remove.append(turn.get('turn_key', {}).get('turn_id'))
             self.chat_thread.chat_histories[self.chat_id] = self.chat_thread.chat_histories[self.chat_id][:index + 1]
-        print(self.chat_thread.chat_histories[self.chat_id])
-        print(turn_ids_for_remove)
 
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)
@@ -1119,7 +1182,9 @@ class GroupChatInterface(QWidget):
         self.discord_thread: DiscordRPC | None = self.mw.discord_thread
         self.chat_data = chat_data
         self.chat_id = chat_data['id']
-        self.characters = chat_data['characters']
+        self.characters = {}
+        for char in chat_data['characters']:
+            self.characters[char['id']] = char
 
         self.svg_icons = SvgIcons()
         self.voice_enabled = False
@@ -1167,7 +1232,6 @@ class GroupChatInterface(QWidget):
         self.setLayout(self.layout)
 
         self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-        self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
         self.chat_thread.get_history(self.chat_id)
 
     def createTopBar(self):
@@ -1290,14 +1354,13 @@ class GroupChatInterface(QWidget):
         return bottom_layout
 
     def generateTurn(self, character_id):
-        print(character_id)
         self.chat_thread.gc_turn_generate(character_id, self.chat_id)
 
     def createCharCards(self):
-        for character in self.characters:
+        for id, character in self.characters.items():
             button = QPushButton()
-            button.setText(character['id'])
-            button.clicked.connect(lambda _, n=character['id']: self.generateTurn(n))
+            button.setText(character['name'])
+            button.clicked.connect(lambda _, n=id: self.generateTurn(n))
             self.characters_layout.addWidget(button)
 
     def userMessageSignal(self, response):
@@ -1576,15 +1639,22 @@ class GroupChatInterface(QWidget):
                 self.discord_thread.update(details=self.tr("Chatting"))
 
     def _addMessagesFromHistory(self, turns):
-        self.clearMessages()
         self.chat_thread.get_history_signal.disconnect()
         message_stacked = QStackedWidget
         for turn in turns:
             older = []
+            is_human = turn.get('author', {}).get('is_human', False)
             pci = turn.get('primary_candidate_id')
             for candidate in turn.get('candidates', []):
                 if candidate.get('candidate_id', pci) == pci:
-                    message_stacked = self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False))
+                    if is_human:
+                        message_stacked = self.addMessage(
+                            candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''),
+                            is_human)
+                    else:
+                        message_stacked = self.addMessage(
+                            candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''),
+                            is_human, turn['author']['name'], self.characters.get(turn['author']['author_id']).get("avatar_url"))
                 else:
                     older.append(candidate)
             if len(turn.get('candidates', [])) > 1:
@@ -1594,65 +1664,17 @@ class GroupChatInterface(QWidget):
                     reverse=True
                 )
                 for candidate in sorted_older:
-                    message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False)))
+                    if is_human:
+                        message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), is_human))
+                    else:
+                        message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), is_human))
 
-    def _getChat(self, chat):
-        self.chat_thread.chat_signal.disconnect()
-        if chat:
-            for chats in chat:
-                self.chat_id = chats.get('chat_id')
-            self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-            self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-            self.chat_thread.get_history(self.chat_id)
-            self.chat_thread.get_chat_by_id(self.chat_id)
-            if self.mw.recent_chats:
-                for i in range(self.mw.recent_chat_layout.count()):
-                    item = self.mw.recent_chat_layout.itemAt(i)
-                    if item and item.widget():
-                        card = item.widget()
-                        if card.objectName() == self.chat_id:
-                            setattr(self, 'recent_card', card)
-                            card.setStyleSheet(card.press_style)
-                        break
-        else:
-            self.chat_thread.new_chat_created_signal.connect(self._newChatCreated)
-            self.chat_thread.new_chat(self.character_id)
-
-    def _getChatById(self, data):
-        self.chat_thread.get_chat_by_id_signal.disconnect()
-        self.chat_data = data.get('chat', {})
-        self.preferred_model_type = self.chat_data.get('preferred_model_type', 'MODEL_TYPE_BALANCED')
-
-    def _newChatCreated(self, botanswer):
-        self.clearMessages()
-        self.chat_thread.new_chat_created_signal.disconnect()
-        self.chat_id = botanswer[0]['chat_id']
-        self.chat_thread.get_char_signal.connect(self._getCharacter)
-        self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-        self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-        self.chat_thread.get_history(self.chat_id)
-        self.chat_thread.get_chat_by_id(self.chat_id)
-        # self.chat_thread.get_character(self.character_id)
-        self.chat_thread.get_recent_chats()
-
-    def clearMessages(self):
-        for i in range(self.messages_layout.count()):
-            item = self.messages_layout.itemAt(i)
-            if item and item.widget():
-                item.widget().deleteLater()
-            elif item and item.spacerItem():
-                pass
-
-        self.messages_layout.update()
-        self.messages_content.update()
-        self.messages_area.verticalScrollBar().setValue(0)
-
-    def addMessage(self, text, turn_id, is_user=False):
+    def addMessage(self, text, turn_id, is_user=False, name="", avatar=""):
         message_widget = QStackedWidget()
         message_widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         message_widget.turn_id = turn_id
         message_widget.is_user = is_user
-        message_bubble = self.createMessage(text, turn_id, is_user)
+        message_bubble = self.createMessage(text, turn_id, is_user, self.mw.name if is_user else name, self.mw.avatar if is_user else avatar)
 
         self.messages_layout.addWidget(message_widget, 1,
                                        Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft)
@@ -1661,13 +1683,9 @@ class GroupChatInterface(QWidget):
         message_widget.setCurrentWidget(message_bubble)
         return message_widget
 
-    def createMessage(self, text, turn_id, is_user=False):
-        message_bubble = MessageBubble(self.mw, self, format_text(text), is_user)
+    def createMessage(self, text, turn_id, is_user=False, name=None, avatar=None):
+        message_bubble = GroupMessageBubble(self.mw, self, format_text(text), name, avatar, is_user)
         message_bubble.turn_id = turn_id
-        message_bubble.setStyleSheet(
-            f"background-color: {self.user_back_message if is_user else self.char_back_message}; border-radius: 4px;")
-        message_bubble.message_label.setStyleSheet(
-            f"color: {self.user_text_message if is_user else self.char_text_message};")
         message_bubble.setObjectName('user_message' if is_user else 'char_message')
         message_bubble.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
@@ -1690,7 +1708,7 @@ class GroupChatInterface(QWidget):
         if text:
             self.addMessage(text, "", is_user=True)
             self.message_input.setHtml('<span style="color: white;"></span>')
-            self.chat_thread.send_group_message(self.chat_id, text)
+            self.chat_thread.gc_send_message(self.chat_id, text)
             if self.mw.recent_chats:
                 for i in range(self.mw.recent_chat_layout.count()):
                     item = self.mw.recent_chat_layout.itemAt(i)

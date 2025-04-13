@@ -307,7 +307,6 @@ class ChatThread(QThread):
     async def create_connect(self):
         self.connect = await self.ccaa.connect()
         self.connected_signal.emit(True)
-        print(await self.connect.gc_reset_chat("a145475a-87dc-40ea-aa3b-91ef21dec746"))
 
     @asyncSlot
     async def check_vtube_connect(self):

@@ -1135,6 +1135,7 @@ class EmiliaNext(QMainWindow):
         self.author_id = data['id']
         self.name = data['account']['name']
         self.username = data['username']
+        self.avatar = data['account'].get('avatar_file_name')
 
         self.welcome_label.setText(self.tr("Welcome back, ") + self.name)
         self.profile_button.setText(self.name)

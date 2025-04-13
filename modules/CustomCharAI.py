@@ -593,6 +593,7 @@ class ChatClient:
         payload = {
             'command': 'create_turn',
             'payload': {
+                "chat_type": "TYPE_MU_ROOM",
                 'turn': {
                     'context_reset': True,
                     'turn_key': {
@@ -616,6 +617,7 @@ class ChatClient:
         message = {
             'command': 'create_turn',
             'payload': {
+                "chat_type": "TYPE_MU_ROOM",
                 'turn': {
                     'turn_key': {
                         'chat_id': chat_id
@@ -640,15 +642,13 @@ class ChatClient:
             'command': 'generate_turn',
             'payload': {
                 "chat_type": "TYPE_MU_ROOM",
+                'character_id': char,
                 'chat_id': chat_id,
                 'user_name': user_name,
                 'smart_reply': 'CHARACTERS',
-                'smart_reply_delay': 0,
-                'character_id': char
+                'smart_reply_delay': 0
             },
-            'character_id': char
         }
-        print(message)
 
         await self.ws.send_str(json.dumps(message))
 
@@ -657,7 +657,6 @@ class ChatClient:
                 msg = await self.ws.receive()
                 if msg.type == aiohttp.WSMsgType.TEXT:
                     response = json.loads(msg.data)
-                    print(response)
                     if 'turn' not in response:
                         raise Exception(response['comment'])
                     yield response
