@@ -10,7 +10,14 @@
 - 3. Смело ищите `Emilia` в меню пуск и запускайте
 
 
-2. из исходного кода:
+2. через WinGet:
+- Требуется Windows 10 (64-бит) или Windows 11
+- 1. Откройте командную строку
+- 2. Введите/скопируйте `winget install kajitsy.emilia`
+- 3. Смело ищите `Emilia` в меню пуск и запускайте
+
+
+3. из исходного кода:
 - Требуется Python 3.10-3.13.3
 - [Сам исходный код](https://github.com/Kajitsy/Emilia/archive/refs/heads/emilia.zip)
 - 1. Установите Python
