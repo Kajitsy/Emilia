@@ -2260,9 +2260,6 @@ class UserProfile(QWidget):
         self.deleteLater()
 
 if __name__ == "__main__":
-    # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_UseSoftwareOpenGL)
-    os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu --disable-software-rasterizer"
-
     app = QApplication(sys.argv)
     translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
     translator.load(
