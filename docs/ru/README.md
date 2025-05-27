@@ -2,6 +2,10 @@
 
 [![en](https://img.shields.io/badge/README-en-red.svg)](../../README.md)
 
+[![en](https://img.shields.io/badge/FIX_ERROR-en-red.svg)](docs/en/FIX_ERROR.md)
+[![ru](https://img.shields.io/badge/FIX_ERROR-ru-red.svg)](docs/ru/FIX_ERROR.md)
+
+
 ## Что нужно для запуска...
 1. с установщиком (рекомендуется):
 - Требуется Windows 10 (64-бит) или Windows 11
