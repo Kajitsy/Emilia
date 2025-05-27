@@ -1,7 +1,9 @@
 import sys, logging
+import webbrowser
+
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QLineEdit, QHBoxLayout, QPushButton
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineUrlRequestInterceptor
+from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineUrlRequestInterceptor, QWebEngineNewWindowRequest
 from PyQt6.QtCore import QUrl, QDateTime, pyqtSignal, Qt
 from PyQt6.QtNetwork import QNetworkCookie
 from modules.styles import icon_button_style, SvgIcons, lineedit_style
@@ -24,6 +26,7 @@ class RequestInterceptor(QWebEngineUrlRequestInterceptor):
 class GetCookies(QWidget):
     auth_cookie_signal = pyqtSignal(str, QDateTime)
     authorization_signal = pyqtSignal(str)
+    notification_signal = pyqtSignal(object)
 
     def __init__(self):
         super().__init__()
@@ -31,6 +34,8 @@ class GetCookies(QWidget):
         self.profile = QWebEngineProfile.defaultProfile()
         self.interceptor = RequestInterceptor()
         self.svg_icons = SvgIcons()
+
+        self.browser.page().newWindowRequested.connect(self.on_new_window_requested)
 
         self.interceptor.authorization_signal.connect(self.on_authorization_received)
         self.profile.setUrlRequestInterceptor(self.interceptor)
@@ -77,6 +82,9 @@ class GetCookies(QWidget):
 
     def on_authorization_received(self, token: str):
         self.authorization_signal.emit(token)
+
+    def on_new_window_requested(self, data: QWebEngineNewWindowRequest):
+        self.notification_signal.emit(self.tr("(To log in via Apple/Google, specify the email address of your Apple/Google account.)"))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

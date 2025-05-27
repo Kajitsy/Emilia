@@ -69,7 +69,7 @@ from PyQt6.QtCore import (
     QRect, QDateTime,
     QPropertyAnimation,
     QEasingCurve, QTimer,
-    QTranslator, QLocale,
+    QTranslator, QCoreApplication,
     QParallelAnimationGroup,
     QRegularExpression, QPoint)
 from PyQt6.QtMultimedia import QMediaDevices
@@ -99,7 +99,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = SvgIcons()
-        self.version = "3.0.3"
+        self.version = "3.0.4b1"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -1757,6 +1757,7 @@ class SettingsPage(QWidget):
         self.mw.showOverlay(cookies)
         cookies.auth_cookie_signal.connect(lambda token, date: get(token, date))
         cookies.authorization_signal.connect(lambda token: token_get(token))
+        cookies.notification_signal.connect(self.mw.showNotification)
 
     def back(self):
         self.mw.main_content_area.setCurrentWidget(self.mw.main_page)
@@ -2259,6 +2260,9 @@ class UserProfile(QWidget):
         self.deleteLater()
 
 if __name__ == "__main__":
+    # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_UseSoftwareOpenGL)
+    os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu --disable-software-rasterizer"
+
     app = QApplication(sys.argv)
     translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
     translator.load(

@@ -60,33 +60,6 @@ class ChatInterface(QWidget):
         self.user_back_message = self.chat_settings.value('colors/user_back_message', '#303136')
         self.user_text_message = self.chat_settings.value('colors/user_text_message', '#e8eaed')
 
-        self.available_models = {
-            "MODEL_TYPE_FAST": {
-                "name": self.tr("Meow"),
-                "description": self.tr("Quick wits, faster words"),
-                "plus": False,
-                "beta": False
-            },
-            "MODEL_TYPE_BALANCED": {
-                "name": self.tr("Roar"),
-                "description": self.tr("Mix of speed & smarts"),
-                "plus": False,
-                "beta": False
-            },
-            "MODEL_TYPE_SMART": {
-                "name": self.tr("Nyan"),
-                "description": self.tr("Smart and more thoughtful"),
-                "plus": True,
-                "beta": False
-            },
-            "MODEL_TYPE_FAMILY_FRIENDLY": {
-                "name": self.tr("Goro"),
-                "description": self.tr("Less spicy"),
-                "plus": False,
-                "beta": True
-            }
-        }
-
         self.initUI()
         self.createRightSidebar()
 
@@ -104,6 +77,7 @@ class ChatInterface(QWidget):
         main_area_layout = QHBoxLayout()
 
         self.messages_area = QScrollArea()
+        self.messages_area.setStyleSheet(scroll_style())
         self.messages_area.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.messages_area.setWidgetResizable(True)
         self.messages_area.verticalScrollBar().rangeChanged.connect(self.scrollToBottomIfNeeded)
@@ -357,7 +331,7 @@ class ChatInterface(QWidget):
 
         card_list = []
         self.overlay_selected_model_type = self.preferred_model_type
-        def createCard(model_type, name, icon, description, plus, beta):
+        def createCard(model_type, name, icon, description, plus, beta, limited):
             card = ClickableFrame()
             card.setObjectName(model_type)
             card.default_style = card_style()
@@ -394,10 +368,16 @@ class ChatInterface(QWidget):
             if plus:
                 plus_label = QLabel("C.AI+")
                 card_layout.addWidget(plus_label)
-            elif beta:
+
+            if beta:
                 beta_label = QLabel()
                 beta_label.setPixmap(self.svg_icons.beta(pixmap_ret=True))
                 card_layout.addWidget(beta_label)
+
+            if limited:
+                limited_label = QLabel()
+                limited_label.setPixmap(self.svg_icons.limited(pixmap_ret=True))
+                card_layout.addWidget(limited_label)
 
             card.setLayout(card_layout)
             return card
@@ -420,8 +400,9 @@ class ChatInterface(QWidget):
                               m_d.get('name'),
                               self.svg_icons.model_type_icon(m_d.get('svg'), pixmap_ret=True),
                               _.get(self.mw.current_language.split("_")[0],_.get("en", "")),
-                              m_d.get('plus'),
-                              m_d.get('beta'))
+                              m_d.get('plus', False),
+                              m_d.get('beta', False),
+                              m_d.get('limited', False))
             if model_type == self.preferred_model_type: card.setCheckable(True)
             models_layout.addWidget(card)
             card_list.append(card)
