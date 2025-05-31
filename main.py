@@ -87,6 +87,16 @@ if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
     logging.debug("ctypes SetCurrentProcessExplicitAppUserModelID")
 
+app = QApplication(sys.argv)
+
+translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
+translator.load(
+    f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
+app.installTranslator(translator)
+
+loop = QEventLoop(app)
+asyncio.set_event_loop(loop)
+
 class EmiliaNext(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -134,50 +144,16 @@ class EmiliaNext(QMainWindow):
             self.output_devices[str(index)] = device.description()
 
         self.chat_thread = ChatThread(self)
-        self.chat_thread.start()
         self.threads.append(self.chat_thread)
-        self.chat_thread.recent_chats_signal.connect(self.addRecentChats)
-        self.chat_thread.featured_voices_signal.connect(self.addFeaturedVoices)
-        self.chat_thread.trythis_chats_signal.connect(self.addTryThisChats)
-        self.chat_thread.get_main_page_chats_signal.connect(self.addMainPageChats)
-        self.chat_thread.category_characters_signal.connect(self.addCharacterByCategory)
-        self.chat_thread.get_me_signal.connect(self.getMe)
-        self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
-        self.chat_thread.get_available_models_signal.connect(self.getAvailableModels)
-        self.chat_thread.get_available_models_git_signal.connect(self.getAvailableModelsGit)
         self.discord_thread = DiscordRPC(self)
-        self.discord_thread.start()
         self.threads.append(self.discord_thread)
-        if self.drpc_enable: self.discord_thread.connect()
-        self.initUI()
-
-        if QDateTime.fromString(self.settings.value("cai_auth/expiration_date")) < QDateTime.currentDateTime():
-            if self.token:
-                self.chat_thread.create_client(self.token)
-                self.chat_thread.create_connect()
-
-                self.chat_thread.get_recent_chats()
-                self.chat_thread.get_trythis_chats()
-                self.chat_thread.get_featured_voices()
-                self.chat_thread.get_me()
-                self.chat_thread.get_main_page_chats()
-                # self.chat_thread.get_user_settings()
-                self.chat_thread.get_available_models()
-                self.chat_thread.get_available_models_git()
-
-            if self.cookie:
-                self.chat_thread.set_cookie(self.cookie)
-
-            if not self.cookie or not self.token:
-                self.openSettings()
-                self.settings_page.getCookies()
-        else:
-            self.openSettings()
-            self.settings_page.getCookies()
-            self.showNotification(self.tr("Please re-enter (the login data has expired)"))
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
-        if getattr(sys, 'frozen', False): self.checkForUpdates()
+        if getattr(sys, 'frozen', False):
+            self.checkForUpdates()
+
+        self.initUI()
+        self.loadUI()
 
     def initUI(self):
         self.layout = QHBoxLayout()
@@ -219,6 +195,45 @@ class EmiliaNext(QMainWindow):
         self.full_animation.addAnimation(self.left_sidebar_animation)
         self.full_animation.addAnimation(self.main_content_area_animation)
         self.full_animation.addAnimation(self.top_bar_animation)
+
+    def loadUI(self):
+        self.chat_thread.recent_chats_signal.connect(self.addRecentChats)
+        self.chat_thread.featured_voices_signal.connect(self.addFeaturedVoices)
+        self.chat_thread.trythis_chats_signal.connect(self.addTryThisChats)
+        self.chat_thread.get_main_page_chats_signal.connect(self.addMainPageChats)
+        self.chat_thread.category_characters_signal.connect(self.addCharacterByCategory)
+        self.chat_thread.get_me_signal.connect(self.getMe)
+        self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
+        self.chat_thread.get_available_models_signal.connect(self.getAvailableModels)
+        self.chat_thread.get_available_models_git_signal.connect(self.getAvailableModelsGit)
+
+        self.chat_thread.start()
+        self.discord_thread.start()
+        if self.drpc_enable: self.discord_thread.connect()
+
+        if QDateTime.fromString(self.settings.value("cai_auth/expiration_date")) < QDateTime.currentDateTime():
+            if self.token:
+                self.chat_thread.create_client(self.token)
+                self.chat_thread.create_connect()
+
+                self.chat_thread.get_recent_chats()
+                self.chat_thread.get_trythis_chats()
+                self.chat_thread.get_featured_voices()
+                self.chat_thread.get_me()
+                self.chat_thread.get_main_page_chats()
+                self.chat_thread.get_available_models()
+                self.chat_thread.get_available_models_git()
+
+            if self.cookie:
+                self.chat_thread.set_cookie(self.cookie)
+
+            if not self.cookie or not self.token:
+                self.openSettings()
+                self.settings_page.getCookies()
+        else:
+            self.openSettings()
+            self.settings_page.getCookies()
+            self.showNotification(self.tr("Please re-enter (the login data has expired)"))
 
     def createLeftSidebar(self):
         left_sidebar = LeftSidebar(self)
@@ -2259,16 +2274,8 @@ class UserProfile(QWidget):
         self.mw.profile_button_2.setChecked(False)
         self.deleteLater()
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
-    translator.load(
-        f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
-    app.installTranslator(translator)
-
-    loop = QEventLoop(app)
-    asyncio.set_event_loop(loop)
-
+async def main():
+    global main_window, tray_icon, show_action, hide_action, quit_action
     tray_icon = QSystemTrayIcon()
     tray_menu = QMenu()
     main_window = EmiliaNext()
@@ -2283,7 +2290,8 @@ if __name__ == "__main__":
     tray_icon.setIcon(QIcon("icon.ico"))
 
     show_action = QAction(tray_icon.tr("Show"))
-    show_action.triggered.connect(lambda: main_window.showMaximized() if main_window.isMaximized() else main_window.show())
+    show_action.triggered.connect(
+        lambda: main_window.showMaximized() if main_window.isMaximized() else main_window.show())
     tray_menu.addAction(show_action)
 
     hide_action = QAction(tray_icon.tr("Hide"))
@@ -2291,13 +2299,17 @@ if __name__ == "__main__":
     tray_menu.addAction(hide_action)
 
     quit_action = QAction(tray_icon.tr("Quit"))
-    quit_action.triggered.connect(lambda event: sys.exit(app.exec()))
+    quit_action.triggered.connect(lambda: app.quit())
     tray_menu.addAction(quit_action)
 
     if main_window.settings.value("main_window/maximized", False, type=bool):
         main_window.showMaximized()
     else:
         main_window.show()
+
     tray_icon.show()
 
-    loop.run_forever()
+if __name__ == "__main__":
+    with loop:
+        loop.create_task(main())
+        loop.run_forever()

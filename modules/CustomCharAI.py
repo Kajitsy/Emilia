@@ -1,11 +1,12 @@
 import aiohttp, json, uuid, logging, inspect, curl_cffi
 
-class Async():
+class Async:
     def __init__(self, token, auth_cookie=""):
         super().__init__()
         self.token = token
         self.auth_cookie = auth_cookie
         self.connect = ChatClient(self.token)
+        self.session = aiohttp.ClientSession()
 
     async def request(self, endpoint, data = None, method = "get", neo = False, text = False):
         headers = {
@@ -19,39 +20,26 @@ class Async():
         else:
             url = f"https://plus.character.ai/{endpoint}"
 
-        async with aiohttp.ClientSession() as session:
-            while True:
-                if method == "get":
-                    async with session.get(url, headers=headers, params=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
-                        if response.status == 200:
-                            return await response.json() if not text else json.loads(await response.text())
-                        elif response.status == 400:
-                            pass
-                        else:
-                            raise Exception(f"Failed to get data, status code: {response.status}")
-                elif method == "post":
-                    async with session.post(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
-                        if response.status == 200:
-                            return await response.json() if not text else json.loads(await response.text())
-                        elif response.status == 400:
-                            pass
-                        else:
-                            raise Exception(f"Failed to get data, status code: {response.status}")
-                elif method == "put":
-                    async with session.put(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
-                        if response.status == 200:
-                            return await response.json() if not text else json.loads(await response.text())
-                        elif response.status == 400:
-                            pass
-                        else:
-                            raise Exception(f"Failed to get data, status code: {response.status}")
-                else:
-                    raise ValueError("Invalid method")
+        while True:
+            if method == "get":
+                response = await self.session.get(url, headers=headers, params=data, timeout=100)
+                logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
+            elif method == "post":
+                response = await self.session.post(url, headers=headers, json=data, timeout=100)
+                logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
+            elif method == "put":
+                response = await self.session.put(url, headers=headers, json=data, timeout=100)
+                logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
+            else:
+                raise ValueError("Invalid method")
+            if response.status == 200:
+                return await response.json() if not text else json.loads(await response.text())
+            elif response.status == 400:
+                pass
+            else:
+                raise Exception(f"Failed to get data, status code: {response.status}")
 
-    async def trpc_request(self, endpoint, data = None, method = "get"):
+    async def trpc_request(self, endpoint, data = None, method = "get", text = False):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
@@ -60,56 +48,47 @@ class Async():
 
         url = f"https://character.ai/api/trpc/{endpoint}"
 
-        async with aiohttp.ClientSession() as session:
-            while True:
-                if method == "get":
-                    async with session.get(url, headers=headers, params=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
-                        if response.status == 200:
-                            return await response.json()
-                        elif response.status == 400:
-                            pass
-                        else:
-                            raise Exception(f"Failed to get data, status code: {response.status}")
-                elif method == "post":
-                    async with session.post(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
-                        if response.status == 200:
-                            return await response.json()
-                        elif response.status == 400:
-                            pass
-                        else:
-                            raise Exception(f"Failed to get data, status code: {response.status}")
-                elif method == "put":
-                    async with session.put(url, headers=headers, json=data, timeout=100) as response:
-                        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
-                        if response.status == 200:
-                            return await response.json()
-                        elif response.status == 400:
-                            pass
-                        else:
-                            raise Exception(f"Failed to get data, status code: {response.status}")
-                else:
-                    raise ValueError("Invalid method")
-
-    async def custom_request(self, url, data = None, method = "get", text=False,headers={}):
-        async with aiohttp.ClientSession() as session:
+        while True:
             if method == "get":
-                async with session.get(url, headers=headers, params=data, timeout=10) as response:
-                    logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
-                    if response.status == 200:
-                        return await response.json() if not text else json.loads(await response.text())
-                    else:
-                        raise Exception(f"Failed to get data, status code: {response.status}")
+                response = await self.session.get(url, headers=headers, params=data, timeout=100)
+                logging.debug(
+                    f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
             elif method == "post":
-                async with session.post(url, headers=headers, json=data, timeout=10) as response:
-                    logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
-                    if response.status == 200:
-                        return await response.json() if not text else json.loads(await response.text())
-                    else:
-                        raise Exception(f"Failed to get data, status code: {response.status}")
+                response = await self.session.post(url, headers=headers, json=data, timeout=100)
+                logging.debug(
+                    f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
+            elif method == "put":
+                response = await self.session.put(url, headers=headers, json=data, timeout=100)
+                logging.debug(
+                    f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
             else:
                 raise ValueError("Invalid method")
+            if response.status == 200:
+                return await response.json() if not text else json.loads(await response.text())
+            elif response.status == 400:
+                pass
+            else:
+                raise Exception(f"Failed to get data, status code: {response.status}")
+
+    async def custom_request(self, url, data = None, method = "get", text=False,headers={}):
+        if method == "get":
+            response = await self.session.get(url, headers=headers, params=data, timeout=100)
+            logging.debug(
+                f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async get request: {url}")
+        elif method == "post":
+            response = await self.session.post(url, headers=headers, json=data, timeout=100)
+            logging.debug(
+                f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async post request: {url}")
+        elif method == "put":
+            response = await self.session.put(url, headers=headers, json=data, timeout=100)
+            logging.debug(
+                f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
+        else:
+            raise ValueError("Invalid method")
+        if response.status == 200:
+            return await response.json() if not text else json.loads(await response.text())
+        else:
+            raise Exception(f"Failed to get data, status code: {response.status}")
 
     async def get_character(self, character_id):
         response = await self.trpc_request(
@@ -258,23 +237,20 @@ class Async():
         response = await self.request("chat/user/follow/", data, "post")
         return response
 
-    async def get_following(self, pageParam="", username=""):
-        data = {}
-        if pageParam and username:
-            data = {
-                "pageParam": pageParam,
-                "username": username
-            }
+    async def get_following(self, pageParam=1, username=""):
+        data = {
+            "pageParam": pageParam,
+            "username": username
+        }
         response = await self.request("chat/user/public/following/", data, "post")
+        print(response['users'])
         return response
 
-    async def get_followers(self, pageParam="", username=""):
-        data = {}
-        if pageParam and username:
-            data = {
-                "pageParam": pageParam,
-                "username": username
-            }
+    async def get_followers(self, pageParam=1, username=""):
+        data = {
+            "pageParam": pageParam,
+            "username": username
+        }
         response = await self.request("chat/user/public/followers/", data, "post")
         return response
 
