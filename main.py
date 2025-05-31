@@ -1892,6 +1892,8 @@ class UserProfile(QWidget):
         self.chat_thread.get_user(self.profile_id)
         self.chat_thread.voices_search_username_signal.connect(self._getVoices)
         self.chat_thread.voices_search_username(self.profile_id)
+        self.chat_thread.get_upvoted_characters_signal.connect(self._getUpCharacters)
+        self.chat_thread.get_upvoted_characters()
 
     def initUI(self):
         self.top_bar, self.top_bar_layout = self.createTopBar()
@@ -1975,20 +1977,33 @@ class UserProfile(QWidget):
         self.characters_button.setStyleSheet(tab_button_style())
         self.characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.character_list))
         self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        buttons_layout.addWidget(self.characters_button)
+        self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
 
         self.voices_button = QPushButton(self.tr("Voices"))
         self.voices_button.setCheckable(True)
         self.voices_button.setStyleSheet(tab_button_style())
         self.voices_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.voice_list))
         self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
+        self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
+
+        self.up_characters_button = QPushButton(self.tr("Upvoted Characters"))
+        self.up_characters_button.setCheckable(True)
+        self.up_characters_button.setStyleSheet(tab_button_style())
+        self.up_characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.upvoted_characters_list))
+        self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
+        self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
+        self.up_characters_button.setVisible(False)
+        buttons_layout.addWidget(self.characters_button)
+        buttons_layout.addWidget(self.up_characters_button)
         buttons_layout.addWidget(self.voices_button)
 
         self.character_list, self.character_list_layout = self.scroll_page()
+        self.upvoted_characters_list, self.upvoted_characters_layout = self.scroll_page()
         self.voice_list, self.voice_list_layout = self.scroll_page()
 
         self.lists_widget = QStackedWidget()
         self.lists_widget.addWidget(self.character_list)
+        self.lists_widget.addWidget(self.upvoted_characters_list)
         self.lists_widget.addWidget(self.voice_list)
         self.lists_widget.setFixedWidth(600)
         self.lists_widget.setCurrentWidget(self.character_list)
@@ -2004,8 +2019,10 @@ class UserProfile(QWidget):
 
         if self.username == self.mw.username:
             self.follow_button.setVisible(False)
+            self.up_characters_button.setVisible(True)
         else:
             self.follow_button.setVisible(True)
+            self.up_characters_button.setVisible(False)
 
         if self.username in self.me_following:
             self.follow_button.setText(self.tr("Unfollow"))
@@ -2028,6 +2045,21 @@ class UserProfile(QWidget):
         else:
             empty_label = QLabel(self.tr("And it's empty here..."))
             self.voice_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+    def _getUpCharacters(self, data):
+        self.chat_thread.get_upvoted_characters_signal.disconnect()
+        self.upvoted_characters = data
+
+        if self.upvoted_characters:
+            for character in self.upvoted_characters:
+                card = self.mw.createCard(character['participant__name'], character.get('avatar_file_name'),
+                                          character.get('title'), "", character['external_id'],
+                                          character["participant__num_interactions"], character["upvotes"], 70, 70)
+                card.setFixedHeight(87)
+                self.upvoted_characters_layout.addWidget(card)
+        else:
+            empty_label = QLabel(self.tr("And it's empty here..."))
+            self.upvoted_characters_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     def _getUser(self, data):
         self.chat_thread.get_user_signal.disconnect()
@@ -2079,7 +2111,7 @@ class UserProfile(QWidget):
         self.chats_label.setText(str(chats_count) + " " + self.tr("chats"))
         if self.data.get('characters', []):
             for character in self.data.get('characters', []):
-                card = self.mw.createCard(character['participant__name'], character.get('avatar_file_name'), character.get('greeting'), "", character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)
+                card = self.mw.createCard(character['participant__name'], character.get('avatar_file_name'), character.get('title'), "", character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)
                 card.setFixedHeight(87)
                 self.character_list_layout.addWidget(card)
         else:
