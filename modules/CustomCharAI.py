@@ -339,6 +339,10 @@ class Async:
         response = await self.request(f"chat/{chat_id}/resurrect", method="get", neo=True)
         return response
 
+    async def get_upvoted_characters(self):
+        response = await self.request("character/v1/upvoted_characters", method="get", neo=True)
+        return response.get('characters', [])
+
 class ChatClient:
     def __init__(self, token: str = ""):
         self.token = token

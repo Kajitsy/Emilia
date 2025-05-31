@@ -251,6 +251,7 @@ class ChatThread(QThread):
     get_available_models_git_signal = pyqtSignal(object)
     get_user_signal = pyqtSignal(object)
     hide_chat_signal = pyqtSignal(object)
+    character_search_signal = pyqtSignal(object)
 
     recent_chats_signal = pyqtSignal(object)
     get_popular_and_trending_chars_signal = pyqtSignal(object)
@@ -268,9 +269,10 @@ class ChatThread(QThread):
     user_following_signal = pyqtSignal(object)
     user_followers_signal = pyqtSignal(object)
     me_following_signal = pyqtSignal(object)
+    get_upvoted_characters_signal = pyqtSignal(list)
+
     join_or_create_session_signal = pyqtSignal(object)
 
-    character_search_signal = pyqtSignal(object)
     voices_search_signal = pyqtSignal(object)
     voices_search_username_signal = pyqtSignal(object)
     featured_voices_signal = pyqtSignal(object)
@@ -279,7 +281,6 @@ class ChatThread(QThread):
     voice_override_signal = pyqtSignal(object)
     voice_override_update_signal = pyqtSignal(object)
     voice_override_delete_signal = pyqtSignal(object)
-
     recognize_speech_signal = pyqtSignal(object)
 
     vtube_connect_signal = pyqtSignal(object)
@@ -623,6 +624,10 @@ class ChatThread(QThread):
         await self.eec.UseEmote(emote)
         await self.eec.close()
         logging.debug(f'QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The emotion of "{emote}" was used')
+
+    @asyncSlot
+    async def get_upvoted_characters(self):
+        await self._call_ccaa('get_upvoted_characters', self.get_upvoted_characters_signal)
 
 class VoiceModeThread(QThread):
     connected_signal = pyqtSignal(bool)
