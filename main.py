@@ -89,7 +89,8 @@ if platform.system() == 'Windows':
 
 app = QApplication(sys.argv)
 
-translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
+translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py .\modules\Cards.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
+
 translator.load(
     f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
 app.installTranslator(translator)
