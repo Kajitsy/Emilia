@@ -91,8 +91,7 @@ class Async:
             raise Exception(f"Failed to get data, status code: {response.status}")
 
     async def get_character(self, character_id):
-        response = await self.trpc_request(
-            f"character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22{character_id}%22%7D%7D%7D")
+        response = await self.trpc_request(f"character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22{character_id}%22%7D%7D%7D")
         return response[0].get("result", {}).get("data", {}).get("json", {}).get("character", {})
 
     async def tts(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):
@@ -128,8 +127,7 @@ class Async:
         return response[0].get("result", {}).get("data", {}).get("json", {}).get("characters", [])
 
     async def get_main_page_chats(self, short_lang):
-        response = await self.trpc_request(
-            f"discovery.recommended,discovery.curatedLists,discovery.recommended,character.infos?batch=1&input={{%220%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%221%22:{{%22json%22:{{%22listIds%22:[%22cold_start_popular_characters_l30d_v1%22,%22cold_start_trending_characters_v1%22]}}}},%222%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%223%22:{{%22json%22:{{%22externalIds%22:[%22q0KukI6MnGQm_vDr9tG8YIyBJr8pNs8Wf6eKGh_yldw%22,%22edOuK6q8jN1kbv_QXnx25gfqpL0k0v2ByTbET5HCsgs%22,%22o6GGF93x8zFmPL1f2lT7d0iRhRZquc1x6h4KJ00g9Ck%22,%22U0UEmkGE3HBSuZAXchwcwO4HDWwPV8qhlsmO38YkO3k%22,%22DI1yer-gTAG_SvdxR-bu23eCCz4BMgsLTKp-NJ0vV3s%22,%22H4Y7Db2ALtZCm2yI8Ai9TT_hjyskGASBgKy6VSxhtak%22,%225MNwesgXRtUm0is6KXZ7ii2U0aaopVDyGa1N5-DwHrc%22,%228wk86EGdQ7LLbu8I1nadKL1giiYGLfE4DaryTdSyv9w%22,%22VAe__mrIOgaos1AgKQqTLe2lbe3E1JU8WXmTWxm45gw%22,%22EeNI0LbMJXSNUrlFaaAmEq5OfVXMY73A_GplJtGZ-pU%22,%22QD9um3txuc-oDVMmMB3rg9KFzmYR_JBMo8wEVwPDlRE%22,%22gFWL2jo3N1FHiLihknz1f_nwFBq6xBiAdGyuSmw_cTc%22,%22JzdwtXZNEqHoSsVf8sQ2P26WZRv7f_IQGSWZQAcT3pY%22,%22n3xkV_EptnZ0euflSos8Ylq_corcjZfaYEcfSOmu9to%22,%22f3vvWne0fuUL20eHVNRjAxk1a0CzbtjA6sFlgIU6p2g%22,%22VAxMSGSUghPurx28geTtgXWZYbm07vX7kGKJlaKw4Vg%22]}}}}}}")
+        response = await self.trpc_request(f"discovery.recommended,discovery.curatedLists,discovery.recommended,character.infos?batch=1&input={{%220%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%221%22:{{%22json%22:{{%22listIds%22:[%22cold_start_popular_characters_l30d_v1%22,%22cold_start_trending_characters_v1%22]}}}},%222%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%223%22:{{%22json%22:{{%22externalIds%22:[%22q0KukI6MnGQm_vDr9tG8YIyBJr8pNs8Wf6eKGh_yldw%22,%22edOuK6q8jN1kbv_QXnx25gfqpL0k0v2ByTbET5HCsgs%22,%22o6GGF93x8zFmPL1f2lT7d0iRhRZquc1x6h4KJ00g9Ck%22,%22U0UEmkGE3HBSuZAXchwcwO4HDWwPV8qhlsmO38YkO3k%22,%22DI1yer-gTAG_SvdxR-bu23eCCz4BMgsLTKp-NJ0vV3s%22,%22H4Y7Db2ALtZCm2yI8Ai9TT_hjyskGASBgKy6VSxhtak%22,%225MNwesgXRtUm0is6KXZ7ii2U0aaopVDyGa1N5-DwHrc%22,%228wk86EGdQ7LLbu8I1nadKL1giiYGLfE4DaryTdSyv9w%22,%22VAe__mrIOgaos1AgKQqTLe2lbe3E1JU8WXmTWxm45gw%22,%22EeNI0LbMJXSNUrlFaaAmEq5OfVXMY73A_GplJtGZ-pU%22,%22QD9um3txuc-oDVMmMB3rg9KFzmYR_JBMo8wEVwPDlRE%22,%22gFWL2jo3N1FHiLihknz1f_nwFBq6xBiAdGyuSmw_cTc%22,%22JzdwtXZNEqHoSsVf8sQ2P26WZRv7f_IQGSWZQAcT3pY%22,%22n3xkV_EptnZ0euflSos8Ylq_corcjZfaYEcfSOmu9to%22,%22f3vvWne0fuUL20eHVNRjAxk1a0CzbtjA6sFlgIU6p2g%22,%22VAxMSGSUghPurx28geTtgXWZYbm07vX7kGKJlaKw4Vg%22]}}}}}}")
         return response
 
     async def get_featured_voices(self):
@@ -164,14 +162,18 @@ class Async:
 
     async def get_me(self):
         response = await self.request("chat/user/")
-        return response.get("user", None).get("user", None)
+        return response.get("user", {}).get("user", {})
 
     async def get_user(self, username):
         response = await self.trpc_request(f"social.publicProfile?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22username%22%3A%22{username}%22%7D%7D%7D")
         return response[0].get("result", {}).get("data", {}).get("json", {})
 
     async def get_user_settings(self):
-        response = await self.request("chat/user/settings", text=True)
+        response = await self.request("chat/user/settings/")
+        return response
+
+    async def update_user_settings(self, data):
+        response = await self.request("chat/user/update_settings/", data, "post")
         return response
 
     async def get_chat(self, character_id):
@@ -243,7 +245,6 @@ class Async:
             "username": username
         }
         response = await self.request("chat/user/public/following/", data, "post")
-        print(response['users'])
         return response
 
     async def get_followers(self, pageParam=1, username=""):
@@ -342,6 +343,53 @@ class Async:
     async def get_upvoted_characters(self):
         response = await self.request("character/v1/upvoted_characters", method="get", neo=True)
         return response.get('characters', [])
+
+    async def create_persona(self, avatar_rel_path, base_img_prompt, definition, name):
+        data = {
+            'avatar_file_name': "",
+            'avatar_rel_path': avatar_rel_path,
+            'base_img_prompt': base_img_prompt,
+            'categories': [],
+            'copyable': False,
+            'definition': definition,
+            'description': "This is my persona.",
+            'greeting': "Hello! This is my persona",
+            'identifier': f"id:{uuid.uuid4()}",
+            'img_gen_enabled': False,
+            'name': name,
+            'strip_img_prompt_from_msg': False,
+            'title': name,
+            'visibility': "PRIVATE",
+            'voice_id': ""
+        }
+        response = await self.request("character/v1/create_persona", data, "post", True)
+        return response.get('persona', {})
+
+    async def remove_persona(self, data):
+        data['archived'] = True
+        response = await self.request("character/v1/update_persona", data, "post", True)
+        return response
+
+    async def update_persona(self, data):
+        response = await self.request("character/v1/update_persona", data, "post", True)
+        print(response)
+        return response.get('persona', {})
+
+    async def get_user_personas(self, force_refresh=0):
+        response = await self.request(f"character/v1/get_user_personas?force_refresh={force_refresh}", method="get", neo=True)
+        return response.get('personas', [])
+
+    async def uploadAvatar(self, filetype, image):
+        data = {
+            "0": {
+                "json": {
+                    "imageDataUrl": f"data:image/{filetype};base64,{image}"
+                }
+            }
+        }
+
+        response = await self.trpc_request("user.uploadAvatar?batch=1", data, "post")
+        return response[0]['result']['data']['json']
 
 class ChatClient:
     def __init__(self, token: str = ""):

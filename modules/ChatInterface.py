@@ -13,6 +13,7 @@ from PyQt6.QtCore import (
     QSettings, QTimer)
 from datetime import datetime
 
+from modules.Cards import PersonaCards
 from modules.QCustom import ClickableFrame, CustomTextEdit
 from modules.QThreads import (
     PlayerThread, FileLoaderThread,
@@ -50,6 +51,7 @@ class ChatInterface(QWidget):
         self.character = None
         self.cis_visible = False
         self.voice_id = None
+        self.user_personas = []
         self.svg_icons = SvgIcons()
 
         self.voice_enabled = False
@@ -65,6 +67,7 @@ class ChatInterface(QWidget):
 
         self.chat_thread.message_signal.connect(self.charMessageSignal)
         self.chat_thread.user_message_signal.connect(self.userMessageSignal)
+        self.chat_thread.get_user_personas_signal.connect(self.getUserPersonas)
 
     def initUI(self):
         self.layout = QVBoxLayout(self)
@@ -130,6 +133,7 @@ class ChatInterface(QWidget):
             self.chat_thread.get_character(self.character_id)
         self.chat_thread.voice_override_signal.connect(self._voiceOverride)
         self.chat_thread.voice_override(self.character_id)
+        self.chat_thread.get_user_personas()
 
     def createTopBar(self):
         header_frame = QWidget()
@@ -261,6 +265,12 @@ class ChatInterface(QWidget):
         self.chat_theme_button.clicked.connect(self.openColorPickerOverlay)
         self.char_info_layout.addWidget(self.chat_theme_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
+        self.choose_persona_button = QPushButton(self.tr("Persona"))
+        self.choose_persona_button.setIcon(self.svg_icons.persona())
+        self.choose_persona_button.setStyleSheet(button_style())
+        self.choose_persona_button.clicked.connect(self.openPersonaOverlay)
+        self.char_info_layout.addWidget(self.choose_persona_button, alignment=Qt.AlignmentFlag.AlignLeft)
+
         self.chat_style_button = QPushButton(self.tr("Chat Style"))
         self.chat_style_button.setIcon(self.svg_icons.style())
         self.chat_style_button.setStyleSheet(button_style())
@@ -268,6 +278,10 @@ class ChatInterface(QWidget):
         self.char_info_layout.addWidget(self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
+
+    def getUserPersonas(self, data):
+        self.chat_thread.get_user_personas_signal.disconnect()
+        self.user_personas = data
 
     def userMessageSignal(self, response):
         for i in reversed(range(self.messages_layout.count())):
@@ -299,6 +313,62 @@ class ChatInterface(QWidget):
             message_stacked.adjustSize()
             message.setMinimumHeight(message.message_label.height() + 15)
 
+    def openPersonaOverlay(self):
+        overlay_widget = QWidget()
+        overlay_widget.setFixedWidth(350)
+        overlay_widget.setFixedHeight(550)
+        overlay_layout = QVBoxLayout()
+        overlay_widget.setLayout(overlay_layout)
+
+        choose_label = QLabel(self.tr("Choose a persona"))
+        overlay_layout.addWidget(choose_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+        f_page = QWidget()
+        f_page_layout = QVBoxLayout(f_page)
+        f_page_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        f_page.setLayout(f_page_layout)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet(scroll_style())
+
+        models_widget = QWidget()
+        models_widget.setStyleSheet("background-color: transparent; border: none;")
+        personas_layout = QVBoxLayout()
+        personas_layout.setContentsMargins(10, 10, 10, 10)
+        personas_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        models_widget.setLayout(personas_layout)
+        overlay_layout.addWidget(f_page)
+
+        scroll_area.setWidget(models_widget)
+        f_page_layout.addWidget(scroll_area)
+
+        card_list = []
+
+        def updateSettings(data):
+            self.chat_thread.update_user_settings_signal.disconnect()
+            if data.get('success', False):
+                self.mw.user_settings = data['settings']
+                self.mw.showNotification(self.tr('Successfully updated your persona'))
+            self.mw.hideOverlay()
+
+        def onCardClicked(clicked_card):
+            if clicked_card.active:
+                self.mw.user_settings['personaOverrides'][self.character_id]= ""
+            else:
+                self.mw.user_settings['personaOverrides'][self.character_id] = clicked_card.data['external_id']
+            self.chat_thread.update_user_settings_signal.connect(updateSettings)
+            self.chat_thread.update_user_settings(self.mw.user_settings)
+
+        for persona in self.user_personas:
+            card = PersonaCards.ListCard(self.mw, persona, self.character_id)
+            card.mousePressEvent = lambda _: onCardClicked(card)
+            personas_layout.addWidget(card)
+            card_list.append(card)
+
+        self.mw.showOverlay(overlay_widget)
+        pass
+
     def openModelOverlay(self):
         overlay_widget = QWidget()
         overlay_widget.setFixedWidth(350)
@@ -307,7 +377,7 @@ class ChatInterface(QWidget):
         overlay_widget.setLayout(overlay_layout)
 
         choose_label = QLabel(self.tr("Choose a model to influence the style of your chat"))
-        overlay_layout.addWidget(choose_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        overlay_layout.addWidget(choose_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         f_page = QWidget()
         f_page_layout = QVBoxLayout(f_page)
@@ -354,11 +424,16 @@ class ChatInterface(QWidget):
 
             name_label = QLabel(name)
             name_label.setWordWrap(True)
-            name_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+            font = name_label.font()
+            font.setBold(True)
+            font.setPointSize(12)
+            name_label.setFont(font)
             text_layout.addWidget(name_label)
 
             description_label = QLabel(description)
-            description_label.setFont(QFont("Arial", 9))
+            font = description_label.font()
+            font.setPointSize(9)
+            description_label.setFont(font)
             description_label.setWordWrap(True)
             description_label.setStyleSheet("color: #a2a2ac")
             text_layout.addWidget(description_label)

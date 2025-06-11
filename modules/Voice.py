@@ -1,6 +1,5 @@
-import sounddevice, keyboard
+import keyboard
 from PyQt6.QtWidgets import (
-    QApplication,
     QWidget, QHBoxLayout,
     QVBoxLayout, QLabel,
     QPushButton, QLineEdit,
@@ -15,266 +14,7 @@ from modules.styles import *
 from modules.QThreads import (
     PlayerThread, FileLoaderThread,
     ImageLoaderThread, VoiceModeThread)
-
-class VoiceCard(QWidget):
-    def __init__(self, main_window, data, character_id="", current_voice_id="", search=True):
-        super().__init__()
-        self.setFixedSize(500, 200)
-
-        self.main_window = main_window
-        self.data = data
-        self.character_id = character_id
-        self.current_voice_id = current_voice_id
-        self.search = search
-        self.svg_icons = SvgIcons()
-
-        self.iss = self.data.get('id') == self.current_voice_id
-
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-
-        voice_frame = QFrame()
-        layout.addWidget(voice_frame, 0, Qt.AlignmentFlag.AlignTop)
-        voice_layout = QHBoxLayout()
-        voice_frame.setLayout(voice_layout)
-
-        play_button = QPushButton()
-        play_button.setIcon(SvgIcons().play())
-        play_button.setFixedWidth(40)
-        play_button.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 32px;")
-        play_button.clicked.connect(lambda event: play(self.data.get('previewAudioURI')))
-        voice_layout.addWidget(play_button)
-
-        def set_play():
-            try:
-                play_button.setIcon(self.svg_icons.play())
-                play_button.clicked.connect(lambda event: play(self.data.get('previewAudioURI')))
-            except: pass
-
-        def set_pause(thread):
-            try:
-                play_button.setIcon(self.svg_icons.pause())
-                play_button.clicked.connect(lambda event: thread.stop())
-            except: pass
-
-        def _play(dataa):
-            thread = PlayerThread(dataa)
-            thread.play_signal.connect(lambda: set_pause(thread))
-            thread.stop_signal.connect(lambda: set_play())
-            self.main_window.threads.append(thread)
-            thread.start()
-
-        def play(url):
-            thread = FileLoaderThread(url)
-            self.main_window.threads.append(thread)
-            thread.file.connect(lambda data: _play(data))
-            thread.start()
-
-        text_frame = QFrame()
-        text_layout = QVBoxLayout()
-        text_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        text_frame.setLayout(text_layout)
-        voice_layout.addWidget(text_frame)
-        self.name_label = QLabel(self.data.get('name'))
-        self.description_label = QLabel(self.data.get('description'))
-        self.description_label.setWordWrap(True)
-        self.author_label = QLabel()
-        text_layout.addWidget(self.name_label, 0, Qt.AlignmentFlag.AlignTop)
-        text_layout.addWidget(self.description_label, 0, Qt.AlignmentFlag.AlignTop)
-        text_layout.addWidget(self.author_label, 0, Qt.AlignmentFlag.AlignBottom)
-
-        button_frame = QFrame()
-        button_layout = QHBoxLayout()
-        button_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
-        button_frame.setLayout(button_layout)
-        voice_layout.addWidget(button_frame, 0, Qt.AlignmentFlag.AlignBottom)
-
-        sha_voice_button = QPushButton()
-        sha_voice_button.setIcon(self.svg_icons.share())
-        sha_voice_button.setStyleSheet(button_style())
-        sha_voice_button.clicked.connect(self.voiceOverrideShare)
-        button_layout.addWidget(sha_voice_button, alignment=Qt.AlignmentFlag.AlignLeft)
-
-        sel_voice_button = QPushButton(self.tr("Select"))
-        sel_voice_button.setStyleSheet(button_style())
-        sel_voice_button.clicked.connect(self.voiceOverrideSelect)
-
-        rem_voice_button = QPushButton(self.tr("Remove"))
-        rem_voice_button.setStyleSheet(button_style())
-        rem_voice_button.clicked.connect(self.voiceOverrideRemove)
-
-        if self.character_id:
-            button_layout.addWidget(sel_voice_button if not self.iss else rem_voice_button, 0)
-
-        character_page = QWidget()
-        character_page_layout = QVBoxLayout(character_page)
-
-        recent_label = QLabel("<b>"+self.tr("Try with latest chat")+"</b>")
-
-        character_scroll_area = QScrollArea()
-        character_scroll_area.setWidgetResizable(True)
-        character_scroll_area.setStyleSheet(scroll_style())
-
-        character_container = QWidget()
-        character_container.setStyleSheet("background-color: transparent; border: none;")
-        self.character_layout = QVBoxLayout()
-        self.character_layout.setContentsMargins(0, 0, 0, 0)
-        self.character_layout.setSpacing(0)
-        character_container.setLayout(self.character_layout)
-
-        character_scroll_area.setWidget(character_container)
-        if not self.search:
-            for chat in self.main_window.recent_chats:
-                card = self.createCard(chat.get('name'), chat.get('avatar_file_name'), chat.get('character_id'), chat.get('id'))
-                self.character_layout.addWidget(card)
-            layout.addWidget(recent_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-            layout.addWidget(character_scroll_area)
-            self.setFixedSize(500, 750)
-        character_page.setLayout(character_page_layout)
-
-    def createCard(self, name, avatar_url, character_id, chat_id=""):
-        def openChat():
-            self.main_window.chat_thread.voice_override_update_signal.connect(_openChat)
-            self.main_window.chat_thread.voice_override_update(character_id, self.data.get('id'))
-        def _openChat(data):
-            self.main_window.openChat(character_id, name, chat_id)
-            self.main_window.hideOverlay()
-        card = QFrame()
-        card.setStyleSheet(card_style())
-        card.mousePressEvent = lambda event: openChat()
-        card.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        card_layout = QHBoxLayout()
-
-        avatar_label = QLabel()
-        avatar_label.setFixedSize(50, 50)
-        avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        card_layout.addWidget(avatar_label)
-
-        if avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + avatar_url + '?webp=true&anim=0', 50, 50)
-            load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.main_window.threads.append(load_avatar_thread)
-        else:
-            color_avatar(avatar_label, 50, 50, name, 4)
-
-        text_layout = QVBoxLayout()
-        text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        card_layout.addLayout(text_layout, 1)
-        title_label = QLabel(name)
-        title_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
-        text_layout.addWidget(title_label)
-
-        card.setLayout(card_layout)
-        return card
-
-    def voiceOverrideShare(self):
-        QApplication.clipboard().setText(f'https://character.ai/?voiceId={self.data.get('id')}')
-        self.main_window.showNotification(self.tr("Link copied to clipboard"))
-
-    def voiceOverrideRemove(self):
-        self.main_window.chat_thread.voice_override_delete_signal.connect(self._voiceOverrideRemove)
-        self.main_window.chat_thread.voice_override_delete(self.character_id)
-
-    def voiceOverrideSelect(self):
-        self.main_window.chat_thread.voice_override_update_signal.connect(self._voiceOverrideSelect)
-        self.main_window.chat_thread.voice_override_update(self.character_id, self.data.get('id'))
-
-    def _voiceOverrideRemove(self, response):
-        self.main_window.chat_thread.voice_override_delete_signal.disconnect()
-        self.main_window.current_chat_interface.voice_id = None
-        self.main_window.current_chat_interface.select_char_voice_label.setText("")
-        self.main_window.current_chat_interface.enable_char_voice_button.setVisible(False)
-        self.main_window.hideOverlay()
-
-    def _voiceOverrideSelect(self, response):
-        self.main_window.chat_thread.voice_override_update_signal.disconnect()
-        self.main_window.current_chat_interface.voice_id = self.data.get('id')
-        self.main_window.current_chat_interface.select_char_voice_label.setText(f"{self.data.get('name')}")
-        self.main_window.current_chat_interface.enable_char_voice_button.setVisible(True)
-        self.main_window.hideOverlay()
-
-    def closeEvent(self, a0):
-        super().closeEvent(a0)
-        sounddevice.stop()
-
-class HorizontalMiniVoiceCard(QFrame):
-    def __init__(self, main_window, data):
-        super().__init__()
-        self.setFixedHeight(60)
-        self.setStyleSheet(card_style())
-        self.mousePressEvent = lambda event: self.openVoiceCard()
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        self.main_window = main_window
-        self.data = data
-        self.svg_icons = SvgIcons()
-
-        self.initUI()
-
-    def openVoiceCard(self):
-        vcard = VoiceCard(self.main_window, self.data, search=False)
-        self.main_window.showOverlay(vcard)
-
-    def initUI(self):
-        card_layout = QHBoxLayout()
-        play_button = QPushButton()
-        play_button.setIcon(self.svg_icons.play())
-        play_button.setFixedWidth(40)
-        play_button.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 32px;")
-        play_button.clicked.connect(lambda event: play(self.data.get('previewAudioURI')))
-        card_layout.addWidget(play_button)
-
-        def set_play():
-            try:
-                play_button.setIcon(self.svg_icons.play())
-                play_button.clicked.connect(lambda event: play(self.data.get('previewAudioURI')))
-            except:
-                pass
-
-        def set_pause(thread):
-            try:
-                play_button.setIcon(self.svg_icons.pause())
-                play_button.clicked.connect(lambda event: thread.stop())
-            except:
-                pass
-
-        def _play(dataa):
-            thread = PlayerThread(dataa)
-            thread.play_signal.connect(lambda: set_pause(thread))
-            thread.stop_signal.connect(lambda: set_play())
-            self.main_window.threads.append(thread)
-            thread.start()
-
-        def play(url):
-            thread = FileLoaderThread(url)
-            self.main_window.threads.append(thread)
-            thread.file.connect(lambda dataa: _play(dataa))
-            thread.start()
-
-        text_layout = QVBoxLayout()
-        text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        card_layout.addLayout(text_layout, 1)
-
-        title_label = QLabel(self.data.get("name"))
-        title_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
-        text_layout.addWidget(title_label)
-
-        description_label = QLabel(self.data.get("description"))
-        description_label.setFont(QFont("Arial", 10))
-        text_layout.addWidget(description_label)
-
-        self.setLayout(card_layout)
-
-    def closeEvent(self, a0):
-        super().closeEvent(a0)
-        sounddevice.stop()
+from modules.Cards import VoiceCards
 
 class VoiceSearch(QWidget):
     def __init__(self, main_window, search_character: str | None = None, current_voice_id="", current_character_id=""):
@@ -330,7 +70,7 @@ class VoiceSearch(QWidget):
         self.setLayout(layout)
 
     def openVoiceCard(self, voice_data):
-        voiceCard = VoiceCard(self.mw, voice_data, self.current_character_id, self.current_voice_id)
+        voiceCard = VoiceCards.VoiceCard(self.mw, voice_data, self.current_character_id, self.current_voice_id)
         self.mw.hideOverlay()
         self.mw.showOverlay(voiceCard)
 
@@ -376,12 +116,17 @@ class VoiceSearch(QWidget):
         text_layout = QVBoxLayout()
         card_layout.addLayout(text_layout, 1)
         title_label = QLabel(voice_data['name'])
-        title_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
+        font = title_label.font()
+        font.setBold(True)
+        font.setPointSize(12)
+        title_label.setFont(font)
         text_layout.addWidget(title_label)
 
         if voice_data.get('creatorInfo', {}).get('username'):
             author_label = QLabel(self.tr("Author: @") + voice_data.get('creatorInfo', {}).get('username'))
-            author_label.setFont(QFont("Arial", 9))
+            font = author_label.font()
+            font.setPointSize(9)
+            author_label.setFont(font)
             text_layout.addWidget(author_label)
 
         selected_label = QLabel()

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QScrollArea, QPushButton,
     QFrame, QTextEdit, QVBoxLayout,
-    QHBoxLayout, QWidget)
+    QHBoxLayout, QWidget, QSizePolicy)
 from PyQt6.QtGui import QWheelEvent, QKeyEvent
 from PyQt6.QtCore import Qt
 from modules.styles import (
@@ -33,11 +33,11 @@ class HorizontalScrollArea(QScrollArea):
         event.accept()
 
 class CheckablePushButton(QPushButton):
-    svg = SvgIcons()
     def __init__(self):
         super().__init__()
         self.setCheckable(True)
         self.setStyleSheet(check_button_style())
+        self.svg = SvgIcons()
 
     def checkStateSet(self):
         if self.isChecked():

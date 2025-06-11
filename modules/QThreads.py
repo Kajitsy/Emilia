@@ -17,6 +17,7 @@ def asyncSlot(func):
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
+    error_loading = pyqtSignal(object)
 
     def __init__(self, url, width, height, cache_dir="cache/avatars"):
         super().__init__()
@@ -78,7 +79,7 @@ class ImageLoaderThread(QThread):
             self.image_loaded.emit(self.round_qpixmap(pixmap))
         except Exception as e:
             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Image download error: {e}")
-            self.image_loaded.emit(QPixmap())
+            self.error_loading.emit(QPixmap())
 
 class FileLoaderThread(QThread):
     file = pyqtSignal(object)
@@ -247,6 +248,7 @@ class ChatThread(QThread):
     get_chat_by_id_signal = pyqtSignal(object)
     get_me_signal = pyqtSignal(object)
     get_user_settings_signal = pyqtSignal(object)
+    update_user_settings_signal = pyqtSignal(object)
     get_available_models_signal = pyqtSignal(object)
     get_available_models_git_signal = pyqtSignal(object)
     get_user_signal = pyqtSignal(object)
@@ -269,7 +271,12 @@ class ChatThread(QThread):
     user_following_signal = pyqtSignal(object)
     user_followers_signal = pyqtSignal(object)
     me_following_signal = pyqtSignal(object)
+    upload_avatar_signal = pyqtSignal(object)
     get_upvoted_characters_signal = pyqtSignal(list)
+    get_user_personas_signal = pyqtSignal(list)
+    create_persona_signal = pyqtSignal(object)
+    update_persona_signal = pyqtSignal(object)
+    remove_persona_signal = pyqtSignal(object)
 
     join_or_create_session_signal = pyqtSignal(object)
 
@@ -483,6 +490,10 @@ class ChatThread(QThread):
         await self._call_ccaa('get_user_settings', self.get_user_settings_signal)
 
     @asyncSlot
+    async def update_user_settings(self, data):
+        await self._call_ccaa('update_user_settings', self.update_user_settings_signal, data)
+
+    @asyncSlot
     async def get_user(self, username):
         await self._call_ccaa('get_user', self.get_user_signal, username)
 
@@ -628,6 +639,26 @@ class ChatThread(QThread):
     @asyncSlot
     async def get_upvoted_characters(self):
         await self._call_ccaa('get_upvoted_characters', self.get_upvoted_characters_signal)
+
+    @asyncSlot
+    async def get_user_personas(self, force_refresh=0):
+        await self._call_ccaa('get_user_personas', self.get_user_personas_signal, force_refresh)
+
+    @asyncSlot
+    async def create_persona(self, avatar_rel_path, base_img_prompt, definition, name):
+        await self._call_ccaa('create_persona', self.create_persona_signal, avatar_rel_path, base_img_prompt, definition, name)
+
+    @asyncSlot
+    async def update_persona(self, data):
+        await self._call_ccaa('update_persona', self.update_persona_signal, data)
+
+    @asyncSlot
+    async def remove_persona(self, data):
+        await self._call_ccaa('remove_persona', self.remove_persona_signal, data)
+
+    @asyncSlot
+    async def upload_avatar(self, filetype, image):
+        await self._call_ccaa('uploadAvatar', self.upload_avatar_signal, filetype, image)
 
 class VoiceModeThread(QThread):
     connected_signal = pyqtSignal(bool)

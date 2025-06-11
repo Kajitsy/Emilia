@@ -69,7 +69,7 @@ from PyQt6.QtCore import (
     QRect, QDateTime,
     QPropertyAnimation,
     QEasingCurve, QTimer,
-    QTranslator, QCoreApplication,
+    QTranslator,
     QParallelAnimationGroup,
     QRegularExpression, QPoint)
 from PyQt6.QtMultimedia import QMediaDevices
@@ -81,7 +81,7 @@ from modules.GetCAICookies import GetCookies
 from modules.QCustom import HorizontalScrollArea, CheckablePushButton, ClickableFrame, LeftSidebar
 from modules.QThreads import *
 from modules.styles import *
-from modules.Voice import HorizontalMiniVoiceCard
+from modules.Cards import VoiceCards, PersonaCards, CharacterCards
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -223,6 +223,7 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.get_main_page_chats()
                 self.chat_thread.get_available_models()
                 self.chat_thread.get_available_models_git()
+                self.chat_thread.get_user_settings()
 
             if self.cookie:
                 self.chat_thread.set_cookie(self.cookie)
@@ -541,7 +542,9 @@ class EmiliaNext(QMainWindow):
         self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
 
         self.welcome_label = QLabel(self.tr("Welcome back, User"))
-        self.welcome_label.setFont(QFont("Arial", 12))
+        font = self.welcome_label.font()
+        font.setPointSize(12)
+        self.welcome_label.setFont(font)
         top_bar_layout.addWidget(self.welcome_label)
 
         top_bar_layout.addStretch(1)
@@ -569,7 +572,10 @@ class EmiliaNext(QMainWindow):
         section_layout.setContentsMargins(0, 10, 0, 10)
 
         title_label = QLabel(title)
-        title_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+        font = title_label.font()
+        font.setPointSize(14)
+        font.setBold(True)
+        title_label.setFont(font)
         section_layout.addWidget(title_label)
 
         scroll_area = HorizontalScrollArea()
@@ -594,7 +600,10 @@ class EmiliaNext(QMainWindow):
         section_layout.setContentsMargins(0, 10, 0, 10)
 
         title_label = QLabel(title)
-        title_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+        font = title_label.font()
+        font.setPointSize(14)
+        font.setBold(True)
+        title_label.setFont(font)
         section_layout.addWidget(title_label)
 
         scroll_area = HorizontalScrollArea()
@@ -628,7 +637,10 @@ class EmiliaNext(QMainWindow):
         section_layout.setContentsMargins(0, 10, 0, 10)
 
         title_label = QLabel(self.tr("Voices"))
-        title_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+        font = title_label.font()
+        font.setPointSize(14)
+        font.setBold(True)
+        title_label.setFont(font)
         section_layout.addWidget(title_label)
 
         scroll_area = HorizontalScrollArea()
@@ -731,98 +743,6 @@ class EmiliaNext(QMainWindow):
             if btn is not clicked_button:
                 btn.setChecked(False)
         self.chat_thread.get_category_characters(category)
-
-    def createCard(self, name="", avatar_url="", description="", author="", character_id="", chats=0, voted=0, avatar_label_w=90, avatar_label_h=114):
-        card = QFrame()
-        card.setStyleSheet(card_style())
-        card.mousePressEvent = lambda event: self.openChat(character_id, name, None)
-        card.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        card_layout = QHBoxLayout()
-
-        avatar_label = QLabel()
-        avatar_label.setFixedSize(avatar_label_w, avatar_label_h)
-        avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        card_layout.addWidget(avatar_label)
-
-        if avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + avatar_url + '?webp=true&anim=0', avatar_label_w, avatar_label_h)
-            load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.threads.append(load_avatar_thread)
-        else:
-            color_avatar(avatar_label, avatar_label_w, avatar_label_h, name, 4)
-
-        text_layout = QVBoxLayout()
-        text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        card_layout.addLayout(text_layout, 1)
-
-        title_label = QLabel(name)
-        title_label.setWordWrap(True)
-        title_label.setFont(QFont("Arial", 10, QFont.Weight.Bold))
-        text_layout.addWidget(title_label)
-
-        if author:
-            author_label = QLabel(self.tr("Author: @") + author)
-            author_label.setFont(QFont("Arial", 8))
-            text_layout.addWidget(author_label)
-
-        if description:
-            description_label = QLabel(format_text(description, self.name))
-            description_label.setFont(QFont("Arial", 9))
-            description_label.setWordWrap(True)
-            fm = QFontMetrics(description_label.font())
-            description_label.setMaximumHeight(fm.lineSpacing() * 4)
-            text_layout.addWidget(description_label)
-            card.setToolTip(format_text(description))
-
-        spacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        text_layout.addItem(spacer)
-
-        add_info = QLabel()
-        if chats:
-            add_info.setText(add_info.text() + str(format_number(chats)) + self.tr(" chats"))
-        if voted:
-            add_info.setText(add_info.text() + " • " + str(format_number(voted)) + self.tr(" likes"))
-
-        if add_info.text():
-            add_info.setFont(QFont("Arial", 10))
-            text_layout.addWidget(add_info)
-
-        card.setLayout(card_layout)
-        return card
-
-    def createMiniCard(self, name="", avatar_url="", character_id=""):
-        card = QFrame()
-        card.setStyleSheet(card_style())
-        card.mousePressEvent = lambda event: self.openChat(character_id, name, None)
-        card.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        card_layout = QHBoxLayout()
-
-        avatar_label = QLabel()
-        avatar_label.setFixedSize(54, 54)
-        avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        card_layout.addWidget(avatar_label)
-
-        if avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + avatar_url + '?webp=true&anim=0',54, 54)
-            load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.threads.append(load_avatar_thread)
-        else:
-            color_avatar(avatar_label, 54, 54, name, 4)
-
-        title_label = QLabel(name)
-        title_label.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        card_layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-        card.setLayout(card_layout)
-        return card
 
     def createOverlay(self):
         self.overlay = QFrame(self)
@@ -956,9 +876,9 @@ class EmiliaNext(QMainWindow):
                 item.widget().deleteLater()
 
         for character in characters:
-            card = self.createCard(character.get('participant__name', "Unknown"), character.get('avatar_file_name'),
-                                   character.get('title'), character.get('user__username'),
-                                   character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(self, character.get('participant__name', "Unknown"), character.get('avatar_file_name'),
+                                           character.get('title'), character.get('user__username'),
+                                           character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(252, 134)
             self.category_layout.addWidget(card)
 
@@ -984,7 +904,7 @@ class EmiliaNext(QMainWindow):
 
         self.featured_voices = voices
         for voice in self.featured_voices:
-            card = HorizontalMiniVoiceCard(main_window, voice)
+            card = VoiceCards.HorizontalMiniVoiceCard(main_window, voice)
             card.setFixedWidth(200)
             self.featured_voices_layout.addWidget(card)
 
@@ -1013,19 +933,19 @@ class EmiliaNext(QMainWindow):
         self.recommended_chats = results[3].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
 
         for character in self.popular_chats:
-            card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(244, 134)
             self.popular_layout.addWidget(card)
         for character in self.trending_chats:
-            card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(244, 134)
             self.trending_layout.addWidget(card)
         for character in self.featured_chats:
-            card = self.createCard(character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(244, 134)
             self.for_you_layout.addWidget(card)
         for character in self.recommended_chats:
-            card = self.createCard(character.get('name'), character.get('avatar_file_name'),character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(244, 134)
             self.recommended_layout.addWidget(card)
 
@@ -1038,10 +958,11 @@ class EmiliaNext(QMainWindow):
 
         self.try_this_chats = chats
         for index, character in enumerate(self.try_this_chats):
-            card = self.createMiniCard(
+            card = CharacterCards.MiniCard(
+                self,
                 character.get('name', "Unknown"),
-                character.get('avatar_file_name'),
-                character.get('external_id')
+                character.get('external_id'),
+                character.get('avatar_file_name')
             )
             card.setFixedHeight(70)
             card.setMinimumWidth(250)
@@ -1055,11 +976,14 @@ class EmiliaNext(QMainWindow):
         self.author_id = data['id']
         self.name = data['account']['name']
         self.username = data['username']
+        self.me_has_avatar = True if data.get('account', {}).get('avatar_file_name') else False
+        self.me_avatar = data.get('account', {}).get('avatar_file_name')
 
         self.welcome_label.setText(self.tr("Welcome back, ") + self.name)
         self.profile_button.setText(self.name)
 
     def getUserSettings(self, data):
+        self.chat_thread.get_user_settings_signal.disconnect()
         self.user_settings = data
 
     def getAvailableModels(self, data):
@@ -1207,15 +1131,18 @@ class SearchPage(QWidget):
         self.data = data[0].get("result", {}).get("data", {}).get("json", []).get('characters', [])
         if self.data:
             for character in self.data:
-                card = self.mw.createCard(character.get('participant__name'), character.get('avatar_file_name'),
-                                          character.get('title').replace('\n', ''), character.get('user__username'),
-                                          character.get('external_id'), character.get('participant__num_interactions', 0),
-                                          0, 70, 70)
+                card = CharacterCards.MainCard(self.mw, character.get('participant__name'), character.get('avatar_file_name'),
+                                               character.get('title').replace('\n', ''), character.get('user__username'),
+                                               character.get('external_id'), character.get('participant__num_interactions', 0),
+                                               0, 70, 70)
                 card.setFixedHeight(87)
                 self.cards_layout.addWidget(card)
         else:
             no_results_label = QLabel(self.tr("Characters not found"))
-            no_results_label.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+            font = no_results_label.font()
+            font.setBold(True)
+            font.setPointSize(20)
+            no_results_label.setFont(font)
             self.cards_layout.addWidget(no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.chat_thread.character_search_signal.disconnect()
 
@@ -1558,10 +1485,13 @@ class SettingsPage(QWidget):
             head_layout = QHBoxLayout()
             head_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
             group_label = QLabel(emote_data["label"])
-            group_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+            font = group_label.font()
+            font.setBold(True)
+            font.setPointSize(14)
+            group_label.setFont(font)
             head_layout.addWidget(group_label)
             test_emote_button = QPushButton(self.tr(" | Test"))
-            test_emote_button.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+            test_emote_button.setFont(font)
             test_emote_button.clicked.connect(lambda _, e=emote_name: self.chat_thread.vtube_use_emote(e))
             head_layout.addWidget(test_emote_button)
             e_layout.addLayout(head_layout)
@@ -1640,7 +1570,10 @@ class SettingsPage(QWidget):
             group_label = QLabel(format_text(setting_group["label"]))
             if group_beta:
                 group_label.setText(f'{format_text(setting_group["label"])} {self.tr("(Beta)")}')
-            group_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
+            font = group_label.font()
+            font.setBold(True)
+            font.setPointSize(14)
+            group_label.setFont(font)
             group_layout.addWidget(group_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
             for setting in setting_group["settings"]:
@@ -1649,6 +1582,7 @@ class SettingsPage(QWidget):
                     label = QTextEdit()
                     label.setReadOnly(True)
                     label.setHtml(format_text(setting["label"]))
+                    label.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
                     layout.addWidget(label)
 
                 key = setting["key"]
@@ -1889,11 +1823,15 @@ class UserProfile(QWidget):
         self.profile_id = username
         self.is_me = self.profile_id == self.mw.username
         self.chat_thread.get_user_signal.connect(self._getUser)
-        self.chat_thread.get_user(self.profile_id)
         self.chat_thread.voices_search_username_signal.connect(self._getVoices)
-        self.chat_thread.voices_search_username(self.profile_id)
         self.chat_thread.get_upvoted_characters_signal.connect(self._getUpCharacters)
-        self.chat_thread.get_upvoted_characters()
+        self.chat_thread.get_user_personas_signal.connect(self._getUserPersonas)
+
+        self.chat_thread.get_user(self.profile_id)
+        self.chat_thread.voices_search_username(self.profile_id)
+        if self.is_me:
+            self.chat_thread.get_user_personas()
+            self.chat_thread.get_upvoted_characters()
 
     def initUI(self):
         self.top_bar, self.top_bar_layout = self.createTopBar()
@@ -1978,6 +1916,7 @@ class UserProfile(QWidget):
         self.characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.character_list))
         self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
+        self.characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
 
         self.voices_button = QPushButton(self.tr("Voices"))
         self.voices_button.setCheckable(True)
@@ -1985,25 +1924,40 @@ class UserProfile(QWidget):
         self.voices_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.voice_list))
         self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
+        self.voices_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
 
-        self.up_characters_button = QPushButton(self.tr("Upvoted Characters"))
+        self.up_characters_button = QPushButton(self.tr("Liked"))
         self.up_characters_button.setCheckable(True)
         self.up_characters_button.setStyleSheet(tab_button_style())
         self.up_characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.upvoted_characters_list))
         self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
+        self.up_characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
         self.up_characters_button.setVisible(False)
+
+        self.personas_button = QPushButton(self.tr("Personas"))
+        self.personas_button.setCheckable(True)
+        self.personas_button.setStyleSheet(tab_button_style())
+        self.personas_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.personas_list))
+        self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
+        self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
+        self.personas_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
+        self.personas_button.setVisible(False)
+
         buttons_layout.addWidget(self.characters_button)
         buttons_layout.addWidget(self.up_characters_button)
+        buttons_layout.addWidget(self.personas_button)
         buttons_layout.addWidget(self.voices_button)
 
         self.character_list, self.character_list_layout = self.scroll_page()
         self.upvoted_characters_list, self.upvoted_characters_layout = self.scroll_page()
+        self.personas_list, self.personas_layout = self.scroll_page()
         self.voice_list, self.voice_list_layout = self.scroll_page()
 
         self.lists_widget = QStackedWidget()
         self.lists_widget.addWidget(self.character_list)
         self.lists_widget.addWidget(self.upvoted_characters_list)
+        self.lists_widget.addWidget(self.personas_list)
         self.lists_widget.addWidget(self.voice_list)
         self.lists_widget.setFixedWidth(600)
         self.lists_widget.setCurrentWidget(self.character_list)
@@ -2017,12 +1971,14 @@ class UserProfile(QWidget):
         self.chat_thread.me_following_signal.disconnect()
         self.me_following = data.get('following', [])
 
-        if self.username == self.mw.username:
+        if self.is_me:
             self.follow_button.setVisible(False)
             self.up_characters_button.setVisible(True)
+            self.personas_button.setVisible(True)
         else:
             self.follow_button.setVisible(True)
             self.up_characters_button.setVisible(False)
+            self.personas_button.setVisible(False)
 
         if self.username in self.me_following:
             self.follow_button.setText(self.tr("Unfollow"))
@@ -2040,7 +1996,7 @@ class UserProfile(QWidget):
 
         if self.voice_data:
             for voice in self.voice_data:
-                card = HorizontalMiniVoiceCard(main_window, voice)
+                card = VoiceCards.HorizontalMiniVoiceCard(main_window, voice)
                 self.voice_list_layout.addWidget(card)
         else:
             empty_label = QLabel(self.tr("And it's empty here..."))
@@ -2052,14 +2008,29 @@ class UserProfile(QWidget):
 
         if self.upvoted_characters:
             for character in self.upvoted_characters:
-                card = self.mw.createCard(character['participant__name'], character.get('avatar_file_name'),
-                                          character.get('title'), "", character['external_id'],
-                                          character["participant__num_interactions"], character["upvotes"], 70, 70)
+                card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'),
+                                               character.get('title'), "", character['external_id'],
+                                               character["participant__num_interactions"], character["upvotes"], 70, 70)
                 card.setFixedHeight(87)
                 self.upvoted_characters_layout.addWidget(card)
         else:
             empty_label = QLabel(self.tr("And it's empty here..."))
             self.upvoted_characters_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+    def _getUserPersonas(self, data):
+        self.chat_thread.get_user_personas_signal.disconnect()
+        self.user_personas = data
+
+        if self.user_personas:
+            for persona in self.user_personas:
+                card = PersonaCards.ListCard(self.mw, persona)
+                card.setFixedHeight(87)
+                self.personas_layout.addWidget(card)
+
+        button = QPushButton(self.tr("New"))
+        button.setStyleSheet(button_style())
+        button.clicked.connect(lambda _: self.mw.showOverlay(PersonaCards.OverlayCard(self.mw)))
+        self.personas_layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     def _getUser(self, data):
         self.chat_thread.get_user_signal.disconnect()
@@ -2111,7 +2082,7 @@ class UserProfile(QWidget):
         self.chats_label.setText(str(chats_count) + " " + self.tr("chats"))
         if self.data.get('characters', []):
             for character in self.data.get('characters', []):
-                card = self.mw.createCard(character['participant__name'], character.get('avatar_file_name'), character.get('title'), "", character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)
+                card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'), character.get('title'), "", character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)
                 card.setFixedHeight(87)
                 self.character_list_layout.addWidget(card)
         else:
@@ -2232,7 +2203,7 @@ class UserProfile(QWidget):
 
             sub_button = QPushButton()
             sub_button.setStyleSheet(button_style())
-            if username != self.mw.username:
+            if not self.is_me:
                 u_layout.addWidget(sub_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 if username in self.me_following:
                     sub_button.setText(self.tr("Unfollow"))
