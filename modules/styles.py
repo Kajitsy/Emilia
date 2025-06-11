@@ -492,15 +492,6 @@ def top_bar_style():
         }
     """
 
-def character_info_sidebar_style():
-    return """
-        QFrame {
-            background-color: #303134;
-            border-radius: 4px;
-            border: none;
-        }
-    """
-
 def main_window_style():
     return """
         background-color: #202124;

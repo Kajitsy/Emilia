@@ -138,7 +138,6 @@ class ChatInterface(QWidget):
     def createTopBar(self):
         header_frame = QWidget()
         header_frame.hideEvent = lambda event: self.mw.t_bar.setStyleSheet(None)
-        header_frame.showEvent = lambda _: self.mw.t_bar.setStyleSheet(top_bar_style())
         header_frame.setFixedHeight(75)
         header_layout = QHBoxLayout()
 
@@ -176,7 +175,6 @@ class ChatInterface(QWidget):
         self.character_info_sidebar = QFrame(self)
         self.character_info_sidebar.setFixedWidth(230)
         self.character_info_sidebar.setFixedHeight(self.mw.height() - 230)
-        self.character_info_sidebar.setStyleSheet(character_info_sidebar_style())
         self.char_info_layout = QVBoxLayout()
         self.character_info_sidebar.setLayout(self.char_info_layout)
         self.char_info_layout.setContentsMargins(10, 10, 10, 10)
