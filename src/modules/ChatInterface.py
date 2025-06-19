@@ -13,7 +13,7 @@ from PyQt6.QtCore import (
     QSettings, QTimer)
 from datetime import datetime
 
-from modules.Cards import PersonaCards
+from modules.cards import PersonaCards
 from modules.QCustom import ClickableFrame, CustomTextEdit
 from modules.QThreads import (
     PlayerThread, FileLoaderThread,

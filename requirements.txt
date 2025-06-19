@@ -21,5 +21,6 @@ soundfile==0.13.1
 scipy==1.15.3
 speechrecognition==3.14.2
 typing_extensions==4.13.2
-urllib3==2.4.0
+urllib3==2.5.0
 websockets==15.0.1
+curl_cffi==0.11.4

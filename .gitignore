@@ -1,8 +1,7 @@
-
-/.idea
-/cache
 *__pycache__
-data/VTube_Token.txt
-/logs
+/.idea
+/scr/data/VTube_Token.txt
 /dist
 /build
+/src/cache
+/src/logs

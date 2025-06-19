@@ -259,7 +259,6 @@ class ChatThread(QThread):
     get_popular_and_trending_chars_signal = pyqtSignal(object)
     get_main_page_chats_signal = pyqtSignal(object)
     featured_chats_signal = pyqtSignal(object)
-    recommended_chats_signal = pyqtSignal(object)
     trythis_chats_signal = pyqtSignal(object)
     category_characters_signal = pyqtSignal(object)
     character_chats_signal = pyqtSignal(object)
@@ -563,7 +562,8 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_main_page_chats(self):
-        await self._call_ccaa('get_main_page_chats', self.get_main_page_chats_signal, self.mw.current_language.split("_")[0])
+        await self._call_ccaa('get_main_page_chats', self.get_main_page_chats_signal)
+        await self._call_ccaa('get_for_you_chats', self.featured_chats_signal)
 
     @asyncSlot
     async def get_character(self, character_id):

@@ -14,7 +14,7 @@ from modules.styles import *
 from modules.QThreads import (
     PlayerThread, FileLoaderThread,
     ImageLoaderThread, VoiceModeThread)
-from modules.Cards import VoiceCards
+from modules.cards import VoiceCards
 
 class VoiceSearch(QWidget):
     def __init__(self, main_window, search_character: str | None = None, current_voice_id="", current_character_id=""):

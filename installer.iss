@@ -1,5 +1,5 @@
 #define MyAppName "Emilia"
-#define MyAppVersion "3.0.3"
+#define MyAppVersion "3.1.0"
 #define MyAppPublisher "Kajitsy"
 #define MyAppURL "https://github.com/Kajitsy/Emilia"
 #define MyAppExeName "emilia.exe"
@@ -28,10 +28,10 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Files]
 Source: ".\dist\main\emilia.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\dist\main\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs
-Source: ".\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs
-Source: ".\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs
+Source: ".\src\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\src\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs
+Source: ".\src\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

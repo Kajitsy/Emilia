@@ -9,7 +9,7 @@ if %errorlevel% == 0 (
 )
 call .venv\Scripts\activate
 @echo on
-python main.py
+python src/main.py
 @echo off
 call .venv\Scripts\deactivate.bat
 pause

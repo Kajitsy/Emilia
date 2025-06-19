@@ -81,7 +81,7 @@ from modules.GetCAICookies import GetCookies
 from modules.QCustom import HorizontalScrollArea, CheckablePushButton, ClickableFrame, LeftSidebar
 from modules.QThreads import *
 from modules.styles import *
-from modules.Cards import VoiceCards, PersonaCards, CharacterCards
+from modules.cards import VoiceCards, PersonaCards, CharacterCards
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -89,7 +89,7 @@ if platform.system() == 'Windows':
 
 app = QApplication(sys.argv)
 
-translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py .\modules\Cards.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
+translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
 
 translator.load(
     f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
@@ -202,6 +202,7 @@ class EmiliaNext(QMainWindow):
         self.chat_thread.featured_voices_signal.connect(self.addFeaturedVoices)
         self.chat_thread.trythis_chats_signal.connect(self.addTryThisChats)
         self.chat_thread.get_main_page_chats_signal.connect(self.addMainPageChats)
+        self.chat_thread.featured_chats_signal.connect(self.addForYouChats)
         self.chat_thread.category_characters_signal.connect(self.addCharacterByCategory)
         self.chat_thread.get_me_signal.connect(self.getMe)
         self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
@@ -880,7 +881,7 @@ class EmiliaNext(QMainWindow):
             card = CharacterCards.MainCard(self, character.get('participant__name', "Unknown"), character.get('avatar_file_name'),
                                            character.get('title'), character.get('user__username'),
                                            character.get('external_id'), character.get('participant__num_interactions'))
-            card.setFixedSize(252, 134)
+            card.setFixedSize(277, 134)
             self.category_layout.addWidget(card)
 
     def addRecentChats(self, chats):
@@ -906,7 +907,7 @@ class EmiliaNext(QMainWindow):
         self.featured_voices = voices
         for voice in self.featured_voices:
             card = VoiceCards.HorizontalMiniVoiceCard(main_window, voice)
-            card.setFixedWidth(200)
+            card.setFixedWidth(277)
             self.featured_voices_layout.addWidget(card)
 
     def addMainPageChats(self, results):
@@ -918,37 +919,42 @@ class EmiliaNext(QMainWindow):
             item = self.trending_layout.itemAt(i)
             if item and item.widget():
                 item.widget().deleteLater()
-        for i in reversed(range(self.for_you_layout.count())):
-            item = self.for_you_layout.itemAt(i)
-            if item and item.widget():
-                item.widget().deleteLater()
         for i in reversed(range(self.recommended_layout.count())):
             item = self.recommended_layout.itemAt(i)
             if item and item.widget():
                 item.widget().deleteLater()
 
 
-        self.featured_chats = results[0].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
-        self.trending_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_popular_characters_l30d_v1', [])
-        self.popular_chats = results[2].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
-        self.recommended_chats = results[3].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+        self.recommended_chats = results[0].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
+        self.popular_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_popular_characters_l30d_v1', [])
+        self.trending_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_trending_characters_v1', [])
 
+        for character in self.recommended_chats:
+            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card.setFixedSize(277, 134)
+            self.recommended_layout.addWidget(card)
         for character in self.popular_chats:
             card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
-            card.setFixedSize(244, 134)
+            card.setFixedSize(277, 134)
             self.popular_layout.addWidget(card)
         for character in self.trending_chats:
             card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
-            card.setFixedSize(244, 134)
+            card.setFixedSize(277, 134)
             self.trending_layout.addWidget(card)
+
+    def addForYouChats(self, chats):
+        for i in reversed(range(self.for_you_layout.count())):
+            item = self.popular_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
+
+        self.featured_chats = chats
+
         for character in self.featured_chats:
+            character = character.get('character_item', {})
             card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
-            card.setFixedSize(244, 134)
+            card.setFixedSize(277, 134)
             self.for_you_layout.addWidget(card)
-        for character in self.recommended_chats:
-            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
-            card.setFixedSize(244, 134)
-            self.recommended_layout.addWidget(card)
 
     def addTryThisChats(self, chats):
         for layout in (self.try_this_odd_layout, self.try_this_even_layout):
@@ -965,8 +971,7 @@ class EmiliaNext(QMainWindow):
                 character.get('external_id'),
                 character.get('avatar_file_name')
             )
-            card.setFixedHeight(70)
-            card.setMinimumWidth(250)
+            card.setFixedSize(277, 70)
             if (index + 1) % 2 == 0:
                 self.try_this_even_layout.addWidget(card)
             else:

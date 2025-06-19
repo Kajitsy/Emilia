@@ -63,7 +63,7 @@ class Async:
                     f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async put request: {url}")
             else:
                 raise ValueError("Invalid method")
-            if response.status == 200:
+            if response.status == 200 or response.status == 207:
                 return await response.json() if not text else json.loads(await response.text())
             elif response.status == 400:
                 pass
@@ -126,8 +126,8 @@ class Async:
         response = await self.trpc_request("discovery.recommended?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22lang%22%3A%22none%22%7D%7D%7D")
         return response[0].get("result", {}).get("data", {}).get("json", {}).get("characters", [])
 
-    async def get_main_page_chats(self, short_lang):
-        response = await self.trpc_request(f"discovery.recommended,discovery.curatedLists,discovery.recommended,character.infos?batch=1&input={{%220%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%221%22:{{%22json%22:{{%22listIds%22:[%22cold_start_popular_characters_l30d_v1%22,%22cold_start_trending_characters_v1%22]}}}},%222%22:{{%22json%22:{{%22lang%22:%22{short_lang}%22}}}},%223%22:{{%22json%22:{{%22externalIds%22:[%22q0KukI6MnGQm_vDr9tG8YIyBJr8pNs8Wf6eKGh_yldw%22,%22edOuK6q8jN1kbv_QXnx25gfqpL0k0v2ByTbET5HCsgs%22,%22o6GGF93x8zFmPL1f2lT7d0iRhRZquc1x6h4KJ00g9Ck%22,%22U0UEmkGE3HBSuZAXchwcwO4HDWwPV8qhlsmO38YkO3k%22,%22DI1yer-gTAG_SvdxR-bu23eCCz4BMgsLTKp-NJ0vV3s%22,%22H4Y7Db2ALtZCm2yI8Ai9TT_hjyskGASBgKy6VSxhtak%22,%225MNwesgXRtUm0is6KXZ7ii2U0aaopVDyGa1N5-DwHrc%22,%228wk86EGdQ7LLbu8I1nadKL1giiYGLfE4DaryTdSyv9w%22,%22VAe__mrIOgaos1AgKQqTLe2lbe3E1JU8WXmTWxm45gw%22,%22EeNI0LbMJXSNUrlFaaAmEq5OfVXMY73A_GplJtGZ-pU%22,%22QD9um3txuc-oDVMmMB3rg9KFzmYR_JBMo8wEVwPDlRE%22,%22gFWL2jo3N1FHiLihknz1f_nwFBq6xBiAdGyuSmw_cTc%22,%22JzdwtXZNEqHoSsVf8sQ2P26WZRv7f_IQGSWZQAcT3pY%22,%22n3xkV_EptnZ0euflSos8Ylq_corcjZfaYEcfSOmu9to%22,%22f3vvWne0fuUL20eHVNRjAxk1a0CzbtjA6sFlgIU6p2g%22,%22VAxMSGSUghPurx28geTtgXWZYbm07vX7kGKJlaKw4Vg%22]}}}}}}")
+    async def get_main_page_chats(self):
+        response = await self.trpc_request(f"character.infos,discovery.curatedLists,character.info,character.info,character.info,character.info,character.info,character.info,character.info,character.info,discovery.curatedCategories,discovery.charactersByCurated,character.info,character.info,character.info,character.info,character.info,character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalIds%22%3A%5B%22OtlDvgun8lLEEI3mXxVhl7_e8ArdmnuHa-hKeFKxjSI%22%2C%221his4cFt1rPawY6N01u5p5CM_4BbWJM3A-RVHwuSnRI%22%2C%22BQShAudovnnwL0rWwNzPzpn1cg_MQm3C3yPvUVuVvfU%22%2C%22Alp8ttiB1mOVF937d_b0hix2ToM3npDijaXRwA_7PY0%22%2C%22roqeHT1P5--gMOjrHEjE7z1PJ6sAXRYVcpLI6MYRemA%22%2C%22q0akobJPMxSgums8Z1GsVmsr498Zm7YtxRpKVS_iUl0%22%2C%22sv54nR1qDnJaS5Zf8Yxze-rrCGKSEMZUKg4Ui-azMk4%22%2C%22T-Vpx4MmCwvlb0PG_TkjBhGdpDWAhPVIRRk5E-eeEl4%22%2C%222gzUbuu3eznfsZMG6g6VxuyAoY_qGRUE22DNa399_I0%22%2C%22xAB0gj88bLy0lng4wcNPn1RAwQ51mHv03Uzqfus-Epk%22%2C%22m0kuZJY-9lFmEydDwmX1ea8pROEffyRjty4a_9xy2EI%22%2C%22uA2zSUxOzrsIKJKTzZZRA9AL6M5D1CShe8RAZns91As%22%2C%22LNb8DCj6vQ2Z1d3ok111bxoxpRVqqeP9drQd7IL3BGg%22%2C%22zWgJMRcp2Q_9fWfY4uBgLfQb9iDTPXyGGlSmSyOABe4%22%2C%22fvdCvTk3AAVeW-h3y4a9_ajfbIo1_1jdughy1VQJ0-8%22%2C%22ADisxXRP6TgrjJ-9M04m1ctHCeLTw-DPFUHJ1p-1Rqk%22%2C%22NayYpcaCSn8IkQBnES0UcFH-2unn48_i39iiVmAzAIc%22%2C%22wbcZlYilRx1ep5_L01aFB6-g0PPqbxHi_O4RsFNbOtw%22%2C%22FeXcfHZPzoStZCwqcqpf-wO-yCxsA-MGToRoipKfvzA%22%2C%22ZVHoWO767A7mR4DHHtum7J-l8tMFwY-NRbAy1S8ub4c%22%2C%22v-GVsCZOUNU5-Xovuji14m16qCjGW-96UIBZhyTP3do%22%2C%22dAPSIb3xavyQ-aO4Q0BxmUBXqHqaoktxr_l2rbRgccc%22%2C%22W3IC9o8l8Cbjep8pskXpbjwRn7huVkBM4GzzaxtLTaw%22%2C%22i-mYsXbuRSyYpsPivuFhjDCy9EcMBBi-uPLzER63E4c%22%2C%22DlqmValOtaDUVyYCbb-krx7PRdAQUiagFodPkpDtwTw%22%2C%22mXNjk1FpX06Nkjv4D0zyIKW2vJnxNnatiXr8chdN9Yc%22%5D%7D%7D%2C%221%22%3A%7B%22json%22%3A%7B%22listIds%22%3A%5B%22cold_start_popular_characters_l30d_v1%22%2C%22cold_start_trending_characters_v1%22%5D%7D%7D%2C%222%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22A9zlEuzpvWiH8h0PNWEvZPK-PQifYxS-V24D3ncqIyU%22%7D%7D%2C%223%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22uD71krOYYFjVkYwspviH_8tYTybsf5eAGdwhNlFJAls%22%7D%7D%2C%224%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22f4hEGbw8ywUrjsrye03EJxiBdooy--HiOWgU2EiRJ0s%22%7D%7D%2C%225%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%229ZSDyg3OuPbFgDqGwy3RpsXqJblE4S1fKA_oU3yvfTM%22%7D%7D%2C%226%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22Hu84TYGgte3qVoQuy75x6Q1-ORjQbgoe2qaFoTkjaOM%22%7D%7D%2C%227%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22_FrgO6M-xCuTi72BYHbt-dQN2QsjNXnl-eKJGrjJttc%22%7D%7D%2C%228%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22WLcau8HDbkAPlnU9GPZvLVQ4QaWMhktCmgGFgG2nb5c%22%7D%7D%2C%229%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%229wIR0NXzqD76sfJWRsHCGGb8IkPljhINj8WDy_2xjcg%22%7D%7D%2C%2210%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%2C%2211%22%3A%7B%22json%22%3A%7B%22category%22%3A%22Helpers%22%7D%7D%2C%2212%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22W4MWmsvbFFnKF8b9e3Eg6ZUNzdhqvEZYy-tNRtxB_Og%22%7D%7D%2C%2213%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22GxP9L6QQ-qocxM9sYfvwywDw6wwfSmBJUjalAlD1ZCY%22%7D%7D%2C%2214%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%226HhWfeDjetnxESEcThlBQtEUo0O8YHcXyHqCgN7b2hY%22%7D%7D%2C%2215%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%227yDt2WH6Y_OpaAV4GsxKcY5xIQ8QT5M0kgpDQ6VAflI%22%7D%7D%2C%2216%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22YntB_ZeqRq2l_aVf2gWDCZl4oBttQzDvhj9cXafWcF8%22%7D%7D%2C%2217%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22YpuGnNPQiGvb0DIg77pDUruORvqEPQAxmabNuOIGylo%22%7D%7D%7D")
         return response
 
     async def get_featured_voices(self):
@@ -191,6 +191,15 @@ class Async:
     async def get_available_models_git(self):
         response = await self.custom_request("https://raw.githubusercontent.com/Kajitsy/Emilia/refs/heads/emilia/data/CAI_Available_Models.json", text=True)
         return response
+
+    async def get_for_you_chats(self):
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Token {self.token}",
+            "Cookie": f"web-next-auth={self.auth_cookie}"
+        }
+        response = await self.custom_request("https://feed.api.character.ai/api/feed/recommended", method='post', headers=headers)
+        return response.get('contents', [])
 
     async def hide_recent_chat(self, character_external_id):
         data = {
