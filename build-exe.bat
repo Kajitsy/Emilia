@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-call .venv\Scripts\activate
+call src\.venv\Scripts\activate
 if exist requirements.txt (
     echo Installing dependencies from requirements.txt...
     pip install -r requirements.txt

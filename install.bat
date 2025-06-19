@@ -8,13 +8,13 @@ if %errorlevel% == 0 (
     echo Creating virtual environment...
 )
 
-python -m venv .venv
-call .venv\Scripts\activate
+python -m venv src\.venv
+call src\.venv\Scripts\activate
 
 echo Installing dependencies... Please wait.
 @echo on
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 @echo off
-call lib\Scripts\deactivate.bat
+call src\.venv\Scripts\deactivate.bat
 pause

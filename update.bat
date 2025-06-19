@@ -7,12 +7,12 @@ if %errorlevel% == 0 (
 ) else (
     echo Updating libraries
 )
-call .venv\Scripts\activate
+call src\.venv\Scripts\activate
 
 echo Installing dependencies... Please wait.
 @echo on
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 @echo off
-call lib\Scripts\deactivate.bat
+call src\.venv\Scripts\deactivate.bat
 pause
