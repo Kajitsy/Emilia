@@ -23,7 +23,7 @@ ArchitecturesInstallIn64BitMode=x64
 ArchitecturesAllowed=x64
 MinVersion=10.0
 LicenseFile=LICENSE
-SetupIconFile=".\icon.ico"
+SetupIconFile=".\src\icon.ico"
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Files]
