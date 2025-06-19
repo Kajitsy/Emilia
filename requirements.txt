@@ -15,7 +15,7 @@ pyqt6-webengine-qt6==6.9.0
 pyvts==0.3.3
 pypresence==4.3.0
 qasync==0.27.1
-requests==2.32.3
+requests==2.32.4
 sounddevice==0.5.1
 soundfile==0.13.1
 scipy==1.15.3
