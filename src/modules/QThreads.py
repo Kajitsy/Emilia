@@ -301,7 +301,6 @@ class ChatThread(QThread):
         self.ccaa: ccaa | None = None
         self.connect: ccaa().connect() | None = {}
         self.me = {}
-        self.connect = {}
         self.eec = EEC(self.mw, self.mw.settings.value("vtube/port", 8001))
 
         self.microphone_muted = True
@@ -505,12 +504,13 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED"):
-        if not self.me and self.ccaa: self.me = await self.ccaa.get_me()
+        if not self.me and self.ccaa:
+            self.me = await self.ccaa.get_me()
         if self.connect:
-            response = await self.connect.new_chat(char, self.me['id'], preferred_model_type=preferred_model_type)
-            self.new_chat_created_signal.emit(response)
+            response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type)
             if chat_id: del self.chat_histories[chat_id]
             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
+            self.new_chat_created_signal.emit(response)
 
     @asyncSlot
     async def get_chat(self, char):

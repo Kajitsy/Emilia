@@ -1,4 +1,3 @@
-aiohttp==3.11.12
 aiosignal==1.3.2
 Eel==0.18.1
 gpytranslate==2.0.0

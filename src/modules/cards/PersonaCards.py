@@ -304,6 +304,7 @@ class MainCard(QFrame):
         self.deleteLater()
 
     def showOverlay(self):
+        self.mw.hideOverlay()
         self.mw.showOverlay(EditOverlay(self.mw, self.data, self))
 
     def contextMenuEvent(self, a0):
