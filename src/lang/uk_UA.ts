@@ -56,7 +56,7 @@
     <message>
         <location filename="../modules/ChatInterface.py" line="350"/>
         <source>Successfully updated your persona</source>
-        <translation type="unfinished"></translation>
+        <translation>Ви успішно оновили свою персону</translation>
     </message>
     <message>
         <location filename="../modules/ChatInterface.py" line="377"/>
@@ -234,155 +234,341 @@
 <context>
     <name>ChatThread</name>
     <message>
-        <location filename="../modules/QThreads.py" line="322"/>
+        <location filename="../modules/QThreads.py" line="325"/>
         <source>Successful connection!</source>
         <translation>Успішне підключення!</translation>
     </message>
     <message>
-        <location filename="../modules/QThreads.py" line="325"/>
+        <location filename="../modules/QThreads.py" line="328"/>
         <source>Connection error: </source>
         <translation>Помилка підключення: </translation>
     </message>
 </context>
 <context>
+    <name>EditOverlay</name>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="538"/>
+        <location filename="../modules/cards/PersonaCards.py" line="42"/>
+        <source>Display Name</source>
+        <translation>Відображуване ім&apos;я</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="552"/>
+        <location filename="../modules/cards/PersonaCards.py" line="73"/>
+        <source>Background</source>
+        <translation>Фон</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="90"/>
+        <source>Make default for new chats</source>
+        <translation>Використовувати для всіх нових чатів</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="97"/>
+        <source>Remove</source>
+        <translation>Видаляти</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="570"/>
+        <location filename="../modules/cards/PersonaCards.py" line="102"/>
+        <source>Save</source>
+        <translation>Зберігши</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="545"/>
+        <source>Username</source>
+        <translation>Ім&apos;я користувача</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="565"/>
+        <source>Cancel</source>
+        <translation>Скасування</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="637"/>
+        <source>Welcome back, </source>
+        <translation>З поверненням, </translation>
+    </message>
+</context>
+<context>
+    <name>EditPage</name>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="224"/>
+        <source>Character Name</source>
+        <translation>Ім&apos;я персонажа</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="233"/>
+        <source>e.g. Albert Einstein</source>
+        <translation>наприклад Альбер Ейнштейн</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="237"/>
+        <source>Tagline</source>
+        <translation>Слоган</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="244"/>
+        <source>Add a short tagline of your Character</source>
+        <translation>Додайте слоган свого персонажа</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="247"/>
+        <source>Description</source>
+        <translation>Опис</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="252"/>
+        <source>How would your Character describe themselves?</source>
+        <translation>Як би ваш персонаж описав себе?</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="260"/>
+        <source>Greeting</source>
+        <translation>Вітання</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="265"/>
+        <source>e.g. Hello, I am Albert. Ask me anything about my scientific contributions.</source>
+        <translation>Привіт, я Альберт. Запитай мене про мій науковий внесок.</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="277"/>
+        <source>Allow dynamic greetings</source>
+        <translation>Дозволяти динамічні привітання</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="281"/>
+        <source>Definition</source>
+        <translation>Визначення</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="286"/>
+        <source>What&apos;s your Character&apos;s backstory? How do you want it to talk or act?</source>
+        <translation>Яка історія вашого персонажа? Як ви хочете, щоб він говорив чи діяв?</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="296"/>
+        <source>User message</source>
+        <translation>Повідомлення Користувача</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="300"/>
+        <source>Character message</source>
+        <translation>Повідомлення персонажа</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="304"/>
+        <source>End of dialog</source>
+        <translation>Кінець діалогу</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="315"/>
+        <source>Keep Character definition private</source>
+        <translation>Зберегти визначення персонажа в таємниці</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="319"/>
+        <source>Visibility</source>
+        <translation>Видимість</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="442"/>
+        <location filename="../modules/cards/CharacterCards.py" line="409"/>
+        <location filename="../modules/cards/CharacterCards.py" line="325"/>
+        <source>Public</source>
+        <translation>Публічний</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="444"/>
+        <location filename="../modules/cards/CharacterCards.py" line="411"/>
+        <location filename="../modules/cards/CharacterCards.py" line="325"/>
+        <source>Unlisted</source>
+        <translation>Неперерахований</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="446"/>
+        <location filename="../modules/cards/CharacterCards.py" line="413"/>
+        <location filename="../modules/cards/CharacterCards.py" line="325"/>
+        <source>Private</source>
+        <translation>Приватний</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="331"/>
+        <source>Create Character</source>
+        <translation>Створити персонажа</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="336"/>
+        <source>Save Changes</source>
+        <translation>Зберегти зміни</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="341"/>
+        <source>Save and Chat</source>
+        <translation>Зберегти і спілкуватися</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="376"/>
+        <location filename="../modules/cards/CharacterCards.py" line="362"/>
+        <source>The character has been saved successfully!</source>
+        <translation>Персонаж успішно збережений!</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="388"/>
+        <source>The character has been successfully created!</source>
+        <translation>Персонаж успішно створений!</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="396"/>
+        <source>The character&apos;s name must be longer than three characters.</source>
+        <translation>Ім&apos;я персонажа не може бути коротше 3 символів.</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="399"/>
+        <source>The character&apos;s greeting must be longer than three characters.</source>
+        <translation>Привітання персонажа не може бути коротше 3 символів.</translation>
+    </message>
+</context>
+<context>
     <name>EmiliaNext</name>
     <message>
-        <location filename="../main.py" line="137"/>
+        <location filename="../main.py" line="138"/>
         <source>User</source>
         <translation>Користувач</translation>
     </message>
     <message>
-        <location filename="../main.py" line="239"/>
+        <location filename="../main.py" line="240"/>
         <source>Please re-enter (the login data has expired)</source>
         <translation>Будь ласка, увійдіть (термін дії періоду даних)</translation>
     </message>
     <message>
-        <location filename="../main.py" line="284"/>
+        <location filename="../main.py" line="285"/>
         <source>Remove from Recent Chats</source>
         <translation>Видалити з недавніх</translation>
     </message>
     <message>
-        <location filename="../main.py" line="426"/>
+        <location filename="../main.py" line="427"/>
         <source>A new version is available: </source>
         <translation>Нова версія доступна: </translation>
     </message>
     <message>
-        <location filename="../main.py" line="443"/>
+        <location filename="../main.py" line="444"/>
         <source>Download complete. Running installer...</source>
         <translation>Завантаження завершено. Запуск інсталятора ...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="448"/>
+        <location filename="../main.py" line="449"/>
         <source>Download failed.</source>
         <translation>Помилка завантаження.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="455"/>
+        <location filename="../main.py" line="456"/>
         <source>Downloading...</source>
         <translation>Завантажити ...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="473"/>
+        <location filename="../main.py" line="474"/>
         <source>Looking at the main page</source>
         <translation>Дивиться на головну сторінку</translation>
     </message>
     <message>
-        <location filename="../main.py" line="488"/>
+        <location filename="../main.py" line="489"/>
         <source>For You</source>
         <translation>Для вас</translation>
     </message>
     <message>
-        <location filename="../main.py" line="491"/>
+        <location filename="../main.py" line="492"/>
         <source>Recommended</source>
         <translation>Рекомендований</translation>
     </message>
     <message>
-        <location filename="../main.py" line="494"/>
+        <location filename="../main.py" line="495"/>
         <source>Popular</source>
         <translation>Популярний</translation>
     </message>
     <message>
-        <location filename="../main.py" line="497"/>
+        <location filename="../main.py" line="498"/>
         <source>Trending</source>
         <translation>В Тренді</translation>
     </message>
     <message>
-        <location filename="../main.py" line="500"/>
+        <location filename="../main.py" line="501"/>
         <source>Try This</source>
         <translation>Спробуйте це</translation>
     </message>
     <message>
-        <location filename="../main.py" line="546"/>
+        <location filename="../main.py" line="547"/>
         <source>Welcome back, User</source>
         <translation>З поверненням, користувач</translation>
     </message>
     <message>
-        <location filename="../main.py" line="554"/>
+        <location filename="../main.py" line="555"/>
         <source>Update</source>
         <translation>Оновлення</translation>
     </message>
     <message>
-        <location filename="../main.py" line="560"/>
+        <location filename="../main.py" line="561"/>
         <source>Character Search</source>
         <translation>Пошук символів</translation>
     </message>
     <message>
-        <location filename="../main.py" line="641"/>
+        <location filename="../main.py" line="642"/>
         <source>Voices</source>
         <translation>Голосувати</translation>
     </message>
     <message>
-        <location filename="../main.py" line="665"/>
+        <location filename="../main.py" line="666"/>
         <source>Assistants</source>
         <translation>Асистенти</translation>
     </message>
     <message>
-        <location filename="../main.py" line="666"/>
+        <location filename="../main.py" line="667"/>
         <source>Anime</source>
         <translation>Аніме</translation>
     </message>
     <message>
-        <location filename="../main.py" line="667"/>
+        <location filename="../main.py" line="668"/>
         <source>Creativity and Writing</source>
         <translation>Творчість та письмо</translation>
     </message>
     <message>
-        <location filename="../main.py" line="668"/>
+        <location filename="../main.py" line="669"/>
         <source>Entertainment and Gaming</source>
         <translation>Розваги та ігри</translation>
     </message>
     <message>
-        <location filename="../main.py" line="669"/>
+        <location filename="../main.py" line="670"/>
         <source>History</source>
         <translation>Розповідь</translation>
     </message>
     <message>
-        <location filename="../main.py" line="670"/>
+        <location filename="../main.py" line="671"/>
         <source>Humor</source>
         <translation>Гумор</translation>
     </message>
     <message>
-        <location filename="../main.py" line="671"/>
+        <location filename="../main.py" line="672"/>
         <source>Learning</source>
         <translation>Освіта</translation>
     </message>
     <message>
-        <location filename="../main.py" line="672"/>
+        <location filename="../main.py" line="673"/>
         <source>Lifestyle</source>
         <translation>Спосіб життя</translation>
     </message>
     <message>
-        <location filename="../main.py" line="673"/>
+        <location filename="../main.py" line="674"/>
         <source>Parody</source>
         <translation>Пародія</translation>
     </message>
     <message>
-        <location filename="../main.py" line="674"/>
+        <location filename="../main.py" line="675"/>
         <source>RPG and Puzzles</source>
         <translation>Роль -ігрові ігри та головоломки</translation>
     </message>
     <message>
-        <location filename="../main.py" line="988"/>
+        <location filename="../main.py" line="1000"/>
         <source>Welcome back, </source>
         <translation>З поверненням, </translation>
     </message>
@@ -473,12 +659,17 @@
 <context>
     <name>LeftSidebar</name>
     <message>
-        <location filename="../modules/QCustom.py" line="106"/>
+        <location filename="../modules/QCustom.py" line="112"/>
         <source>To Main Page</source>
         <translation>На головному</translation>
     </message>
     <message>
-        <location filename="../modules/QCustom.py" line="143"/>
+        <location filename="../modules/QCustom.py" line="131"/>
+        <source>Create Character</source>
+        <translation>Створити персонажа</translation>
+    </message>
+    <message>
+        <location filename="../modules/QCustom.py" line="163"/>
         <source>Profile</source>
         <translation>Профіл</translation>
     </message>
@@ -486,87 +677,103 @@
 <context>
     <name>ListCard</name>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="247"/>
         <source>Default</source>
-        <translation>За замовчуванням</translation>
+        <translation type="vanished">За замовчуванням</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="248"/>
         <source>Active</source>
-        <translation>Активний</translation>
+        <translation type="vanished">Активний</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="309"/>
-        <location filename="../modules/cards/PersonaCards.py" line="266"/>
         <source>Edit</source>
-        <translation>Змінивши</translation>
+        <translation type="vanished">Змінивши</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="287"/>
-        <location filename="../modules/cards/PersonaCards.py" line="274"/>
-        <source>Successfully updated your persona</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/cards/PersonaCards.py" line="313"/>
         <source>Clear default</source>
-        <translation>Очистити за замовчуванням</translation>
+        <translation type="vanished">Очистити за замовчуванням</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="317"/>
-        <source>Make default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/cards/PersonaCards.py" line="321"/>
         <source>Remove</source>
-        <translation>Видаляти</translation>
+        <translation type="vanished">Видаляти</translation>
     </message>
 </context>
 <context>
     <name>MainCard</name>
     <message>
-        <location filename="../modules/cards/CharacterCards.py" line="67"/>
+        <location filename="../modules/cards/CharacterCards.py" line="72"/>
         <source>Author: @</source>
         <translation>Автор: @</translation>
     </message>
     <message>
-        <location filename="../modules/cards/CharacterCards.py" line="92"/>
+        <location filename="../modules/cards/CharacterCards.py" line="97"/>
         <source> chats</source>
         <translation> чатів</translation>
     </message>
     <message>
-        <location filename="../modules/cards/CharacterCards.py" line="94"/>
+        <location filename="../modules/cards/CharacterCards.py" line="99"/>
         <source> likes</source>
         <translation> лайковий</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="315"/>
+        <location filename="../modules/cards/PersonaCards.py" line="272"/>
+        <location filename="../modules/cards/CharacterCards.py" line="104"/>
+        <source>Edit</source>
+        <translation>Змінивши</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="253"/>
+        <source>Default</source>
+        <translation>За замовчуванням</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="254"/>
+        <source>Active</source>
+        <translation>Активний</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="293"/>
+        <location filename="../modules/cards/PersonaCards.py" line="280"/>
+        <source>Successfully updated your persona</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="319"/>
+        <source>Clear default</source>
+        <translation>Очистити за замовчуванням</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="323"/>
+        <source>Make default</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="327"/>
+        <source>Remove</source>
+        <translation>Видаляти</translation>
     </message>
 </context>
 <context>
     <name>OverlayCard</name>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="42"/>
         <source>Display Name</source>
-        <translation>Відображуване ім&apos;я</translation>
+        <translation type="vanished">Відображуване ім&apos;я</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="72"/>
         <source>Background</source>
-        <translation>Фон</translation>
+        <translation type="vanished">Фон</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="89"/>
         <source>Make default for new chats</source>
-        <translation>Використовувати для всіх нових чатів</translation>
+        <translation type="vanished">Використовувати для всіх нових чатів</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="96"/>
         <source>Remove</source>
-        <translation>Видаляти</translation>
+        <translation type="vanished">Видаляти</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="101"/>
         <source>Save</source>
-        <translation>Зберігши</translation>
+        <translation type="vanished">Зберігши</translation>
     </message>
 </context>
 <context>
@@ -618,17 +825,17 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../main.py" line="1076"/>
+        <location filename="../main.py" line="1088"/>
         <source>Search characters...</source>
         <translation>Шукає персонажів...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1147"/>
+        <location filename="../main.py" line="1159"/>
         <source>Characters not found</source>
         <translation>Персонажів не знайшли</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1169"/>
+        <location filename="../main.py" line="1181"/>
         <source>Character Search</source>
         <translation>Пошук символів</translation>
     </message>
@@ -636,605 +843,611 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../main.py" line="1745"/>
-        <location filename="../main.py" line="1743"/>
-        <location filename="../main.py" line="1190"/>
+        <location filename="../main.py" line="1762"/>
+        <location filename="../main.py" line="1760"/>
+        <location filename="../main.py" line="1202"/>
         <source>English</source>
         <translation>Англійська</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1191"/>
+        <location filename="../main.py" line="1203"/>
         <source>Russian</source>
         <translation>Російський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1192"/>
+        <location filename="../main.py" line="1204"/>
         <source>French</source>
         <translation>Французький</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1193"/>
+        <location filename="../main.py" line="1205"/>
         <source>Spanish</source>
         <translation>Іспанська</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1194"/>
+        <location filename="../main.py" line="1206"/>
         <source>Afrikaans</source>
         <translation>Африкаани</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1195"/>
+        <location filename="../main.py" line="1207"/>
         <source>Albanian</source>
         <translation>Албанський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1196"/>
+        <location filename="../main.py" line="1208"/>
         <source>Amharic</source>
         <translation>Амхарський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1197"/>
+        <location filename="../main.py" line="1209"/>
         <source>Arabic</source>
         <translation>Арабський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1198"/>
+        <location filename="../main.py" line="1210"/>
         <source>Armenian</source>
         <translation>Вірменський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1199"/>
+        <location filename="../main.py" line="1211"/>
         <source>Azerbaijani</source>
         <translation>Азербайджані</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1200"/>
+        <location filename="../main.py" line="1212"/>
         <source>Basque</source>
         <translation>Баска</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1201"/>
+        <location filename="../main.py" line="1213"/>
         <source>Bengali</source>
         <translation>Бенгальський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1202"/>
+        <location filename="../main.py" line="1214"/>
         <source>Bulgarian</source>
         <translation>Болгарський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1203"/>
+        <location filename="../main.py" line="1215"/>
         <source>Catalan</source>
         <translation>Каталонський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1204"/>
+        <location filename="../main.py" line="1216"/>
         <source>Croatian</source>
         <translation>Хорватський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1205"/>
+        <location filename="../main.py" line="1217"/>
         <source>Czech</source>
         <translation>Чеський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1206"/>
+        <location filename="../main.py" line="1218"/>
         <source>Danish</source>
         <translation>Датський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1207"/>
+        <location filename="../main.py" line="1219"/>
         <source>Dutch</source>
         <translation>Голландський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1208"/>
+        <location filename="../main.py" line="1220"/>
         <source>Estonian</source>
         <translation>Естонський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1209"/>
+        <location filename="../main.py" line="1221"/>
         <source>Filipino</source>
         <translation>Філіппінський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1210"/>
+        <location filename="../main.py" line="1222"/>
         <source>Finnish</source>
         <translation>Фінський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1211"/>
+        <location filename="../main.py" line="1223"/>
         <source>Georgian</source>
         <translation>Грузинський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1212"/>
+        <location filename="../main.py" line="1224"/>
         <source>German</source>
         <translation>Німецький</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1213"/>
+        <location filename="../main.py" line="1225"/>
         <source>Greek</source>
         <translation>Грецький</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1214"/>
+        <location filename="../main.py" line="1226"/>
         <source>Gujarati</source>
         <translation>Гуджарат</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1215"/>
+        <location filename="../main.py" line="1227"/>
         <source>Hebrew</source>
         <translation>Єврейський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1216"/>
+        <location filename="../main.py" line="1228"/>
         <source>Hindi</source>
         <translation>Хінді</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1217"/>
+        <location filename="../main.py" line="1229"/>
         <source>Hungarian</source>
         <translation>Угорський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1218"/>
+        <location filename="../main.py" line="1230"/>
         <source>Icelandic</source>
         <translation>Ісландський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1219"/>
+        <location filename="../main.py" line="1231"/>
         <source>Indonesian</source>
         <translation>Індонезійський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1220"/>
+        <location filename="../main.py" line="1232"/>
         <source>Irish</source>
         <translation>Ірландський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1221"/>
+        <location filename="../main.py" line="1233"/>
         <source>Italian</source>
         <translation>Італійський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1222"/>
+        <location filename="../main.py" line="1234"/>
         <source>Japanese</source>
         <translation>Японський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1223"/>
+        <location filename="../main.py" line="1235"/>
         <source>Kannada</source>
         <translation>Кантад</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1224"/>
+        <location filename="../main.py" line="1236"/>
         <source>Kazakh</source>
         <translation>Казаха</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1225"/>
+        <location filename="../main.py" line="1237"/>
         <source>Korean</source>
         <translation>Корейський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1226"/>
+        <location filename="../main.py" line="1238"/>
         <source>Lao</source>
         <translation>Лаоціан</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1227"/>
+        <location filename="../main.py" line="1239"/>
         <source>Latvian</source>
         <translation>Латвійський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1228"/>
+        <location filename="../main.py" line="1240"/>
         <source>Lithuanian</source>
         <translation>Литовський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1229"/>
+        <location filename="../main.py" line="1241"/>
         <source>Macedonian</source>
         <translation>Македонський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1230"/>
+        <location filename="../main.py" line="1242"/>
         <source>Malay</source>
         <translation>Малайський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1231"/>
+        <location filename="../main.py" line="1243"/>
         <source>Malayalam</source>
         <translation>Малаялам</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1232"/>
+        <location filename="../main.py" line="1244"/>
         <source>Maltese</source>
         <translation>Мальтійський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1233"/>
+        <location filename="../main.py" line="1245"/>
         <source>Mongolian</source>
         <translation>Монгольський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1234"/>
+        <location filename="../main.py" line="1246"/>
         <source>Nepali</source>
         <translation>Непальський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1235"/>
+        <location filename="../main.py" line="1247"/>
         <source>Norwegian</source>
         <translation>Норвезький</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1236"/>
+        <location filename="../main.py" line="1248"/>
         <source>Persian</source>
         <translation>Перський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1237"/>
+        <location filename="../main.py" line="1249"/>
         <source>Polish</source>
         <translation>Польський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1238"/>
+        <location filename="../main.py" line="1250"/>
         <source>Portuguese</source>
         <translation>Португальський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1239"/>
+        <location filename="../main.py" line="1251"/>
         <source>Punjabi</source>
         <translation>Пенджабі</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1240"/>
+        <location filename="../main.py" line="1252"/>
         <source>Romanian</source>
         <translation>Румунський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1241"/>
+        <location filename="../main.py" line="1253"/>
         <source>Serbian</source>
         <translation>Сербський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1242"/>
+        <location filename="../main.py" line="1254"/>
         <source>Slovak</source>
         <translation>Словак</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1243"/>
+        <location filename="../main.py" line="1255"/>
         <source>Slovenian</source>
         <translation>Словенський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1244"/>
+        <location filename="../main.py" line="1256"/>
         <source>Swahili</source>
         <translation>Суахілі</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1245"/>
+        <location filename="../main.py" line="1257"/>
         <source>Swedish</source>
         <translation>Шведський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1246"/>
+        <location filename="../main.py" line="1258"/>
         <source>Tamil</source>
         <translation>Тамільський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1247"/>
+        <location filename="../main.py" line="1259"/>
         <source>Telugu</source>
         <translation>Телугу</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1248"/>
+        <location filename="../main.py" line="1260"/>
         <source>Thai</source>
         <translation>Тайський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1249"/>
+        <location filename="../main.py" line="1261"/>
         <source>Turkish</source>
         <translation>Турецький</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1250"/>
+        <location filename="../main.py" line="1262"/>
         <source>Ukrainian</source>
         <translation>Український</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1251"/>
+        <location filename="../main.py" line="1263"/>
         <source>Urdu</source>
         <translation>Урду</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1252"/>
+        <location filename="../main.py" line="1264"/>
         <source>Vietnamese</source>
         <translation>В&apos;єтнамський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1253"/>
+        <location filename="../main.py" line="1265"/>
         <source>Welsh</source>
         <translation>Валлійський</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1254"/>
+        <location filename="../main.py" line="1266"/>
         <source>Xhosa</source>
         <translation>Коса</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1258"/>
+        <location filename="../main.py" line="1270"/>
         <source>Character.AI Settings</source>
         <translation>Настройка Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1260"/>
-        <location filename="../main.py" line="1260"/>
+        <location filename="../main.py" line="1272"/>
+        <location filename="../main.py" line="1272"/>
         <source>Character.AI Login</source>
         <translation>Character.AI логiн</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1260"/>
+        <location filename="../main.py" line="1272"/>
         <source>Valid until: </source>
         <translation>Дії раніше: </translation>
     </message>
     <message>
-        <location filename="../main.py" line="1261"/>
+        <location filename="../main.py" line="1273"/>
         <source>Re-Auth with Character.AI</source>
         <translation>Перезайти в Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1261"/>
+        <location filename="../main.py" line="1273"/>
         <source>Auth with Character.AI</source>
         <translation>Логiн через Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1265"/>
-        <source>Emilia Settings</source>
-        <translation>Настройка Emilia</translation>
+        <location filename="../main.py" line="1275"/>
+        <source>User Settings</source>
+        <translation>Налаштування користувача</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1267"/>
-        <source>Automatically hide the sidebar when the window is narrow</source>
-        <translation>Автоматичне приховування бічної панелі у вузькому вікні</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1268"/>
-        <source>Working in the background</source>
-        <translation>Робота на задньому плані</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1269"/>
-        <source>Input Device</source>
-        <translation>Пристрій введення</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1270"/>
-        <source>Output Device</source>
-        <translation>Вихідний пристрій</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1271"/>
-        <source>Microphone mute key</source>
-        <translation>Клавіша відключення мікрофона</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1274"/>
-        <source>VTube Studio Plugin</source>
-        <translation>Плагін Vtube Studio</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1276"/>
-        <source>Use VTube Studio</source>
-        <translation>Використовуйте VTube Studio</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1277"/>
-        <source>VTube Studio Port</source>
-        <translation>Порт VTube Studio</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1279"/>
-        <source>VTube Emotes Editor</source>
-        <translation>Редактор VTube Emotes</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1313"/>
-        <location filename="../main.py" line="1309"/>
-        <location filename="../main.py" line="1280"/>
+        <location filename="../main.py" line="1326"/>
+        <location filename="../main.py" line="1322"/>
+        <location filename="../main.py" line="1293"/>
+        <location filename="../main.py" line="1275"/>
         <source>Open</source>
         <translation>Відкривши</translation>
     </message>
     <message>
+        <location filename="../main.py" line="1278"/>
+        <source>Emilia Settings</source>
+        <translation>Настройка Emilia</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1280"/>
+        <source>Automatically hide the sidebar when the window is narrow</source>
+        <translation>Автоматичне приховування бічної панелі у вузькому вікні</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1281"/>
+        <source>Working in the background</source>
+        <translation>Робота на задньому плані</translation>
+    </message>
+    <message>
         <location filename="../main.py" line="1282"/>
+        <source>Input Device</source>
+        <translation>Пристрій введення</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1283"/>
+        <source>Output Device</source>
+        <translation>Вихідний пристрій</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1284"/>
+        <source>Microphone mute key</source>
+        <translation>Клавіша відключення мікрофона</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1287"/>
+        <source>VTube Studio Plugin</source>
+        <translation>Плагін Vtube Studio</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1289"/>
+        <source>Use VTube Studio</source>
+        <translation>Використовуйте VTube Studio</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1290"/>
+        <source>VTube Studio Port</source>
+        <translation>Порт VTube Studio</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1292"/>
+        <source>VTube Emotes Editor</source>
+        <translation>Редактор VTube Emotes</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1295"/>
         <source>Check the connection to VTube Studio</source>
         <translation>Перевірка підключення до VTube Studio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1282"/>
+        <location filename="../main.py" line="1295"/>
         <source>Check</source>
         <translation>Перевіряти</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1286"/>
+        <location filename="../main.py" line="1299"/>
         <source>Discord Rich Presence</source>
         <translatorcomment>I do not know how to translate this without losing its meaning.</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main.py" line="1288"/>
+        <location filename="../main.py" line="1301"/>
         <source>Enable DiscordRPC</source>
         <translation>Включать DiscordRPC</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1289"/>
+        <location filename="../main.py" line="1302"/>
         <source>Display the current page</source>
         <translation>Відображати поточну сторінку</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1290"/>
+        <location filename="../main.py" line="1303"/>
         <source>Displaying the chat name</source>
         <translation>Відображати назву чату</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1291"/>
+        <location filename="../main.py" line="1304"/>
         <source>Displaying the nickname of the profile being viewed</source>
         <translation>Відображати нік проглядається профілю</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1294"/>
+        <location filename="../main.py" line="1307"/>
         <source>Languages of Emilia</source>
         <translation>Emilia Мови</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1296"/>
+        <location filename="../main.py" line="1309"/>
         <source>Emilia Language</source>
         <translation>Emilia мова</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1297"/>
+        <location filename="../main.py" line="1310"/>
         <source>Translate user&apos;s messages</source>
         <translation>Переклад повідомлень користувача</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1298"/>
+        <location filename="../main.py" line="1311"/>
         <source>Translate user&apos;s messages to</source>
         <translation>Переклад повідомлень користувача на</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1299"/>
+        <location filename="../main.py" line="1312"/>
         <source>Translate character messages</source>
         <translation>Перекладіть повідомлення персонажа</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1300"/>
+        <location filename="../main.py" line="1313"/>
         <source>Translate character messages to</source>
         <translation>Перекладати повідомлення персонажа на</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1303"/>
+        <location filename="../main.py" line="1316"/>
         <source>Other</source>
         <translation>Інше</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1305"/>
+        <location filename="../main.py" line="1318"/>
         <source>Did you find a problem?</source>
         <translation>Ви знайшли проблему?</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1306"/>
+        <location filename="../main.py" line="1319"/>
         <source>Report a Problem</source>
         <translation>Повідомте про проблему</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1308"/>
+        <location filename="../main.py" line="1321"/>
         <source>Settings Folder</source>
         <translation>Папка налаштувань</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1312"/>
+        <location filename="../main.py" line="1325"/>
         <source>Logs Folder</source>
         <translation>Папка логів</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1318"/>
+        <location filename="../main.py" line="1331"/>
         <source>About Emilia</source>
         <translation>Про Emilia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1321"/>
+        <location filename="../main.py" line="1334"/>
         <source>Emilia is a desktop version of Character.AI with several improvements and additional features.</source>
         <translation>Emilia - це настільний клієнт Character.AI з кількома вдосконаленнями та додатковими функціями.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1322"/>
+        <location filename="../main.py" line="1335"/>
         <source>The program is distributed free of charge under the MIT License.</source>
         <translation>Програма розповсюджується безкоштовно по MIT License.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1325"/>
+        <location filename="../main.py" line="1338"/>
         <source>By using Emilia, you accept the Terms of Use Character.AI and confirm that you have read the Privacy Policy Character.AI</source>
         <translation>Используя Emilia, вы принимаете Условия использования Character.AI вы соглашаетесь и подтверждаете, что ознакомились с Политикой конфиденциальности Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1405"/>
+        <location filename="../main.py" line="1422"/>
         <source>Parameter Name</source>
         <translation>Назва параметра</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1423"/>
+        <location filename="../main.py" line="1440"/>
         <source>Use Random Value</source>
         <translation>Використовуйте випадкове значення</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1430"/>
+        <location filename="../main.py" line="1447"/>
         <source>From</source>
         <translation>З</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1440"/>
+        <location filename="../main.py" line="1457"/>
         <source>To</source>
         <translation>На</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1450"/>
+        <location filename="../main.py" line="1467"/>
         <source>Value</source>
         <translation>Значення</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1466"/>
+        <location filename="../main.py" line="1483"/>
         <source>The values for emotions are saved</source>
         <translation>Значення емоцій зберігаються</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1499"/>
+        <location filename="../main.py" line="1516"/>
         <source> | Test</source>
         <translation> | Перевіряти</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1513"/>
+        <location filename="../main.py" line="1530"/>
         <source>Add parameter</source>
         <translation>Додати параметр</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1650"/>
-        <location filename="../main.py" line="1529"/>
+        <location filename="../main.py" line="1667"/>
+        <location filename="../main.py" line="1546"/>
         <source>Save</source>
         <translation>Зберігши</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1534"/>
+        <location filename="../main.py" line="1551"/>
         <source>Close</source>
         <translation>Закривати</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1578"/>
+        <location filename="../main.py" line="1595"/>
         <source>(Beta)</source>
         <translation>(Бета)</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1653"/>
+        <location filename="../main.py" line="1670"/>
         <source>Cancel</source>
         <translation>Скасування</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1675"/>
+        <location filename="../main.py" line="1692"/>
         <source>The token is being updated...</source>
         <translation>Маркер оновлюється...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1784"/>
-        <location filename="../main.py" line="1727"/>
+        <location filename="../main.py" line="1801"/>
+        <location filename="../main.py" line="1744"/>
         <source>Looking at the settings...</source>
         <translation>Дивиться на Налаштування...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1762"/>
+        <location filename="../main.py" line="1779"/>
         <source> cannot be empty</source>
         <translation> не може бути порожнім</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1812"/>
+        <location filename="../main.py" line="1829"/>
         <source>Settings saved successfully</source>
         <translation>Налаштування успішно збережені</translation>
     </message>
@@ -1254,113 +1467,113 @@
 <context>
     <name>UserProfile</name>
     <message>
-        <location filename="../main.py" line="1871"/>
+        <location filename="../modules/cards/UserCards.py" line="72"/>
         <source>0 followers</source>
         <translation>0 передплатників</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1880"/>
+        <location filename="../modules/cards/UserCards.py" line="81"/>
         <source>0 following</source>
         <translation>0 підписки</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1889"/>
+        <location filename="../modules/cards/UserCards.py" line="90"/>
         <source>0 chats</source>
         <translation>0 чатів</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2218"/>
-        <location filename="../main.py" line="2155"/>
-        <location filename="../main.py" line="2125"/>
-        <location filename="../main.py" line="1899"/>
+        <location filename="../modules/cards/UserCards.py" line="419"/>
+        <location filename="../modules/cards/UserCards.py" line="356"/>
+        <location filename="../modules/cards/UserCards.py" line="326"/>
+        <location filename="../modules/cards/UserCards.py" line="100"/>
         <source>Follow</source>
         <translation>Підписатися</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1918"/>
+        <location filename="../modules/cards/UserCards.py" line="119"/>
         <source>Characters</source>
         <translation>Персонажі</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1927"/>
+        <location filename="../modules/cards/UserCards.py" line="128"/>
         <source>Voices</source>
         <translation>Голосувати</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1935"/>
+        <location filename="../modules/cards/UserCards.py" line="136"/>
         <source>Liked</source>
         <translation>Сподобалися</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1944"/>
+        <location filename="../modules/cards/UserCards.py" line="145"/>
         <source>Personas</source>
         <translation>Персоны</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2215"/>
-        <location filename="../main.py" line="2146"/>
-        <location filename="../main.py" line="2133"/>
-        <location filename="../main.py" line="1990"/>
+        <location filename="../modules/cards/UserCards.py" line="416"/>
+        <location filename="../modules/cards/UserCards.py" line="347"/>
+        <location filename="../modules/cards/UserCards.py" line="334"/>
+        <location filename="../modules/cards/UserCards.py" line="191"/>
         <source>Unfollow</source>
         <translation>Скасувати підписку</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2095"/>
-        <location filename="../main.py" line="2023"/>
-        <location filename="../main.py" line="2008"/>
+        <location filename="../modules/cards/UserCards.py" line="296"/>
+        <location filename="../modules/cards/UserCards.py" line="224"/>
+        <location filename="../modules/cards/UserCards.py" line="209"/>
         <source>And it&apos;s empty here...</source>
         <translation>Ось порожній...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2036"/>
+        <location filename="../modules/cards/UserCards.py" line="237"/>
         <source>New</source>
         <translation>Утворити</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2070"/>
-        <location filename="../main.py" line="2060"/>
+        <location filename="../modules/cards/UserCards.py" line="271"/>
+        <location filename="../modules/cards/UserCards.py" line="261"/>
         <source>Looks at </source>
         <translation>Дивиться на профіль </translation>
     </message>
     <message>
-        <location filename="../main.py" line="2070"/>
-        <location filename="../main.py" line="2060"/>
+        <location filename="../modules/cards/UserCards.py" line="271"/>
+        <location filename="../modules/cards/UserCards.py" line="261"/>
         <source>&apos;s profile </source>
         <translatorcomment>Not required</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main.py" line="2077"/>
+        <location filename="../modules/cards/UserCards.py" line="278"/>
         <source>Looks at user profile</source>
         <translation>Дивиться на профіль користувача</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2086"/>
+        <location filename="../modules/cards/UserCards.py" line="287"/>
         <source>followers</source>
         <translation>передплатники</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2087"/>
+        <location filename="../modules/cards/UserCards.py" line="288"/>
         <source>following</source>
         <translation>підписки</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2088"/>
+        <location filename="../modules/cards/UserCards.py" line="289"/>
         <source>chats</source>
         <translation>чатiв</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2100"/>
+        <location filename="../modules/cards/UserCards.py" line="301"/>
         <source>Link copied to clipboard</source>
         <translation>Посилання скопійовано</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2232"/>
+        <location filename="../modules/cards/UserCards.py" line="433"/>
         <source>Followers</source>
         <translation>Передплатники</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2239"/>
+        <location filename="../modules/cards/UserCards.py" line="440"/>
         <source>Following</source>
         <translation>Підписки</translation>
     </message>

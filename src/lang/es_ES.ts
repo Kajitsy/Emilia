@@ -234,155 +234,341 @@
 <context>
     <name>ChatThread</name>
     <message>
-        <location filename="../modules/QThreads.py" line="322"/>
+        <location filename="../modules/QThreads.py" line="325"/>
         <source>Successful connection!</source>
         <translation>Conexión exitosa!</translation>
     </message>
     <message>
-        <location filename="../modules/QThreads.py" line="325"/>
+        <location filename="../modules/QThreads.py" line="328"/>
         <source>Connection error: </source>
         <translation>Error de conexión: </translation>
     </message>
 </context>
 <context>
+    <name>EditOverlay</name>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="538"/>
+        <location filename="../modules/cards/PersonaCards.py" line="42"/>
+        <source>Display Name</source>
+        <translation>Nombre para Mostrar</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="552"/>
+        <location filename="../modules/cards/PersonaCards.py" line="73"/>
+        <source>Background</source>
+        <translation>Fondo</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="90"/>
+        <source>Make default for new chats</source>
+        <translation>Establecer como predeterminado para nuevos chats</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="97"/>
+        <source>Remove</source>
+        <translation>Borrar</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="570"/>
+        <location filename="../modules/cards/PersonaCards.py" line="102"/>
+        <source>Save</source>
+        <translation>Ahorrar</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="545"/>
+        <source>Username</source>
+        <translation>Nombre de Usuario</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="565"/>
+        <source>Cancel</source>
+        <translation>Cancelación</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/UserCards.py" line="637"/>
+        <source>Welcome back, </source>
+        <translation>Con un regreso, </translation>
+    </message>
+</context>
+<context>
+    <name>EditPage</name>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="224"/>
+        <source>Character Name</source>
+        <translation>Nombre del personaje</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="233"/>
+        <source>e.g. Albert Einstein</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="237"/>
+        <source>Tagline</source>
+        <translation>Lema</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="244"/>
+        <source>Add a short tagline of your Character</source>
+        <translation>Añade el eslogan de tu personaje</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="247"/>
+        <source>Description</source>
+        <translation>Description</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="252"/>
+        <source>How would your Character describe themselves?</source>
+        <translation>¿Cómo se describiría a sí mismo tu Personaje?</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="260"/>
+        <source>Greeting</source>
+        <translation>Saludo</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="265"/>
+        <source>e.g. Hello, I am Albert. Ask me anything about my scientific contributions.</source>
+        <translation>Hola, soy Albert. Pregúntame cualquier cosa sobre mis contribuciones científicas.</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="277"/>
+        <source>Allow dynamic greetings</source>
+        <translation>Permitir saludos dinámicos</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="281"/>
+        <source>Definition</source>
+        <translation>Definición</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="286"/>
+        <source>What&apos;s your Character&apos;s backstory? How do you want it to talk or act?</source>
+        <translation>¿Cuál es la historia de fondo de tu Personaje? ¿Cómo quieres que hable o actúe?</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="296"/>
+        <source>User message</source>
+        <translation>Mensaje de usuario</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="300"/>
+        <source>Character message</source>
+        <translation>Mensaje del personaje</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="304"/>
+        <source>End of dialog</source>
+        <translation>Fin del diálogo</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="315"/>
+        <source>Keep Character definition private</source>
+        <translation>Mantener la definición del personaje en secreto</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="319"/>
+        <source>Visibility</source>
+        <translation>Visibilidad</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="442"/>
+        <location filename="../modules/cards/CharacterCards.py" line="409"/>
+        <location filename="../modules/cards/CharacterCards.py" line="325"/>
+        <source>Public</source>
+        <translation>Public</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="444"/>
+        <location filename="../modules/cards/CharacterCards.py" line="411"/>
+        <location filename="../modules/cards/CharacterCards.py" line="325"/>
+        <source>Unlisted</source>
+        <translation>No numerado</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="446"/>
+        <location filename="../modules/cards/CharacterCards.py" line="413"/>
+        <location filename="../modules/cards/CharacterCards.py" line="325"/>
+        <source>Private</source>
+        <translation>Privado</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="331"/>
+        <source>Create Character</source>
+        <translation>Crear un personaje</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="336"/>
+        <source>Save Changes</source>
+        <translation>Guardar Cambios</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="341"/>
+        <source>Save and Chat</source>
+        <translation>Guardar y comunicar</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="376"/>
+        <location filename="../modules/cards/CharacterCards.py" line="362"/>
+        <source>The character has been saved successfully!</source>
+        <translation>¡El personaje se ha guardado con éxito!</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="388"/>
+        <source>The character has been successfully created!</source>
+        <translation>¡El personaje ha sido creado con éxito!</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="396"/>
+        <source>The character&apos;s name must be longer than three characters.</source>
+        <translation>El nombre del personaje no puede ser inferior a 3 caracteres.</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/CharacterCards.py" line="399"/>
+        <source>The character&apos;s greeting must be longer than three characters.</source>
+        <translation>El saludo de un personaje no puede ser inferior a 3 caracteres.</translation>
+    </message>
+</context>
+<context>
     <name>EmiliaNext</name>
     <message>
-        <location filename="../main.py" line="137"/>
+        <location filename="../main.py" line="138"/>
         <source>User</source>
         <translation>Usuario</translation>
     </message>
     <message>
-        <location filename="../main.py" line="239"/>
+        <location filename="../main.py" line="240"/>
         <source>Please re-enter (the login data has expired)</source>
         <translation>Inicie sesión (expiró el período de datos)</translation>
     </message>
     <message>
-        <location filename="../main.py" line="284"/>
+        <location filename="../main.py" line="285"/>
         <source>Remove from Recent Chats</source>
         <translation>Eliminar de la reciente</translation>
     </message>
     <message>
-        <location filename="../main.py" line="426"/>
+        <location filename="../main.py" line="427"/>
         <source>A new version is available: </source>
         <translation>La nueva versión está disponible: </translation>
     </message>
     <message>
-        <location filename="../main.py" line="443"/>
+        <location filename="../main.py" line="444"/>
         <source>Download complete. Running installer...</source>
         <translation>La descarga se completa. Lanzamiento del instalador ...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="448"/>
+        <location filename="../main.py" line="449"/>
         <source>Download failed.</source>
         <translation>Descargar error.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="455"/>
+        <location filename="../main.py" line="456"/>
         <source>Downloading...</source>
         <translation>Descargar...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="473"/>
+        <location filename="../main.py" line="474"/>
         <source>Looking at the main page</source>
         <translation>Mira la página principal</translation>
     </message>
     <message>
-        <location filename="../main.py" line="488"/>
+        <location filename="../main.py" line="489"/>
         <source>For You</source>
         <translation>Para ti</translation>
     </message>
     <message>
-        <location filename="../main.py" line="491"/>
+        <location filename="../main.py" line="492"/>
         <source>Recommended</source>
         <translation>Recomendado</translation>
     </message>
     <message>
-        <location filename="../main.py" line="494"/>
+        <location filename="../main.py" line="495"/>
         <source>Popular</source>
         <translation>Popular</translation>
     </message>
     <message>
-        <location filename="../main.py" line="497"/>
+        <location filename="../main.py" line="498"/>
         <source>Trending</source>
         <translation>En Tendencia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="500"/>
+        <location filename="../main.py" line="501"/>
         <source>Try This</source>
         <translation>Probar estos</translation>
     </message>
     <message>
-        <location filename="../main.py" line="546"/>
+        <location filename="../main.py" line="547"/>
         <source>Welcome back, User</source>
         <translation>Con la devolución, usuario</translation>
     </message>
     <message>
-        <location filename="../main.py" line="554"/>
+        <location filename="../main.py" line="555"/>
         <source>Update</source>
         <translation>Actualizar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="560"/>
+        <location filename="../main.py" line="561"/>
         <source>Character Search</source>
         <translation>Buscar personajes</translation>
     </message>
     <message>
-        <location filename="../main.py" line="641"/>
+        <location filename="../main.py" line="642"/>
         <source>Voices</source>
         <translation>Votar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="665"/>
+        <location filename="../main.py" line="666"/>
         <source>Assistants</source>
         <translation>Asistentes</translation>
     </message>
     <message>
-        <location filename="../main.py" line="666"/>
+        <location filename="../main.py" line="667"/>
         <source>Anime</source>
         <translation>Anime</translation>
     </message>
     <message>
-        <location filename="../main.py" line="667"/>
+        <location filename="../main.py" line="668"/>
         <source>Creativity and Writing</source>
         <translation>Creatividad y escritura</translation>
     </message>
     <message>
-        <location filename="../main.py" line="668"/>
+        <location filename="../main.py" line="669"/>
         <source>Entertainment and Gaming</source>
         <translation>Entretenimiento y juegos</translation>
     </message>
     <message>
-        <location filename="../main.py" line="669"/>
+        <location filename="../main.py" line="670"/>
         <source>History</source>
         <translation>Historia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="670"/>
+        <location filename="../main.py" line="671"/>
         <source>Humor</source>
         <translation>Humor</translation>
     </message>
     <message>
-        <location filename="../main.py" line="671"/>
+        <location filename="../main.py" line="672"/>
         <source>Learning</source>
         <translation>Educación</translation>
     </message>
     <message>
-        <location filename="../main.py" line="672"/>
+        <location filename="../main.py" line="673"/>
         <source>Lifestyle</source>
         <translation>Estilo de vida</translation>
     </message>
     <message>
-        <location filename="../main.py" line="673"/>
+        <location filename="../main.py" line="674"/>
         <source>Parody</source>
         <translation>Parodia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="674"/>
+        <location filename="../main.py" line="675"/>
         <source>RPG and Puzzles</source>
         <translation>Juegos y rompecabezas de rol</translation>
     </message>
     <message>
-        <location filename="../main.py" line="988"/>
+        <location filename="../main.py" line="1000"/>
         <source>Welcome back, </source>
         <translation>Con un regreso, </translation>
     </message>
@@ -473,12 +659,17 @@
 <context>
     <name>LeftSidebar</name>
     <message>
-        <location filename="../modules/QCustom.py" line="106"/>
+        <location filename="../modules/QCustom.py" line="112"/>
         <source>To Main Page</source>
         <translation>En el principal</translation>
     </message>
     <message>
-        <location filename="../modules/QCustom.py" line="143"/>
+        <location filename="../modules/QCustom.py" line="131"/>
+        <source>Create Character</source>
+        <translation>Crear un personaje</translation>
+    </message>
+    <message>
+        <location filename="../modules/QCustom.py" line="163"/>
         <source>Profile</source>
         <translation>Perfil</translation>
     </message>
@@ -486,87 +677,111 @@
 <context>
     <name>ListCard</name>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="247"/>
         <source>Default</source>
-        <translation>Por defecto</translation>
+        <translation type="vanished">Por defecto</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="248"/>
         <source>Active</source>
-        <translation>Activo</translation>
+        <translation type="vanished">Activo</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="309"/>
-        <location filename="../modules/cards/PersonaCards.py" line="266"/>
         <source>Edit</source>
-        <translation>Cambiar</translation>
+        <translation type="vanished">Cambiar</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="287"/>
-        <location filename="../modules/cards/PersonaCards.py" line="274"/>
         <source>Successfully updated your persona</source>
-        <translation>Actualizó con éxito su persona</translation>
+        <translation type="vanished">Actualizó con éxito su persona</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="313"/>
         <source>Clear default</source>
-        <translation>Borrar por defecto</translation>
+        <translation type="vanished">Borrar por defecto</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="317"/>
         <source>Make default</source>
-        <translation>Usar por defecto</translation>
+        <translation type="vanished">Usar por defecto</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="321"/>
         <source>Remove</source>
-        <translation>Borrar</translation>
+        <translation type="vanished">Borrar</translation>
     </message>
 </context>
 <context>
     <name>MainCard</name>
     <message>
-        <location filename="../modules/cards/CharacterCards.py" line="67"/>
+        <location filename="../modules/cards/CharacterCards.py" line="72"/>
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/cards/CharacterCards.py" line="92"/>
+        <location filename="../modules/cards/CharacterCards.py" line="97"/>
         <source> chats</source>
         <translation> charlar</translation>
     </message>
     <message>
-        <location filename="../modules/cards/CharacterCards.py" line="94"/>
+        <location filename="../modules/cards/CharacterCards.py" line="99"/>
         <source> likes</source>
         <translation> gustos</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="315"/>
+        <location filename="../modules/cards/PersonaCards.py" line="272"/>
+        <location filename="../modules/cards/CharacterCards.py" line="104"/>
+        <source>Edit</source>
+        <translation>Cambiar</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="253"/>
+        <source>Default</source>
+        <translation>Por defecto</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="254"/>
+        <source>Active</source>
+        <translation>Activo</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="293"/>
+        <location filename="../modules/cards/PersonaCards.py" line="280"/>
+        <source>Successfully updated your persona</source>
+        <translation>Actualizó con éxito su persona</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="319"/>
+        <source>Clear default</source>
+        <translation>Borrar por defecto</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="323"/>
+        <source>Make default</source>
+        <translation>Usar por defecto</translation>
+    </message>
+    <message>
+        <location filename="../modules/cards/PersonaCards.py" line="327"/>
+        <source>Remove</source>
+        <translation>Borrar</translation>
     </message>
 </context>
 <context>
     <name>OverlayCard</name>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="42"/>
         <source>Display Name</source>
-        <translation>Nombre para Mostrar</translation>
+        <translation type="vanished">Nombre para Mostrar</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="72"/>
         <source>Background</source>
-        <translation>Fondo</translation>
+        <translation type="vanished">Fondo</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="89"/>
         <source>Make default for new chats</source>
-        <translation>Establecer como predeterminado para nuevos chats</translation>
+        <translation type="vanished">Establecer como predeterminado para nuevos chats</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="96"/>
         <source>Remove</source>
-        <translation>Borrar</translation>
+        <translation type="vanished">Borrar</translation>
     </message>
     <message>
-        <location filename="../modules/cards/PersonaCards.py" line="101"/>
         <source>Save</source>
-        <translation>Ahorrar</translation>
+        <translation type="vanished">Ahorrar</translation>
     </message>
 </context>
 <context>
@@ -626,17 +841,17 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../main.py" line="1076"/>
+        <location filename="../main.py" line="1088"/>
         <source>Search characters...</source>
         <translation>Buscando personajes...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1147"/>
+        <location filename="../main.py" line="1159"/>
         <source>Characters not found</source>
         <translation>Los personajes no fueron encontrados</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1169"/>
+        <location filename="../main.py" line="1181"/>
         <source>Character Search</source>
         <translation>Buscar personajes</translation>
     </message>
@@ -644,605 +859,611 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../main.py" line="1745"/>
-        <location filename="../main.py" line="1743"/>
-        <location filename="../main.py" line="1190"/>
+        <location filename="../main.py" line="1762"/>
+        <location filename="../main.py" line="1760"/>
+        <location filename="../main.py" line="1202"/>
         <source>English</source>
         <translation>Inglés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1191"/>
+        <location filename="../main.py" line="1203"/>
         <source>Russian</source>
         <translation>ruso</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1192"/>
+        <location filename="../main.py" line="1204"/>
         <source>French</source>
         <translation>Francés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1193"/>
+        <location filename="../main.py" line="1205"/>
         <source>Spanish</source>
         <translation>Español</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1194"/>
+        <location filename="../main.py" line="1206"/>
         <source>Afrikaans</source>
         <translation>africaans</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1195"/>
+        <location filename="../main.py" line="1207"/>
         <source>Albanian</source>
         <translation>albanés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1196"/>
+        <location filename="../main.py" line="1208"/>
         <source>Amharic</source>
         <translation>Amárico</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1197"/>
+        <location filename="../main.py" line="1209"/>
         <source>Arabic</source>
         <translation>árabe</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1198"/>
+        <location filename="../main.py" line="1210"/>
         <source>Armenian</source>
         <translation>armenio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1199"/>
+        <location filename="../main.py" line="1211"/>
         <source>Azerbaijani</source>
         <translation>Azerbaiyano</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1200"/>
+        <location filename="../main.py" line="1212"/>
         <source>Basque</source>
         <translation>vasco</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1201"/>
+        <location filename="../main.py" line="1213"/>
         <source>Bengali</source>
         <translation>Bengala</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1202"/>
+        <location filename="../main.py" line="1214"/>
         <source>Bulgarian</source>
         <translation>búlgaro</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1203"/>
+        <location filename="../main.py" line="1215"/>
         <source>Catalan</source>
         <translation>catalán</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1204"/>
+        <location filename="../main.py" line="1216"/>
         <source>Croatian</source>
         <translation>croata</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1205"/>
+        <location filename="../main.py" line="1217"/>
         <source>Czech</source>
         <translation>checo</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1206"/>
+        <location filename="../main.py" line="1218"/>
         <source>Danish</source>
         <translation>danés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1207"/>
+        <location filename="../main.py" line="1219"/>
         <source>Dutch</source>
         <translation>Holandés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1208"/>
+        <location filename="../main.py" line="1220"/>
         <source>Estonian</source>
         <translation>Estonio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1209"/>
+        <location filename="../main.py" line="1221"/>
         <source>Filipino</source>
         <translation>filipino</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1210"/>
+        <location filename="../main.py" line="1222"/>
         <source>Finnish</source>
         <translation>finlandés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1211"/>
+        <location filename="../main.py" line="1223"/>
         <source>Georgian</source>
         <translation>georgiano</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1212"/>
+        <location filename="../main.py" line="1224"/>
         <source>German</source>
         <translation>Alemán</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1213"/>
+        <location filename="../main.py" line="1225"/>
         <source>Greek</source>
         <translation>Griego</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1214"/>
+        <location filename="../main.py" line="1226"/>
         <source>Gujarati</source>
         <translation>Gujarat</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1215"/>
+        <location filename="../main.py" line="1227"/>
         <source>Hebrew</source>
         <translation>judío</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1216"/>
+        <location filename="../main.py" line="1228"/>
         <source>Hindi</source>
         <translation>hindi</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1217"/>
+        <location filename="../main.py" line="1229"/>
         <source>Hungarian</source>
         <translation>húngaro</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1218"/>
+        <location filename="../main.py" line="1230"/>
         <source>Icelandic</source>
         <translation>islandés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1219"/>
+        <location filename="../main.py" line="1231"/>
         <source>Indonesian</source>
         <translation>indonesio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1220"/>
+        <location filename="../main.py" line="1232"/>
         <source>Irish</source>
         <translation>irlandés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1221"/>
+        <location filename="../main.py" line="1233"/>
         <source>Italian</source>
         <translation>italiano</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1222"/>
+        <location filename="../main.py" line="1234"/>
         <source>Japanese</source>
         <translation>japonés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1223"/>
+        <location filename="../main.py" line="1235"/>
         <source>Kannada</source>
         <translation>Canada</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1224"/>
+        <location filename="../main.py" line="1236"/>
         <source>Kazakh</source>
         <translation>Kazáceo</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1225"/>
+        <location filename="../main.py" line="1237"/>
         <source>Korean</source>
         <translation>coreano</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1226"/>
+        <location filename="../main.py" line="1238"/>
         <source>Lao</source>
         <translation>Laosta</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1227"/>
+        <location filename="../main.py" line="1239"/>
         <source>Latvian</source>
         <translation>letón</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1228"/>
+        <location filename="../main.py" line="1240"/>
         <source>Lithuanian</source>
         <translation>lituano</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1229"/>
+        <location filename="../main.py" line="1241"/>
         <source>Macedonian</source>
         <translation>macedónio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1230"/>
+        <location filename="../main.py" line="1242"/>
         <source>Malay</source>
         <translation>malayo</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1231"/>
+        <location filename="../main.py" line="1243"/>
         <source>Malayalam</source>
         <translation>Malayalam</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1232"/>
+        <location filename="../main.py" line="1244"/>
         <source>Maltese</source>
         <translation>maltés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1233"/>
+        <location filename="../main.py" line="1245"/>
         <source>Mongolian</source>
         <translation>mongol</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1234"/>
+        <location filename="../main.py" line="1246"/>
         <source>Nepali</source>
         <translation>Nepalí</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1235"/>
+        <location filename="../main.py" line="1247"/>
         <source>Norwegian</source>
         <translation>noruego</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1236"/>
+        <location filename="../main.py" line="1248"/>
         <source>Persian</source>
         <translation>persa</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1237"/>
+        <location filename="../main.py" line="1249"/>
         <source>Polish</source>
         <translation>Polaco</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1238"/>
+        <location filename="../main.py" line="1250"/>
         <source>Portuguese</source>
         <translation>portugués</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1239"/>
+        <location filename="../main.py" line="1251"/>
         <source>Punjabi</source>
         <translation>punjabi</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1240"/>
+        <location filename="../main.py" line="1252"/>
         <source>Romanian</source>
         <translation>rumano</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1241"/>
+        <location filename="../main.py" line="1253"/>
         <source>Serbian</source>
         <translation>serbio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1242"/>
+        <location filename="../main.py" line="1254"/>
         <source>Slovak</source>
         <translation>eslovaco</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1243"/>
+        <location filename="../main.py" line="1255"/>
         <source>Slovenian</source>
         <translation>esloveno</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1244"/>
+        <location filename="../main.py" line="1256"/>
         <source>Swahili</source>
         <translation>swahili</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1245"/>
+        <location filename="../main.py" line="1257"/>
         <source>Swedish</source>
         <translation>sueco</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1246"/>
+        <location filename="../main.py" line="1258"/>
         <source>Tamil</source>
         <translation>Tamil</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1247"/>
+        <location filename="../main.py" line="1259"/>
         <source>Telugu</source>
         <translation>Telugu</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1248"/>
+        <location filename="../main.py" line="1260"/>
         <source>Thai</source>
         <translation>tailandés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1249"/>
+        <location filename="../main.py" line="1261"/>
         <source>Turkish</source>
         <translation>turco</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1250"/>
+        <location filename="../main.py" line="1262"/>
         <source>Ukrainian</source>
         <translation>ucranio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1251"/>
+        <location filename="../main.py" line="1263"/>
         <source>Urdu</source>
         <translation>Urdu</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1252"/>
+        <location filename="../main.py" line="1264"/>
         <source>Vietnamese</source>
         <translation>vietnamita</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1253"/>
+        <location filename="../main.py" line="1265"/>
         <source>Welsh</source>
         <translation>galés</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1254"/>
+        <location filename="../main.py" line="1266"/>
         <source>Xhosa</source>
         <translation>Kosa</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1258"/>
+        <location filename="../main.py" line="1270"/>
         <source>Character.AI Settings</source>
         <translation>Configuración de Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1260"/>
-        <location filename="../main.py" line="1260"/>
+        <location filename="../main.py" line="1272"/>
+        <location filename="../main.py" line="1272"/>
         <source>Character.AI Login</source>
         <translation>Personaje.Ai Iniciar sesión</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1260"/>
+        <location filename="../main.py" line="1272"/>
         <source>Valid until: </source>
         <translation>Actúa antes: </translation>
     </message>
     <message>
-        <location filename="../main.py" line="1261"/>
+        <location filename="../main.py" line="1273"/>
         <source>Re-Auth with Character.AI</source>
         <translation>Volver a autenticar con Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1261"/>
+        <location filename="../main.py" line="1273"/>
         <source>Auth with Character.AI</source>
         <translation>Autenticación con Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1265"/>
-        <source>Emilia Settings</source>
-        <translation>Configuración de Emilia</translation>
+        <location filename="../main.py" line="1275"/>
+        <source>User Settings</source>
+        <translation>Configuración del usuario</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1267"/>
-        <source>Automatically hide the sidebar when the window is narrow</source>
-        <translation>Ocultación automática del panel lateral en una ventana estrecha</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1268"/>
-        <source>Working in the background</source>
-        <translation>Trabajar en segundo plano</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1269"/>
-        <source>Input Device</source>
-        <translation>Dispositivo de entrada</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1270"/>
-        <source>Output Device</source>
-        <translation>Dispositivo de conclusión</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1271"/>
-        <source>Microphone mute key</source>
-        <translation>Tecla de silencio del micrófono</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1274"/>
-        <source>VTube Studio Plugin</source>
-        <translation>VTube Studio Plugin</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1276"/>
-        <source>Use VTube Studio</source>
-        <translation>Use VTube Studio</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1277"/>
-        <source>VTube Studio Port</source>
-        <translation>Puerto de VTube Studio</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1279"/>
-        <source>VTube Emotes Editor</source>
-        <translation>Configuración VTube Emotes</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="1313"/>
-        <location filename="../main.py" line="1309"/>
-        <location filename="../main.py" line="1280"/>
+        <location filename="../main.py" line="1326"/>
+        <location filename="../main.py" line="1322"/>
+        <location filename="../main.py" line="1293"/>
+        <location filename="../main.py" line="1275"/>
         <source>Open</source>
         <translation>Abierto</translation>
     </message>
     <message>
+        <location filename="../main.py" line="1278"/>
+        <source>Emilia Settings</source>
+        <translation>Configuración de Emilia</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1280"/>
+        <source>Automatically hide the sidebar when the window is narrow</source>
+        <translation>Ocultación automática del panel lateral en una ventana estrecha</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1281"/>
+        <source>Working in the background</source>
+        <translation>Trabajar en segundo plano</translation>
+    </message>
+    <message>
         <location filename="../main.py" line="1282"/>
+        <source>Input Device</source>
+        <translation>Dispositivo de entrada</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1283"/>
+        <source>Output Device</source>
+        <translation>Dispositivo de conclusión</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1284"/>
+        <source>Microphone mute key</source>
+        <translation>Tecla de silencio del micrófono</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1287"/>
+        <source>VTube Studio Plugin</source>
+        <translation>VTube Studio Plugin</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1289"/>
+        <source>Use VTube Studio</source>
+        <translation>Use VTube Studio</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1290"/>
+        <source>VTube Studio Port</source>
+        <translation>Puerto de VTube Studio</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1292"/>
+        <source>VTube Emotes Editor</source>
+        <translation>Configuración VTube Emotes</translation>
+    </message>
+    <message>
+        <location filename="../main.py" line="1295"/>
         <source>Check the connection to VTube Studio</source>
         <translation>Verificación de conexión a VTube Studio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1282"/>
+        <location filename="../main.py" line="1295"/>
         <source>Check</source>
         <translation>Controlar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1286"/>
+        <location filename="../main.py" line="1299"/>
         <source>Discord Rich Presence</source>
         <translatorcomment>I do not know how to translate this without losing its meaning.</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main.py" line="1288"/>
+        <location filename="../main.py" line="1301"/>
         <source>Enable DiscordRPC</source>
         <translation>Incluir DiscordRPC</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1289"/>
+        <location filename="../main.py" line="1302"/>
         <source>Display the current page</source>
         <translation>Mostrar la página actual</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1290"/>
+        <location filename="../main.py" line="1303"/>
         <source>Displaying the chat name</source>
         <translation>Mostrar el nombre del chat</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1291"/>
+        <location filename="../main.py" line="1304"/>
         <source>Displaying the nickname of the profile being viewed</source>
         <translation>Mostrar el apodo del perfil visto</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1294"/>
+        <location filename="../main.py" line="1307"/>
         <source>Languages of Emilia</source>
         <translation>Idiomas Emilia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1296"/>
+        <location filename="../main.py" line="1309"/>
         <source>Emilia Language</source>
         <translation>Lenguaje de programa</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1297"/>
+        <location filename="../main.py" line="1310"/>
         <source>Translate user&apos;s messages</source>
         <translation>Traducir mensajes de usuario</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1298"/>
+        <location filename="../main.py" line="1311"/>
         <source>Translate user&apos;s messages to</source>
         <translation>Traducir al usuario a</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1299"/>
+        <location filename="../main.py" line="1312"/>
         <source>Translate character messages</source>
         <translation>Traducir los mensajes de los personajes</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1300"/>
+        <location filename="../main.py" line="1313"/>
         <source>Translate character messages to</source>
         <translation>Traducir los mensajes de los personajes a</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1303"/>
+        <location filename="../main.py" line="1316"/>
         <source>Other</source>
         <translation>Demás</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1305"/>
+        <location filename="../main.py" line="1318"/>
         <source>Did you find a problem?</source>
         <translation>¿Has encontrado el problema?</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1306"/>
+        <location filename="../main.py" line="1319"/>
         <source>Report a Problem</source>
         <translation>Informar el problema</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1308"/>
+        <location filename="../main.py" line="1321"/>
         <source>Settings Folder</source>
         <translation>Carpeta de preferencias</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1312"/>
+        <location filename="../main.py" line="1325"/>
         <source>Logs Folder</source>
         <translation>Pasta Logs</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1318"/>
+        <location filename="../main.py" line="1331"/>
         <source>About Emilia</source>
         <translation>Acerca De Emilia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1321"/>
+        <location filename="../main.py" line="1334"/>
         <source>Emilia is a desktop version of Character.AI with several improvements and additional features.</source>
         <translation>Emilia es un cliente de Escritorio Character.AI con varias mejoras y características adicionales.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1322"/>
+        <location filename="../main.py" line="1335"/>
         <source>The program is distributed free of charge under the MIT License.</source>
         <translation>El programa se distribuye de forma gratuita bajo la licencia MIT.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1325"/>
+        <location filename="../main.py" line="1338"/>
         <source>By using Emilia, you accept the Terms of Use Character.AI and confirm that you have read the Privacy Policy Character.AI</source>
         <translation>Al utilizar Emilia, acepta los Términos de uso Character.AI usted acepta y reconoce que ha leído la Política de privacidad Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1405"/>
+        <location filename="../main.py" line="1422"/>
         <source>Parameter Name</source>
         <translation>El nombre del parámetro</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1423"/>
+        <location filename="../main.py" line="1440"/>
         <source>Use Random Value</source>
         <translation>Usar valor aleatorio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1430"/>
+        <location filename="../main.py" line="1447"/>
         <source>From</source>
         <translation>De</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1440"/>
+        <location filename="../main.py" line="1457"/>
         <source>To</source>
         <translation>A</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1450"/>
+        <location filename="../main.py" line="1467"/>
         <source>Value</source>
         <translation>Significado</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1466"/>
+        <location filename="../main.py" line="1483"/>
         <source>The values for emotions are saved</source>
         <translation>Los valores para las emociones se guardan</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1499"/>
+        <location filename="../main.py" line="1516"/>
         <source> | Test</source>
         <translation> | Controlar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1513"/>
+        <location filename="../main.py" line="1530"/>
         <source>Add parameter</source>
         <translation>Agregar el parámetro</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1650"/>
-        <location filename="../main.py" line="1529"/>
+        <location filename="../main.py" line="1667"/>
+        <location filename="../main.py" line="1546"/>
         <source>Save</source>
         <translation>Ahorrar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1534"/>
+        <location filename="../main.py" line="1551"/>
         <source>Close</source>
         <translation>Cerca</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1578"/>
+        <location filename="../main.py" line="1595"/>
         <source>(Beta)</source>
         <translation>(Beta)</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1653"/>
+        <location filename="../main.py" line="1670"/>
         <source>Cancel</source>
         <translation>Cancelación</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1675"/>
+        <location filename="../main.py" line="1692"/>
         <source>The token is being updated...</source>
         <translation>El token se actualiza ...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1784"/>
-        <location filename="../main.py" line="1727"/>
+        <location filename="../main.py" line="1801"/>
+        <location filename="../main.py" line="1744"/>
         <source>Looking at the settings...</source>
         <translation>Mira la configuración...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1762"/>
+        <location filename="../main.py" line="1779"/>
         <source> cannot be empty</source>
         <translation> no puede estar vacío</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1812"/>
+        <location filename="../main.py" line="1829"/>
         <source>Settings saved successfully</source>
         <translation>La configuración se actualiza correctamente</translation>
     </message>
@@ -1262,113 +1483,113 @@
 <context>
     <name>UserProfile</name>
     <message>
-        <location filename="../main.py" line="1871"/>
+        <location filename="../modules/cards/UserCards.py" line="72"/>
         <source>0 followers</source>
         <translation>0 suscriptores</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1880"/>
+        <location filename="../modules/cards/UserCards.py" line="81"/>
         <source>0 following</source>
         <translation>0 suscripciones</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1889"/>
+        <location filename="../modules/cards/UserCards.py" line="90"/>
         <source>0 chats</source>
         <translation>0 chats</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2218"/>
-        <location filename="../main.py" line="2155"/>
-        <location filename="../main.py" line="2125"/>
-        <location filename="../main.py" line="1899"/>
+        <location filename="../modules/cards/UserCards.py" line="419"/>
+        <location filename="../modules/cards/UserCards.py" line="356"/>
+        <location filename="../modules/cards/UserCards.py" line="326"/>
+        <location filename="../modules/cards/UserCards.py" line="100"/>
         <source>Follow</source>
         <translation>Suscribir</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1918"/>
+        <location filename="../modules/cards/UserCards.py" line="119"/>
         <source>Characters</source>
         <translation>Personajes</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1927"/>
+        <location filename="../modules/cards/UserCards.py" line="128"/>
         <source>Voices</source>
         <translation>Votar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1935"/>
+        <location filename="../modules/cards/UserCards.py" line="136"/>
         <source>Liked</source>
         <translation>Me gusta</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1944"/>
+        <location filename="../modules/cards/UserCards.py" line="145"/>
         <source>Personas</source>
         <translation>Personas</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2215"/>
-        <location filename="../main.py" line="2146"/>
-        <location filename="../main.py" line="2133"/>
-        <location filename="../main.py" line="1990"/>
+        <location filename="../modules/cards/UserCards.py" line="416"/>
+        <location filename="../modules/cards/UserCards.py" line="347"/>
+        <location filename="../modules/cards/UserCards.py" line="334"/>
+        <location filename="../modules/cards/UserCards.py" line="191"/>
         <source>Unfollow</source>
         <translation>Cancelar la suscripción</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2095"/>
-        <location filename="../main.py" line="2023"/>
-        <location filename="../main.py" line="2008"/>
+        <location filename="../modules/cards/UserCards.py" line="296"/>
+        <location filename="../modules/cards/UserCards.py" line="224"/>
+        <location filename="../modules/cards/UserCards.py" line="209"/>
         <source>And it&apos;s empty here...</source>
         <translation>Aquí está vacío ...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2036"/>
+        <location filename="../modules/cards/UserCards.py" line="237"/>
         <source>New</source>
         <translation>Nuevo</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2070"/>
-        <location filename="../main.py" line="2060"/>
+        <location filename="../modules/cards/UserCards.py" line="271"/>
+        <location filename="../modules/cards/UserCards.py" line="261"/>
         <source>Looks at </source>
         <translation>Mira el perfil de </translation>
     </message>
     <message>
-        <location filename="../main.py" line="2070"/>
-        <location filename="../main.py" line="2060"/>
+        <location filename="../modules/cards/UserCards.py" line="271"/>
+        <location filename="../modules/cards/UserCards.py" line="261"/>
         <source>&apos;s profile </source>
         <translatorcomment>Not required</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main.py" line="2077"/>
+        <location filename="../modules/cards/UserCards.py" line="278"/>
         <source>Looks at user profile</source>
         <translation>Mira el perfil del usuario</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2086"/>
+        <location filename="../modules/cards/UserCards.py" line="287"/>
         <source>followers</source>
         <translation>suscriptores</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2087"/>
+        <location filename="../modules/cards/UserCards.py" line="288"/>
         <source>following</source>
         <translation>suscripciones</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2088"/>
+        <location filename="../modules/cards/UserCards.py" line="289"/>
         <source>chats</source>
         <translation>Charlar</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2100"/>
+        <location filename="../modules/cards/UserCards.py" line="301"/>
         <source>Link copied to clipboard</source>
         <translation>El enlace se copia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2232"/>
+        <location filename="../modules/cards/UserCards.py" line="433"/>
         <source>Followers</source>
         <translation>Suscriptores</translation>
     </message>
     <message>
-        <location filename="../main.py" line="2239"/>
+        <location filename="../modules/cards/UserCards.py" line="440"/>
         <source>Following</source>
         <translation>Suscripciones</translation>
     </message>
