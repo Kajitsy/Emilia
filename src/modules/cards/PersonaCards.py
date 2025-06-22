@@ -9,10 +9,9 @@ from PyQt6.QtWidgets import (
 
 from modules.QCustom import CustomTextEdit
 from modules.styles import *
-from modules.QThreads import (
-    ImageLoaderThread)
+from modules.QThreads import ImageLoaderThread
 
-class OverlayCard(QFrame):
+class EditOverlay(QFrame):
     def __init__(self, main_window, data=None, list_card=None):
         super().__init__()
         self.setFixedSize(500, 200)
@@ -43,6 +42,7 @@ class OverlayCard(QFrame):
         self.display_name_edit.setText(self.data.get('participant__name'))
         self.display_name_edit.setStyleSheet(lineedit_style())
         self.display_name_edit.textChanged.connect(lambda text: self.data.update({'name': text}))
+        self.display_name_edit.setMaxLength(20)
         fh_layout.addWidget(self.display_name_edit)
 
         self.display_avatar = QLabel()
@@ -138,6 +138,11 @@ class OverlayCard(QFrame):
         self.data.update({'definition': self.background_edit.toPlainText()})
         self.background_edit.setFixedHeight(height)
         self.setFixedHeight(self.layout().sizeHint().height())
+        if len(text) > 750:
+            self.background_edit.setPlainText(text[:750])
+            cursor = self.background_edit.textCursor()
+            cursor.setPosition(750)
+            self.background_edit.setTextCursor(cursor)
 
     def removePerson(self):
         self.mw.chat_thread.remove_persona(self.data)
@@ -189,7 +194,7 @@ class OverlayCard(QFrame):
             else:
                 color_avatar(self.list_card.display_avatar, 60, 60, self.mw.name)
 
-class ListCard(QFrame):
+class MainCard(QFrame):
     def __init__(self, main_window, data=None, character_id=None):
         super().__init__()
         self.mw = main_window
@@ -299,7 +304,7 @@ class ListCard(QFrame):
         self.deleteLater()
 
     def showOverlay(self):
-        self.mw.showOverlay(OverlayCard(self.mw, self.data, self))
+        self.mw.showOverlay(EditOverlay(self.mw, self.data, self))
 
     def contextMenuEvent(self, a0):
         super().contextMenuEvent(a0)

@@ -81,7 +81,7 @@ from modules.GetCAICookies import GetCookies
 from modules.QCustom import HorizontalScrollArea, CheckablePushButton, ClickableFrame, LeftSidebar
 from modules.QThreads import *
 from modules.styles import *
-from modules.cards import VoiceCards, PersonaCards, CharacterCards
+from modules.cards import VoiceCards, PersonaCards, CharacterCards, UserCards
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -110,7 +110,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = SvgIcons()
-        self.version = "3.0.4b2"
+        self.version = "3.1.0b"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -120,6 +120,7 @@ class EmiliaNext(QMainWindow):
         self.left_sidebar_hide_auto = False
         self.current_chat_interface = None
         self.hide_overlay = True
+        self.me_has_avatar = False
 
         self.threads = []
         self.overlays = []
@@ -836,11 +837,10 @@ class EmiliaNext(QMainWindow):
     def showMainPage(self, widget: QWidget | None):
         if widget: widget.setVisible(False)
         self.main_content_area.setCurrentWidget(self.main_page)
-        # self.top_bar_stacked_widget.setCurrentWidget(self.top_widget)
         self.current_chat_interface = None
         self.top_widget.setVisible(True)
 
-    def openChat(self, character_id, character_name, chat_id, card=None):
+    def openChat(self, character_id, character_name, chat_id="", card=None):
         if self.current_chat_interface:
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
@@ -863,8 +863,16 @@ class EmiliaNext(QMainWindow):
             self.current_chat_interface.setVisible(False)
             self.search_bar.setText("")
 
+    def openCreateCharacterPage(self, character_id=None):
+        self.create_char_page = CharacterCards.EditPage(self, character_id)
+        self.main_content_area.addWidget(self.create_char_page)
+        self.main_content_area.setCurrentWidget(self.create_char_page)
+        if self.current_chat_interface:
+            self.current_chat_interface.setVisible(False)
+            self.search_bar.setText("")
+
     def openUserPage(self, username):
-        self.user_page = UserProfile(self, username)
+        self.user_page = UserCards.UserProfile(self, username)
         self.main_content_area.addWidget(self.user_page)
         self.main_content_area.setCurrentWidget(self.user_page)
         if self.current_chat_interface:
@@ -978,12 +986,16 @@ class EmiliaNext(QMainWindow):
                 self.try_this_odd_layout.addWidget(card)
 
     def getMe(self, data):
-        self.me = data
-        self.author_id = data['id']
-        self.name = data['account']['name']
-        self.username = data['username']
-        self.me_has_avatar = True if data.get('account', {}).get('avatar_file_name') else False
-        self.me_avatar = data.get('account', {}).get('avatar_file_name')
+        self.me_full = data
+        self.me = self.me_full.get("user", {})
+        self.author_id = self.me['id']
+        self.name = self.me['account']['name']
+        self.username = self.me['username']
+        self.me_has_avatar = True if self.me.get('account', {}).get('avatar_file_name') else False
+        self.me_avatar = self.me.get('account', {}).get('avatar_file_name')
+
+        if self.me_has_avatar:
+            self.left_sidebar.avatarUpdate()
 
         self.welcome_label.setText(self.tr("Welcome back, ") + self.name)
         self.profile_button.setText(self.name)
@@ -1259,7 +1271,8 @@ class SettingsPage(QWidget):
                 "settings": [
                     {"type": "pushbutton", "label": self.tr("Character.AI Login") + "\n" + self.tr("Valid until: ") + self.mw.settings.value('cai_auth/expiration_date') if self.mw.settings.value('cai_auth/expiration_date') else self.tr("Character.AI Login"),
                      "buttonlabel": self.tr("Re-Auth with Character.AI") if self.mw.token else self.tr("Auth with Character.AI") ,
-                     "key": "auth_cookie_get", "click": self.getCookies}
+                     "key": "auth_cookie_get", "click": self.getCookies},
+                    {"type": "pushbutton", "label": self.tr("User Settings"), "buttonlabel": self.tr("Open"), "key": "cai_edit", "click": self.openUserSettings}
                 ]
             }, {
                 "label": self.tr("Emilia Settings"),
@@ -1340,6 +1353,10 @@ class SettingsPage(QWidget):
         main_layout.addWidget(self.button_bar, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.setLayout(main_layout)
+
+    def openUserSettings(self):
+        overlay = UserCards.EditOverlay(self.mw)
+        self.mw.showOverlay(overlay)
 
     def openEmotesEditor(self):
         with open(f"./data/VTube_Emotes.json", "r") as f:
@@ -1811,477 +1828,6 @@ class SettingsPage(QWidget):
                 self.mw.settings.setValue(key, widget.keySequence().toString())
         self.mw.showNotification(self.tr("Settings saved successfully"))
         logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings saved successfully")
-
-class UserProfile(QWidget):
-    def __init__(self, main_window, username):
-        super().__init__(main_window)
-        self.profile_id = None
-        self.is_me = False
-        self.data = {}
-        self.me_following = []
-        self.mw = main_window
-        self.chat_thread: ChatThread | None = self.mw.chat_thread
-        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
-        self.svg_icons = SvgIcons()
-
-        self.initUI()
-
-        self.profile_id = username
-        self.is_me = self.profile_id == self.mw.username
-        self.chat_thread.get_user_signal.connect(self._getUser)
-        self.chat_thread.voices_search_username_signal.connect(self._getVoices)
-        self.chat_thread.get_upvoted_characters_signal.connect(self._getUpCharacters)
-        self.chat_thread.get_user_personas_signal.connect(self._getUserPersonas)
-
-        self.chat_thread.get_user(self.profile_id)
-        self.chat_thread.voices_search_username(self.profile_id)
-        if self.is_me:
-            self.chat_thread.get_user_personas()
-            self.chat_thread.get_upvoted_characters()
-
-    def initUI(self):
-        self.top_bar, self.top_bar_layout = self.createTopBar()
-
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
-
-        main_info_frame = QFrame(self)
-        main_info_layout = QVBoxLayout()
-        main_info_frame.setLayout(main_info_layout)
-        layout.addWidget(main_info_frame)
-
-        self.avatar_label = QLabel()
-        self.avatar_label.setFixedSize(80, 80)
-        main_info_layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.name_label = QLabel()
-        self.name_label.setStyleSheet("font-size: 18px;")
-        main_info_layout.addWidget(self.name_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-        self.username_label = QLabel()
-        self.username_label.setStyleSheet("color: #a2a2ac; font-size: 12px;")
-        main_info_layout.addWidget(self.username_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-        sub_frame = QFrame(self)
-        sub_layout = QHBoxLayout()
-        sub_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        sub_frame.setLayout(sub_layout)
-        layout.addWidget(sub_frame)
-
-        self.followers_label = QLabel(self.tr("0 followers"))
-        self.followers_label.mousePressEvent = lambda event: self.showFollowingFollowers("following")
-        self.followers_label.setStyleSheet("color: #a2a2ac;")
-        sub_layout.addWidget(self.followers_label)
-
-        span_label = QLabel("•")
-        span_label.setStyleSheet("color: #a2a2ac;")
-        sub_layout.addWidget(span_label)
-
-        self.following_label = QLabel(self.tr("0 following"))
-        self.following_label.mousePressEvent = lambda event: self.showFollowingFollowers("followers")
-        self.following_label.setStyleSheet("color: #a2a2ac;")
-        sub_layout.addWidget(self.following_label)
-
-        span2_label = QLabel("|")
-        span2_label.setStyleSheet("color: #a2a2ac;")
-        sub_layout.addWidget(span2_label)
-
-        self.chats_label = QLabel(self.tr("0 chats"))
-        self.chats_label.setStyleSheet("color: #a2a2ac;")
-        sub_layout.addWidget(self.chats_label)
-
-        but_frame = QFrame(self)
-        but_layout = QHBoxLayout()
-        but_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        but_frame.setLayout(but_layout)
-        layout.addWidget(but_frame)
-
-        self.follow_button = QPushButton(self.tr("Follow"))
-        self.follow_button.setStyleSheet(button_style())
-        self.follow_button.setVisible(False)
-        but_layout.addWidget(self.follow_button)
-
-        self.share_button = QPushButton()
-        self.share_button.setStyleSheet(icon_button_style())
-        self.share_button.setIcon(self.svg_icons.share())
-        self.share_button.clicked.connect(self.share)
-        but_layout.addWidget(self.share_button)
-
-        content_layout = QVBoxLayout()
-
-        buttons_frame = QFrame()
-        buttons_layout = QHBoxLayout()
-        buttons_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        buttons_frame.setLayout(buttons_layout)
-        content_layout.addWidget(buttons_frame)
-
-        self.characters_button = QPushButton(self.tr("Characters"))
-        self.characters_button.setCheckable(True)
-        self.characters_button.setChecked(True)
-        self.characters_button.setStyleSheet(tab_button_style())
-        self.characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.character_list))
-        self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-
-        self.voices_button = QPushButton(self.tr("Voices"))
-        self.voices_button.setCheckable(True)
-        self.voices_button.setStyleSheet(tab_button_style())
-        self.voices_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.voice_list))
-        self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.voices_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-
-        self.up_characters_button = QPushButton(self.tr("Liked"))
-        self.up_characters_button.setCheckable(True)
-        self.up_characters_button.setStyleSheet(tab_button_style())
-        self.up_characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.upvoted_characters_list))
-        self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.up_characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-        self.up_characters_button.setVisible(False)
-
-        self.personas_button = QPushButton(self.tr("Personas"))
-        self.personas_button.setCheckable(True)
-        self.personas_button.setStyleSheet(tab_button_style())
-        self.personas_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.personas_list))
-        self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.personas_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.personas_button.setVisible(False)
-
-        buttons_layout.addWidget(self.characters_button)
-        buttons_layout.addWidget(self.up_characters_button)
-        buttons_layout.addWidget(self.personas_button)
-        buttons_layout.addWidget(self.voices_button)
-
-        self.character_list, self.character_list_layout = self.scroll_page()
-        self.upvoted_characters_list, self.upvoted_characters_layout = self.scroll_page()
-        self.personas_list, self.personas_layout = self.scroll_page()
-        self.voice_list, self.voice_list_layout = self.scroll_page()
-
-        self.lists_widget = QStackedWidget()
-        self.lists_widget.addWidget(self.character_list)
-        self.lists_widget.addWidget(self.upvoted_characters_list)
-        self.lists_widget.addWidget(self.personas_list)
-        self.lists_widget.addWidget(self.voice_list)
-        self.lists_widget.setFixedWidth(600)
-        self.lists_widget.setCurrentWidget(self.character_list)
-        content_layout.addWidget(self.lists_widget, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-        layout.addLayout(content_layout)
-
-        self.setLayout(layout)
-
-    def _getFollowing(self, data):
-        self.chat_thread.me_following_signal.disconnect()
-        self.me_following = data.get('following', [])
-
-        if self.is_me:
-            self.follow_button.setVisible(False)
-            self.up_characters_button.setVisible(True)
-            self.personas_button.setVisible(True)
-        else:
-            self.follow_button.setVisible(True)
-            self.up_characters_button.setVisible(False)
-            self.personas_button.setVisible(False)
-
-        if self.username in self.me_following:
-            self.follow_button.setText(self.tr("Unfollow"))
-            self.follow_button.clicked.connect(self.unfollow)
-        else:
-            self.follow_button.clicked.connect(self.follow)
-
-    def getFollowing(self):
-        self.chat_thread.me_following_signal.connect(self._getFollowing)
-        self.chat_thread.get_me_following()
-
-    def _getVoices(self, data):
-        self.chat_thread.voices_search_username_signal.disconnect()
-        self.voice_data = data
-
-        if self.voice_data:
-            for voice in self.voice_data:
-                card = VoiceCards.HorizontalMiniVoiceCard(main_window, voice)
-                self.voice_list_layout.addWidget(card)
-        else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.voice_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-    def _getUpCharacters(self, data):
-        self.chat_thread.get_upvoted_characters_signal.disconnect()
-        self.upvoted_characters = data
-
-        if self.upvoted_characters:
-            for character in self.upvoted_characters:
-                card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'),
-                                               character.get('title'), "", character['external_id'],
-                                               character["participant__num_interactions"], character["upvotes"], 70, 70)
-                card.setFixedHeight(87)
-                self.upvoted_characters_layout.addWidget(card)
-        else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.upvoted_characters_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-    def _getUserPersonas(self, data):
-        self.chat_thread.get_user_personas_signal.disconnect()
-        self.user_personas = data
-
-        if self.user_personas:
-            for persona in self.user_personas:
-                card = PersonaCards.ListCard(self.mw, persona)
-                card.setFixedHeight(87)
-                self.personas_layout.addWidget(card)
-
-        button = QPushButton(self.tr("New"))
-        button.setStyleSheet(button_style())
-        button.clicked.connect(lambda _: self.mw.showOverlay(PersonaCards.OverlayCard(self.mw)))
-        self.personas_layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-    def _getUser(self, data):
-        self.chat_thread.get_user_signal.disconnect()
-        self.getFollowing()
-        self.data = data
-        self.username = self.data.get('username')
-
-        if self.data.get('avatar_file_name'):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get('avatar_file_name') + '?webp=true&anim=0',
-                80, 80)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
-        else:
-            color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
-
-        if self.mw.drpc_enable and self.mw.drpc_show_current_page:
-            if self.data.get('avatar_file_name') and self.mw.drpc_show_username:
-                self.discord_thread.update(
-                    details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
-                    large_image="https://characterai.io/i/80/static/avatars/" + self.data.get(
-                        'avatar_file_name') + '?webp=true&anim=0',
-                    buttons=[{
-                        "label": "Open profile",
-                        "url": f"https://character.ai/profile/{self.username}"
-                    }]
-                )
-            elif self.mw.drpc_show_username:
-                self.discord_thread.update(
-                    details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
-                    buttons=[{
-                        "label": "Open profile",
-                        "url": f"https://character.ai/profile/{self.username}"
-                    }]
-                )
-            else:
-                self.discord_thread.update(details=self.tr("Looks at user profile"))
-
-        chats_count = 0
-        for character in self.data.get('characters', []):
-            chats_count += character.get('participant__num_interactions', 0)
-        chats_count = format_number(chats_count)
-
-        self.name_label.setText(f"{self.data.get('name')}")
-        self.username_label.setText(f"@{self.username}")
-        self.followers_label.setText(str(self.data.get('num_followers')) + " " + self.tr("followers"))
-        self.following_label.setText(str(self.data.get('num_following')) + " " + self.tr("following"))
-        self.chats_label.setText(str(chats_count) + " " + self.tr("chats"))
-        if self.data.get('characters', []):
-            for character in self.data.get('characters', []):
-                card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'), character.get('title'), "", character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)
-                card.setFixedHeight(87)
-                self.character_list_layout.addWidget(card)
-        else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.character_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-    def share(self):
-        QApplication.clipboard().setText(f'https://character.ai/profile/{self.username}')
-        self.mw.showNotification(self.tr("Link copied to clipboard"))
-
-    def scroll_page(self):
-        f_page = QWidget()
-        f_page_layout = QVBoxLayout(f_page)
-        f_page_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        f_page.setLayout(f_page_layout)
-
-        users_scroll_area = QScrollArea()
-        users_scroll_area.setWidgetResizable(True)
-        users_scroll_area.setStyleSheet(scroll_style())
-
-        users_container = QWidget()
-        users_container.setStyleSheet("background-color: transparent; border: none;")
-        users_layout = QVBoxLayout()
-        users_layout.setContentsMargins(10,10,10,10)
-        users_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        users_container.setLayout(users_layout)
-
-        users_scroll_area.setWidget(users_container)
-        f_page_layout.addWidget(users_scroll_area)
-        return f_page, users_layout
-
-    def unfollow(self):
-        def unfollow(self, data):
-            self.follow_button.setText(self.tr("Follow"))
-            self.follow_button.clicked.disconnect()
-            self.follow_button.clicked.connect(self.follow)
-        self.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(self, data))
-        self.chat_thread.user_unfollow(self.username)
-
-    def follow(self):
-        def follow(self, data):
-            self.follow_button.setText(self.tr("Unfollow"))
-            self.follow_button.clicked.disconnect()
-            self.follow_button.clicked.connect(self.unfollow)
-        self.chat_thread.user_follow_signal.connect(lambda data: follow(self, data))
-        self.chat_thread.user_follow(self.username)
-
-    def showFollowingFollowers(self, open_page="followers"):
-        def openUser(username):
-            self.mw.openUserPage(username)
-            self.mw.hideOverlay()
-
-        def follow(username, button: QPushButton):
-            def follow(data):
-                button.setText(self.tr("Unfollow"))
-                button.clicked.disconnect()
-                button.clicked.connect(lambda: unfollow(username, button))
-
-            self.chat_thread.user_follow_signal.connect(lambda data: follow(data))
-            self.chat_thread.user_follow(username)
-
-        def unfollow(username, button: QPushButton):
-            def unfollow(data):
-                button.setText(self.tr("Follow"))
-                button.clicked.disconnect()
-                button.clicked.connect(lambda: follow(username, button))
-
-            self.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(data))
-            self.chat_thread.user_unfollow(username)
-
-        def _followers(data):
-            self.chat_thread.user_followers_signal.disconnect()
-            for user in data.get('users', {}):
-                card = createCard(user)
-                card.setFixedWidth(435)
-                followers_users_layout.addWidget(card)
-
-        def _following(data):
-            self.chat_thread.user_following_signal.disconnect()
-            for user in data.get('users', {}):
-                card = createCard(user)
-                card.setFixedWidth(435)
-                following_users_layout.addWidget(card)
-
-        def createCard(data):
-            username = data.get("username")
-            u_widget = QFrame()
-            u_widget.setStyleSheet(card_style())
-            u_widget.mousePressEvent = lambda event: openUser(username)
-            u_widget.setCursor(Qt.CursorShape.PointingHandCursor)
-            u_layout = QHBoxLayout(u_widget)
-            u_widget.setLayout(u_layout)
-
-            avatar_label = QLabel()
-            avatar_label.setFixedSize(40, 40)
-            if data.get('account__avatar_file_name'):
-                load_avatar_thread = ImageLoaderThread(
-                    "https://characterai.io/i/80/static/avatars/" + data.get('account__avatar_file_name') + '?webp=true&anim=0', 40, 40)
-                load_avatar_thread.radius = 4
-                load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
-                load_avatar_thread.start()
-                self.mw.threads.append(load_avatar_thread)
-            else:
-                color_avatar(avatar_label, 40, 40, username, 4)
-            u_layout.addWidget(avatar_label)
-
-            info_layout = QVBoxLayout()
-            u_layout.addLayout(info_layout)
-            name_label = QLabel(username)
-            info_layout.addWidget(name_label, alignment=Qt.AlignmentFlag.AlignLeft)
-            if data.get('account__bio'):
-                bio = data.get('account__bio')
-                if len(bio) > 45:
-                    bio = data.get('account__bio')[:45] + "..."
-                bio_label = QLabel(bio)
-                bio_label.setStyleSheet("color: #a2a2ac;")
-                info_layout.addWidget(bio_label, alignment=Qt.AlignmentFlag.AlignLeft)
-
-            sub_button = QPushButton()
-            sub_button.setStyleSheet(button_style())
-            if not self.is_me:
-                u_layout.addWidget(sub_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                if username in self.me_following:
-                    sub_button.setText(self.tr("Unfollow"))
-                    sub_button.clicked.connect(lambda: unfollow(username, sub_button))
-                else:
-                    sub_button.setText(self.tr("Follow"))
-                    sub_button.clicked.connect(lambda: follow(username, sub_button))
-            return u_widget
-
-        widget = QWidget()
-        widget.setFixedSize(500, 750)
-        layout = QVBoxLayout(widget)
-        widget.setLayout(layout)
-
-        buttons_frame = QFrame(widget)
-        buttons_layout = QHBoxLayout()
-        buttons_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        buttons_frame.setLayout(buttons_layout)
-
-        followers_button = QPushButton(self.tr("Followers"))
-        followers_button.setCheckable(True)
-        followers_button.setStyleSheet(tab_button_style())
-        followers_button.clicked.connect(lambda: pages_widget.setCurrentWidget(followers_page))
-        followers_button.clicked.connect(lambda: following_button.setChecked(False))
-        buttons_layout.addWidget(followers_button)
-
-        following_button = QPushButton(self.tr("Following"))
-        following_button.setCheckable(True)
-        following_button.setStyleSheet(tab_button_style())
-        following_button.clicked.connect(lambda: pages_widget.setCurrentWidget(following_page))
-        following_button.clicked.connect(lambda: followers_button.setChecked(False))
-        buttons_layout.addWidget(following_button)
-
-        followers_page, followers_users_layout = self.scroll_page()
-        following_page, following_users_layout = self.scroll_page()
-
-        pages_widget = QStackedWidget()
-        pages_widget.addWidget(followers_page)
-        pages_widget.addWidget(following_page)
-        if open_page == "followers":
-            pages_widget.setCurrentWidget(following_page)
-            following_button.setChecked(True)
-        else:
-            pages_widget.setCurrentWidget(followers_page)
-            followers_button.setChecked(True)
-
-        self.chat_thread.user_followers_signal.connect(_followers)
-        self.chat_thread.user_following_signal.connect(_following)
-        self.chat_thread.get_user_followers(username=self.username)
-        self.chat_thread.get_user_following(username=self.username)
-
-        layout.addWidget(buttons_frame)
-        layout.addWidget(pages_widget, 1)
-        self.mw.showOverlay(widget)
-
-    def createTopBar(self):
-        top_bar = QWidget()
-        top_bar_layout = QHBoxLayout()
-        top_bar.setLayout(top_bar_layout)
-
-        return top_bar, top_bar_layout
-
-    def showEvent(self, a0):
-        super().showEvent(a0)
-        self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
-        self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
-
-    def hideEvent(self, a0):
-        super().hideEvent(a0)
-        self.mw.profile_button.setChecked(False)
-        self.mw.profile_button_2.setChecked(False)
-        self.deleteLater()
 
 async def main():
     global main_window, tray_icon, show_action, hide_action, quit_action

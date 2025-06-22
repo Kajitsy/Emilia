@@ -733,3 +733,12 @@ class SvgIcons:
             return pixmap
         else:
             return QIcon(pixmap)
+
+    def create_character(self, color='#A2A2AC', pixmap_ret=False):
+        svg = f"""<svg viewBox="0 0 24 24" fill="none" width="20" height="20" class="text-icon-primary"><path d="M18.947 1.894a.5.5 0 0 0-.894 0l-.979 1.957a.5.5 0 0 1-.223.224l-1.957.978a.5.5 0 0 0 0 .894l1.957.978a.5.5 0 0 1 .224.224l.978 1.957a.5.5 0 0 0 .894 0l.979-1.957a.5.5 0 0 1 .223-.224l1.957-.978a.5.5 0 0 0 0-.894l-1.957-.978a.5.5 0 0 1-.224-.224z" fill="{color}"></path><path d="M5 7a2 2 0 0 1 2-2h4a1 1 0 1 0 0-2H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4v-4a1 1 0 1 0-2 0v4a2 2 0 0 1-2 2h-.1a5.002 5.002 0 0 0-9.8 0H7a2 2 0 0 1-2-2z" fill="{color}" fill-rule="evenodd"></path><path d="M12 7.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6" fill="{color}"></path></svg>"""
+        pixmap = self._svg_to_pixmap(svg)
+
+        if pixmap_ret:
+            return pixmap
+        else:
+            return QIcon(pixmap)

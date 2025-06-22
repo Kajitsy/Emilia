@@ -249,6 +249,7 @@ class ChatThread(QThread):
     get_me_signal = pyqtSignal(object)
     get_user_settings_signal = pyqtSignal(object)
     update_user_settings_signal = pyqtSignal(object)
+    update_user_settings_2_signal = pyqtSignal(object)
     get_available_models_signal = pyqtSignal(object)
     get_available_models_git_signal = pyqtSignal(object)
     get_user_signal = pyqtSignal(object)
@@ -272,6 +273,8 @@ class ChatThread(QThread):
     me_following_signal = pyqtSignal(object)
     upload_avatar_signal = pyqtSignal(object)
     get_upvoted_characters_signal = pyqtSignal(list)
+    create_character_signal = pyqtSignal(object)
+    update_character_signal = pyqtSignal(object)
     get_user_personas_signal = pyqtSignal(list)
     create_persona_signal = pyqtSignal(object)
     update_persona_signal = pyqtSignal(object)
@@ -493,6 +496,10 @@ class ChatThread(QThread):
         await self._call_ccaa('update_user_settings', self.update_user_settings_signal, data)
 
     @asyncSlot
+    async def update_user_settings_2(self, data):
+        await self._call_ccaa('update_user_settings_2', self.update_user_settings_2_signal, data)
+
+    @asyncSlot
     async def get_user(self, username):
         await self._call_ccaa('get_user', self.get_user_signal, username)
 
@@ -639,6 +646,17 @@ class ChatThread(QThread):
     @asyncSlot
     async def get_upvoted_characters(self):
         await self._call_ccaa('get_upvoted_characters', self.get_upvoted_characters_signal)
+
+    @asyncSlot
+    async def create_character(self, data):
+        await self._call_ccaa('create_character', self.create_character_signal, data)
+
+    @asyncSlot
+    async def update_character(self, data):
+        result = await self.ccaa.update_character(data)
+        self.update_character_signal.emit(result)
+        if data.get('status') == "OK":
+            self.characters[result['character']['external_id']]['character'] = result['character']
 
     @asyncSlot
     async def get_user_personas(self, force_refresh=0):

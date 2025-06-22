@@ -12,7 +12,8 @@ class Async:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
-            "Cookie": f"web-next-auth={self.auth_cookie}"
+            "Cookie": f"web-next-auth={self.auth_cookie}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0"
         }
 
         if neo:
@@ -37,13 +38,15 @@ class Async:
             elif response.status == 400:
                 pass
             else:
+                print(await response.json() if not text else json.loads(await response.text()))
                 raise Exception(f"Failed to get data, status code: {response.status}")
 
     async def trpc_request(self, endpoint, data = None, method = "get", text = False):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
-            "Cookie": f"web-next-auth={self.auth_cookie}"
+            "Cookie": f"web-next-auth={self.auth_cookie}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0"
         }
 
         url = f"https://character.ai/api/trpc/{endpoint}"
@@ -162,7 +165,7 @@ class Async:
 
     async def get_me(self):
         response = await self.request("chat/user/")
-        return response.get("user", {}).get("user", {})
+        return response.get("user", {})
 
     async def get_user(self, username):
         response = await self.trpc_request(f"social.publicProfile?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22username%22%3A%22{username}%22%7D%7D%7D")
@@ -174,6 +177,10 @@ class Async:
 
     async def update_user_settings(self, data):
         response = await self.request("chat/user/update_settings/", data, "post")
+        return response
+
+    async def update_user_settings_2(self, data):
+        response = await self.request("chat/user/update/", data, "post")
         return response
 
     async def get_chat(self, character_id):
@@ -373,6 +380,14 @@ class Async:
         }
         response = await self.request("character/v1/create_persona", data, "post", True)
         return response.get('persona', {})
+
+    async def create_character(self, data):
+        response = await self.request("character/v1/create_character", data, "post", True)
+        return response
+
+    async def update_character(self, data):
+        response = await self.request("character/v1/update_character", data, "post", True)
+        return response
 
     async def remove_persona(self, data):
         data['archived'] = True

@@ -213,6 +213,13 @@ class ChatInterface(QWidget):
         share_char_button.clicked.connect(self.shareCharacter)
         social_buttons_layout.addWidget(share_char_button, 1, Qt.AlignmentFlag.AlignLeft)
 
+        self.edit_char_button = QPushButton()
+        self.edit_char_button.setStyleSheet(icon_button_style())
+        self.edit_char_button.setIcon(self.svg_icons.create_character())
+        self.edit_char_button.clicked.connect(self.editCharacter)
+        social_buttons_layout.addWidget(self.edit_char_button, 1, Qt.AlignmentFlag.AlignLeft)
+        self.edit_char_button.setVisible(False)
+
         self.like_button = QPushButton()
         self.like_button.setIcon(self.svg_icons.like())
         self.like_button.setStyleSheet(icon_button_style())
@@ -359,7 +366,7 @@ class ChatInterface(QWidget):
             self.chat_thread.update_user_settings(self.mw.user_settings)
 
         for persona in self.user_personas:
-            card = PersonaCards.ListCard(self.mw, persona, self.character_id)
+            card = PersonaCards.MainCard(self.mw, persona, self.character_id)
             card.mousePressEvent = lambda _: onCardClicked(card)
             personas_layout.addWidget(card)
             card_list.append(card)
@@ -865,6 +872,9 @@ class ChatInterface(QWidget):
             self.chat_thread.character_vote(self.character_id, True)
             self.like_button.setIcon(self.svg_icons.liked())
 
+    def editCharacter(self):
+        self.mw.openCreateCharacterPage(self.character_id)
+
     def shareCharacter(self):
         QApplication.clipboard().setText(f'https://character.ai/chat/{self.character_id}')
         self.mw.showNotification(self.tr("Link copied to clipboard"))
@@ -915,6 +925,9 @@ class ChatInterface(QWidget):
         self.title_label.setText(self.character.get('title'))
         self.toggle_info_button.setEnabled(True)
         self.header_character_frame.setVisible(True)
+
+        if self.character.get('participant__user__username', self.tr('Unknown')) == self.mw.username:
+            self.edit_char_button.setVisible(True)
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
             if self.character.get('visibility') == "PUBLIC" and self.mw.drpc_show_chat_name:

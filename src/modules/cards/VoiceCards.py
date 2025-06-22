@@ -8,8 +8,7 @@ from PyQt6.QtWidgets import (
 
 from modules.cards import CharacterCards
 from modules.styles import *
-from modules.QThreads import (
-    PlayerThread, FileLoaderThread,)
+from modules.QThreads import PlayerThread, FileLoaderThread
 
 class VoiceCard(QFrame):
     def __init__(self, main_window, data, character_id="", current_voice_id="", search=True):
