@@ -1,5 +1,4 @@
-import sys, ctypes, platform, webbrowser, subprocess, datetime, os, json
-import logging, inspect
+import sys, ctypes, platform, webbrowser, subprocess, datetime, os, json, logging
 
 os.makedirs("logs", exist_ok=True)
 
@@ -48,29 +47,13 @@ Frozen EXE:   {getattr(sys, 'frozen', False)}
 Python Path:  {sys.executable}
 Process ID:   {os.getpid()}""")
 
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow,
-    QWidget, QHBoxLayout,
-    QVBoxLayout,QLabel,
-    QPushButton, QLineEdit,
-    QScrollArea, QFrame,
-    QSizePolicy, QStackedWidget,
-    QComboBox, QSpacerItem,
-    QMenu, QSystemTrayIcon,
-    QProgressBar, QKeySequenceEdit,
-    QTextEdit)
-from PyQt6.QtGui import (
-    QMouseEvent, QAction,
-    QFontMetrics, QIntValidator,
-    QRegularExpressionValidator,
-    QKeySequence)
-from PyQt6.QtCore import (
-    QEvent, QSettings,
-    QRect, QDateTime,
-    QPropertyAnimation,
-    QEasingCurve, QTimer,
-    QTranslator,
-    QParallelAnimationGroup,
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
+    QPushButton, QFrame, QSizePolicy, QStackedWidget,
+    QSystemTrayIcon, QProgressBar)
+from PyQt6.QtGui import (QMouseEvent, QAction, QIntValidator, QRegularExpressionValidator,
+    QKeySequence, QIcon)
+from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
+    QEasingCurve, QTimer, QTranslator, QParallelAnimationGroup,
     QRegularExpression, QPoint)
 from PyQt6.QtMultimedia import QMediaDevices
 from qasync import QEventLoop
@@ -78,10 +61,13 @@ from packaging import version
 
 from modules.ChatInterface import ChatInterface
 from modules.GetCAICookies import GetCookies
-from modules.QCustom import HorizontalScrollArea, CheckablePushButton, ClickableFrame, LeftSidebar
 from modules.QThreads import *
-from modules.styles import *
-from modules.cards import VoiceCards, PersonaCards, CharacterCards, UserCards
+from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
+                                    LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
+                                    VerticalScrollPage, HorizontalScrollPage, CardFrame)
+from modules.style.Icons import Svg
+from modules.style.Utils import format_text, color_avatar
+from modules.cards import VoiceCards, CharacterCards, UserCards
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -89,7 +75,7 @@ if platform.system() == 'Windows':
 
 app = QApplication(sys.argv)
 
-translator = QTranslator() # pylupdate6 --verbose .\modules\ChatInterface.py .\modules\GetCAICookies.py .\modules\Voice.py .\modules\QThreads.py .\modules\QCustom.py .\main.py -ts lang/de_DE.ts -ts lang/es_ES.ts -ts lang/pt_PT.ts -ts lang/ru_RU.ts -ts lang/uk_UA.ts
+translator = QTranslator()
 
 translator.load(
     f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
@@ -102,14 +88,17 @@ class EmiliaNext(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Emilia")
-        self.setStyleSheet(main_window_style())
+        self.setStyleSheet("""
+        background-color: #202124;
+        color: #e8eaed;
+    """)
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
         self.drpc_show_chat_name = self.settings.value("discord_rpc/show_chat_name", False, type=bool)
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
         self.version = "3.1.0b"
         self.beta = version.parse(self.version).is_prerelease
 
@@ -121,6 +110,7 @@ class EmiliaNext(QMainWindow):
         self.current_chat_interface = None
         self.hide_overlay = True
         self.me_has_avatar = False
+        self.username = None
 
         self.threads = []
         self.overlays = []
@@ -171,7 +161,46 @@ class EmiliaNext(QMainWindow):
         self.main_layout.addWidget(self.t_bar)
 
         self.main_content_area = QStackedWidget()
-        self.main_content_area.setStyleSheet(scroll_bar_style())
+        self.main_content_area.setStyleSheet("""
+            QScrollArea {
+                background-color: #303134;
+                border: none;
+                border-radius: 4px;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #303134;
+                width: 8px;
+                margin: 0px 0 0px 0;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px; 
+            }
+            QScrollBar::sub-control:vertical {
+                background: #f0f0f0;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical {
+                height: 0px;
+                subcontrol-position: bottom;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+                subcontrol-position: top;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #777;
+            }
+        """)
         self.main_page = self.createMainContentPage()
         self.search_results_page = QWidget()
         self.search_results_layout = QVBoxLayout(self.search_results_page)
@@ -244,7 +273,7 @@ class EmiliaNext(QMainWindow):
         self.settings_button = left_sidebar.settings_button
         self.profile_button = left_sidebar.profile_button
         self.profile_button_2 = left_sidebar.profile_button_2
-        self.recent_chat_layout = left_sidebar.recent_chat_layout
+        self.recent_chat_layout = left_sidebar.recent_chat_scroll_layout
 
         self.left_sidebar_animation = QPropertyAnimation(left_sidebar, b"geometry")
         self.left_sidebar_animation.setDuration(500)
@@ -263,9 +292,6 @@ class EmiliaNext(QMainWindow):
         card = ClickableFrame()
         card.setObjectName(chat_id)
         card.setFixedWidth(self.settings.value("left_sidebar_width", 255, type=int))
-        card.setStyleSheet(card_style())
-        card.default_style = card_style()
-        card.press_style = card_pressed_style()
         card.mousePress = openChat
         card.enterEvent = lambda event: menu_button.setVisible(True) if menu_button.visibility else None
         card.leaveEvent = lambda event: menu_button.setVisible(False)
@@ -279,8 +305,7 @@ class EmiliaNext(QMainWindow):
                 card.setParent(None)
                 card.deleteLater()
 
-            context_menu = QMenu(self)
-            context_menu.setStyleSheet(menu_style())
+            context_menu = Menu(self)
 
             delete_action = QAction(self.tr("Remove from Recent Chats"), self)
             delete_action.triggered.connect(deleteCard)
@@ -332,7 +357,21 @@ class EmiliaNext(QMainWindow):
         menu_button = QPushButton()
         menu_button.visibility = True
         menu_button.setIcon(self.svg_icons.ellipsis())
-        menu_button.setStyleSheet(recent_delete_button_style())
+        menu_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                margin-right: 10px;
+            }
+            QPushButton:hover {
+                background-color: #5a5c60;
+                border-radius: 4px;
+            }
+            QPushButton:pressed {
+                background-color: #3e4043;
+                border-radius: 4px;
+            }
+        """)
         menu_button.setVisible(False)
         menu_button.clicked.connect(lambda: showContextMenu(menu_button.pos(), card))
         chat_layout.addWidget(menu_button, 0, Qt.AlignmentFlag.AlignRight)
@@ -478,13 +517,10 @@ class EmiliaNext(QMainWindow):
         main_content_area.showEvent = show
         self.main_content_layout = QVBoxLayout()
 
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
+        scroll_area = VerticalScrollPage()
         scroll_area.setStyleSheet("background-color: transparent; border: none;")
-        scroll_content = QWidget()
-        scroll_content.setStyleSheet("border-radius: 4px;")
-        scroll_layout = QVBoxLayout()
-        scroll_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        scroll_content = scroll_area.viewport
+        scroll_layout = scroll_area.layout
 
         for_you_section, self.for_you_layout = self.createSection(self.tr("For You"))
         scroll_layout.addWidget(for_you_section)
@@ -507,8 +543,6 @@ class EmiliaNext(QMainWindow):
         category_section, self.category_layout, self.category_button_layout = self.createCategorySection()
         scroll_layout.addWidget(category_section)
 
-        scroll_content.setLayout(scroll_layout)
-        scroll_area.setWidget(scroll_content)
         self.main_content_layout.addWidget(scroll_area)
 
         main_content_area.setLayout(self.main_content_layout)
@@ -538,9 +572,8 @@ class EmiliaNext(QMainWindow):
         self.top_bar_animation.setDuration(500)
         self.top_bar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
-        self.top_bar_collapse_button = QPushButton()
+        self.top_bar_collapse_button = PushButton()
         self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis())
-        self.top_bar_collapse_button.setStyleSheet(icon_button_style())
         self.top_bar_collapse_button.clicked.connect(self.toggleLeftSidebar)
         self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
 
@@ -552,14 +585,12 @@ class EmiliaNext(QMainWindow):
 
         top_bar_layout.addStretch(1)
 
-        self.update_button = QPushButton(self.tr("Update"))
-        self.update_button.setStyleSheet(button_style())
+        self.update_button = PushButton(self.tr("Update"))
         top_bar_layout.addWidget(self.update_button)
         self.update_button.setVisible(False)
 
-        self.search_bar = QLineEdit()
+        self.search_bar = LineEdit()
         self.search_bar.setPlaceholderText(self.tr("Character Search"))
-        self.search_bar.setStyleSheet(lineedit_style())
         self.search_bar.returnPressed.connect(self.showSearchResultsV2)
         top_bar_layout.addWidget(self.search_bar)
 
@@ -581,18 +612,12 @@ class EmiliaNext(QMainWindow):
         title_label.setFont(font)
         section_layout.addWidget(title_label)
 
-        scroll_area = HorizontalScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_style())
+        scroll_page = HorizontalScrollPage()
+        cards_viewport = scroll_page.viewport
+        cards_layout = scroll_page.layout
 
-        cards_viewport = QWidget()
-        cards_layout = QHBoxLayout()
-        cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        cards_viewport.setLayout(cards_layout)
-        scroll_area.setWidget(cards_viewport)
-        cards_layout.addStretch(1)
 
-        section_layout.addWidget(scroll_area)
+        section_layout.addWidget(scroll_page)
         section_frame.setLayout(section_layout)
         return section_frame, cards_layout
 
@@ -610,8 +635,6 @@ class EmiliaNext(QMainWindow):
         section_layout.addWidget(title_label)
 
         scroll_area = HorizontalScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_style())
 
         cards_viewport = QWidget()
         cards_layout_main = QVBoxLayout()
@@ -646,20 +669,13 @@ class EmiliaNext(QMainWindow):
         title_label.setFont(font)
         section_layout.addWidget(title_label)
 
-        scroll_area = HorizontalScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_style())
+        scroll_page = HorizontalScrollPage()
+        sctoll_viewport = scroll_page.viewport
+        scroll_layout = scroll_page.layout
 
-        cards_viewport = QWidget()
-        cards_layout = QHBoxLayout()
-        cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        cards_viewport.setLayout(cards_layout)
-        scroll_area.setWidget(cards_viewport)
-        cards_layout.addStretch(1)
-
-        section_layout.addWidget(scroll_area)
+        section_layout.addWidget(scroll_page)
         section_frame.setLayout(section_layout)
-        return section_frame, cards_layout
+        return section_frame, scroll_layout
 
     def createCategorySection(self):
         categories = {
@@ -681,65 +697,59 @@ class EmiliaNext(QMainWindow):
         section_layout.setContentsMargins(0, 10, 0, 10)
 
         button_scroll_area = HorizontalScrollArea()
+        button_scroll_area.setStyleSheet("")
         button_scroll_area.setWidgetResizable(True)
         button_scroll_area.horizontalScrollBar().setVisible(False)
 
-        buttons_viewport = QWidget()
-        buttons_layout = QHBoxLayout()
-        buttons_viewport.setLayout(buttons_layout)
-        button_scroll_area.setWidget(buttons_viewport)
+        button_scroll_viewport = QWidget()
+        button_scroll_layout = QHBoxLayout()
+        button_scroll_viewport.setLayout(button_scroll_layout)
+        button_scroll_area.setWidget(button_scroll_viewport)
 
         self.category_buttons = []
 
         for key, value in categories.items():
             btn = QPushButton(value)
             btn.setStyleSheet("""
-        QPushButton {
-            background-color: #494a4d;
-            color: #e8eaed;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 15px;
-            text-align: center;
-        }
-        QPushButton:disabled {
-            background-color: #555;
-            color: #a2a2ac;
-        }
-        QPushButton:hover {
-            background-color: #5f6368;
-        }
-        QPushButton:pressed, QPushButton:checked {
-            background-color: #494a4d;
-            border-bottom: 5px solid #555;
-            padding-bottom: 3px;
-        }
-    """)
+                QPushButton {
+                    background-color: #494a4d;
+                    color: #e8eaed;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 8px 15px;
+                    text-align: center;
+                }
+                QPushButton:disabled {
+                    background-color: #555;
+                    color: #a2a2ac;
+                }
+                QPushButton:hover {
+                    background-color: #5f6368;
+                }
+                QPushButton:pressed, QPushButton:checked {
+                    background-color: #494a4d;
+                    border-bottom: 5px solid #555;
+                    padding-bottom: 3px;
+                }
+            """)
             btn.setObjectName(key)
             btn.setCheckable(True)
             btn.clicked.connect(lambda checked, b=btn, cat=key: self.onCategoryClicked(b, cat))
             self.category_buttons.append(btn)
-            buttons_layout.addWidget(btn)
+            button_scroll_layout.addWidget(btn)
             if key == "Assistants":
                 btn.setChecked(True)
                 self.onCategoryClicked(btn, key)
         section_layout.addWidget(button_scroll_area, alignment=Qt.AlignmentFlag.AlignTop)
 
-        scroll_area = HorizontalScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_style())
+        scroll_page = HorizontalScrollPage()
+        scroll_viewport = scroll_page.viewport
+        scroll_layout = scroll_page.layout
 
-        cards_viewport = QWidget()
-        cards_layout = QHBoxLayout()
-        cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        cards_viewport.setLayout(cards_layout)
-        scroll_area.setWidget(cards_viewport)
-        cards_layout.addStretch(1)
-
-        section_layout.addWidget(scroll_area)
+        section_layout.addWidget(scroll_page)
 
         section_frame.setLayout(section_layout)
-        return section_frame, cards_layout, buttons_layout
+        return section_frame, scroll_layout, button_scroll_layout
 
     def onCategoryClicked(self, clicked_button, category):
         for btn in self.category_buttons:
@@ -817,7 +827,7 @@ class EmiliaNext(QMainWindow):
                 item.widget().deleteLater()
 
     def updateAutoCollapseSidebar(self):
-        auto_collapse_sidebar_checkbox = self.settings_page.findChild(CheckablePushButton, "auto_collapse_sidebar")
+        auto_collapse_sidebar_checkbox = self.settings_page.findChild(CheckBox, "auto_collapse_sidebar")
         self.auto_collapse_sidebar = auto_collapse_sidebar_checkbox.isChecked()
         self.settings.setValue("auto_collapse_sidebar", self.auto_collapse_sidebar)
 
@@ -850,7 +860,7 @@ class EmiliaNext(QMainWindow):
             self.current_chat_interface = None
 
 
-        self.current_chat_interface = ChatInterface(main_window, character_name, character_id, chat_id)
+        self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id)
         self.current_chat_interface.chat_id = chat_id
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
@@ -914,7 +924,7 @@ class EmiliaNext(QMainWindow):
 
         self.featured_voices = voices
         for voice in self.featured_voices:
-            card = VoiceCards.HorizontalMiniVoiceCard(main_window, voice)
+            card = VoiceCards.HorizontalMiniVoiceCard(self, voice)
             card.setFixedWidth(277)
             self.featured_voices_layout.addWidget(card)
 
@@ -1080,7 +1090,7 @@ class SearchPage(QWidget):
         self.mw = main_window
         self.chat_thread: ChatThread | None = self.mw.chat_thread
         self.discord_thread: DiscordRPC | None = self.mw.discord_thread
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
         self.setStyleSheet("background-color: transparent; border: none;")
 
         self.initUI()
@@ -1097,41 +1107,20 @@ class SearchPage(QWidget):
 
         self.setLayout(self.layout)
 
-        self.mw.top_bar_collapse_button.setStyleSheet("""
-        QPushButton {
-            background-color: #494a4d;
-            color: #e8eaed;
-            border: none;
-            border-radius: 4px;
-            padding: 12px 10px;
-        }
-        QPushButton:hover {
-            background-color: #5f6368;
-        }
-        QPushButton:pressed {
-            background-color: #3c3d3f;
-        }
-    """)
         self.mw.top_bar_stacked_widget.setFixedHeight(40)
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
 
     def createMainContentPage(self):
-        scroll_area = QScrollArea()
-        scroll_area.setFixedWidth(700)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_style())
+        scroll_page = VerticalScrollPage()
+        scroll_page.setFixedWidth(700)
+        scroll_viewport = scroll_page.viewport
+        scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
+        scroll_layout = scroll_page.layout
 
-        cards_viewport = QWidget()
-        cards_viewport.setStyleSheet("background-color: transparent; border: none;")
-        cards_layout = QVBoxLayout()
-        cards_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        cards_viewport.setLayout(cards_layout)
-        scroll_area.setWidget(cards_viewport)
+        return scroll_page, scroll_viewport, scroll_layout
 
-        return scroll_area, cards_viewport, cards_layout
-
-    def showSearchResultsV2(self):
+    def showSearchResults(self):
         search_query = self.search_bar.text().strip()
         if not search_query:
             return
@@ -1166,33 +1155,26 @@ class SearchPage(QWidget):
 
     def createTopBar(self):
         top_bar = QWidget()
-        top_bar.setFixedHeight(40)
-        top_bar.setStyleSheet(lineedit_style2())
-        top_bar_layout = QHBoxLayout()
+        top_bar.setFixedHeight(50)
+        top_bar_layout = QVBoxLayout()
         top_bar.setLayout(top_bar_layout)
 
-        search_label = QLabel()
-        search_label.setPixmap(self.svg_icons.search())
-        search_label.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 8px;")
-        top_bar_layout.addWidget(search_label)
-
-        self.search_bar = QLineEdit()
+        self.search_bar = LineEdit()
+        self.search_bar.setIcon(QIcon(self.svg_icons.search()))
         self.search_bar.setText(self.mw.search_bar.text())
         self.search_bar.setPlaceholderText(self.tr("Character Search"))
-        self.search_bar.returnPressed.connect(self.showSearchResultsV2)
-        top_bar_layout.addWidget(self.search_bar)
+        self.search_bar.returnPressed.connect(self.showSearchResults)
+        top_bar_layout.addWidget(self.search_bar, alignment=Qt.AlignmentFlag.AlignTop)
 
         return top_bar, top_bar_layout
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
-        self.mw.top_bar_collapse_button.setStyleSheet(icon_button_style())
         self.mw.search_bar.setText("")
 
 class SettingsPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("background-color: transparent; border: none;")
         main_layout = QVBoxLayout()
         self.mw: EmiliaNext | None = parent
         self.chat_thread: ChatThread | None = self.mw.chat_thread
@@ -1410,29 +1392,27 @@ class SettingsPage(QWidget):
                 u_widget.deleteLater()
 
             validator = QRegularExpressionValidator(QRegularExpression(r"[^\s]+"))
-            u_widget = QFrame()
-            u_widget.setStyleSheet(card_style())
+            u_widget = CardFrame()
+            u_widget.setCursor(Qt.CursorShape.LastCursor)
             u_layout = QHBoxLayout(u_widget)
             u_widget.setLayout(u_layout)
 
-            param_name_edit = QLineEdit()
+            param_name_edit = LineEdit()
             param_name_edit.setValidator(validator)
             param_name_edit.textChanged.connect(lambda t: updateParamName(t, param_name))
-            param_name_edit.setStyleSheet(lineedit_style())
             param_name_edit.setPlaceholderText(self.tr("Parameter Name"))
             param_name_edit.setText(param_name)
             param_name_edit.setFixedWidth(150)
             u_layout.addWidget(param_name_edit)
 
-            remove_button = QPushButton()
+            remove_button = PushButton()
             remove_button.clicked.connect(removeParameter)
-            remove_button.setStyleSheet(icon_button_style())
             remove_button.setIcon(self.mw.svg_icons.close())
             u_layout.addWidget(remove_button)
 
             u_layout.addStretch()
 
-            random_checkbox = CheckablePushButton()
+            random_checkbox = CheckBox()
             random_checkbox.setChecked(random_value)
             random_checkbox.clicked.connect(updateRandom)
             u_layout.addWidget(random_checkbox)
@@ -1440,30 +1420,27 @@ class SettingsPage(QWidget):
             random_label = QLabel(self.tr("Use Random Value"))
             u_layout.addWidget(random_label)
 
-            value_1_edit = QLineEdit()
+            value_1_edit = LineEdit()
             value_1_edit.setValidator(validator)
             value_1_edit.textEdited.connect(updateParamValue1)
-            value_1_edit.setStyleSheet(lineedit_style())
             value_1_edit.setPlaceholderText(self.tr("From"))
             value_1_edit.setText(str(value_1))
             value_1_edit.setFixedWidth(50)
             u_layout.addWidget(value_1_edit)
             value_1_edit.setVisible(random_value)
 
-            value_2_edit = QLineEdit()
+            value_2_edit = LineEdit()
             value_2_edit.setValidator(validator)
             value_2_edit.textEdited.connect(updateParamValue2)
-            value_2_edit.setStyleSheet(lineedit_style())
             value_2_edit.setPlaceholderText(self.tr("To"))
             value_2_edit.setText(str(value_2))
             value_2_edit.setFixedWidth(50)
             u_layout.addWidget(value_2_edit)
             value_2_edit.setVisible(random_value)
 
-            value_edit = QLineEdit()
+            value_edit = LineEdit()
             value_edit.setValidator(validator)
             value_edit.textEdited.connect(updateParamValue)
-            value_edit.setStyleSheet(lineedit_style())
             value_edit.setPlaceholderText(self.tr("Value"))
             value_edit.setText(str(value))
             value_edit.setFixedWidth(106)
@@ -1483,18 +1460,10 @@ class SettingsPage(QWidget):
             self.mw.showNotification(self.tr("The values for emotions are saved"))
             self.mw.hideOverlay()
 
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_style())
-
-        container = QWidget()
-        container.setStyleSheet("background-color: transparent; border: none;")
-        emotes_layout = QVBoxLayout()
-        emotes_layout.setContentsMargins(10, 10, 10, 10)
-        emotes_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        container.setLayout(emotes_layout)
-
-        scroll_area.setWidget(container)
+        scroll_page = VerticalScrollPage()
+        scroll_viewport = scroll_page.viewport
+        scroll_layout = scroll_page.layout
+        scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
 
         for emote_name in emotes_data.keys():
             e_widget = QWidget()
@@ -1515,6 +1484,7 @@ class SettingsPage(QWidget):
             head_layout.addWidget(group_label)
             test_emote_button = QPushButton(self.tr(" | Test"))
             test_emote_button.setFont(font)
+            test_emote_button.setCursor(Qt.CursorShape.PointingHandCursor)
             test_emote_button.clicked.connect(lambda _, e=emote_name: self.chat_thread.vtube_use_emote(e))
             head_layout.addWidget(test_emote_button)
             e_layout.addLayout(head_layout)
@@ -1527,11 +1497,10 @@ class SettingsPage(QWidget):
                 else:
                     param_widget = createEmoteSlot(emote_name, param, random_value, params[param])
                 e_layout.addWidget(param_widget)
-            add_button = QPushButton(self.tr("Add parameter"))
-            add_button.setStyleSheet(button_style())
+            add_button = PushButton(self.tr("Add parameter"))
             add_button.clicked.connect(lambda _, b=add_button, l=e_layout, e=emote_name: createParameter(b, l, e))
             e_layout.addWidget(add_button, alignment=Qt.AlignmentFlag.AlignHCenter)
-            emotes_layout.addWidget(e_widget)
+            scroll_layout.addWidget(e_widget)
 
         widget = QWidget()
         widget.setFixedSize(750, 750)
@@ -1543,17 +1512,15 @@ class SettingsPage(QWidget):
         buttons_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         buttons_frame.setLayout(buttons_layout)
 
-        save_button = QPushButton(self.tr("Save"))
+        save_button = PushButton(self.tr("Save"))
         save_button.clicked.connect(save)
-        save_button.setStyleSheet(button_style())
         buttons_layout.addWidget(save_button)
 
-        close_button = QPushButton(self.tr("Close"))
+        close_button = PushButton(self.tr("Close"))
         close_button.clicked.connect(self.mw.hideOverlay)
-        close_button.setStyleSheet(button_style())
         buttons_layout.addWidget(close_button)
 
-        layout.addWidget(scroll_area)
+        layout.addWidget(scroll_page)
         layout.addWidget(buttons_frame)
         self.mw.showOverlay(widget)
 
@@ -1574,17 +1541,12 @@ class SettingsPage(QWidget):
         return top_bar, top_bar_layout
 
     def createMainContentPage(self):
-        scroll_area = QScrollArea()
+        scroll_area = VerticalScrollPage()
         scroll_area.setFixedWidth(800)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(scroll_bar_style())
 
-        settings_viewport = QWidget()
-        settings_viewport.setStyleSheet("background-color: transparent; border: none;")
-        settings_viewport.setFixedWidth(780)
-        settings_layout = QVBoxLayout()
-        settings_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        settings_viewport.setLayout(settings_layout)
+        settings_viewport = scroll_area.viewport
+        # settings_viewport.setFixedWidth(780)
+        settings_layout = scroll_area.layout
         scroll_area.setWidget(settings_viewport)
 
         for setting_group in self.settings_data:
@@ -1602,40 +1564,34 @@ class SettingsPage(QWidget):
             for setting in setting_group["settings"]:
                 layout = QHBoxLayout()
                 if setting.get("label"):
-                    label = QTextEdit()
-                    label.setReadOnly(True)
-                    label.setHtml(format_text(setting["label"]))
-                    label.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
-                    layout.addWidget(label)
+                    label = QLabel()
+                    label.setText(format_text(setting["label"]))
+                    label.setWordWrap(True)
+                    layout.addWidget(label, 1)
 
                 key = setting["key"]
 
                 if setting.get('type'):
-                    layout.addStretch(1)
                     if setting["type"] == "lineedit":
-                        widget = QLineEdit()
+                        widget = LineEdit()
                         if setting.get("validator"):
                             widget.setValidator(setting["validator"])
                         widget.setObjectName(key)
-                        widget.setEchoMode(setting.get("echo", QLineEdit.EchoMode.Normal))
-                        widget.setStyleSheet(lineedit_style())
+                        widget.setEchoMode(setting.get("echo", LineEdit.EchoMode.Normal))
                     elif setting["type"] == "checkbox":
-                        widget = CheckablePushButton()
+                        widget = CheckBox()
                         widget.setObjectName(key)
                     elif setting["type"] == "pushbutton":
-                        widget = QPushButton(setting["buttonlabel"])
+                        widget = PushButton(setting["buttonlabel"])
                         widget.setObjectName(key)
-                        widget.setStyleSheet(button_style())
                         widget.clicked.connect(setting["click"])
                     elif setting["type"] == "combobox":
-                        widget = QComboBox()
+                        widget = ComboBox()
                         widget.setObjectName(key)
-                        widget.setStyleSheet(combobox_style())
                         widget.addItems(setting['items'])
                     elif setting["type"] == "keybind":
-                        widget = QKeySequenceEdit()
+                        widget = KeySequenceEdit()
                         widget.setObjectName(key)
-                        widget.setStyleSheet(keysequenceedit_style())
                         widget.keySequenceChanged.connect(lambda seq, edit=widget: edit.setKeySequence(QKeySequence(seq[0])) if seq.count() > 1 else None)
 
                     layout.addWidget(widget)
@@ -1664,12 +1620,10 @@ class SettingsPage(QWidget):
         button_bar = QWidget()
         button_layout = QHBoxLayout()
         button_bar.setLayout(button_layout)
-        self.save_button = QPushButton(self.tr("Save"))
+        self.save_button = PushButton(self.tr("Save"))
         self.save_button.clicked.connect(self.saveSettings)
-        self.save_button.setStyleSheet(button_style())
-        self.cancel_button = QPushButton(self.tr("Cancel"))
+        self.cancel_button = PushButton(self.tr("Cancel"))
         self.cancel_button.clicked.connect(self.loadSettings)
-        self.cancel_button.setStyleSheet(button_style())
         button_layout.addWidget(self.save_button)
         button_layout.addWidget(self.cancel_button)
 
@@ -1750,12 +1704,12 @@ class SettingsPage(QWidget):
     def loadSettings(self):
         for key, widget in self.setting_widgets.items():
             value = self.mw.settings.value(key, str(self.setting_data[key].get('def_value')))
-            if isinstance(widget, QLineEdit):
+            if isinstance(widget, LineEdit):
                 widget.setText(value if value is not None else "")
-            elif isinstance(widget, CheckablePushButton):
+            elif isinstance(widget, CheckBox):
                 value = self.mw.settings.value(key, self.setting_data[key].get('def_value'), type=bool)
                 widget.setChecked(value)
-            elif isinstance(widget, QComboBox):
+            elif isinstance(widget, ComboBox):
                 if key == "emilia_language":
                     widget.setCurrentText(self.languages.get(self.mw.current_language, {}).get("title", self.tr("English")))
                 elif key in {"tr_char_msg_to", "tr_user_msg_to"}:
@@ -1768,20 +1722,20 @@ class SettingsPage(QWidget):
                     widget.setCurrentText(text)
                 else:
                     widget.setCurrentText(value)
-            elif isinstance(widget, QKeySequenceEdit):
+            elif isinstance(widget, KeySequenceEdit):
                 widget.setKeySequence(QKeySequence(value))
         logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings are loaded")
 
     def saveSettings(self):
         for key, widget in self.setting_widgets.items():
-            if isinstance(widget, QLineEdit):
+            if isinstance(widget, LineEdit):
                 if not self.setting_data.get(key).get('may_be_empty', True) and not widget.text():
                     self.mw.showNotification(self.setting_data[key]['label'] + self.tr(" cannot be empty"))
                     return
                 self.mw.settings.setValue(key, widget.text())
                 if key == "vtube/port":
                     self.chat_thread.eec.create_vts_with_port(int(widget.text()))
-            elif isinstance(widget, CheckablePushButton):
+            elif isinstance(widget, CheckBox):
                 self.mw.settings.setValue(key, 'true' if widget.isChecked() else 'false')
                 if key == "discord_rpc/enable":
                     self.mw.drpc_enable = widget.isChecked()
@@ -1801,7 +1755,7 @@ class SettingsPage(QWidget):
                         self.discord_thread.update(state=self.tr("Looking at the settings..."))
                     else:
                         self.discord_thread.update()
-            elif isinstance(widget, QComboBox):
+            elif isinstance(widget, ComboBox):
                 if key == "emilia_language":
                     lang = next((k for k, v in self.languages.items() if v["title"] == widget.currentText() and v.get("lang_available", False)), None)
                     if lang != self.mw.current_language:
@@ -1824,7 +1778,7 @@ class SettingsPage(QWidget):
                         index = next(k for k, v in self.mw.output_devices.items() if v == widget.currentText())
                         self.mw.setOutputDevice(index)
                     self.mw.settings.setValue(key, index)
-            elif isinstance(widget, QKeySequenceEdit):
+            elif isinstance(widget, KeySequenceEdit):
                 self.mw.settings.setValue(key, widget.keySequence().toString())
         self.mw.showNotification(self.tr("Settings saved successfully"))
         logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings saved successfully")
@@ -1832,7 +1786,7 @@ class SettingsPage(QWidget):
 async def main():
     global main_window, tray_icon, show_action, hide_action, quit_action
     tray_icon = QSystemTrayIcon()
-    tray_menu = QMenu()
+    tray_menu = Menu()
     main_window = EmiliaNext()
 
     tray_icon.activated.connect(
@@ -1840,7 +1794,7 @@ async def main():
         if reason == QSystemTrayIcon.ActivationReason.Trigger else None
     )
     tray_icon.setContextMenu(tray_menu)
-    tray_icon.setToolTip("Emilia Next")
+    tray_icon.setToolTip("Emilia")
     app.setWindowIcon(QIcon("icon.ico"))
     tray_icon.setIcon(QIcon("icon.ico"))
 

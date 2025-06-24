@@ -1,19 +1,17 @@
-import base64
-import uuid
+import base64, uuid
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
-from PyQt6.QtWidgets import (
-    QHBoxLayout, QVBoxLayout,
-    QLabel, QFrame, QSpacerItem,
-    QSizePolicy, QWidget, QPushButton,
-    QFileDialog, QLineEdit, QScrollArea,
-    QCheckBox, QComboBox)
+from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
+    QSizePolicy, QWidget, QFileDialog)
 
-from modules.QCustom import CustomTextEdit
-from modules.styles import *
+from modules.style.Elements import (CustomTextEdit, PushButton, LineEdit, CheckBox, ComboBox, VerticalScrollPage,
+    CardFrame)
+from modules.style.Icons import Svg
+from modules.style.Utils import format_text, format_number, color_avatar
 from modules.QThreads import ImageLoaderThread
 
-class MainCard(QFrame):
+class MainCard(CardFrame):
     def __init__(self, main_window, name="", avatar_url="", description="", author="", character_id="", chats=0,
                  voted=0, avatar_label_w=90, avatar_label_h=114):
         super().__init__()
@@ -27,9 +25,6 @@ class MainCard(QFrame):
         self.voted = voted
         self.avatar_label_w = avatar_label_w
         self.avatar_label_h = avatar_label_h
-
-        self.setStyleSheet(card_style())
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.initUI()
 
@@ -72,6 +67,7 @@ class MainCard(QFrame):
             author_label = QLabel(self.tr("Author: @") + self.author)
             font = author_label.font()
             font.setPointSize(8)
+            author_label.setStyleSheet("color: #a2a2ac;")
             author_label.setFont(font)
             text_layout.addWidget(author_label)
 
@@ -79,7 +75,7 @@ class MainCard(QFrame):
             description_label = QLabel(format_text(self.description, self.name))
             description_label.setWordWrap(True)
             font = description_label.font()
-            font.setPointSize(9)
+            font.setPointSize(10)
             description_label.setFont(font)
             fm = QFontMetrics(font)
             description_label.setMaximumHeight(fm.lineSpacing() * 4)
@@ -90,6 +86,7 @@ class MainCard(QFrame):
         text_layout.addItem(spacer)
 
         add_info = QLabel()
+        add_info.setStyleSheet("color: #a2a2ac;")
         font = add_info.font()
         font.setPointSize(10)
         add_info.setFont(font)
@@ -101,8 +98,7 @@ class MainCard(QFrame):
         if add_info.text():
             text_layout.addWidget(add_info)
 
-        self.edit_button = QPushButton(self.tr("Edit"))
-        self.edit_button.setStyleSheet(pushbutton_style())
+        self.edit_button = PushButton(self.tr("Edit"))
         self.edit_button.clicked.connect(lambda: self.mw.openCreateCharacterPage(self.character_id))
 
         if self.author == self.mw.username:
@@ -112,7 +108,7 @@ class MainCard(QFrame):
         super().mousePressEvent(a0)
         self.mw.openChat(self.character_id, self.name)
 
-class MiniCard(QFrame):
+class MiniCard(CardFrame):
     def __init__(self, main_window, character_name, character_id, avatar_url, chat_id=None):
         super().__init__()
         self.mw = main_window
@@ -120,9 +116,6 @@ class MiniCard(QFrame):
         self.character_id = character_id
         self.avatar_url = avatar_url
         self.chat_id = chat_id
-
-        self.setStyleSheet(card_style())
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.initUI()
 
@@ -161,9 +154,7 @@ class EditPage(QWidget):
         super().__init__(main_window)
         self.setStyleSheet("background-color: transparent; border: none;")
         self.mw = main_window
-        self.svg_icons = SvgIcons()
-
-
+        self.svg_icons = Svg()
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.initUI()
         if character_id is None:
@@ -195,21 +186,15 @@ class EditPage(QWidget):
     def initUI(self):
         main_layout = QVBoxLayout()
 
-        scroll_area = QScrollArea()
-        scroll_area.setFixedWidth(800)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet("background-color: transparent; border: none;")
-        scroll_content = QWidget()
-        scroll_content.setStyleSheet("border-radius: 4px;")
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        scroll_content.setLayout(layout)
-        scroll_area.setWidget(scroll_content)
+        scroll_page = VerticalScrollPage()
+        scroll_page.setFixedWidth(800)
+        scroll_page.setStyleSheet("background-color: transparent; border: none;")
+        scroll_layout = scroll_page.layout
 
         self.display_avatar = QLabel()
         self.display_avatar.mousePressEvent = lambda _: self.selectAvatar()
         self.display_avatar.setFixedSize(60, 60)
-
+        self.display_avatar.setCursor(Qt.CursorShape.PointingHandCursor)
         if self.mw.me_has_avatar:
             load_avatar_thread = ImageLoaderThread(
                 "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
@@ -220,135 +205,123 @@ class EditPage(QWidget):
             self.mw.threads.append(load_avatar_thread)
         else:
             color_avatar(self.display_avatar, 60, 60, self.mw.name)
-        layout.addWidget(self.display_avatar)
+        scroll_layout.addWidget(self.display_avatar)
 
         self.character_name_label = QLabel(self.tr("Character Name"))
         font = self.character_name_label.font()
         font.setBold(True)
         font.setPointSize(12)
         self.character_name_label.setFont(font)
-        layout.addWidget(self.character_name_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.character_name_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.character_name_edit = QLineEdit()
-        self.character_name_edit.setStyleSheet(lineedit_style())
+        self.character_name_edit = LineEdit()
         self.character_name_edit.setPlaceholderText(self.tr("e.g. Albert Einstein"))
         self.character_name_edit.setMaxLength(20)
-        layout.addWidget(self.character_name_edit)
+        scroll_layout.addWidget(self.character_name_edit)
 
         self.tagline_label = QLabel(self.tr("Tagline"))
         self.tagline_label.setFont(font)
-        layout.addWidget(self.tagline_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.tagline_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.tagline_edit = QLineEdit()
-        self.tagline_edit.setStyleSheet(lineedit_style())
+        self.tagline_edit = LineEdit()
         self.tagline_edit.setMaxLength(50)
         self.tagline_edit.setPlaceholderText(self.tr("Add a short tagline of your Character"))
-        layout.addWidget(self.tagline_edit)
+        scroll_layout.addWidget(self.tagline_edit)
 
         self.description_label = QLabel(self.tr("Description"))
         self.description_label.setFont(font)
-        layout.addWidget(self.description_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.description_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.description_edit = CustomTextEdit()
         self.description_edit.setPlaceholderText(self.tr("How would your Character describe themselves?"))
-        self.description_edit.setStyleSheet(lineedit_style())
         self.description_edit.textChanged.connect(lambda: self.textChanged(self.description_edit, 500))
         self.description_edit.setFixedHeight(48)
         self.description_edit.horizontalScrollBar().setVisible(False)
         self.description_edit.verticalScrollBar().setVisible(False)
-        layout.addWidget(self.description_edit)
+        scroll_layout.addWidget(self.description_edit)
 
         self.greeting_label = QLabel(self.tr("Greeting"))
         self.greeting_label.setFont(font)
-        layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.greeting_edit = CustomTextEdit()
         self.greeting_edit.setPlaceholderText(self.tr("e.g. Hello, I am Albert. Ask me anything about my scientific contributions."))
-        self.greeting_edit.setStyleSheet(lineedit_style())
         self.greeting_edit.textChanged.connect(lambda: self.textChanged(self.greeting_edit, 4096))
         self.greeting_edit.setFixedHeight(48)
         self.greeting_edit.horizontalScrollBar().setVisible(False)
         self.greeting_edit.verticalScrollBar().setVisible(False)
-        layout.addWidget(self.greeting_edit)
+        scroll_layout.addWidget(self.greeting_edit)
 
         dg_layout = QHBoxLayout()
         dg_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.dg_checkbox = QCheckBox()
+        self.dg_checkbox = CheckBox()
         dg_layout.addWidget(self.dg_checkbox)
         self.dg_label = QLabel(self.tr('Allow dynamic greetings'))
         dg_layout.addWidget(self.dg_label)
-        layout.addLayout(dg_layout)
+        scroll_layout.addLayout(dg_layout)
 
         self.definition_label = QLabel(self.tr("Definition"))
         self.definition_label.setFont(font)
-        layout.addWidget(self.definition_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.definition_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.definition_edit = CustomTextEdit()
         self.definition_edit.setPlaceholderText(self.tr("What's your Character's backstory? How do you want it to talk or act?"))
-        self.definition_edit.setStyleSheet(lineedit_style())
         self.definition_edit.textChanged.connect(lambda: self.textChanged(self.definition_edit, 32000))
         self.definition_edit.setFixedHeight(48)
         self.definition_edit.horizontalScrollBar().setVisible(False)
         self.definition_edit.verticalScrollBar().setVisible(False)
-        layout.addWidget(self.definition_edit)
+        scroll_layout.addWidget(self.definition_edit)
 
         def_layout = QHBoxLayout()
         def_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.add_user_message_button = QPushButton(self.tr("User message"))
+        self.add_user_message_button = PushButton(self.tr("User message"))
         self.add_user_message_button.clicked.connect(lambda: self.addText('\n{{user}}: '))
-        self.add_user_message_button.setStyleSheet(pushbutton_style())
         def_layout.addWidget(self.add_user_message_button)
-        self.add_char_message_button = QPushButton(self.tr("Character message"))
+        self.add_char_message_button = PushButton(self.tr("Character message"))
         self.add_char_message_button.clicked.connect(lambda: self.addText('\n{{char}}: '))
-        self.add_char_message_button.setStyleSheet(pushbutton_style())
         def_layout.addWidget(self.add_char_message_button)
-        self.add_end_button = QPushButton(self.tr("End of dialog"))
+        self.add_end_button = PushButton(self.tr("End of dialog"))
         self.add_end_button.clicked.connect(lambda: self.addText('\nEND_OF_DIALOG'))
-        self.add_end_button.setStyleSheet(pushbutton_style())
         def_layout.addWidget(self.add_end_button)
-        layout.addLayout(def_layout)
+        scroll_layout.addLayout(def_layout)
 
         kcdp_layout = QHBoxLayout()
         kcdp_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.kcdp_checkbox = QCheckBox()
+        self.kcdp_checkbox = CheckBox()
         self.kcdp_checkbox.setChecked(True)
         kcdp_layout.addWidget(self.kcdp_checkbox)
         self.kcdp_label = QLabel(self.tr('Keep Character definition private'))
         kcdp_layout.addWidget(self.kcdp_label)
-        layout.addLayout(kcdp_layout)
+        scroll_layout.addLayout(kcdp_layout)
 
         self.visibility_label = QLabel(self.tr("Visibility"))
         self.visibility_label.setFont(font)
-        layout.addWidget(self.visibility_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.visibility_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.visible_combobox = QComboBox()
-        self.visible_combobox.setStyleSheet(combobox_style())
+        self.visible_combobox = ComboBox()
         self.visible_combobox.addItems([self.tr("Public"), self.tr("Unlisted"), self.tr("Private")])
-        layout.addWidget(self.visible_combobox, alignment=Qt.AlignmentFlag.AlignLeft)
+        scroll_layout.addWidget(self.visible_combobox, alignment=Qt.AlignmentFlag.AlignLeft)
 
         final_buttons_layout = QHBoxLayout()
         final_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.create_button = QPushButton(self.tr("Create Character"))
-        self.create_button.setStyleSheet(pushbutton_style())
+        self.create_button = PushButton(self.tr("Create Character"))
         self.create_button.clicked.connect(self.createCharacter)
         final_buttons_layout.addWidget(self.create_button, alignment=Qt.AlignmentFlag.AlignRight)
 
-        self.save_button = QPushButton(self.tr("Save Changes"))
-        self.save_button.setStyleSheet(pushbutton_style())
+        self.save_button = PushButton(self.tr("Save Changes"))
         self.save_button.clicked.connect(self.saveCharacter)
         final_buttons_layout.addWidget(self.save_button, alignment=Qt.AlignmentFlag.AlignRight)
 
-        self.save_chat_button = QPushButton(self.tr("Save and Chat"))
-        self.save_chat_button.setStyleSheet(pushbutton_style())
+        self.save_chat_button = PushButton(self.tr("Save and Chat"))
         self.save_chat_button.clicked.connect(self.saveCharacterChat)
         final_buttons_layout.addWidget(self.save_chat_button, alignment=Qt.AlignmentFlag.AlignRight)
         self.create_button.setVisible(False)
         self.save_button.setVisible(False)
         self.save_chat_button.setVisible(False)
-        layout.addLayout(final_buttons_layout)
+        scroll_layout.addLayout(final_buttons_layout)
 
-        main_layout.addWidget(scroll_area, alignment=Qt.AlignmentFlag.AlignHCenter)
+        main_layout.addWidget(scroll_page, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.setLayout(main_layout)
 

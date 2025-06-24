@@ -1,14 +1,12 @@
 import base64
-from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import (
-    QHBoxLayout, QFileDialog,
-    QVBoxLayout, QLabel,
-    QPushButton, QLineEdit,
-    QMenu, QCheckBox,
-    QFrame)
 
-from modules.QCustom import CustomTextEdit
-from modules.styles import *
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QHBoxLayout, QFileDialog, QVBoxLayout, QLabel, QFrame
+
+from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, CheckBox, Menu, CardFrame
+from modules.style.Icons import Svg
+from modules.style.Utils import color_avatar
 from modules.QThreads import ImageLoaderThread
 
 class EditOverlay(QFrame):
@@ -21,7 +19,7 @@ class EditOverlay(QFrame):
         self.list_card = list_card
         self.new = False
         self.temp_link = ""
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         if data is None:
             self.data = {}
@@ -37,10 +35,9 @@ class EditOverlay(QFrame):
         fh_layout = QHBoxLayout()
         layout.addLayout(fh_layout)
 
-        self.display_name_edit = QLineEdit()
+        self.display_name_edit = LineEdit()
         self.display_name_edit.setPlaceholderText(self.tr("Display Name"))
         self.display_name_edit.setText(self.data.get('participant__name'))
-        self.display_name_edit.setStyleSheet(lineedit_style())
         self.display_name_edit.textChanged.connect(lambda text: self.data.update({'name': text}))
         self.display_name_edit.setMaxLength(20)
         fh_layout.addWidget(self.display_name_edit)
@@ -71,7 +68,6 @@ class EditOverlay(QFrame):
         self.background_edit = CustomTextEdit()
         self.background_edit.setPlaceholderText(self.tr("Background"))
         self.background_edit.setText(self.data.get('definition'))
-        self.background_edit.setStyleSheet(lineedit_style())
         self.background_edit.textChanged.connect(self.textChanged)
         self.background_edit.setFixedHeight(32)
         self.background_edit.horizontalScrollBar().setVisible(False)
@@ -82,7 +78,7 @@ class EditOverlay(QFrame):
         make_default_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addLayout(make_default_layout)
 
-        self.make_default_checkbox = QCheckBox()
+        self.make_default_checkbox = CheckBox()
         if self.ex_id == self.mw.user_settings.get('default_persona_id'):
             self.make_default_checkbox.setChecked(True)
         make_default_layout.addWidget(self.make_default_checkbox, 0)
@@ -93,13 +89,11 @@ class EditOverlay(QFrame):
         layout.addLayout(button_layout)
         button_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.remove_button = QPushButton(self.tr("Remove"))
-        self.remove_button.setStyleSheet(button_style())
+        self.remove_button = PushButton(self.tr("Remove"))
         self.remove_button.clicked.connect(lambda _: self.removePerson())
         button_layout.addWidget(self.remove_button)
 
-        self.save_button = QPushButton(self.tr("Save"))
-        self.save_button.setStyleSheet(button_style())
+        self.save_button = PushButton(self.tr("Save"))
         self.save_button.clicked.connect(self.saveSettings)
         button_layout.addWidget(self.save_button)
 
@@ -194,7 +188,7 @@ class EditOverlay(QFrame):
             else:
                 color_avatar(self.list_card.display_avatar, 60, 60, self.mw.name)
 
-class MainCard(QFrame):
+class MainCard(CardFrame):
     def __init__(self, main_window, data=None, character_id=None):
         super().__init__()
         self.mw = main_window
@@ -202,7 +196,7 @@ class MainCard(QFrame):
         self.char_id = character_id
         self.new = False
         self.active = False
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
         if self.data is None:
             self.data = {}
             self.new = True
@@ -213,7 +207,6 @@ class MainCard(QFrame):
 
         self.data['name'] = self.data.get('participant__name')
         self.initUI()
-        self.setStyleSheet(card_style())
 
     def initUI(self):
         layout = QHBoxLayout()
@@ -268,8 +261,7 @@ class MainCard(QFrame):
         self.background_label.setStyleSheet("color: #a2a2ac; font-size: 12px;")
         fh_layout.addWidget(self.background_label, alignment=Qt.AlignmentFlag.AlignTop)
 
-        self.edit_button = QPushButton(self.tr("Edit"))
-        self.edit_button.setStyleSheet(pushbutton_style())
+        self.edit_button = PushButton(self.tr("Edit"))
         self.edit_button.clicked.connect(self.showOverlay)
         layout.addWidget(self.edit_button, alignment=Qt.AlignmentFlag.AlignRight)
 
@@ -307,10 +299,14 @@ class MainCard(QFrame):
         self.mw.hideOverlay()
         self.mw.showOverlay(EditOverlay(self.mw, self.data, self))
 
+    def mousePressEvent(self, a0):
+        super().mousePressEvent(a0)
+        if a0.button() == Qt.MouseButton.LeftButton:
+            self.showOverlay()
+
     def contextMenuEvent(self, a0):
         super().contextMenuEvent(a0)
-        context_menu = QMenu(self)
-        context_menu.setStyleSheet(menu_style())
+        context_menu = Menu(self)
 
         edit_action = QAction(self.tr("Edit"))
         edit_action.triggered.connect(self.showOverlay)

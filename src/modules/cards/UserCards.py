@@ -1,16 +1,12 @@
 import base64
 
-from PyQt6.QtWidgets import (
-    QApplication,
-    QWidget, QHBoxLayout,
-    QVBoxLayout, QLabel,
-    QPushButton, QFileDialog,
-    QScrollArea, QFrame,
-    QStackedWidget, QLineEdit)
+from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
+    QPushButton, QFileDialog, QFrame, QStackedWidget)
 
-from modules.QCustom import CustomTextEdit
+from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, TabButton, VerticalScrollPage, CardFrame
 from modules.QThreads import *
-from modules.styles import *
+from modules.style.Icons import Svg
+from modules.style.Utils import format_number, color_avatar
 from modules.cards import VoiceCards, PersonaCards, CharacterCards
 
 class UserProfile(QWidget):
@@ -71,6 +67,7 @@ class UserProfile(QWidget):
 
         self.followers_label = QLabel(self.tr("0 followers"))
         self.followers_label.mousePressEvent = lambda event: self.showFollowingFollowers("following")
+        self.followers_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.followers_label.setStyleSheet("color: #a2a2ac;")
         sub_layout.addWidget(self.followers_label)
 
@@ -80,6 +77,7 @@ class UserProfile(QWidget):
 
         self.following_label = QLabel(self.tr("0 following"))
         self.following_label.mousePressEvent = lambda event: self.showFollowingFollowers("followers")
+        self.following_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.following_label.setStyleSheet("color: #a2a2ac;")
         sub_layout.addWidget(self.following_label)
 
@@ -97,13 +95,11 @@ class UserProfile(QWidget):
         but_frame.setLayout(but_layout)
         layout.addWidget(but_frame)
 
-        self.follow_button = QPushButton(self.tr("Follow"))
-        self.follow_button.setStyleSheet(button_style())
+        self.follow_button = PushButton(self.tr("Follow"))
         self.follow_button.setVisible(False)
         but_layout.addWidget(self.follow_button)
 
-        self.share_button = QPushButton()
-        self.share_button.setStyleSheet(icon_button_style())
+        self.share_button = PushButton()
         self.share_button.setIcon(self.svg_icons.share())
         self.share_button.clicked.connect(self.share)
         but_layout.addWidget(self.share_button)
@@ -116,35 +112,31 @@ class UserProfile(QWidget):
         buttons_frame.setLayout(buttons_layout)
         content_layout.addWidget(buttons_frame)
 
-        self.characters_button = QPushButton(self.tr("Characters"))
+        self.characters_button = TabButton(self.tr("Characters"))
         self.characters_button.setCheckable(True)
         self.characters_button.setChecked(True)
-        self.characters_button.setStyleSheet(tab_button_style())
         self.characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.character_list))
         self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
 
-        self.voices_button = QPushButton(self.tr("Voices"))
+        self.voices_button = TabButton(self.tr("Voices"))
         self.voices_button.setCheckable(True)
-        self.voices_button.setStyleSheet(tab_button_style())
         self.voices_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.voice_list))
         self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
 
-        self.up_characters_button = QPushButton(self.tr("Liked"))
+        self.up_characters_button = TabButton(self.tr("Liked"))
         self.up_characters_button.setCheckable(True)
-        self.up_characters_button.setStyleSheet(tab_button_style())
         self.up_characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.upvoted_characters_list))
         self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
         self.up_characters_button.setVisible(False)
 
-        self.personas_button = QPushButton(self.tr("Personas"))
+        self.personas_button = TabButton(self.tr("Personas"))
         self.personas_button.setCheckable(True)
-        self.personas_button.setStyleSheet(tab_button_style())
         self.personas_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.personas_list))
         self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
@@ -234,8 +226,7 @@ class UserProfile(QWidget):
                 card.setFixedHeight(87)
                 self.personas_layout.addWidget(card)
 
-        button = QPushButton(self.tr("New"))
-        button.setStyleSheet(button_style())
+        button = PushButton(self.tr("New"))
         button.clicked.connect(lambda _: self.mw.showOverlay(PersonaCards.EditOverlay(self.mw)))
         self.personas_layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
@@ -306,20 +297,12 @@ class UserProfile(QWidget):
         f_page_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         f_page.setLayout(f_page_layout)
 
-        users_scroll_area = QScrollArea()
-        users_scroll_area.setWidgetResizable(True)
-        users_scroll_area.setStyleSheet(scroll_style())
+        scroll_page = VerticalScrollPage()
+        scroll_page.viewport.setStyleSheet("background-color: transparent; border: none;")
+        scroll_layout = scroll_page.layout
 
-        users_container = QWidget()
-        users_container.setStyleSheet("background-color: transparent; border: none;")
-        users_layout = QVBoxLayout()
-        users_layout.setContentsMargins(10,10,10,10)
-        users_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        users_container.setLayout(users_layout)
-
-        users_scroll_area.setWidget(users_container)
-        f_page_layout.addWidget(users_scroll_area)
-        return f_page, users_layout
+        f_page_layout.addWidget(scroll_page)
+        return f_page, scroll_layout
 
     def unfollow(self):
         def unfollow(self, data):
@@ -376,8 +359,7 @@ class UserProfile(QWidget):
 
         def createCard(data):
             username = data.get("username")
-            u_widget = QFrame()
-            u_widget.setStyleSheet(card_style())
+            u_widget = CardFrame()
             u_widget.mousePressEvent = lambda event: openUser(username)
             u_widget.setCursor(Qt.CursorShape.PointingHandCursor)
             u_layout = QHBoxLayout(u_widget)
@@ -408,8 +390,7 @@ class UserProfile(QWidget):
                 bio_label.setStyleSheet("color: #a2a2ac;")
                 info_layout.addWidget(bio_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
-            sub_button = QPushButton()
-            sub_button.setStyleSheet(button_style())
+            sub_button = PushButton()
             if not self.is_me:
                 u_layout.addWidget(sub_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 if username in self.me_following:
@@ -430,16 +411,14 @@ class UserProfile(QWidget):
         buttons_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         buttons_frame.setLayout(buttons_layout)
 
-        followers_button = QPushButton(self.tr("Followers"))
+        followers_button = TabButton(self.tr("Followers"))
         followers_button.setCheckable(True)
-        followers_button.setStyleSheet(tab_button_style())
         followers_button.clicked.connect(lambda: pages_widget.setCurrentWidget(followers_page))
         followers_button.clicked.connect(lambda: following_button.setChecked(False))
         buttons_layout.addWidget(followers_button)
 
-        following_button = QPushButton(self.tr("Following"))
+        following_button = TabButton(self.tr("Following"))
         following_button.setCheckable(True)
-        following_button.setStyleSheet(tab_button_style())
         following_button.clicked.connect(lambda: pages_widget.setCurrentWidget(following_page))
         following_button.clicked.connect(lambda: followers_button.setChecked(False))
         buttons_layout.addWidget(following_button)
@@ -489,7 +468,7 @@ class EditOverlay(QFrame):
         super().__init__()
         self.setFixedSize(500, 200)
         self.mw = main_window
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         self.data = {
             "avatar_rel_path": self.mw.me.get('account',{}).get('avatar_file_name'),
@@ -510,6 +489,7 @@ class EditOverlay(QFrame):
 
         self.display_avatar = QLabel()
         self.display_avatar.mousePressEvent = lambda _: self.selectAvatar()
+        self.display_avatar.setCursor(Qt.CursorShape.PointingHandCursor)
         self.display_avatar.setFixedSize(70, 70)
         if self.data.get("avatar_file_name"):
             load_avatar_thread = ImageLoaderThread(
@@ -534,24 +514,21 @@ class EditOverlay(QFrame):
         names_layout = QVBoxLayout()
         fh_layout.addLayout(names_layout)
 
-        self.display_name_edit = QLineEdit()
+        self.display_name_edit = LineEdit()
         self.display_name_edit.setPlaceholderText(self.tr("Display Name"))
         self.display_name_edit.setText(self.data['name'])
-        self.display_name_edit.setStyleSheet(lineedit_style())
         self.display_name_edit.setMaxLength(20)
         names_layout.addWidget(self.display_name_edit)
 
-        self.username_edit = QLineEdit()
+        self.username_edit = LineEdit()
         self.username_edit.setPlaceholderText(self.tr("Username"))
         self.username_edit.setText(self.data['username'])
-        self.username_edit.setStyleSheet(lineedit_style())
         self.username_edit.setMaxLength(20)
         names_layout.addWidget(self.username_edit)
 
         self.bio_edit = CustomTextEdit()
         self.bio_edit.setPlaceholderText(self.tr("Background"))
         self.bio_edit.setText(self.data.get('bio'))
-        self.bio_edit.setStyleSheet(lineedit_style())
         self.bio_edit.textChanged.connect(lambda: self.textChanged(self.bio_edit, 500))
         self.bio_edit.setFixedHeight(32)
         self.bio_edit.horizontalScrollBar().setVisible(False)
@@ -562,13 +539,11 @@ class EditOverlay(QFrame):
         layout.addLayout(button_layout)
         button_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.cancel_button = QPushButton(self.tr("Cancel"))
-        self.cancel_button.setStyleSheet(button_style())
+        self.cancel_button = PushButton(self.tr("Cancel"))
         self.cancel_button.clicked.connect(self.mw.hideOverlay)
         button_layout.addWidget(self.cancel_button)
 
-        self.save_button = QPushButton(self.tr("Save"))
-        self.save_button.setStyleSheet(button_style())
+        self.save_button = PushButton(self.tr("Save"))
         self.save_button.clicked.connect(self.saveSettings)
         button_layout.addWidget(self.save_button)
 

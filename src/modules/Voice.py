@@ -1,16 +1,12 @@
 import keyboard
-from PyQt6.QtWidgets import (
-    QWidget, QHBoxLayout,
-    QVBoxLayout, QLabel,
-    QPushButton, QLineEdit,
-    QScrollArea, QFrame,
-    QGraphicsDropShadowEffect,
-    QSizePolicy)
-from PyQt6.QtCore import (
-    QPropertyAnimation, QEasingCurve,
-    QParallelAnimationGroup, QTimer, QPoint)
+from PyQt6.QtGui import QColor, QIcon
+from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
+    QFrame, QGraphicsDropShadowEffect, QSizePolicy)
+from PyQt6.QtCore import (QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QTimer, QPoint, Qt)
 
-from modules.styles import *
+from modules.style.Elements import PushButton, LineEdit, VerticalScrollPage, CardFrame
+from modules.style.Icons import Svg
+from modules.style.Utils import format_text, color_avatar
 from modules.QThreads import (
     PlayerThread, FileLoaderThread,
     ImageLoaderThread, VoiceModeThread)
@@ -25,7 +21,7 @@ class VoiceSearch(QWidget):
         self.current_character_id = current_character_id
         self.setMinimumHeight(600)
         self.setFixedWidth(600)
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         self.initUI()
 
@@ -40,32 +36,17 @@ class VoiceSearch(QWidget):
         search_layout = QVBoxLayout()
         layout.addLayout(search_layout)
 
-        search_widget = QWidget()
-        search_widget.setStyleSheet(lineedit_style2())
-        search_input_layout = QHBoxLayout()
-        search_widget.setLayout(search_input_layout)
-        search_label = QLabel()
-        search_label.setPixmap(self.svg_icons.search())
-        search_label.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 16px;")
-        search_input_layout.addWidget(search_label)
-        self.search_input = QLineEdit()
+        self.search_input = LineEdit()
+        self.search_input.setIcon(QIcon(self.svg_icons.search()))
         self.search_input.returnPressed.connect(self.showSearchResults)
         self.search_input.setPlaceholderText('Search')
-        # self.search_input.setStyleSheet(lineedit_style())
-        search_input_layout.addWidget(self.search_input)
-        search_layout.addWidget(search_widget)
+        search_layout.addWidget(self.search_input)
 
-        self.search_scroll_area = QScrollArea()
-        self.search_scroll_area.setWidgetResizable(True)
-        self.search_scroll_area.setStyleSheet(scroll_style())
-
-        self.search_cards_viewport = QWidget()
-        self.search_cards_viewport.setStyleSheet("background-color: transparent; border: none;")
-        self.search_cards_layout = QVBoxLayout()
-        self.search_cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        self.search_cards_viewport.setLayout(self.search_cards_layout)
-        self.search_scroll_area.setWidget(self.search_cards_viewport)
-        search_layout.addWidget(self.search_scroll_area)
+        self.search_scroll_page = VerticalScrollPage()
+        self.search_scroll_viewport = self.search_scroll_page.viewport
+        self.search_scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
+        self.search_scroll_layout = self.search_scroll_page.layout
+        search_layout.addWidget(self.search_scroll_page)
 
         self.setLayout(layout)
 
@@ -75,8 +56,7 @@ class VoiceSearch(QWidget):
         self.mw.showOverlay(voiceCard)
 
     def createCard(self, voice_data):
-        card = QFrame()
-        card.setStyleSheet(card_style())
+        card = CardFrame()
         card.mousePressEvent = lambda event: self.openVoiceCard(voice_data)
         card.setCursor(Qt.CursorShape.PointingHandCursor)
 
@@ -124,14 +104,15 @@ class VoiceSearch(QWidget):
 
         if voice_data.get('creatorInfo', {}).get('username'):
             author_label = QLabel(self.tr("Author: @") + voice_data.get('creatorInfo', {}).get('username'))
+            author_label.setStyleSheet("color: #a2a2ac;")
             font = author_label.font()
-            font.setPointSize(9)
+            font.setPointSize(8)
             author_label.setFont(font)
             text_layout.addWidget(author_label)
 
         selected_label = QLabel()
         selected_label.setPixmap(self.svg_icons.selected())
-        selected_label.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 16p")
+        selected_label.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 16px")
         if self.current_voice_id == voice_data.get('id'): card_layout.addWidget(selected_label)
 
         card.setLayout(card_layout)
@@ -143,19 +124,19 @@ class VoiceSearch(QWidget):
             for voice in response:
                 card = self.createCard(voice)
                 card.setFixedHeight(60)
-                self.search_cards_layout.addWidget(card)
+                self.search_scroll_layout.addWidget(card)
         else:
             no_results_label = QLabel(self.tr("Voices not found"))
-            self.search_cards_layout.addWidget(no_results_label,0,Qt.AlignmentFlag.AlignVCenter)
+            self.search_scroll_layout.addWidget(no_results_label, 0, Qt.AlignmentFlag.AlignVCenter)
 
     def showSearchResults(self):
         search_query = self.search_input.text().strip()
         if not search_query:
             return
 
-        if self.search_cards_layout.layout() is not None:
-            for i in reversed(range(self.search_cards_layout.layout().count())):
-                item = self.search_cards_layout.layout().itemAt(i)
+        if self.search_scroll_layout.layout() is not None:
+            for i in reversed(range(self.search_scroll_layout.layout().count())):
+                item = self.search_scroll_layout.layout().itemAt(i)
                 if item is not None and item.widget() is not None:
                     item.widget().setParent(None)
 
@@ -173,7 +154,7 @@ class VoiceMode(QWidget):
         self.muted = False
         self.mute_keybind = self.mw.settings.value('microphone_mute_key_bind', 'Ctrl+M')
         self.char_name = character_name
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
@@ -214,15 +195,13 @@ class VoiceMode(QWidget):
         self.user_buttons_frame.setLayout(button_layout)
         self.layout.addWidget(self.user_buttons_frame, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
 
-        self.mute_button = QPushButton()
+        self.mute_button = PushButton()
         self.mute_button.setIcon(self.svg_icons.mute())
-        self.mute_button.setStyleSheet(icon_button_style())
         self.mute_button.clicked.connect(self.toggleMute)
         button_layout.addWidget(self.mute_button)
 
-        self.stop_button = QPushButton()
+        self.stop_button = PushButton()
         self.stop_button.setIcon(self.svg_icons.end_call())
-        self.stop_button.setStyleSheet(icon_button_style())
         self.stop_button.clicked.connect(self.stopThread)
         button_layout.addWidget(self.stop_button)
 

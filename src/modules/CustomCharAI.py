@@ -21,16 +21,18 @@ class Async:
         else:
             url = f"https://plus.character.ai/{endpoint}"
 
-        while True:
+        if method.lower() == "post":
+            response = await self.session.request(method, url, headers=headers, json=data, timeout=100)
+        else:
             response = await self.session.request(method, url, headers=headers, data=data, timeout=100)
-            logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async request: {url}")
-            if response.status_code == 200:
-                return response.json() if not text else json.loads(response.text)
-            elif response.status_code == 400:
-                print(response.json() if not text else json.loads(response.text))
-            else:
-                print(response.json() if not text else json.loads(response.text))
-                raise Exception(f"Failed to get data, status code: {response.status_code}")
+        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async request: {url}")
+        if response.status_code == 200:
+            return response.json() if not text else json.loads(response.text)
+        elif response.status_code == 400:
+            print(response.json() if not text else json.loads(response.text))
+            return response.json() if not text else json.loads(response.text)
+        else:
+            raise Exception(f"Failed to get data, status code: {response.status_code}")
 
     async def trpc_request(self, endpoint, data = {}, method = "get", text = False):
         headers = {
@@ -42,18 +44,21 @@ class Async:
 
         url = f"https://character.ai/api/trpc/{endpoint}"
 
-        while True:
+        if method.lower() == "post":
+            response = await self.session.request(method, url, headers=headers, json=data, timeout=100)
+        else:
             response = await self.session.request(method, url, headers=headers, data=data, timeout=100)
-            logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async trpc_request: {url}")
-            if response.status_code == 200 or response.status_code == 207:
-                return response.json() if not text else json.loads(response.text)
-            elif response.status_code == 400:
-                pass
-            else:
-                raise Exception(f"Failed to get data, status code: {response.status_code}")
+        logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async trpc_request: {url}")
+        if response.status_code == 200 or response.status_code == 207:
+            return response.json() if not text else json.loads(response.text)
+        else:
+            raise Exception(f"Failed to get data, status code: {response.status_code}")
 
-    async def custom_request(self, url, data = {}, method = "get", text=False,headers={}):
-        response = await self.session.request(method, url, headers=headers, json=data, timeout=100)
+    async def custom_request(self, url, data = {}, method = "get", text=False, headers={}):
+        if method.lower() == "post":
+            response = await self.session.request(method, url, headers=headers, json=data, timeout=100)
+        else:
+            response = await self.session.request(method, url, headers=headers, data=data, timeout=100)
         logging.debug(f"CustomCharAI.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async custom_request: {url}")
         if response.status_code == 200:
             return response.json() if not text else json.loads(response.text)
@@ -179,8 +184,8 @@ class Async:
         data = {
             "character_external_id": character_external_id
         }
-        response_2 = await self.request(f"chats/recent/{character_external_id}/hide", "put", neo=True)
-        response = await self.request(f"chat/history/hide/", data, "post")
+        response_2 = await self.request(f"chats/recent/{character_external_id}/hide", method="put", neo=True)
+        response = await self.request(f"chat/history/hide/", data, "post", text=True)
         return response
 
     async def get_messages(self, chat_id, next_token=None):
@@ -265,12 +270,12 @@ class Async:
         url = "multimodal/api/v1/voices/search"
         if character_name: url += f"?characterName={character_name}"
         if query: url += f"?query={query}"
-        response = await self.request(url, "get", neo=True)
+        response = await self.request(url, method="get", neo=True)
         return response.get('voices', [])
 
     async def voices_search_username(self, username: str | None = ""):
         url = f"multimodal/api/v1/voices/search?creatorInfo.username={username}"
-        response = await self.request(url, "get", neo=True)
+        response = await self.request(url, method="get", neo=True)
         return response.get('voices', [])
 
     async def character_search(self, query):

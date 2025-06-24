@@ -1,5 +1,7 @@
 import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.signal, inspect
-import requests, websockets, speech_recognition
+
+import curl_cffi.curl
+import requests, speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRectF, QLocale
 from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
 from gpytranslate import Translator
@@ -407,7 +409,7 @@ class ChatThread(QThread):
                                 return
                             self.message_signal.emit(response)
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
-                except websockets.WebSocketException:
+                except curl_cffi.curl.CurlError:
                     self.connect = await self.ccaa.connect()
                     logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
 
@@ -474,7 +476,7 @@ class ChatThread(QThread):
                             message_bubble_added = True
                             turn_id = response['turn']['turn_key']['turn_id']
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
-                except websockets.WebSocketException:
+                except curl_cffi.curl.CurlError:
                     self.connect = await self.ccaa.connect()
                     logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
@@ -507,10 +509,14 @@ class ChatThread(QThread):
         if not self.me and self.ccaa:
             self.me = await self.ccaa.get_me()
         if self.connect:
-            response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type)
-            if chat_id: del self.chat_histories[chat_id]
-            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
-            self.new_chat_created_signal.emit(response)
+            try:
+                response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type)
+                if chat_id: del self.chat_histories[chat_id]
+                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
+                self.new_chat_created_signal.emit(response)
+            except curl_cffi.curl.CurlError:
+                self.connect = await self.ccaa.connect()
+                logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
     async def get_chat(self, char):
@@ -755,7 +761,7 @@ class VoiceModeThread(QThread):
                         if not response['turn']['author']['author_id'].isdigit():
                                 if response.get('turn', {}).get('candidates', [])[0].get('is_final'):
                                     return response['turn']
-                except websockets.WebSocketException:
+                except curl_cffi.curl.CurlError:
                     self.connected_signal.emit(False)
                     self.connect = await self.ccaa.connect()
                     self.connected_signal.emit(True)

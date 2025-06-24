@@ -1,12 +1,13 @@
 import sys, logging
-import webbrowser
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QLineEdit, QHBoxLayout, QPushButton
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, QHBoxLayout
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineUrlRequestInterceptor, QWebEngineNewWindowRequest
 from PyQt6.QtCore import QUrl, QDateTime, pyqtSignal, Qt
 from PyQt6.QtNetwork import QNetworkCookie
-from modules.styles import icon_button_style, SvgIcons, lineedit_style
+
+from modules.style.Elements import PushButton, LineEdit
+from modules.style.Icons import Svg
 
 class RequestInterceptor(QWebEngineUrlRequestInterceptor):
     authorization_signal = pyqtSignal(str)
@@ -33,7 +34,7 @@ class GetCookies(QWidget):
         self.browser = QWebEngineView()
         self.profile = QWebEngineProfile.defaultProfile()
         self.interceptor = RequestInterceptor()
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         self.browser.page().newWindowRequested.connect(self.on_new_window_requested)
 
@@ -46,12 +47,10 @@ class GetCookies(QWidget):
         self.link_label = QLabel(self.tr("You can also insert a link from the email"))
 
         link_layout = QHBoxLayout()
-        self.link_edit = QLineEdit()
-        self.link_edit.setStyleSheet(lineedit_style())
+        self.link_edit = LineEdit()
         self.link_edit.keyPress = lambda: self.open_link()
-        self.link_button = QPushButton()
+        self.link_button = PushButton()
         self.link_button.setIcon(self.svg_icons.send())
-        self.link_button.setStyleSheet(icon_button_style())
         self.link_button.clicked.connect(self.open_link)
         link_layout.addWidget(self.link_edit)
         link_layout.addWidget(self.link_button)

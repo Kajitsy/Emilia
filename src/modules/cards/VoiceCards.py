@@ -1,13 +1,10 @@
 import sounddevice
-from PyQt6.QtWidgets import (
-    QApplication,
-    QWidget, QHBoxLayout,
-    QVBoxLayout, QLabel,
-    QPushButton,
-    QScrollArea, QFrame)
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QFrame)
 
 from modules.cards import CharacterCards
-from modules.styles import *
+from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame
+from modules.style.Icons import Svg
 from modules.QThreads import PlayerThread, FileLoaderThread
 
 class VoiceCard(QFrame):
@@ -20,7 +17,7 @@ class VoiceCard(QFrame):
         self.character_id = character_id
         self.current_voice_id = current_voice_id
         self.search = search
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         self.iss = self.data.get('id') == self.current_voice_id
 
@@ -36,7 +33,7 @@ class VoiceCard(QFrame):
         voice_frame.setLayout(voice_layout)
 
         play_button = QPushButton()
-        play_button.setIcon(SvgIcons().play())
+        play_button.setIcon(Svg().play())
         play_button.setFixedWidth(40)
         play_button.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 32px;")
         play_button.clicked.connect(lambda event: play(self.data.get('previewAudioURI')))
@@ -88,18 +85,15 @@ class VoiceCard(QFrame):
         button_frame.setLayout(button_layout)
         voice_layout.addWidget(button_frame, 0, Qt.AlignmentFlag.AlignBottom)
 
-        sha_voice_button = QPushButton()
+        sha_voice_button = PushButton()
         sha_voice_button.setIcon(self.svg_icons.share())
-        sha_voice_button.setStyleSheet(button_style())
         sha_voice_button.clicked.connect(self.voiceOverrideShare)
         button_layout.addWidget(sha_voice_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        sel_voice_button = QPushButton(self.tr("Select"))
-        sel_voice_button.setStyleSheet(button_style())
+        sel_voice_button = PushButton(self.tr("Select"))
         sel_voice_button.clicked.connect(self.voiceOverrideSelect)
 
-        rem_voice_button = QPushButton(self.tr("Remove"))
-        rem_voice_button.setStyleSheet(button_style())
+        rem_voice_button = PushButton(self.tr("Remove"))
         rem_voice_button.clicked.connect(self.voiceOverrideRemove)
 
         if self.character_id:
@@ -110,25 +104,17 @@ class VoiceCard(QFrame):
 
         recent_label = QLabel("<b>" + self.tr("Try with latest chat") + "</b>")
 
-        character_scroll_area = QScrollArea()
-        character_scroll_area.setWidgetResizable(True)
-        character_scroll_area.setStyleSheet(scroll_style())
+        character_scroll_page = VerticalScrollPage()
+        character_scroll_page.viewport.setStyleSheet("background-color: transparent; border: none;")
+        self.scroll_character_layout = character_scroll_page.layout
 
-        character_container = QWidget()
-        character_container.setStyleSheet("background-color: transparent; border: none;")
-        self.character_layout = QVBoxLayout()
-        self.character_layout.setContentsMargins(0, 0, 0, 0)
-        self.character_layout.setSpacing(0)
-        character_container.setLayout(self.character_layout)
-
-        character_scroll_area.setWidget(character_container)
         if not self.search:
             for chat in self.mw.recent_chats:
                 card = self.createCard(chat.get('name'), chat.get('avatar_file_name'), chat.get('character_id'),
                                        chat.get('id'))
-                self.character_layout.addWidget(card)
+                self.scroll_character_layout.addWidget(card)
             layout.addWidget(recent_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-            layout.addWidget(character_scroll_area)
+            layout.addWidget(character_scroll_page)
             self.setFixedSize(500, 750)
         character_page.setLayout(character_page_layout)
 
@@ -175,19 +161,20 @@ class VoiceCard(QFrame):
         super().closeEvent(a0)
         sounddevice.stop()
 
-class HorizontalMiniVoiceCard(QFrame):
+class HorizontalMiniVoiceCard(CardFrame):
     def __init__(self, main_window, data):
         super().__init__()
         self.setFixedHeight(60)
-        self.setStyleSheet(card_style())
-        self.mousePressEvent = lambda event: self.openVoiceCard()
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-
         self.main_window = main_window
         self.data = data
-        self.svg_icons = SvgIcons()
+        self.svg_icons = Svg()
 
         self.initUI()
+
+    def mousePressEvent(self, a0):
+        super().mousePressEvent(a0)
+        if a0.button() == Qt.MouseButton.RightButton:
+            self.openVoiceCard()
 
     def openVoiceCard(self):
         vcard = VoiceCard(self.main_window, self.data, search=False)
