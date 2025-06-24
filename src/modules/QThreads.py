@@ -430,8 +430,8 @@ class ChatThread(QThread):
             await self.eec.connect()
             await self.eec.UseEmote("Thinks")
             used_emotes.append("Thinks")
-        while True:
-            if self.connect:
+        if self.connect:
+             while True:
                 try:
                     async for response in self.connect.generate_turn_candidate(char, chat_id, turn_id, user_name):
                         if vtube_studio and "Says" not in used_emotes:
@@ -509,14 +509,16 @@ class ChatThread(QThread):
         if not self.me and self.ccaa:
             self.me = await self.ccaa.get_me()
         if self.connect:
-            try:
-                response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type)
-                if chat_id: del self.chat_histories[chat_id]
-                logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
-                self.new_chat_created_signal.emit(response)
-            except curl_cffi.curl.CurlError:
-                self.connect = await self.ccaa.connect()
-                logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
+            while True:
+                try:
+                    response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type)
+                    if chat_id: del self.chat_histories[chat_id]
+                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
+                    self.new_chat_created_signal.emit(response)
+                    break
+                except curl_cffi.curl.CurlError:
+                    self.connect = await self.ccaa.connect()
+                    logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
     async def get_chat(self, char):

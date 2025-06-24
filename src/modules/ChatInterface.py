@@ -266,11 +266,12 @@ class ChatInterface(QWidget):
             if hasattr(widget, 'is_user') and widget.is_user:
                 message_stacked = widget
                 break
-        message = message_stacked.currentWidget()
-        message.turn_id = response['turn']['turn_key']['turn_id']
-        message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
-        message.customContextMenuRequested.disconnect()
-        message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+        if message_stacked is not None:
+            message = message_stacked.currentWidget()
+            message.turn_id = response['turn']['turn_key']['turn_id']
+            message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+            message.customContextMenuRequested.disconnect()
+            message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
 
     def charMessageSignal(self, response):
         command = response['command']
@@ -318,6 +319,7 @@ class ChatInterface(QWidget):
                 self.mw.user_settings = data['settings']
                 self.mw.showNotification(self.tr('Successfully updated your persona'))
             self.mw.hideOverlay()
+            self.toggleCharacterInfoSidebar()
 
         def onCardClicked(clicked_card):
             if clicked_card.active:
@@ -440,7 +442,7 @@ class ChatInterface(QWidget):
             if self.overlay_selected_model_type != self.preferred_model_type:
                 self.createNewChat(self.overlay_selected_model_type)
             self.mw.hideOverlay()
-            self.hideCharacterInfoSidebar()
+            self.toggleCharacterInfoSidebar()
 
         buttons_layout = QHBoxLayout()
 

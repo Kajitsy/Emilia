@@ -1,3 +1,4 @@
+import asyncio
 import json, uuid, logging, inspect, curl_cffi
 
 class Async:
@@ -396,7 +397,8 @@ class ChatClient:
     async def __aenter__(self):
         self.ws = await self.session.ws_connect(
             'wss://neo.character.ai/ws/',
-            cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'}
+            cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'},
+            autoclose=False
         )
         return self
 
@@ -508,3 +510,12 @@ class ChatClient:
         if 'turn' not in response:
             raise Exception(response['comment'])
         return response['turn']
+
+    async def auto_ping(self, interval: float = 30.0):
+        while True:
+            try:
+                await self.ws.ping()
+                await asyncio.sleep(interval)
+            except Exception as e:
+                print(f"❌ Ping error: {e}")
+                break

@@ -273,7 +273,7 @@ class EmiliaNext(QMainWindow):
         self.settings_button = left_sidebar.settings_button
         self.profile_button = left_sidebar.profile_button
         self.profile_button_2 = left_sidebar.profile_button_2
-        self.recent_chat_layout = left_sidebar.recent_chat_scroll_layout
+        self.recent_chat_scroll_layout = left_sidebar.recent_chat_scroll_layout
 
         self.left_sidebar_animation = QPropertyAnimation(left_sidebar, b"geometry")
         self.left_sidebar_animation.setDuration(500)
@@ -380,7 +380,7 @@ class EmiliaNext(QMainWindow):
         chat_layout.addStretch()
         card.setLayout(chat_layout)
 
-        self.recent_chat_layout.addWidget(card)
+        self.recent_chat_scroll_layout.addWidget(card)
         self.left_sidebar.resizeCard(card)
         return card
 
@@ -903,8 +903,8 @@ class EmiliaNext(QMainWindow):
             self.category_layout.addWidget(card)
 
     def addRecentChats(self, chats):
-        for i in reversed(range(self.recent_chat_layout.count())):
-            item = self.recent_chat_layout.itemAt(i)
+        for i in reversed(range(self.recent_chat_scroll_layout.count())):
+            item = self.recent_chat_scroll_layout.itemAt(i)
             if item and item.widget():
                 item.widget().deleteLater()
 
@@ -1657,8 +1657,8 @@ class SettingsPage(QWidget):
                     if item and item.widget():
                         item.widget().deleteLater()
             if self.mw.recent_chats:
-                for i in range(self.mw.recent_chat_layout.count()):
-                    item = self.mw.recent_chat_layout.itemAt(i)
+                for i in range(self.mw.recent_chat_scroll_layout.count()):
+                    item = self.mw.recent_chat_scroll_layout.itemAt(i)
                     if item and item.widget():
                         item.widget().deleteLater()
 
