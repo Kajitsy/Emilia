@@ -11,7 +11,7 @@ class EEC():
         self.vts_api_info = {
             "host": "localhost",
             "name": "VTubeStudioPublicAPI",
-            "port": 8001,
+            "port": port,
             "version": "1.0"}
 
         self.vts = vts(self.plugin_info, self.vts_api_info)
