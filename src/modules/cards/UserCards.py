@@ -99,6 +99,12 @@ class UserProfile(QWidget):
         self.follow_button.setVisible(False)
         but_layout.addWidget(self.follow_button)
 
+        self.edit_button = PushButton()
+        self.edit_button.setIcon(self.svg_icons.settings())
+        self.edit_button.clicked.connect(self.openUserSettings)
+        but_layout.addWidget(self.edit_button)
+        self.edit_button.setVisible(False)
+
         self.share_button = PushButton()
         self.share_button.setIcon(self.svg_icons.share())
         self.share_button.clicked.connect(self.share)
@@ -166,16 +172,22 @@ class UserProfile(QWidget):
 
         self.setLayout(layout)
 
+    def openUserSettings(self):
+        overlay = EditOverlay(self.mw)
+        self.mw.showOverlay(overlay)
+
     def _getFollowing(self, data):
         self.chat_thread.me_following_signal.disconnect()
         self.me_following = data.get('following', [])
 
         if self.is_me:
             self.follow_button.setVisible(False)
+            self.edit_button.setVisible(True)
             self.up_characters_button.setVisible(True)
             self.personas_button.setVisible(True)
         else:
             self.follow_button.setVisible(True)
+            self.edit_button.setVisible(False)
             self.up_characters_button.setVisible(False)
             self.personas_button.setVisible(False)
 
