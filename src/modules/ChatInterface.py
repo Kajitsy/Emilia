@@ -11,7 +11,8 @@ from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, M
 from modules.QThreads import (PlayerThread, FileLoaderThread, ImageLoaderThread, ChatThread, DiscordRPC)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
-from modules.Voice import VoiceMode, VoiceSearch
+from modules.cards.VoiceCards import VoiceSearch, VoiceMode
+
 
 class MessageBubble(QFrame):
     def __init__(self, mw, parent, text, is_user=False):
@@ -265,13 +266,11 @@ class ChatInterface(QWidget):
             widget = item.widget()
             if hasattr(widget, 'is_user') and widget.is_user:
                 message_stacked = widget
-                break
-        if message_stacked is not None:
-            message = message_stacked.currentWidget()
-            message.turn_id = response['turn']['turn_key']['turn_id']
-            message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
-            message.customContextMenuRequested.disconnect()
-            message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+                message = message_stacked.currentWidget()
+                message.turn_id = response['turn']['turn_key']['turn_id']
+                message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+                message.customContextMenuRequested.disconnect()
+                message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
 
     def charMessageSignal(self, response):
         command = response['command']
@@ -844,8 +843,12 @@ class ChatInterface(QWidget):
         else:
             color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4)
 
+        self.name_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.name_label.setText(f"<b>{self.character_name}</b>")
+        self.name_label.mousePressEvent = lambda x: self.mw.openCharacter(character.get('path'), self.character_id)
+        self.header_name_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.header_name_label.setText(f"<b>{self.character_name}</b>")
+        self.header_name_label.mousePressEvent = lambda x: self.mw.openCharacter(character.get('path'), self.character_id)
 
         self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.author_label.setText("<i>"+self.tr("Author: @") + self.character.get('participant__user__username', self.tr('Unknown')) + "</i>")
@@ -868,6 +871,8 @@ class ChatInterface(QWidget):
 
         if self.character.get('participant__user__username', self.tr('Unknown')) == self.mw.username:
             self.edit_char_button.setVisible(True)
+
+        self.chat_thread.get_recommend_chars_by_id(self.character_id)
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
             if self.character.get('visibility') == "PUBLIC" and self.mw.drpc_show_chat_name:
@@ -1050,8 +1055,6 @@ class ChatInterface(QWidget):
             for turn in self.chat_thread.chat_histories[self.chat_id][index + 1:]:
                 turn_ids_for_remove.append(turn.get('turn_key', {}).get('turn_id'))
             self.chat_thread.chat_histories[self.chat_id] = self.chat_thread.chat_histories[self.chat_id][:index + 1]
-        print(self.chat_thread.chat_histories[self.chat_id])
-        print(turn_ids_for_remove)
 
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)

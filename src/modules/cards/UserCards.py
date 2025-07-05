@@ -287,9 +287,9 @@ class UserProfile(QWidget):
 
         self.name_label.setText(f"{self.data.get('name')}")
         self.username_label.setText(f"@{self.username}")
-        self.followers_label.setText(str(self.data.get('num_followers')) + " " + self.tr("followers"))
-        self.following_label.setText(str(self.data.get('num_following')) + " " + self.tr("following"))
-        self.chats_label.setText(str(chats_count) + " " + self.tr("chats"))
+        self.followers_label.setText(format_number(self.data.get('num_followers')) + " " + self.tr("followers"))
+        self.following_label.setText(format_number(self.data.get('num_following')) + " " + self.tr("following"))
+        self.chats_label.setText(chats_count + " " + self.tr("chats"))
         if self.data.get('characters', []):
             for character in self.data.get('characters', []):
                 card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'), character.get('title'), self.profile_id, character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)

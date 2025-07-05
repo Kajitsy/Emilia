@@ -247,6 +247,7 @@ class ChatThread(QThread):
     chat_signal = pyqtSignal(object)
     get_history_signal = pyqtSignal(object)
     get_char_signal = pyqtSignal(object)
+    get_recommend_chars_by_id_signal = pyqtSignal(object)
     get_chat_by_id_signal = pyqtSignal(object)
     get_me_signal = pyqtSignal(object)
     get_user_settings_signal = pyqtSignal(object)
@@ -313,6 +314,8 @@ class ChatThread(QThread):
         self.chat_histories = {}
         self.category_characters = {}
         self.characters = {}
+        self.users = {}
+        self.similar_characters = {}
 
     @asyncSlot
     async def create_connect(self):
@@ -502,7 +505,11 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_user(self, username):
-        await self._call_ccaa('get_user', self.get_user_signal, username)
+        if self.ccaa:
+            if not username in self.users:
+                response = await self.ccaa.get_user(username)
+                self.users[username] = response
+            self.get_user_signal.emit(self.users[username])
 
     @asyncSlot
     async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED"):
@@ -581,16 +588,29 @@ class ChatThread(QThread):
         await self._call_ccaa('get_for_you_chats', self.featured_chats_signal)
 
     @asyncSlot
-    async def get_character(self, character_id):
+    async def get_character(self, character_id=None, path=None):
         if self.ccaa:
+            if path and not character_id:
+                character = await self.ccaa.get_character_by_path(path)
+                character_id = character['external_id']
             if not character_id in self.characters:
                 character = await self.ccaa.get_character(character_id)
                 voted = await self.ccaa.voted(character_id)
+                path = await self.ccaa.get_path_character(character_id)
                 self.characters[character_id] = {
                     "character": character,
-                    "voted": voted
+                    "voted": voted,
+                    "path": path
                 }
             self.get_char_signal.emit(self.characters[character_id])
+
+    @asyncSlot
+    async def get_recommend_chars_by_id(self, character_id):
+        if self.ccaa:
+            if not character_id in self.similar_characters:
+                response = await self.ccaa.get_recommend_characters_by_id(character_id)
+                self.similar_characters[character_id] = response
+            self.get_recommend_chars_by_id_signal.emit(self.similar_characters[character_id])
 
     @asyncSlot
     async def get_user_following(self, pageParam=1, username=""):
@@ -614,7 +634,18 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def character_vote(self, character_id, vote):
-        await self._call_ccaa('vote', self.character_vote_signal, character_id, vote)
+        if self.ccaa:
+            response = await self.ccaa.vote(character_id, vote)
+            self.character_vote_signal.emit(response)
+            if vote == True:
+                self.characters[character_id]['voted']['vote'] = True
+                self.characters[character_id]['voted']['voted'] = True
+            elif vote == False:
+                self.characters[character_id]['voted']['vote'] = False
+                self.characters[character_id]['voted']['voted'] = False
+            elif vote == None:
+                self.characters[character_id]['voted']['vote'] = None
+                self.characters[character_id]['voted']['voted'] = False
 
     @asyncSlot
     async def character_search(self, query: str | None = None):

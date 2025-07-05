@@ -1,5 +1,5 @@
 import asyncio
-import json, uuid, logging, inspect, curl_cffi
+import json, uuid, logging, inspect, curl_cffi, re
 
 class Async:
     def __init__(self, token, auth_cookie=""):
@@ -30,7 +30,6 @@ class Async:
         if response.status_code == 200:
             return response.json() if not text else json.loads(response.text)
         elif response.status_code == 400:
-            print(response.json() if not text else json.loads(response.text))
             return response.json() if not text else json.loads(response.text)
         else:
             raise Exception(f"Failed to get data, status code: {response.status_code}")
@@ -66,9 +65,47 @@ class Async:
         else:
             raise Exception(f"Failed to get data, status code: {response.status_code}")
 
+    async def get_recommend_characters_by_id(self, character_id):
+        response = await self.request(f"recommendation/v1/character/similar/{character_id}", neo=True)
+        return response.get("characters", [])
+
+    async def get_character_by_path(self, path):
+        headers = {
+            "Cookie": f"web-next-auth={self.auth_cookie}"
+        }
+        match = re.match(r"^/character/([^/]+)(?:/([^/]+))?$", path)
+        id_part = match.group(1)
+        slug_part = match.group(2)
+
+        if slug_part:
+            url = f"character/{id_part}/{slug_part}.json?id={id_part}&slug={slug_part}"
+        else:
+            url =  f"character/{id_part}.json?id={id_part}"
+        response = await self.session.request("GET", f"https://character.ai/_next/data/bP2i_9D3c_KrZ-_24-fQR/{url}", headers=headers, timeout=100)
+        pattern = re.compile(
+            r'<script\s+id="__NEXT_DATA__"\s+type="application/json">\s*(\{.+?\})\s*</script>',
+            re.DOTALL
+        )
+        m = pattern.search(response.text)
+        if m:
+            return json.loads(m.group(1)).get('props',{}).get("pageProps", {}).get("prefetchedCharacterInfo", {})
+
     async def get_character(self, character_id):
         response = await self.trpc_request(f"character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22{character_id}%22%7D%7D%7D")
         return response[0].get("result", {}).get("data", {}).get("json", {}).get("character", {})
+
+    async def get_path_character(self, character_id):
+        headers = {
+            "Cookie": f"web-next-auth={self.auth_cookie}"
+        }
+        response = await self.session.request("GET", f"https://character.ai/_next/data/bP2i_9D3c_KrZ-_24-fQR/chat/{character_id}.json?character={character_id}", headers=headers, timeout=100)
+        pattern = re.compile(
+            r'<script\s+id="__NEXT_DATA__"\s+type="application/json">\s*(\{.+?\})\s*</script>',
+            re.DOTALL
+        )
+        m = pattern.search(response.text)
+        if m:
+            return json.loads(m.group(1)).get('props',{}).get("pageProps", {}).get("characterPagePath")
 
     async def tts(self, candidateId, roomId, turnId, voiceId="", voiceQuery=""):
         """voiceId or voiceQuery (Character Name) required"""
@@ -369,7 +406,6 @@ class Async:
 
     async def update_persona(self, data):
         response = await self.request("character/v1/update_persona", data, "post", True)
-        print(response)
         return response.get('persona', {})
 
     async def get_user_personas(self, force_refresh=0):
@@ -510,12 +546,3 @@ class ChatClient:
         if 'turn' not in response:
             raise Exception(response['comment'])
         return response['turn']
-
-    async def auto_ping(self, interval: float = 30.0):
-        while True:
-            try:
-                await self.ws.ping()
-                await asyncio.sleep(interval)
-            except Exception as e:
-                print(f"❌ Ping error: {e}")
-                break

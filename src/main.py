@@ -87,11 +87,24 @@ asyncio.set_event_loop(loop)
 class EmiliaNext(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Emilia")
+        today = datetime.datetime.now().date()
+        special_titles = {
+            (1, 1): self.tr("Emilia | Happy New Year"),
+            (4, 4): self.tr("Happy birthday Emilia!"),
+            (7, 11): self.tr("Emilia | Happy birthday Kajitsy!"),
+            (9, 16): self.tr("Emilia | Happy birthday CAI!"),
+            (10, 31): "Spoooky | Trick or treat",
+            (12, 31): self.tr("Emilia | Happy New Year")
+        }
+        date_key = (today.month, today.day)
+        if date_key in special_titles:
+            self.setWindowTitle(special_titles[date_key])
+        else:
+            self.setWindowTitle("Emilia")
         self.setStyleSheet("""
-        background-color: #202124;
-        color: #e8eaed;
-    """)
+            background-color: #202124;
+            color: #e8eaed;
+        """)
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
@@ -849,6 +862,11 @@ class EmiliaNext(QMainWindow):
         self.main_content_area.setCurrentWidget(self.main_page)
         self.current_chat_interface = None
         self.top_widget.setVisible(True)
+
+    def openCharacter(self, path=None, character_id=None):
+        widget = CharacterCards.MainPage(self, path, character_id)
+        self.main_content_area.addWidget(widget)
+        self.main_content_area.setCurrentWidget(widget)
 
     def openChat(self, character_id, character_name, chat_id="", card=None):
         if self.current_chat_interface:
