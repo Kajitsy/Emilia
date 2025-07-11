@@ -3,7 +3,7 @@
 
  # Emilia - Unofficial Desktop Application for [Character.AI](https://character.ai)
 [![GitHub Release](https://img.shields.io/github/v/release/kajitsy/emilia?&label=Version)](https://github.com/Kajitsy/Emilia/releases/latest)
-![GitHub Downloads](https://img.shields.io/github/downloads/kajitsy/emilia/latest/total?&label=Downloads)
+![GitHub Downloads](https://img.shields.io/github/downloads/kajitsy/emilia/total?&label=Downloads)
 [![GitHub License](https://img.shields.io/github/license/kajitsy/emilia?label=License)](LICENSE)
 </div>
 
