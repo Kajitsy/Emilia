@@ -1,9 +1,15 @@
-# Emilia - Unofficial (!!!) Desktop Application for [Character.AI](https://character.ai)
+<div align="center">
+ <img alt="icon.png" height="50" src="/src/icon.png" title="Emilia Icon"/>
 
-[![ru](https://img.shields.io/badge/README-ru-red.svg)](docs/ru/README.md)
+ # Emilia - Unofficial Desktop Application for [Character.AI](https://character.ai)
+[![GitHub Release](https://img.shields.io/github/v/release/kajitsy/emilia?&label=Version)](https://github.com/Kajitsy/Emilia/releases/latest)
+![GitHub Downloads](https://img.shields.io/github/downloads/kajitsy/emilia/latest/total?&label=Downloads)
+[![GitHub License](https://img.shields.io/github/license/kajitsy/emilia?label=License)](LICENSE)
+</div>
 
-[![ru](https://img.shields.io/badge/FIX_ERROR-ru-red.svg)](docs/ru/FIX_ERROR.md)
-[![en](https://img.shields.io/badge/FIX_ERROR-en-red.svg)](docs/en/FIX_ERROR.md)
+[![en](https://img.shields.io/badge/FIX_ERROR-en-red)](docs/en/FIX_ERROR.md)
+[![ru](https://img.shields.io/badge/README-ru-red "Russian README.md")](docs/ru/README.md)
+[![ru](https://img.shields.io/badge/FIX_ERROR-ru-red "Russian FIX_ERROR.md")](docs/ru/FIX_ERROR.md)
 
 
 ## Requirements for Launch...
@@ -14,7 +20,7 @@
 - 3. Find `Emilia` in the Start menu and launch it
 
 
-2. via WinGet:
+2. via WinGet (![WinGet Package Version](https://img.shields.io/winget/v/Kajitsy.Emilia?label=Version&style=flat-square)):
 - Requires Windows 10 (64-bit) or Windows 11
 - 1. Open the command prompt
 - 2. Enter/copy `winget install kajitsy.emilia`
@@ -22,7 +28,7 @@
 
 
 3. from Source Code:
-- Requires Python 3.10-3.13.3
+- Requires Python 3.10-3.13.5
 - [Source Code](https://github.com/Kajitsy/Emilia/archive/refs/heads/emilia.zip)
 - 1. Install Python
 - - Check Python availability in the command line with `python --version`
