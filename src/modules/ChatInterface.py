@@ -15,21 +15,60 @@ from modules.cards.VoiceCards import VoiceSearch, VoiceMode
 
 
 class MessageBubble(QFrame):
-    def __init__(self, mw, parent, text, is_user=False):
+    def __init__(self, mw, parent, text, avatar_url, name, is_user=False):
         super().__init__()
         self.main_window = mw
         self.parent = parent
+        self.text = text
+        self.url = avatar_url
+        self.name = name
         self.is_user = is_user
-        layout = QVBoxLayout()
         self.turn_id = None
-        self.message_label = QLabel(text)
-        self.message_label.setWordWrap(True)
-        self.message_label.setMaximumWidth(int(parent.width()/2.25))
+        self.setObjectName('user_message' if self.is_user else 'char_message')
 
-        layout.addWidget(self.message_label)
+        self.initUI()
+
+    def initUI(self):
+        layout = QHBoxLayout()
+
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(24, 24)
+        if self.url:
+            load_avatar_thread = ImageLoaderThread(
+                "https://characterai.io/i/80/static/avatars/" + self.url + '?webp=true&anim=0', 24, 24)
+            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda: color_avatar(self.avatar_label, 24, 24, self.name, 4))
+            load_avatar_thread.start()
+            self.main_window.threads.append(load_avatar_thread)
+        else:
+            color_avatar(self.avatar_label, 24, 24, self.name, 4)
+
+        self.m_frame = QFrame()
+        m_layout = QVBoxLayout()
+        self.m_frame.setLayout(m_layout)
+
+        self.message_label = QLabel(self.text)
+        self.message_label.setWordWrap(True)
+        self.message_label.setMaximumWidth(int(self.parent.width() / 2.25))
+        self.message_label.setContentsMargins(0, 2, 0, 2)
+        m_layout.addWidget(self.message_label)
+
+        if self.is_user:
+            self.message_label.setStyleSheet(f"color: {self.parent.user_text_message};")
+            self.m_frame.setStyleSheet(
+                f"background-color: {self.parent.user_back_message};"
+                "border-radius: 4px;")
+            layout.addWidget(self.m_frame)
+            layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
+        else:
+            self.message_label.setStyleSheet(f"color: {self.parent.char_text_message};")
+            self.m_frame.setStyleSheet(
+                f"background-color: {self.parent.char_back_message};"
+                "border-radius: 4px;")
+            layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
+            layout.addWidget(self.m_frame)
+
         self.setLayout(layout)
-        self.adjustSize()
-        self.setMinimumHeight(self.height())
 
 class ChatInterface(QWidget):
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None):
@@ -44,6 +83,7 @@ class ChatInterface(QWidget):
         self.cis_visible = False
         self.voice_id = None
         self.user_personas = []
+        self.avatar_labels = {}
         self.svg_icons = Svg()
 
         self.voice_enabled = False
@@ -103,18 +143,9 @@ class ChatInterface(QWidget):
 
         self.setLayout(self.layout)
 
-        if self.chat_id:
-            self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
-            self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
-            self.chat_thread.get_history(self.chat_id)
-            self.chat_thread.get_chat_by_id(self.chat_id)
-        else:
-            self.chat_thread.chat_signal.connect(self._getChat)
-            self.chat_thread.get_chat(self.character_id)
+        self.chat_thread.get_char_signal.connect(self.initData)
+        self.chat_thread.get_character(self.character_id)
 
-        if not self.character:
-            self.chat_thread.get_char_signal.connect(self._getCharacter)
-            self.chat_thread.get_character(self.character_id)
         self.chat_thread.voice_override_signal.connect(self._voiceOverride)
         self.chat_thread.voice_override(self.character_id)
         self.chat_thread.get_user_personas()
@@ -816,6 +847,17 @@ class ChatInterface(QWidget):
         QApplication.clipboard().setText(f'https://character.ai/chat/{self.character_id}')
         self.mw.showNotification(self.tr("Link copied to clipboard"))
 
+    def initData(self, character):
+        self._getCharacter(character)
+        if self.chat_id:
+            self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+            self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
+            self.chat_thread.get_history(self.chat_id)
+            self.chat_thread.get_chat_by_id(self.chat_id)
+        else:
+            self.chat_thread.chat_signal.connect(self._getChat)
+            self.chat_thread.get_chat(self.character_id)
+
     def _getCharacter(self, character):
         self.chat_thread.get_char_signal.disconnect()
         self.voted = character.get('voted', {}).get('voted', False)
@@ -827,6 +869,7 @@ class ChatInterface(QWidget):
             load_avatar_thread = ImageLoaderThread(
                 "https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0', 70, 70)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda: color_avatar(self.avatar_label, 70, 70, self.character_name, 4))
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
@@ -837,6 +880,7 @@ class ChatInterface(QWidget):
             load_avatar_thread = ImageLoaderThread(
                 "https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0', 40, 40)
             load_avatar_thread.image_loaded.connect(self.header_avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda: color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4))
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
@@ -983,21 +1027,18 @@ class ChatInterface(QWidget):
         return message_widget
 
     def createMessage(self, text, turn_id, is_user=False):
-        message_bubble = MessageBubble(self.mw, self, format_text(text), is_user)
+        if is_user:
+            message_bubble = MessageBubble(self.mw, self, format_text(text), self.mw.me_avatar, self.mw.name,True)
+        else:
+            message_bubble = MessageBubble(self.mw, self, format_text(text), self.character.get('avatar_file_name'), self.character_name, False)
         message_bubble.turn_id = turn_id
-        message_bubble.setStyleSheet(
-            f"background-color: {self.user_back_message if is_user else self.char_back_message}; border-radius: 4px;")
-        message_bubble.message_label.setStyleSheet(
-            f"color: {self.user_text_message if is_user else self.char_text_message};")
-        message_bubble.setObjectName('user_message' if is_user else 'char_message')
-        message_bubble.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
         message_bubble.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         message_bubble.customContextMenuRequested.connect(lambda pos, mb=message_bubble: self.showContextMenu(pos, mb))
         return message_bubble
 
     def setBackMessageColor(self, message, color):
-        message.setStyleSheet(f"background-color: {color}; border-radius: 4px;")
+        message.m_frame.setStyleSheet(f"background-color: {color}; border-radius: 4px;")
 
     def setTextMessageColor(self, message, color):
         message.message_label.setStyleSheet(f"color: {color};")

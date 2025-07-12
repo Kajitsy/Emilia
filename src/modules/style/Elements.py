@@ -426,12 +426,12 @@ class LeftSidebar(QFrame):
     def __init__(self, mw):
         super().__init__(mw)
         self.setStyleSheet("""
-        #leftSidebar {
-            background-color: #303134;
-            border-radius: 4px;
-            border: none;
-        }
-    """)
+            #leftSidebar {
+                background-color: #303134;
+                border-radius: 4px;
+                border: none;
+            }
+        """)
         self.setMouseTracking(True)
         self.setObjectName("leftSidebar")
         self.resizing = False
