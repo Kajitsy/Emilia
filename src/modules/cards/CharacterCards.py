@@ -2,7 +2,7 @@ import base64, uuid
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
-                             QSizePolicy, QWidget, QFileDialog, QFrame, QApplication)
+                             QSizePolicy, QWidget, QFileDialog, QApplication)
 
 from modules.style.Elements import (CustomTextEdit, PushButton, LineEdit, CheckBox, ComboBox, VerticalScrollPage,
     CardFrame)
