@@ -279,10 +279,11 @@ class ChatClient:
         answer = json.loads((await self.ws.recv_str()))['turn']
         return response['chat'], answer
 
-    async def send_message(self, char: str, chat_id: str, text: str, author: dict = {}):
+    async def send_message(self, char: str, chat_id: str, text: str, author: dict = {}, attachments: list = []):
         message = {
             'command': 'create_and_generate_turn',
             'payload': {
+                'attachments': attachments,
                 'character_id': char,
                 'turn': {
                     'turn_key': {
@@ -297,7 +298,6 @@ class ChatClient:
                 }
             }
         }
-
         await self.ws.send_str(json.dumps(message))
 
         while True:
@@ -385,6 +385,7 @@ class ChatThread(QThread):
     user_followers_signal = pyqtSignal(object)
     me_following_signal = pyqtSignal(object)
     upload_avatar_signal = pyqtSignal(object)
+    upload_image_signal = pyqtSignal(object)
     get_upvoted_characters_signal = pyqtSignal(list)
     create_character_signal = pyqtSignal(object)
     update_character_signal = pyqtSignal(object)
@@ -493,7 +494,7 @@ class ChatThread(QThread):
         self.cookie = cookie
 
     @asyncSlot
-    async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id=""):
+    async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id="", attachments=[]):
         used_emotes = []
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
         if vtube_studio:
@@ -507,7 +508,7 @@ class ChatThread(QThread):
         while True:
             if self.connect:
                 try:
-                    async for response in self.connect.send_message(char, chat_id, text):
+                    async for response in self.connect.send_message(char, chat_id, text, attachments=attachments):
                         if response['turn']['author']['author_id'].isdigit() and response['turn']['author']['is_human']:
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been sent")
                             self.chat_histories.get(chat_id, []).append({
@@ -559,7 +560,7 @@ class ChatThread(QThread):
                             self.message_signal.emit(response)
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except curl_cffi.curl.CurlError:
-                    self.connect = await self.create_connect()
+                    self.connect = self.create_connect()
                     logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
 
     @asyncSlot
@@ -628,7 +629,7 @@ class ChatThread(QThread):
                             turn_id = response['turn']['turn_key']['turn_id']
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except curl_cffi.curl.CurlError:
-                    self.connect = await self.create_connect()
+                    self.connect = self.create_connect()
                     logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
@@ -708,7 +709,7 @@ class ChatThread(QThread):
                     self.new_chat_created_signal.emit(response)
                     break
                 except curl_cffi.curl.CurlError:
-                    self.connect = await self.create_connect()
+                    self.connect = self.create_connect()
                     logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
@@ -773,7 +774,6 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_trythis_chats(self):
-        #await self._call_ccaa('get_trythis_chats', self.trythis_chats_signal)
         response = await self.request("character.info,character.info,character.info,character.info,character.info,character.info,character.info,character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22A9zlEuzpvWiH8h0PNWEvZPK-PQifYxS-V24D3ncqIyU%22%7D%7D%2C%221%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22uD71krOYYFjVkYwspviH_8tYTybsf5eAGdwhNlFJAls%22%7D%7D%2C%222%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22f4hEGbw8ywUrjsrye03EJxiBdooy--HiOWgU2EiRJ0s%22%7D%7D%2C%223%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%229ZSDyg3OuPbFgDqGwy3RpsXqJblE4S1fKA_oU3yvfTM%22%7D%7D%2C%224%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22Hu84TYGgte3qVoQuy75x6Q1-ORjQbgoe2qaFoTkjaOM%22%7D%7D%2C%225%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22_FrgO6M-xCuTi72BYHbt-dQN2QsjNXnl-eKJGrjJttc%22%7D%7D%2C%226%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22WLcau8HDbkAPlnU9GPZvLVQ4QaWMhktCmgGFgG2nb5c%22%7D%7D%2C%227%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%229wIR0NXzqD76sfJWRsHCGGb8IkPljhINj8WDy_2xjcg%22%7D%7D%2C%228%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%226HhWfeDjetnxESEcThlBQtEUo0O8YHcXyHqCgN7b2hY%22%7D%7D%7D",
                                       domain="trpc")
         res_data = []
@@ -1019,6 +1019,19 @@ class ChatThread(QThread):
         data = {"0": {"json": {"imageDataUrl": f"data:image/{filetype};base64,{image}"}}}
         response = await self.request("user.uploadAvatar?batch=1", data, "post", "trpc")
         self.upload_avatar_signal.emit(response[0]['result']['data']['json'])
+
+    @asyncSlot
+    async def upload_image(self, multipart):
+        headers = {
+            "Content-Type": "multipart/form-data",
+            "Authorization": f"Token {self.token}",
+            "Cookie": f"web-next-auth={self.cookie}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0"
+        }
+
+        response = await self.session.request("POST", "https://neo.character.ai/image/upload_private_image", headers=headers, multipart=multipart, timeout=100, impersonate="chrome")
+
+        self.upload_image_signal.emit(response.json())
 
 class VoiceModeThread(QThread):
     connected_signal = pyqtSignal(bool)

@@ -1,8 +1,9 @@
-import re
+import re, os
 
-from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout,QLabel, QPushButton,
-    QFrame, QSizePolicy, QSpacerItem, QStackedWidget)
-from PyQt6.QtGui import QMouseEvent, QAction
+from curl_cffi import CurlMime
+from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
+                             QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog)
+from PyQt6.QtGui import QMouseEvent, QAction, QPixmap
 from PyQt6.QtCore import (QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt)
 from datetime import datetime
 
@@ -15,7 +16,7 @@ from modules.cards.VoiceCards import VoiceSearch, VoiceMode
 
 
 class MessageBubble(QFrame):
-    def __init__(self, mw, parent, text, avatar_url, name, is_user=False):
+    def __init__(self, mw, parent, text, avatar_url, name, is_user=False, attachments=[]):
         super().__init__()
         self.main_window = mw
         self.parent = parent
@@ -24,12 +25,33 @@ class MessageBubble(QFrame):
         self.name = name
         self.is_user = is_user
         self.turn_id = None
+        self.attachments = attachments
         self.setObjectName('user_message' if self.is_user else 'char_message')
 
         self.initUI()
 
     def initUI(self):
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
+        layout_2 = QHBoxLayout()
+        lw2 = QWidget()
+        lw2.setLayout(layout_2)
+
+        self.attach_image_label = QLabel()
+        layout.addWidget(self.attach_image_label)
+        layout.addWidget(lw2)
+        if self.attachments and self.attachments[0]['type'] == "TYPE_IMAGE":
+            def z(v):
+                self.attach_image_label.setPixmap(v)
+                self.setMinimumHeight(0)
+                self.adjustSize()
+                self.setMinimumHeight(self.height())
+            self.attach_image_label.setMinimumSize(100, 100)
+            thread = ImageLoaderThread(self.attachments[0]['url'], 100, 100)
+            thread.radius = 25
+            thread.error_loading.connect(lambda: self.attach_image_label.setMinimumSize(0, 0))
+            thread.image_loaded.connect(z)
+            thread.start()
+            self.main_window.threads.append(thread)
 
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(24, 24)
@@ -58,15 +80,15 @@ class MessageBubble(QFrame):
             self.m_frame.setStyleSheet(
                 f"background-color: {self.parent.user_back_message};"
                 "border-radius: 4px;")
-            layout.addWidget(self.m_frame)
-            layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
+            layout_2.addWidget(self.m_frame)
+            layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
         else:
             self.message_label.setStyleSheet(f"color: {self.parent.char_text_message};")
             self.m_frame.setStyleSheet(
                 f"background-color: {self.parent.char_back_message};"
                 "border-radius: 4px;")
-            layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
-            layout.addWidget(self.m_frame)
+            layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
+            layout_2.addWidget(self.m_frame)
 
         self.setLayout(layout)
         self.adjustSize()
@@ -121,7 +143,13 @@ class ChatInterface(QWidget):
 
         self.layout.addLayout(main_area_layout)
 
-        input_layout = QHBoxLayout()
+        input_layout = QVBoxLayout()
+        self.attach_image_label = QLabel()
+        self.attach_image_label.link = ""
+        input_layout.addWidget(self.attach_image_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        send_layout = QHBoxLayout()
+        send_widget = QWidget()
+        send_widget.setLayout(send_layout)
         self.message_input = CustomTextEdit()
         self.message_input.mousePressEvent = lambda _: self.hideCharacterInfoSidebar2()
         self.message_input.setFixedHeight(32)
@@ -132,15 +160,20 @@ class ChatInterface(QWidget):
         self.format_timer = QTimer()
         self.format_timer.setSingleShot(True)
         self.format_timer.timeout.connect(self.formatUserMessage)
-        input_layout.addWidget(self.message_input, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(self.message_input, alignment=Qt.AlignmentFlag.AlignBottom)
         send_button = PushButton()
         send_button.setIcon(self.svg_icons.send())
         send_button.clicked.connect(self.sendMessage)
-        input_layout.addWidget(send_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(send_button, alignment=Qt.AlignmentFlag.AlignBottom)
         call_button = PushButton()
         call_button.setIcon(self.svg_icons.call())
         call_button.clicked.connect(self.callCharacter)
-        input_layout.addWidget(call_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(call_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        select_image_button = PushButton()
+        select_image_button.setIcon(self.svg_icons.add_image())
+        select_image_button.clicked.connect(self.selectImage)
+        send_layout.addWidget(select_image_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        input_layout.addWidget(send_widget)
         self.layout.addLayout(input_layout)
 
         self.setLayout(self.layout)
@@ -618,6 +651,55 @@ class ChatInterface(QWidget):
 
         self.mw.showOverlay(color_picker_widget)
 
+    def selectImage(self):
+        def uploaded(response):
+            if response.get("status") == "OK":
+                link = response['value']
+                thread = ImageLoaderThread(
+                    link, 50, 50, "cache/imgs_in_chats")
+                thread.radius = 25
+                thread.image_loaded.connect(self.attach_image_label.setPixmap)
+                thread.start()
+                self.mw.threads.append(thread)
+                self.attach_image_label.setMinimumSize(50, 50)
+                self.attach_image_label.link = link
+            else:
+                self.mw.showNotification(response.get("error"))
+
+        file_dialog = QFileDialog()
+        file_dialog.setNameFilter("Images (*.xbm *.tif *.jfif *.pjp *.apng *.svgz *.jpg *.heif *.ico *.tiff *.webp *.jpeg *.heic *.gif *.svg *.png *.bmp *.pjpeg *.avif)")
+
+        if file_dialog.exec():
+            file_path = file_dialog.selectedFiles()[0]
+            mp = CurlMime()
+
+            ext = os.path.splitext(file_path)[1].lower()
+            mime_types = {
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.gif': 'image/gif',
+                '.webp': 'image/webp',
+                '.bmp': 'image/bmp',
+                '.svg': 'image/svg+xml',
+                '.ico': 'image/x-icon',
+                '.tiff': 'image/tiff',
+                '.tif': 'image/tiff'
+            }
+            content_type = mime_types.get(ext, 'application/octet-stream')
+
+            mp.addpart(
+                name="image",
+                content_type=content_type,
+                filename=os.path.basename(file_path),
+                local_path=file_path
+            )
+
+            self.mw.chat_thread.upload_image_signal.connect(uploaded)
+            self.mw.chat_thread.upload_image(mp)
+
+            self.mw.showNotification(self.tr("Uploading..."))
+
     def startFormat(self):
         text = self.message_input.toPlainText()
         line_count = text.count('\n')
@@ -951,7 +1033,7 @@ class ChatInterface(QWidget):
             pci = turn.get('primary_candidate_id')
             for candidate in turn.get('candidates', []):
                 if candidate.get('candidate_id', pci) == pci:
-                    message_stacked = self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False))
+                    message_stacked = self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False), candidate.get('attachments', []))
                 else:
                     older.append(candidate)
             if len(turn.get('candidates', [])) > 1:
@@ -1014,12 +1096,12 @@ class ChatInterface(QWidget):
         self.messages_content.update()
         self.messages_area.verticalScrollBar().setValue(0)
 
-    def addMessage(self, text, turn_id, is_user=False):
+    def addMessage(self, text, turn_id, is_user=False, attachments=[]):
         message_widget = QStackedWidget()
         message_widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         message_widget.turn_id = turn_id
         message_widget.is_user = is_user
-        message_bubble = self.createMessage(text, turn_id, is_user)
+        message_bubble = self.createMessage(text, turn_id, is_user, attachments)
 
         self.messages_layout.addWidget(message_widget, 1,
                                        Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft)
@@ -1028,11 +1110,11 @@ class ChatInterface(QWidget):
         message_widget.setCurrentWidget(message_bubble)
         return message_widget
 
-    def createMessage(self, text, turn_id, is_user=False):
+    def createMessage(self, text, turn_id, is_user=False, attachments=[]):
         if is_user:
-            message_bubble = MessageBubble(self.mw, self, format_text(text), self.mw.me_avatar, self.mw.name,True)
+            message_bubble = MessageBubble(self.mw, self, format_text(text), self.mw.me_avatar, self.mw.name,True, attachments)
         else:
-            message_bubble = MessageBubble(self.mw, self, format_text(text), self.character.get('avatar_file_name'), self.character_name, False)
+            message_bubble = MessageBubble(self.mw, self, format_text(text), self.character.get('avatar_file_name'), self.character_name, False, attachments)
         message_bubble.turn_id = turn_id
 
         message_bubble.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -1052,9 +1134,17 @@ class ChatInterface(QWidget):
         text = self.message_input.toPlainText()
         self.hideCharacterInfoSidebar2()
         if text:
-            self.addMessage(text, "", is_user=True)
             self.message_input.setHtml('<span style="color: white;"></span>')
-            self.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id))
+            if self.attach_image_label.link:
+                attachments = [{"type": "TYPE_IMAGE", "url": self.attach_image_label.link}]
+                self.addMessage(text, "", is_user=True, attachments=attachments)
+                self.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id), attachments)
+                self.attach_image_label.link = ""
+                self.attach_image_label.setMinimumSize(0,0)
+                self.attach_image_label.setPixmap(QPixmap())
+            else:
+                self.addMessage(text, "", is_user=True)
+                self.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id))
             if self.mw.recent_chats:
                 for i in range(self.mw.recent_chat_scroll_layout.count()):
                     item = self.mw.recent_chat_scroll_layout.itemAt(i)
