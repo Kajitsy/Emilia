@@ -487,7 +487,7 @@ class EmiliaNext(QMainWindow):
         self.showOverlay(self.createDownloadOverlay())
         self.hide_overlay = False
         save_path = os.path.join(os.getcwd(), "update.exe")
-        self.thread = DownloadThread(url, save_path)
+        self.thread = FileLoaderThread(url, save_path=save_path)
         self.thread.progress.connect(lambda x: self.download_overlay_progress.setValue(x))
         self.thread.finished.connect(self.runInstaller)
         self.thread.start()
