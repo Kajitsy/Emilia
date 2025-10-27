@@ -668,8 +668,9 @@ class ChatThread(QThread):
     @asyncSlot
     async def get_me(self):
         response = await self.request("user/", domain="neo")
-        self.get_me_signal.emit(response.get("user", {}))
-        return response.get("user", {})
+        self.me = response.get("user", {})
+        self.get_me_signal.emit(self.me)
+        return self.me
 
     @asyncSlot
     async def get_user_settings(self):
