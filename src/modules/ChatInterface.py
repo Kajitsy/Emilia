@@ -69,6 +69,8 @@ class MessageBubble(QFrame):
             layout.addWidget(self.m_frame)
 
         self.setLayout(layout)
+        self.adjustSize()
+        self.setMinimumHeight(self.height())
 
 class ChatInterface(QWidget):
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None):
@@ -316,9 +318,9 @@ class ChatInterface(QWidget):
                     break
             message = message_stacked.currentWidget()
             message.message_label.setText(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username))
+            message.setMinimumHeight(0)
             message.adjustSize()
-            message_stacked.adjustSize()
-            message.setMinimumHeight(message.message_label.height() + 15)
+            message.setMinimumHeight(message.height())
 
     def openPersonaOverlay(self):
         overlay_widget = QWidget()
@@ -1120,9 +1122,9 @@ class ChatInterface(QWidget):
                 message = message_stacked.currentWidget()
             message.turn_id = response['turn']['turn_key']['turn_id']
             message.message_label.setText(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username))
+            message.setMinimumHeight(0)
             message.adjustSize()
-            message_stacked.adjustSize()
-            message.setMinimumHeight(message.message_label.height() + 15)
+            message.setMinimumHeight(message.height())
 
     def turnRegenerate(self, turn_id):
         for i in range(self.messages_layout.count()):
