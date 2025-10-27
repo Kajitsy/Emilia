@@ -1,5 +1,5 @@
 #define MyAppName "Emilia"
-#define MyAppVersion "3.1.0"
+#define MyAppVersion "3.2.0"
 #define MyAppPublisher "Kajitsy"
 #define MyAppURL "https://github.com/Kajitsy/Emilia"
 #define MyAppExeName "emilia.exe"
@@ -13,18 +13,35 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}/issues
 AppUpdatesURL={#MyAppURL}/releases
+
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=.\
 OutputBaseFilename={#MyAppName}Setup
-Compression=lzma
+Compression=lzma2/ultra64
 SolidCompression=yes
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=2
+
 ArchitecturesInstallIn64BitMode=x64
 ArchitecturesAllowed=x64
 MinVersion=10.0
-LicenseFile=LICENSE
+
 SetupIconFile=".\src\icon.ico"
 UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayName={#MyAppName}
+WizardStyle=modern
+DisableWelcomePage=no
+ShowLanguageDialog=auto
+
+LicenseFile=LICENSE
+InfoBeforeFile=README.md
+
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=dialog
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 Source: ".\dist\main\emilia.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -35,13 +52,24 @@ Source: ".\src\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdi
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon; Comment: "{#MyAppName}"
+
 
 [Registry]
 Root: HKCU; Subkey: "Software\{#MyAppName}"; ValueName: "InstallPath"; ValueData: "{app}"
+Root: HKCU; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string; ValueName: "Version"; ValueData: "{#MyAppVersion}"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string; ValueName: "InstallDate"; ValueData: "{code:GetInstallDate}"; Flags: uninsdeletekey
+
 
 [UninstallRun]
 Filename: "{cmd}"; Parameters: "/C ""taskkill /im {#MyAppExeName} /f /t"
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{app}\*"
 Type: filesandordirs; Name: "{app}"
+Type: filesandordirs; Name: "{localappdata}\{#MyAppName}"
+
+[Code]
+function GetInstallDate(Param: String): String;
+begin
+  Result := GetDateTimeString('dd/mm/yyyy', '-', ':');
+end;
