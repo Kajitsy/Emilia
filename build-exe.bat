@@ -30,7 +30,7 @@ if exist ".\dist\main\main.exe" (
 
     echo Copying icon.ico, lang and data folders to the EXE directory...
     copy ".\src\icon.ico" ".\dist\main\icon.ico"
-    copy ".\data\VTube_Emotes.json" ".\dist\main\data\VTube_Emotes.json"
+    copy ".\src\data\VTube_Emotes.json" ".\dist\main\data\VTube_Emotes.json"
     xcopy /E /I /H /Y ".\src\lang" ".\dist\main\lang"
 
     echo Done! All files are located in .\dist\main\

@@ -370,7 +370,6 @@ class ChatThread(QThread):
     character_search_signal = pyqtSignal(object)
 
     recent_chats_signal = pyqtSignal(object)
-    get_popular_and_trending_chars_signal = pyqtSignal(object)
     get_main_page_chats_signal = pyqtSignal(object)
     featured_chats_signal = pyqtSignal(object)
     trythis_chats_signal = pyqtSignal(object)

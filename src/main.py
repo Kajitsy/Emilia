@@ -533,7 +533,6 @@ class EmiliaNext(QMainWindow):
 
         scroll_area = VerticalScrollPage()
         scroll_area.setStyleSheet("background-color: transparent; border: none;")
-        scroll_content = scroll_area.viewport
         scroll_layout = scroll_area.layout
 
         for_you_section, self.for_you_layout = self.createSection(self.tr("For You"))
