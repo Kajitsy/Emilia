@@ -758,6 +758,7 @@ class ChatThread(QThread):
             if next_token: url += f"?next_token={next_token}"
             response = await self.request(url, domain="neo")
             chat = response.get("turns", [])
+            next_token = response.get("meta", {}).get("next_token", "")
             self.chat_histories[chat_id] = list(reversed(chat))
         self.get_history_signal.emit(self.chat_histories[chat_id])
 
@@ -897,7 +898,7 @@ class ChatThread(QThread):
     @asyncSlot
     async def character_vote(self, character_id, vote):
         data = {"external_id": character_id, "vote": vote}
-        response = await self.request("chat/character/vote/", data, "post", text=True)
+        response = await self.request("character/v1/vote_character", data, "post", "neo", text=True)
         self.character_vote_signal.emit(response)
         if vote == True:
             self.characters[character_id]['voted']['vote'] = True

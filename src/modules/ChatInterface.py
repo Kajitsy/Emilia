@@ -33,7 +33,7 @@ class MessageBubble(QFrame):
     def initUI(self):
         layout = QVBoxLayout()
         layout_2 = QHBoxLayout()
-        lw2 = QWidget()
+        lw2 = QFrame()
         lw2.setLayout(layout_2)
 
         self.attach_image_label = QLabel()
@@ -148,7 +148,7 @@ class ChatInterface(QWidget):
         self.attach_image_label.link = ""
         input_layout.addWidget(self.attach_image_label, alignment=Qt.AlignmentFlag.AlignHCenter)
         send_layout = QHBoxLayout()
-        send_widget = QWidget()
+        send_widget = QFrame()
         send_widget.setLayout(send_layout)
         self.message_input = CustomTextEdit()
         self.message_input.mousePressEvent = lambda _: self.hideCharacterInfoSidebar2()
@@ -341,7 +341,13 @@ class ChatInterface(QWidget):
     def charMessageSignal(self, response):
         command = response['command']
         if command == 'add_turn':
-            self.addMessage(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username), response['turn']['turn_key']['turn_id'],is_user=False)
+            message_widget = self.addMessage(
+                format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username),
+                response['turn']['turn_key']['turn_id'],
+                is_user=False
+            )
+            self.startTextAnimation(message_widget.currentWidget(), response['turn']['candidates'][0]['raw_content'])
+
         elif command == 'update_turn':
             for i in reversed(range(self.messages_layout.count())):
                 item = self.messages_layout.itemAt(i)
@@ -349,11 +355,70 @@ class ChatInterface(QWidget):
                 if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
                     message_stacked = widget
                     break
+
             message = message_stacked.currentWidget()
-            message.message_label.setText(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username))
+            if not hasattr(message.message_label, 'animation_queue'):
+                self.setupAnimation(message.message_label)
+
+            new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+            self.addTextToAnimation(message.message_label, new_text)
+
             message.setMinimumHeight(0)
             message.adjustSize()
-            message.setMinimumHeight(message.height())
+
+    def setupAnimation(self, label):
+        label.animation_queue = []
+        label.current_text = ""
+        label.current_index = 0
+        label.is_animating = False
+        label.target_text = ""
+
+        label.animation_timer = QTimer()
+        label.animation_timer.timeout.connect(lambda: self.animateNextChar(label))
+
+    def startTextAnimation(self, message_widget, full_text):
+        message = message_widget
+        label = message.message_label
+
+        self.setupAnimation(label)
+
+        label.setText("")
+        label.target_text = format_text(full_text, self.mw.username)
+        label.current_text = label.target_text
+        label.current_index = 0
+        label.is_animating = True
+
+        label.animation_timer.start(30)
+
+    def addTextToAnimation(self, label, new_full_text):
+        label.target_text = new_full_text
+
+        if label.is_animating:
+            current_length = len(label.current_text)
+            label.current_text = label.target_text
+        else:
+            label.current_text = label.target_text
+            label.current_index = len(label.text())
+            label.is_animating = True
+            label.animation_timer.start(30)
+
+    def animateNextChar(self, label):
+        if label.current_index < len(label.current_text):
+            display_text = label.current_text[:label.current_index + 1]
+            label.setText(display_text)
+            label.current_index += 1
+
+            message = label.parent()
+            if message:
+                message.setMinimumHeight(0)
+                message.adjustSize()
+                message.setMinimumHeight(message.height())
+        else:
+            if label.target_text != label.current_text:
+                label.current_text = label.target_text
+            else:
+                label.animation_timer.stop()
+                label.is_animating = False
 
     def openPersonaOverlay(self):
         overlay_widget = QWidget()
@@ -1105,7 +1170,7 @@ class ChatInterface(QWidget):
 
         self.messages_layout.addWidget(message_widget, 1,
                                        Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft)
-        self.messages_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
+        #self.messages_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
         message_widget.addWidget(message_bubble)
         message_widget.setCurrentWidget(message_bubble)
         return message_widget
@@ -1205,16 +1270,37 @@ class ChatInterface(QWidget):
                 if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
                     message_stacked = widget
                     break
+
             message_stacked.turn_id = response['turn']['turn_key']['turn_id']
+
             if not message_bubble_added:
-                message = self.createMessage(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username), response['turn']['turn_key']['turn_id'], False)
+                message = self.createMessage(
+                    format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username),
+                    response['turn']['turn_key']['turn_id'],
+                    False
+                )
+                self.startTextAnimation(message, response['turn']['candidates'][0]['raw_content'])
             else:
                 message = message_stacked.currentWidget()
+                label = message.message_label
+
+                if hasattr(label, 'animation_timer'):
+                    label.animation_timer.stop()
+                    label.is_animating = False
+
+                self.setupAnimation(label)
+                label.setText("")
+                new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+                label.target_text = new_text
+                label.current_text = new_text
+                label.current_index = 0
+                label.is_animating = True
+
+                label.animation_timer.start(30)
+
             message.turn_id = response['turn']['turn_key']['turn_id']
-            message.message_label.setText(format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username))
             message.setMinimumHeight(0)
             message.adjustSize()
-            message.setMinimumHeight(message.height())
 
     def turnRegenerate(self, turn_id):
         for i in range(self.messages_layout.count()):
