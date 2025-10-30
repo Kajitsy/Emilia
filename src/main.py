@@ -67,7 +67,7 @@ from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, 
                                     VerticalScrollPage, HorizontalScrollPage, CardFrame)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, color_avatar
-from modules.cards import VoiceCards, CharacterCards, UserCards
+from modules.cards import VoiceCards, CharacterCards, ScenesCards, UserCards
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -246,6 +246,7 @@ class EmiliaNext(QMainWindow):
         self.chat_thread.featured_voices_signal.connect(self.addFeaturedVoices)
         self.chat_thread.trythis_chats_signal.connect(self.addTryThisChats)
         self.chat_thread.get_main_page_chats_signal.connect(self.addMainPageChats)
+        self.chat_thread.get_scenes_curated_signal.connect(self.addScenesMainPage)
         self.chat_thread.featured_chats_signal.connect(self.addForYouChats)
         self.chat_thread.category_characters_signal.connect(self.addCharacterByCategory)
         self.chat_thread.get_me_signal.connect(self.getMe)
@@ -263,6 +264,7 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.create_connect()
 
                 self.chat_thread.get_recent_chats()
+                self.chat_thread.get_scenes_curated()
                 self.chat_thread.get_trythis_chats()
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_me()
@@ -537,6 +539,10 @@ class EmiliaNext(QMainWindow):
 
         for_you_section, self.for_you_layout = self.createSection(self.tr("For You"))
         scroll_layout.addWidget(for_you_section)
+
+        scenes_section, self.scenes_layout = self.createSection(self.tr("Scenes"))
+        scenes_section.setFixedHeight(350)
+        scroll_layout.addWidget(scenes_section)
 
         recommended_section, self.recommended_layout = self.createSection(self.tr("Recommended"))
         scroll_layout.addWidget(recommended_section)
@@ -977,6 +983,19 @@ class EmiliaNext(QMainWindow):
             card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(277, 134)
             self.trending_layout.addWidget(card)
+
+    def addScenesMainPage(self, scenes):
+        for i in reversed(range(self.scenes_layout.count())):
+            item = self.popular_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
+
+        self.curated_scenes = scenes
+
+        for scene in self.curated_scenes:
+            card = ScenesCards.MainCard(self, scene)
+            #card.setFixedSize(277, 134)
+            self.scenes_layout.addWidget(card)
 
     def addForYouChats(self, chats):
         for i in reversed(range(self.for_you_layout.count())):
