@@ -395,6 +395,10 @@ class ChatThread(QThread):
 
     join_or_create_session_signal = pyqtSignal(object)
 
+    get_scenes_curated_signal = pyqtSignal(object)
+    get_scene_by_id_signal = pyqtSignal(object)
+    get_scene_by_user_signal = pyqtSignal(object)
+
     voices_search_signal = pyqtSignal(object)
     voices_search_username_signal = pyqtSignal(object)
     featured_voices_signal = pyqtSignal(object)
@@ -771,6 +775,21 @@ class ChatThread(QThread):
     async def get_featured_voices(self):
         response = await self.request("multimodal/api/v1/voices/featured", domain="neo")
         self.featured_voices_signal.emit(response.get("voices", []))
+
+    @asyncSlot
+    async def get_scenes_curated(self):
+        response = await self.request("scene/v1/scenes/curated", domain="neo")
+        self.get_scenes_curated_signal.emit(response.get("scenes", []))
+
+    @asyncSlot
+    async def get_scene_by_id(self, scene_id):
+        response = await self.request(f"scene/v1/scenes/{scene_id}", domain="neo")
+        self.get_scene_by_id_signal.emit(response.get("scene", {}))
+
+    @asyncSlot
+    async def get_scene_by_user(self, username):
+        response = await self.request(f"scene/v1/scenes?creator_username={username}", domain="neo")
+        self.get_scene_by_user_signal.emit(response.get("scenes", []))
 
     @asyncSlot
     async def get_trythis_chats(self):
