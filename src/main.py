@@ -874,7 +874,12 @@ class EmiliaNext(QMainWindow):
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
-    def openChat(self, character_id, character_name, chat_id="", card=None):
+    def openScene(self, data={}, scene_id=None):
+        widget = ScenesCards.MainPage(self, data, scene_id)
+        self.main_content_area.addWidget(widget)
+        self.main_content_area.setCurrentWidget(widget)
+
+    def openChat(self, character_id, character_name, chat_id="", card=None, scene_id=""):
         if self.current_chat_interface:
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
@@ -884,8 +889,7 @@ class EmiliaNext(QMainWindow):
             self.current_chat_interface = None
 
 
-        self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id)
-        self.current_chat_interface.chat_id = chat_id
+        self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id, scene_id)
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
         self.main_content_area.addWidget(self.current_chat_interface)
@@ -1022,7 +1026,7 @@ class EmiliaNext(QMainWindow):
         for index, character in enumerate(self.try_this_chats):
             card = CharacterCards.MiniCard(
                 self,
-                character.get('name', "Unknown"),
+                character.get('name'),
                 character.get('external_id'),
                 character.get('avatar_file_name')
             )

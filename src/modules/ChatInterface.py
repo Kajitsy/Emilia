@@ -95,7 +95,7 @@ class MessageBubble(QFrame):
         self.setMinimumHeight(self.height())
 
 class ChatInterface(QWidget):
-    def __init__(self, main_window, character_name, character_id, chat_id: str | None = None):
+    def __init__(self, main_window, character_name, character_id, chat_id: str | None = None, scene_id: str | None = None):
         super().__init__()
         self.mw = main_window
         self.chat_thread: ChatThread | None = self.mw.chat_thread
@@ -103,6 +103,8 @@ class ChatInterface(QWidget):
         self.character_name = character_name
         self.character_id = character_id
         self.chat_id = chat_id
+        self.scene_id = scene_id
+        self.scene = {}
         self.character = None
         self.cis_visible = False
         self.voice_id = None
@@ -124,6 +126,7 @@ class ChatInterface(QWidget):
         self.chat_thread.message_signal.connect(self.charMessageSignal)
         self.chat_thread.user_message_signal.connect(self.userMessageSignal)
         self.chat_thread.get_user_personas_signal.connect(self.getUserPersonas)
+        self.chat_thread.get_scene_by_id_signal.connect(self.getScene)
 
     def initUI(self):
         self.layout = QVBoxLayout(self)
@@ -184,6 +187,7 @@ class ChatInterface(QWidget):
         self.chat_thread.voice_override_signal.connect(self._voiceOverride)
         self.chat_thread.voice_override(self.character_id)
         self.chat_thread.get_user_personas()
+        if self.scene_id: self.chat_thread.get_scene_by_id(self.scene_id)
 
     def createTopBar(self):
         header_frame = QWidget()
@@ -204,8 +208,19 @@ class ChatInterface(QWidget):
         header_char_text_layout = QVBoxLayout()
         header_char_text_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         header_character_layout.addLayout(header_char_text_layout)
+        header_text_layout = QHBoxLayout()
+        header_char_text_layout.addLayout(header_text_layout)
         self.header_name_label = QLabel()
-        header_char_text_layout.addWidget(self.header_name_label)
+        header_text_layout.addWidget(self.header_name_label)
+        header_spacer_label = QLabel(" | ")
+        header_spacer_label.setVisible(False)
+        header_text_layout.addWidget(header_spacer_label)
+        self.header_scene_title_label = QLabel()
+        self.header_scene_title_label.setVisible(False)
+        header_text_layout.addWidget(self.header_scene_title_label)
+        if self.scene_id:
+            self.header_scene_title_label.setVisible(True)
+            header_spacer_label.setVisible(True)
         self.header_author_label = QLabel()
         header_char_text_layout.addWidget(self.header_author_label)
 
@@ -321,6 +336,13 @@ class ChatInterface(QWidget):
         self.char_info_layout.addWidget(self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
+
+    def getScene(self, data):
+        self.chat_thread.get_scene_by_id_signal.disconnect()
+        self.scene = data
+        self.header_scene_title_label.setText(self.scene["title"])
+        self.header_scene_title_label.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.header_scene_title_label.mousePressEvent = lambda _: self.mw.openScene(self.scene, self.scene_id)
 
     def getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()
@@ -952,7 +974,7 @@ class ChatInterface(QWidget):
                     self.mw.recent_chat_scroll_layout.insertWidget(0, recent_card)
                     break
 
-        self.chat_id = botanswer[0]['chat_id']
+        self.chat_id = botanswer['chat']['chat_id']
         recent_card.mousePressEvent = lambda event: self.mw.openChat(self.character_id, self.character_name, self.chat_id)
         recent_card.setObjectName(self.chat_id)
         self.chat_thread.new_chat_created_signal.disconnect()
@@ -1140,7 +1162,7 @@ class ChatInterface(QWidget):
     def _newChatCreated(self, botanswer):
         self.clearMessages()
         self.chat_thread.new_chat_created_signal.disconnect()
-        self.chat_id = botanswer[0]['chat_id']
+        self.chat_id = botanswer['chat']['chat_id']
         self.chat_thread.get_char_signal.connect(self._getCharacter)
         self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
         self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
@@ -1352,7 +1374,7 @@ class ChatInterface(QWidget):
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
-        if hasattr(self, 'recent_card'):
+        if hasattr(self, 'recent_card') and not self.scene_id:
             self.recent_card.setCheckable(False)
 
     def toggleLeftSidebar(self):

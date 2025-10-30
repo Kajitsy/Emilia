@@ -252,7 +252,7 @@ class ChatClient:
             await self.session.close()
 
     async def new_chat(self, char: str, creator_id: str, greeting: bool = True,
-                       chat_id: str = None, preferred_model_type: str = "MODEL_TYPE_BALANCED"):
+                       chat_id: str = None, preferred_model_type: str = "MODEL_TYPE_BALANCED", scene_id: str = ""):
         chat_id = str(uuid.uuid4()) if chat_id is None else chat_id
 
         payload = {
@@ -270,14 +270,15 @@ class ChatClient:
             }
         }
 
+        if scene_id:
+            payload['payload']['chat']['scene_id'] = scene_id
+
         await self.ws.send_str(json.dumps(payload))
         response = json.loads((await self.ws.recv_str()))
-
         if 'chat' not in response:
             raise Exception(response.get('comment', 'Unknown error'))
 
-        answer = json.loads((await self.ws.recv_str()))['turn']
-        return response['chat'], answer
+        return response
 
     async def send_message(self, char: str, chat_id: str, text: str, author: dict = {}, attachments: list = []):
         message = {
@@ -700,15 +701,16 @@ class ChatThread(QThread):
         self.get_user_signal.emit(self.users[username])
 
     @asyncSlot
-    async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED"):
+    async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED", scene_id = ""):
         if not self.me:
             self.me = self.get_me()
         if self.connect:
             while True:
                 try:
-                    response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type)
-                    if chat_id: del self.chat_histories[chat_id]
+                    response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type, scene_id=scene_id)
+                    if chat_id and chat_id in self.chat_histories: del self.chat_histories[chat_id]
                     logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
+                    print(response)
                     self.new_chat_created_signal.emit(response)
                     break
                 except curl_cffi.curl.CurlError:
