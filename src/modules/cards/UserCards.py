@@ -7,7 +7,8 @@ from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, TabButt
 from modules.QThreads import *
 from modules.style.Icons import Svg
 from modules.style.Utils import format_number, color_avatar
-from modules.cards import VoiceCards, PersonaCards, CharacterCards
+from modules.cards import VoiceCards, PersonaCards, CharacterCards, ScenesCards
+
 
 class UserProfile(QWidget):
     def __init__(self, main_window, username):
@@ -28,10 +29,12 @@ class UserProfile(QWidget):
         self.chat_thread.get_user_signal.connect(self._getUser)
         self.chat_thread.voices_search_username_signal.connect(self._getVoices)
         self.chat_thread.get_upvoted_characters_signal.connect(self._getUpCharacters)
+        self.chat_thread.get_scenes_by_user_signal.connect(self._getScenes)
         self.chat_thread.get_user_personas_signal.connect(self._getUserPersonas)
 
         self.chat_thread.get_user(self.profile_id)
         self.chat_thread.voices_search_username(self.profile_id)
+        self.chat_thread.get_scenes_by_user(self.profile_id)
         if self.is_me:
             self.chat_thread.get_user_personas()
             self.chat_thread.get_upvoted_characters()
@@ -125,6 +128,7 @@ class UserProfile(QWidget):
         self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
 
         self.voices_button = TabButton(self.tr("Voices"))
         self.voices_button.setCheckable(True)
@@ -132,6 +136,15 @@ class UserProfile(QWidget):
         self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.voices_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
+
+        self.scenes_button = TabButton(self.tr("Scenes"))
+        self.scenes_button.setCheckable(True)
+        self.scenes_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.scenes_list))
+        self.scenes_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
+        self.scenes_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
+        self.scenes_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.scenes_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
 
         self.up_characters_button = TabButton(self.tr("Liked"))
         self.up_characters_button.setCheckable(True)
@@ -139,6 +152,7 @@ class UserProfile(QWidget):
         self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.up_characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
         self.up_characters_button.setVisible(False)
 
         self.personas_button = TabButton(self.tr("Personas"))
@@ -147,14 +161,17 @@ class UserProfile(QWidget):
         self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.personas_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
+        self.personas_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
         self.personas_button.setVisible(False)
 
         buttons_layout.addWidget(self.characters_button)
         buttons_layout.addWidget(self.up_characters_button)
         buttons_layout.addWidget(self.personas_button)
         buttons_layout.addWidget(self.voices_button)
+        buttons_layout.addWidget(self.scenes_button)
 
         self.character_list, self.character_list_layout = self.scroll_page()
+        self.scenes_list, self.scenes_list_layout = self.scroll_page()
         self.upvoted_characters_list, self.upvoted_characters_layout = self.scroll_page()
         self.personas_list, self.personas_layout = self.scroll_page()
         self.voice_list, self.voice_list_layout = self.scroll_page()
@@ -164,6 +181,7 @@ class UserProfile(QWidget):
         self.lists_widget.addWidget(self.upvoted_characters_list)
         self.lists_widget.addWidget(self.personas_list)
         self.lists_widget.addWidget(self.voice_list)
+        self.lists_widget.addWidget(self.scenes_list)
         self.lists_widget.setFixedWidth(600)
         self.lists_widget.setCurrentWidget(self.character_list)
         content_layout.addWidget(self.lists_widget, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -227,6 +245,19 @@ class UserProfile(QWidget):
         else:
             empty_label = QLabel(self.tr("And it's empty here..."))
             self.upvoted_characters_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+    def _getScenes(self, data):
+        self.chat_thread.get_scenes_by_user_signal.disconnect()
+        self.scenes = data
+
+        if self.scenes:
+            for scene in self.scenes:
+                card = ScenesCards.ListCard(self.mw, scene)
+                self.scenes_list_layout.addWidget(card)
+        else:
+            empty_label = QLabel(self.tr("And it's empty here..."))
+            self.scenes_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
 
     def _getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()

@@ -398,7 +398,7 @@ class ChatThread(QThread):
 
     get_scenes_curated_signal = pyqtSignal(object)
     get_scene_by_id_signal = pyqtSignal(object)
-    get_scene_by_user_signal = pyqtSignal(object)
+    get_scenes_by_user_signal = pyqtSignal(object)
 
     voices_search_signal = pyqtSignal(object)
     voices_search_username_signal = pyqtSignal(object)
@@ -789,9 +789,9 @@ class ChatThread(QThread):
         self.get_scene_by_id_signal.emit(response.get("scene", {}))
 
     @asyncSlot
-    async def get_scene_by_user(self, username):
+    async def get_scenes_by_user(self, username):
         response = await self.request(f"scene/v1/scenes?creator_username={username}", domain="neo")
-        self.get_scene_by_user_signal.emit(response.get("scenes", []))
+        self.get_scenes_by_user_signal.emit(response.get("scenes", []))
 
     @asyncSlot
     async def get_trythis_chats(self):

@@ -65,6 +65,58 @@ class MainCard(CardFrame):
         super().mousePressEvent(a0)
         self.mw.openScene(self.data)
 
+class ListCard(CardFrame):
+    def __init__(self, main_window, data):
+        super().__init__()
+        self.mw = main_window
+        self.data = data
+        self.title = self.data.get('title')
+
+        self.initUI()
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+
+    def initUI(self):
+        card_layout = QHBoxLayout()
+        self.setLayout(card_layout)
+
+        self.image_label = QLabel()
+        self.image_label.setFixedSize(110, 140)
+        card_layout.addWidget(self.image_label, alignment=Qt.AlignmentFlag.AlignVCenter)
+
+        thread = ImageLoaderThread(self.data.get("background_image_url"), 110, 140, "cache/scenes")
+        thread.image_loaded.connect(self.image_label.setPixmap)
+        thread.radius = 4
+        thread.start()
+        self.mw.threads.append(thread)
+
+        text_layout = QVBoxLayout()
+        text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        card_layout.addLayout(text_layout)
+
+        title_label = QLabel(self.title)
+        title_label.setWordWrap(True)
+        font = title_label.font()
+        font.setBold(True)
+        font.setPointSize(10)
+        title_label.setFont(font)
+        text_layout.addWidget(title_label)
+
+        if self.data.get('description'):
+            description_label = QLabel(format_text(self.data.get('description')))
+            description_label.setWordWrap(True)
+            description_label.setStyleSheet("color: #a2a2ac;")
+            font = description_label.font()
+            font.setPointSize(9)
+            description_label.setFont(font)
+            fm = QFontMetrics(font)
+            description_label.setMaximumHeight(fm.lineSpacing() * 3)
+            text_layout.addWidget(description_label)
+            self.setToolTip(format_text(self.data.get('title')))
+
+    def mousePressEvent(self, a0):
+        super().mousePressEvent(a0)
+        self.mw.openScene(self.data)
+
 class MainPage(QWidget):
     def __init__(self, main_window, data={}, scene_id=None):
         super().__init__()
