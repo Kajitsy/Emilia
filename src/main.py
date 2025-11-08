@@ -67,7 +67,7 @@ from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, 
                                     VerticalScrollPage, HorizontalScrollPage, CardFrame)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, color_avatar
-from modules.cards import VoiceCards, CharacterCards, UserCards
+from modules.cards import VoiceCards, CharacterCards, ScenesCards, UserCards
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -112,7 +112,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.1.0b"
+        self.version = "3.2.0b"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -124,6 +124,7 @@ class EmiliaNext(QMainWindow):
         self.hide_overlay = True
         self.me_has_avatar = False
         self.username = None
+        self.muted = False
 
         self.threads = []
         self.overlays = []
@@ -163,7 +164,6 @@ class EmiliaNext(QMainWindow):
     def initUI(self):
         self.layout = QHBoxLayout()
 
-        # Left Sidebar
         self.left_sidebar = self.createLeftSidebar()
         self.layout.addWidget(self.left_sidebar)
 
@@ -245,6 +245,7 @@ class EmiliaNext(QMainWindow):
         self.chat_thread.featured_voices_signal.connect(self.addFeaturedVoices)
         self.chat_thread.trythis_chats_signal.connect(self.addTryThisChats)
         self.chat_thread.get_main_page_chats_signal.connect(self.addMainPageChats)
+        self.chat_thread.get_scenes_curated_signal.connect(self.addScenesMainPage)
         self.chat_thread.featured_chats_signal.connect(self.addForYouChats)
         self.chat_thread.category_characters_signal.connect(self.addCharacterByCategory)
         self.chat_thread.get_me_signal.connect(self.getMe)
@@ -258,10 +259,11 @@ class EmiliaNext(QMainWindow):
 
         if QDateTime.fromString(self.settings.value("cai_auth/expiration_date")) < QDateTime.currentDateTime():
             if self.token:
-                self.chat_thread.create_client(self.token)
+                self.chat_thread.set_token(self.token)
                 self.chat_thread.create_connect()
 
                 self.chat_thread.get_recent_chats()
+                self.chat_thread.get_scenes_curated()
                 self.chat_thread.get_trythis_chats()
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_me()
@@ -340,6 +342,7 @@ class EmiliaNext(QMainWindow):
                 "https://characterai.io/i/80/static/avatars/" + character_avatar_url + '?webp=true&anim=0',
                 45, 45)
             load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(avatar_label, 45, 45, character_name))
             load_avatar_thread.start()
             self.threads.append(load_avatar_thread)
         else:
@@ -356,6 +359,7 @@ class EmiliaNext(QMainWindow):
                 "https://characterai.io/i/80/static/avatars/" + character_avatar_url + '?webp=true&anim=0',
                 55, 55)
             load_avatar_thread.image_loaded.connect(avatar_label_2.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(avatar_label_2, 55, 55, character_name))
             load_avatar_thread.start()
             self.threads.append(load_avatar_thread)
         else:
@@ -486,7 +490,7 @@ class EmiliaNext(QMainWindow):
         self.showOverlay(self.createDownloadOverlay())
         self.hide_overlay = False
         save_path = os.path.join(os.getcwd(), "update.exe")
-        self.thread = DownloadThread(url, save_path)
+        self.thread = FileLoaderThread(url, save_path=save_path)
         self.thread.progress.connect(lambda x: self.download_overlay_progress.setValue(x))
         self.thread.finished.connect(self.runInstaller)
         self.thread.start()
@@ -532,11 +536,14 @@ class EmiliaNext(QMainWindow):
 
         scroll_area = VerticalScrollPage()
         scroll_area.setStyleSheet("background-color: transparent; border: none;")
-        scroll_content = scroll_area.viewport
         scroll_layout = scroll_area.layout
 
         for_you_section, self.for_you_layout = self.createSection(self.tr("For You"))
         scroll_layout.addWidget(for_you_section)
+
+        scenes_section, self.scenes_layout = self.createSection(self.tr("Scenes"))
+        scenes_section.setFixedHeight(350)
+        scroll_layout.addWidget(scenes_section)
 
         recommended_section, self.recommended_layout = self.createSection(self.tr("Recommended"))
         scroll_layout.addWidget(recommended_section)
@@ -868,7 +875,12 @@ class EmiliaNext(QMainWindow):
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
-    def openChat(self, character_id, character_name, chat_id="", card=None):
+    def openScene(self, data={}, scene_id=None):
+        widget = ScenesCards.MainPage(self, data, scene_id)
+        self.main_content_area.addWidget(widget)
+        self.main_content_area.setCurrentWidget(widget)
+
+    def openChat(self, character_id, character_name, chat_id="", card=None, scene_id=""):
         if self.current_chat_interface:
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
@@ -878,8 +890,7 @@ class EmiliaNext(QMainWindow):
             self.current_chat_interface = None
 
 
-        self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id)
-        self.current_chat_interface.chat_id = chat_id
+        self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id, scene_id)
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
         self.main_content_area.addWidget(self.current_chat_interface)
@@ -978,6 +989,19 @@ class EmiliaNext(QMainWindow):
             card.setFixedSize(277, 134)
             self.trending_layout.addWidget(card)
 
+    def addScenesMainPage(self, scenes):
+        for i in reversed(range(self.scenes_layout.count())):
+            item = self.popular_layout.itemAt(i)
+            if item and item.widget():
+                item.widget().deleteLater()
+
+        self.curated_scenes = scenes
+
+        for scene in self.curated_scenes:
+            card = ScenesCards.MainCard(self, scene)
+            #card.setFixedSize(277, 134)
+            self.scenes_layout.addWidget(card)
+
     def addForYouChats(self, chats):
         for i in reversed(range(self.for_you_layout.count())):
             item = self.popular_layout.itemAt(i)
@@ -1003,7 +1027,7 @@ class EmiliaNext(QMainWindow):
         for index, character in enumerate(self.try_this_chats):
             card = CharacterCards.MiniCard(
                 self,
-                character.get('name', "Unknown"),
+                character.get('name'),
                 character.get('external_id'),
                 character.get('avatar_file_name')
             )
@@ -1279,6 +1303,7 @@ class SettingsPage(QWidget):
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
                     {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
+                    {"type": "checkbox", "label": self.tr("Display text formatting buttons"), "key": "show_format_buttons", "def_value": False},
                     {"type": "combobox", "label": self.tr("Input Device"), "items": self.mw.input_devices.values(), "key": "input_device"},
                     {"type": "combobox", "label": self.tr("Output Device"), "items": self.mw.output_devices.values(), "key": "output_device"},
                     {"type": "keybind", "label": self.tr("Microphone mute key"), "def_value": "Ctrl+M", "key": "microphone_mute_key_bind"},

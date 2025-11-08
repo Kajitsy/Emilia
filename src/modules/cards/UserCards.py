@@ -7,7 +7,8 @@ from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, TabButt
 from modules.QThreads import *
 from modules.style.Icons import Svg
 from modules.style.Utils import format_number, color_avatar
-from modules.cards import VoiceCards, PersonaCards, CharacterCards
+from modules.cards import VoiceCards, PersonaCards, CharacterCards, ScenesCards
+
 
 class UserProfile(QWidget):
     def __init__(self, main_window, username):
@@ -28,10 +29,12 @@ class UserProfile(QWidget):
         self.chat_thread.get_user_signal.connect(self._getUser)
         self.chat_thread.voices_search_username_signal.connect(self._getVoices)
         self.chat_thread.get_upvoted_characters_signal.connect(self._getUpCharacters)
+        self.chat_thread.get_scenes_by_user_signal.connect(self._getScenes)
         self.chat_thread.get_user_personas_signal.connect(self._getUserPersonas)
 
         self.chat_thread.get_user(self.profile_id)
         self.chat_thread.voices_search_username(self.profile_id)
+        self.chat_thread.get_scenes_by_user(self.profile_id)
         if self.is_me:
             self.chat_thread.get_user_personas()
             self.chat_thread.get_upvoted_characters()
@@ -89,6 +92,9 @@ class UserProfile(QWidget):
         self.chats_label.setStyleSheet("color: #a2a2ac;")
         sub_layout.addWidget(self.chats_label)
 
+        self.bio_label = QLabel()
+        layout.addWidget(self.bio_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
         but_frame = QFrame(self)
         but_layout = QHBoxLayout()
         but_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -125,6 +131,7 @@ class UserProfile(QWidget):
         self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
 
         self.voices_button = TabButton(self.tr("Voices"))
         self.voices_button.setCheckable(True)
@@ -132,6 +139,15 @@ class UserProfile(QWidget):
         self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.voices_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
+
+        self.scenes_button = TabButton(self.tr("Scenes"))
+        self.scenes_button.setCheckable(True)
+        self.scenes_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.scenes_list))
+        self.scenes_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
+        self.scenes_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
+        self.scenes_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.scenes_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
 
         self.up_characters_button = TabButton(self.tr("Liked"))
         self.up_characters_button.setCheckable(True)
@@ -139,6 +155,7 @@ class UserProfile(QWidget):
         self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.up_characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
         self.up_characters_button.setVisible(False)
 
         self.personas_button = TabButton(self.tr("Personas"))
@@ -147,14 +164,17 @@ class UserProfile(QWidget):
         self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
         self.personas_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
+        self.personas_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
         self.personas_button.setVisible(False)
 
         buttons_layout.addWidget(self.characters_button)
         buttons_layout.addWidget(self.up_characters_button)
         buttons_layout.addWidget(self.personas_button)
         buttons_layout.addWidget(self.voices_button)
+        buttons_layout.addWidget(self.scenes_button)
 
         self.character_list, self.character_list_layout = self.scroll_page()
+        self.scenes_list, self.scenes_list_layout = self.scroll_page()
         self.upvoted_characters_list, self.upvoted_characters_layout = self.scroll_page()
         self.personas_list, self.personas_layout = self.scroll_page()
         self.voice_list, self.voice_list_layout = self.scroll_page()
@@ -164,6 +184,7 @@ class UserProfile(QWidget):
         self.lists_widget.addWidget(self.upvoted_characters_list)
         self.lists_widget.addWidget(self.personas_list)
         self.lists_widget.addWidget(self.voice_list)
+        self.lists_widget.addWidget(self.scenes_list)
         self.lists_widget.setFixedWidth(600)
         self.lists_widget.setCurrentWidget(self.character_list)
         content_layout.addWidget(self.lists_widget, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -228,6 +249,19 @@ class UserProfile(QWidget):
             empty_label = QLabel(self.tr("And it's empty here..."))
             self.upvoted_characters_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
+    def _getScenes(self, data):
+        self.chat_thread.get_scenes_by_user_signal.disconnect()
+        self.scenes = data
+
+        if self.scenes:
+            for scene in self.scenes:
+                card = ScenesCards.ListCard(self.mw, scene)
+                self.scenes_list_layout.addWidget(card)
+        else:
+            empty_label = QLabel(self.tr("And it's empty here..."))
+            self.scenes_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+
     def _getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()
         self.user_personas = data
@@ -257,6 +291,9 @@ class UserProfile(QWidget):
             self.mw.threads.append(load_avatar_thread)
         else:
             color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
+
+        if self.data.get('bio'):
+            self.bio_label.setText(self.data.get('bio'))
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
             if self.data.get('avatar_file_name') and self.mw.drpc_show_username:
@@ -478,7 +515,7 @@ class UserProfile(QWidget):
 class EditOverlay(QFrame):
     def __init__(self, main_window):
         super().__init__()
-        self.setFixedSize(500, 200)
+        self.setFixedSize(500, 250)
         self.mw = main_window
         self.svg_icons = Svg()
 
@@ -526,18 +563,24 @@ class EditOverlay(QFrame):
         names_layout = QVBoxLayout()
         fh_layout.addLayout(names_layout)
 
+        self.display_name_label = QLabel(self.tr("Display Name"))
+        names_layout.addWidget(self.display_name_label)
         self.display_name_edit = LineEdit()
         self.display_name_edit.setPlaceholderText(self.tr("Display Name"))
         self.display_name_edit.setText(self.data['name'])
         self.display_name_edit.setMaxLength(20)
         names_layout.addWidget(self.display_name_edit)
 
+        self.username_label = QLabel(self.tr("Username"))
+        names_layout.addWidget(self.username_label)
         self.username_edit = LineEdit()
         self.username_edit.setPlaceholderText(self.tr("Username"))
         self.username_edit.setText(self.data['username'])
         self.username_edit.setMaxLength(20)
         names_layout.addWidget(self.username_edit)
 
+        self.bio_label = QLabel(self.tr("Background"))
+        layout.addWidget(self.bio_label)
         self.bio_edit = CustomTextEdit()
         self.bio_edit.setPlaceholderText(self.tr("Background"))
         self.bio_edit.setText(self.data.get('bio'))

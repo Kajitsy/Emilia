@@ -2,10 +2,10 @@ import base64, uuid
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
-                             QSizePolicy, QWidget, QFileDialog, QFrame, QApplication)
+                             QSizePolicy, QWidget, QFileDialog, QApplication, QFrame)
 
 from modules.style.Elements import (CustomTextEdit, PushButton, LineEdit, CheckBox, ComboBox, VerticalScrollPage,
-    CardFrame)
+                                    CardFrame, ClickableFrame)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
 from modules.QThreads import ImageLoaderThread
@@ -42,8 +42,7 @@ class MainCard(CardFrame):
                 self.avatar_label_w,
                 self.avatar_label_h)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(
-                lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4))
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4))
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
@@ -134,8 +133,7 @@ class ListCard(CardFrame):
                 self.avatar_label_w,
                 self.avatar_label_h)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(
-                lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4))
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4))
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
@@ -209,6 +207,7 @@ class MiniCard(CardFrame):
             load_avatar_thread = ImageLoaderThread(
                 "https://characterai.io/i/80/static/avatars/" + self.avatar_url + '?webp=true&anim=0', 54, 54)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, 54, 54, self.name, 4))
             load_avatar_thread.radius = 4
             load_avatar_thread.start()
             self.mw.threads.append(load_avatar_thread)
@@ -225,6 +224,44 @@ class MiniCard(CardFrame):
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)
         self.mw.openChat(self.character_id, self.name, self.chat_id)
+
+class ClickableMiniCard(ClickableFrame):
+    def __init__(self, main_window, character_name, character_id, avatar_url, chat_id=None):
+        super().__init__()
+        self.mw = main_window
+        self.name = character_name
+        self.character_id = character_id
+        self.avatar_url = avatar_url
+        self.chat_id = chat_id
+
+        self.initUI()
+
+    def initUI(self):
+        card_layout = QHBoxLayout()
+        self.setLayout(card_layout)
+
+        self.avatar_label = QLabel()
+        self.avatar_label.setFixedSize(54, 54)
+        self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        card_layout.addWidget(self.avatar_label)
+
+        if self.avatar_url:
+            load_avatar_thread = ImageLoaderThread(
+                "https://characterai.io/i/80/static/avatars/" + self.avatar_url + '?webp=true&anim=0', 54, 54)
+            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, 54, 54, self.name, 4))
+            load_avatar_thread.radius = 4
+            load_avatar_thread.start()
+            self.mw.threads.append(load_avatar_thread)
+        else:
+            color_avatar(self.avatar_label, 54, 54, self.name, 4)
+
+        title_label = QLabel(self.name)
+        font = title_label.font()
+        font.setBold(True)
+        font.setPointSize(16)
+        title_label.setFont(font)
+        card_layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
 class EditPage(QWidget):
     def __init__(self, main_window, character_id=None):
@@ -305,9 +342,33 @@ class EditPage(QWidget):
         self.tagline_edit.setPlaceholderText(self.tr("Add a short tagline of your Character"))
         scroll_layout.addWidget(self.tagline_edit)
 
+        scroll_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
+
+        description_layout = QHBoxLayout()
+        scroll_layout.addLayout(description_layout)
         self.description_label = QLabel(self.tr("Description"))
         self.description_label.setFont(font)
-        scroll_layout.addWidget(self.description_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        description_layout.addWidget(self.description_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        description_layout.addStretch()
+        heading_combo = ComboBox()
+        heading_combo.addItem(self.tr("Plain text"), "")
+        heading_combo.addItem(self.tr("# Title 1"), "#")
+        heading_combo.addItem(self.tr("## Title 2"), "##")
+        heading_combo.addItem(self.tr("### Title 3"), "###")
+        heading_combo.addItem(self.tr("#### Title 4"), "####")
+        heading_combo.addItem(self.tr("##### Title 5"), "#####")
+        heading_combo.addItem(self.tr("###### Title 6"), "######")
+        heading_combo.currentIndexChanged.connect(lambda: self.description_edit.applyHeading(heading_combo))
+        description_layout.addWidget(heading_combo)
+        bold_button = PushButton(self.tr("Bold"))
+        bold_button.clicked.connect(lambda: self.description_edit.formatSelectedText("**", "**"))
+        description_layout.addWidget(bold_button)
+        italic_button = PushButton(self.tr("Italic"))
+        italic_button.clicked.connect(lambda: self.description_edit.formatSelectedText("*", "*"))
+        description_layout.addWidget(italic_button)
+        code_button = PushButton(self.tr("Code"))
+        code_button.clicked.connect(lambda: self.description_edit.formatSelectedText("`", "`"))
+        description_layout.addWidget(code_button)
 
         self.description_edit = CustomTextEdit()
         self.description_edit.setPlaceholderText(self.tr("How would your Character describe themselves?"))
@@ -317,9 +378,33 @@ class EditPage(QWidget):
         self.description_edit.verticalScrollBar().setVisible(False)
         scroll_layout.addWidget(self.description_edit)
 
+        scroll_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
+
+        greeting_layout = QHBoxLayout()
+        scroll_layout.addLayout(greeting_layout)
         self.greeting_label = QLabel(self.tr("Greeting"))
         self.greeting_label.setFont(font)
-        scroll_layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        greeting_layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        greeting_layout.addStretch()
+        heading_combo = ComboBox()
+        heading_combo.addItem(self.tr("Plain text"), "")
+        heading_combo.addItem(self.tr("# Title 1"), "#")
+        heading_combo.addItem(self.tr("## Title 2"), "##")
+        heading_combo.addItem(self.tr("### Title 3"), "###")
+        heading_combo.addItem(self.tr("#### Title 4"), "####")
+        heading_combo.addItem(self.tr("##### Title 5"), "#####")
+        heading_combo.addItem(self.tr("###### Title 6"), "######")
+        heading_combo.currentIndexChanged.connect(lambda: self.greeting_edit.applyHeading(heading_combo))
+        greeting_layout.addWidget(heading_combo)
+        bold_button = PushButton(self.tr("Bold"))
+        bold_button.clicked.connect(lambda: self.greeting_edit.formatSelectedText("**", "**"))
+        greeting_layout.addWidget(bold_button)
+        italic_button = PushButton(self.tr("Italic"))
+        italic_button.clicked.connect(lambda: self.greeting_edit.formatSelectedText("*", "*"))
+        greeting_layout.addWidget(italic_button)
+        code_button = PushButton(self.tr("Code"))
+        code_button.clicked.connect(lambda: self.greeting_edit.formatSelectedText("`", "`"))
+        greeting_layout.addWidget(code_button)
 
         self.greeting_edit = CustomTextEdit()
         self.greeting_edit.setPlaceholderText(self.tr("e.g. Hello, I am Albert. Ask me anything about my scientific contributions."))
@@ -337,9 +422,33 @@ class EditPage(QWidget):
         dg_layout.addWidget(self.dg_label)
         scroll_layout.addLayout(dg_layout)
 
+        scroll_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
+
+        definition_layout = QHBoxLayout()
+        scroll_layout.addLayout(definition_layout)
         self.definition_label = QLabel(self.tr("Definition"))
         self.definition_label.setFont(font)
-        scroll_layout.addWidget(self.definition_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        definition_layout.addWidget(self.definition_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        definition_layout.addStretch()
+        heading_combo = ComboBox()
+        heading_combo.addItem(self.tr("Plain text"), "")
+        heading_combo.addItem(self.tr("# Title 1"), "#")
+        heading_combo.addItem(self.tr("## Title 2"), "##")
+        heading_combo.addItem(self.tr("### Title 3"), "###")
+        heading_combo.addItem(self.tr("#### Title 4"), "####")
+        heading_combo.addItem(self.tr("##### Title 5"), "#####")
+        heading_combo.addItem(self.tr("###### Title 6"), "######")
+        heading_combo.currentIndexChanged.connect(lambda: self.definition_edit.applyHeading(heading_combo))
+        definition_layout.addWidget(heading_combo)
+        bold_button = PushButton(self.tr("Bold"))
+        bold_button.clicked.connect(lambda: self.definition_edit.formatSelectedText("**", "**"))
+        definition_layout.addWidget(bold_button)
+        italic_button = PushButton(self.tr("Italic"))
+        italic_button.clicked.connect(lambda: self.definition_edit.formatSelectedText("*", "*"))
+        definition_layout.addWidget(italic_button)
+        code_button = PushButton(self.tr("Code"))
+        code_button.clicked.connect(lambda: self.definition_edit.formatSelectedText("`", "`"))
+        definition_layout.addWidget(code_button)
 
         self.definition_edit = CustomTextEdit()
         self.definition_edit.setPlaceholderText(self.tr("What's your Character's backstory? How do you want it to talk or act?"))

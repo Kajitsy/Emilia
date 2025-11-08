@@ -1,4 +1,6 @@
-from PyQt6.QtCore import Qt
+import re
+
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon
 from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
     QHBoxLayout, QWidget,QCheckBox, QKeySequenceEdit, QMenu, QComboBox)
@@ -371,15 +373,121 @@ class CustomTextEdit(QTextEdit):
             color: #a2a2ac;
         }
     """)
+        self.format_timer = QTimer()
+        self.format_timer.setSingleShot(True)
+        self.format_timer.timeout.connect(self.formatUserMessage)
+        self.textChanged.connect(self.startFormat)
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() in {Qt.Key.Key_Return, Qt.Key.Key_Enter} and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
             self.keyPress()
+        elif event.key() == Qt.Key.Key_B and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            self.formatSelectedText("**", "**")
+            return
+        elif event.key() == Qt.Key.Key_I and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            self.formatSelectedText("*", "*")
+            return
+        elif event.key() == Qt.Key.Key_E and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            self.formatSelectedText("`", "`")
+            return
         else:
             super().keyPressEvent(event)
 
     def keyPress(self, *args, **kwargs):
         pass
+
+    def formatSelectedText(self, start_marker, end_marker, block=False):
+        cursor = self.textCursor()
+
+        if not cursor.hasSelection():
+            if block:
+                cursor.insertText(start_marker + end_marker)
+                cursor.movePosition(cursor.MoveOperation.Left, cursor.MoveMode.MoveAnchor, len(end_marker))
+            else:
+                cursor.insertText(start_marker + end_marker)
+                cursor.movePosition(cursor.MoveOperation.Left, cursor.MoveMode.MoveAnchor, len(end_marker))
+            self.setTextCursor(cursor)
+            return
+
+        selected_text = cursor.selectedText()
+        selected_text = selected_text.replace('\u2029', '\n')
+
+        if selected_text.startswith(start_marker.strip()) and selected_text.endswith(end_marker.strip()):
+            new_text = selected_text[len(start_marker.strip()):-len(end_marker.strip())]
+        else:
+            new_text = f"{start_marker}{selected_text}{end_marker}"
+
+        cursor.insertText(new_text)
+
+        cursor.movePosition(cursor.MoveOperation.Left, cursor.MoveMode.KeepAnchor, len(new_text))
+        self.setTextCursor(cursor)
+        self.format_timer.start(500)
+
+    def startFormat(self):
+        text = self.toPlainText()
+        line_count = text.count('\n')
+        line_count += text.count('<br>') + 1 if text else 1
+        height = line_count * self.fontMetrics().lineSpacing() + 16
+        self.setFixedHeight(height)
+        self.format_timer.start(500)
+
+    def formatUserMessage(self):
+        self.blockSignals(True)
+        text = self.toPlainText()
+        cursor = self.textCursor()
+        position = cursor.position()
+
+        replacements = [
+            (r"^(#{1,6})\s*(.+)$", lambda
+                m: f'<span style="color: gray;">{m.group(1)}</span> <h{len(m.group(1))} style="display:inline; font-size: {20 - len(m.group(1)) * 2}px;">{m.group(2)}</h{len(m.group(1))}>',
+             re.MULTILINE),
+            (r"``````", r'<span style="color: gray;">``````</span>', re.DOTALL),
+            (r"`(.*?)`", r'<span style="color: gray;">`</span><code style="padding: 2px;">\1</code><span style="color: gray;">`</span>'),
+            (r"\*\*\*(.*?)\*\*\*", r'<span style="color: gray;">***</span><b><i>\1</i></b><span style="color: gray;">***</span>'),
+            (r"\*\*(.*?)\*\*", r'<span style="color: gray;">**</span><b>\1</b><span style="color: gray;">**</span>'),
+            (r"\*(.*?)\*", r'<span style="color: gray;">*</span><i>\1</i><span style="color: gray;">*</span>'),
+            ("\n", "<br>"),
+        ]
+
+        for pattern, replacement, *flags in replacements:
+            text = re.sub(pattern, replacement, text, flags=flags[0] if flags else 0)
+
+        #line_count = text.count('<br>') + 1 if text else 1
+        #height = line_count * self.fontMetrics().lineSpacing() + 16
+
+        if text != self.toHtml():
+            self.setHtml(text)
+            cursor.setPosition(min(position, len(self.toPlainText())))
+            self.setTextCursor(cursor)
+
+        self.blockSignals(False)
+
+
+    def applyHeading(self, combo):
+        heading_marker = combo.currentData()
+
+        if not heading_marker:
+            combo.setCurrentIndex(0)
+            return
+
+        cursor = self.textCursor()
+
+        cursor.movePosition(cursor.MoveOperation.StartOfLine)
+        cursor.movePosition(cursor.MoveOperation.EndOfLine, cursor.MoveMode.KeepAnchor)
+
+        line_text = cursor.selectedText()
+
+        line_text = re.sub(r'^#{1,6}\s*', '', line_text)
+
+        new_text = f"{heading_marker} {line_text}"
+
+        cursor.insertText(new_text)
+
+        combo.blockSignals(True)
+        combo.setCurrentIndex(0)
+        combo.blockSignals(False)
+
+        self.format_timer.start(500)
 
 
 class ClickableFrame(QFrame):
