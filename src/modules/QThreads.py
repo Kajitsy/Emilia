@@ -228,125 +228,6 @@ class DiscordRPC(QThread):
             self.mw.settings.setValue("discord_rpc/enable", False)
             logging.error(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): {e}")
 
-class ChatClient:
-    def __init__(self, session: curl_cffi.AsyncSession, token: str = ""):
-        self.token = token
-        self.session = session
-        self.ws = None
-
-    async def __aexit__(self, *args):
-        await self.close()
-
-    async def connect(self):
-        self.ws = await self.session.ws_connect(
-            'wss://neo.character.ai/ws/',
-            cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'},
-            autoclose=False
-        )
-        return self
-
-    async def close(self):
-        if self.ws:
-            await self.ws.close()
-        if self.session:
-            await self.session.close()
-
-    async def new_chat(self, char: str, creator_id: str, greeting: bool = True,
-                       chat_id: str = None, preferred_model_type: str = "MODEL_TYPE_BALANCED", scene_id: str = ""):
-        chat_id = str(uuid.uuid4()) if chat_id is None else chat_id
-
-        payload = {
-            'command': 'create_chat',
-            'payload': {
-                'chat': {
-                    'character_id': char,
-                    'chat_id': chat_id,
-                    'creator_id': str(creator_id),
-                    'preferred_model_type': preferred_model_type,
-                    'type': 'TYPE_ONE_ON_ONE',
-                    'visibility': 'VISIBILITY_PRIVATE'
-                },
-                'with_greeting': greeting
-            }
-        }
-
-        if scene_id:
-            payload['payload']['chat']['scene_id'] = scene_id
-
-        await self.ws.send_str(json.dumps(payload))
-        response = json.loads((await self.ws.recv_str()))
-        if 'chat' not in response:
-            raise Exception(response.get('comment', 'Unknown error'))
-
-        return response
-
-    async def send_message(self, char: str, chat_id: str, text: str, author: dict = {}, attachments: list = []):
-        message = {
-            'command': 'create_and_generate_turn',
-            'payload': {
-                'attachments': attachments,
-                'character_id': char,
-                'turn': {
-                    'turn_key': {
-                        'chat_id': chat_id
-                    },
-                    'author': author,
-                    'candidates': [
-                        {
-                            'raw_content': text
-                        }
-                    ]
-                }
-            }
-        }
-        await self.ws.send_str(json.dumps(message))
-
-        while True:
-            msg = await self.ws.recv_str()
-            response = json.loads(msg)
-            if 'turn' not in response:
-                raise Exception(response['comment'])
-            yield response
-
-    async def generate_turn_candidate(self, char: str, chat_id: str, turn_id: str, user_name: str = ""):
-        message = {
-            'command': 'generate_turn_candidate',
-            'payload': {
-                'character_id': char,
-                'turn_key': {
-                    'chat_id': chat_id,
-                    'turn_id': turn_id
-                },
-                'user_name': user_name
-            }
-        }
-
-        await self.ws.send_str(json.dumps(message))
-
-        while True:
-            msg = await self.ws.recv_str()
-            response = json.loads(msg)
-            if 'turn' not in response:
-                raise Exception(response['comment'])
-            yield response
-
-    async def edit_message(self, chat_id: str, message_id: str, text: str):
-        payload = {
-            'command': 'edit_turn_candidate',
-            'payload': {
-                'turn_key': {
-                    'chat_id': chat_id,
-                    'turn_id': message_id
-                },
-                'new_candidate_raw_content': text
-            }
-        }
-        await self.ws.send_str(json.dumps(payload))
-        response = json.loads((await self.ws.recv_str()))
-        if 'turn' not in response:
-            raise Exception(response['comment'])
-        return response['turn']
-
 class ChatThread(QThread):
     finished = pyqtSignal(object)
     connected_signal = pyqtSignal(bool)
@@ -418,6 +299,7 @@ class ChatThread(QThread):
         self.cookie: str | None = None
         self.session = curl_cffi.AsyncSession()
         self.connect = None
+        self.ws = None
         self.me = {}
         self.eec = EEC(self.mw, self.mw.settings.value("vtube/port", 8001))
 
@@ -476,10 +358,8 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def create_connect(self):
-        self.connect = ChatClient(self.session, self.token)
-        await self.connect.connect()
-        self.connected_signal.emit(True)
-        return self.connect
+        self.ws = await self.session.ws_connect('wss://neo.character.ai/ws/', cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'}, autoclose=False)
+        return self.ws
 
     @asyncSlot
     async def check_vtube_connect(self):
@@ -497,6 +377,34 @@ class ChatThread(QThread):
     def set_cookie(self, cookie):
         self.cookie = cookie
 
+    async def _send_message(self, char: str, chat_id: str, text: str, author: dict = {}, attachments: list = []):
+        message = {
+            'command': 'create_and_generate_turn',
+            'payload': {
+                'attachments': attachments,
+                'character_id': char,
+                'turn': {
+                    'turn_key': {
+                        'chat_id': chat_id
+                    },
+                    'author': author,
+                    'candidates': [
+                        {
+                            'raw_content': text
+                        }
+                    ]
+                }
+            }
+        }
+        await self.ws.send_str(json.dumps(message))
+
+        while True:
+            msg = await self.ws.recv_str()
+            response = json.loads(msg)
+            if 'turn' not in response:
+                raise Exception(response['comment'])
+            yield response
+
     @asyncSlot
     async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id="", attachments=[]):
         used_emotes = []
@@ -510,9 +418,9 @@ class ChatThread(QThread):
             text = translation.text
             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The translator is used on user message")
         while True:
-            if self.connect:
+            if self.ws:
                 try:
-                    async for response in self.connect.send_message(char, chat_id, text, attachments=attachments):
+                    async for response in self._send_message(char, chat_id, text, attachments=attachments):
                         if response['turn']['author']['author_id'].isdigit() and response['turn']['author']['is_human']:
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been sent")
                             self.chat_histories.get(chat_id, []).append({
@@ -564,8 +472,25 @@ class ChatThread(QThread):
                             self.message_signal.emit(response)
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except curl_cffi.curl.CurlError:
-                    self.connect = self.create_connect()
+                    self.ws = self.create_connect()
                     logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
+
+    async def _edit_message(self, chat_id: str, message_id: str, text: str):
+        payload = {
+            'command': 'edit_turn_candidate',
+            'payload': {
+                'turn_key': {
+                    'chat_id': chat_id,
+                    'turn_id': message_id
+                },
+                'new_candidate_raw_content': text
+            }
+        }
+        await self.ws.send_str(json.dumps(payload))
+        response = json.loads((await self.ws.recv_str()))
+        if 'turn' not in response:
+            raise Exception(response['comment'])
+        return response['turn']
 
     @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):
@@ -575,6 +500,29 @@ class ChatThread(QThread):
         for i, turn in enumerate(self.chat_histories.get(chat_id, [])):
             if turn.get('turn_key', {}).get('turn_id') in turn_ids:
                 del self.chat_histories[chat_id][i]
+
+    async def _generate_turn_candidate(self, char: str, chat_id: str, turn_id: str, user_name: str = ""):
+        message = {
+            'command': 'generate_turn_candidate',
+            'payload': {
+                'character_id': char,
+                'turn_key': {
+                    'chat_id': chat_id,
+                    'turn_id': turn_id
+                },
+                'user_name': user_name
+            }
+        }
+
+        await self.ws.send_str(json.dumps(message))
+
+        while True:
+            msg = await self.ws.recv_str()
+            response = json.loads(msg)
+            if 'turn' not in response:
+                raise Exception(response['comment'])
+            yield response
+
 
     @asyncSlot
     async def turn_regenerate(self, char, chat_id, turn_id, user_name="", tts_enabled=False, voice_id=""):
@@ -586,10 +534,10 @@ class ChatThread(QThread):
             await self.eec.connect()
             await self.eec.UseEmote("Thinks")
             used_emotes.append("Thinks")
-        if self.connect:
+        if self.ws:
              while True:
                 try:
-                    async for response in self.connect.generate_turn_candidate(char, chat_id, turn_id, user_name):
+                    async for response in self._generate_turn_candidate(char, chat_id, turn_id, user_name):
                         if vtube_studio and "Says" not in used_emotes:
                             logging.debug(f'QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The emotion "Says" is used')
                             await self.eec.UseEmote("Says")
@@ -633,7 +581,7 @@ class ChatThread(QThread):
                             turn_id = response['turn']['turn_key']['turn_id']
                             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): The message has been updated")
                 except curl_cffi.curl.CurlError:
-                    self.connect = self.create_connect()
+                    self.ws = self.create_connect()
                     logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
@@ -704,16 +652,46 @@ class ChatThread(QThread):
     async def new_chat(self, char, chat_id = None, preferred_model_type = "MODEL_TYPE_BALANCED", scene_id = ""):
         if not self.me:
             self.me = self.get_me()
-        if self.connect:
+        if self.ws:
             while True:
                 try:
-                    response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type, scene_id=scene_id)
-                    if chat_id and chat_id in self.chat_histories: del self.chat_histories[chat_id]
-                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
-                    self.new_chat_created_signal.emit(response)
+                    chat_id = str(uuid.uuid4())
+
+                    payload = {
+                        'command': 'create_chat',
+                        'payload': {
+                            'chat': {
+                                'character_id': char,
+                                'chat_id': chat_id,
+                                'creator_id': str(self.me['user']['id']),
+                                'preferred_model_type': preferred_model_type,
+                                'type': 'TYPE_ONE_ON_ONE',
+                                'visibility': 'VISIBILITY_PRIVATE'
+                            },
+                            'with_greeting': True
+                        }
+                    }
+
+                    if scene_id:
+                        payload['payload']['chat']['scene_id'] = scene_id
+
+                    await self.ws.send_str(json.dumps(payload))
+
+                    while True:
+                        response = json.loads((await self.ws.recv_str()))
+                        print(response)
+                        if response['command'] == 'create_chat_response':
+                            if chat_id and chat_id in self.chat_histories: del self.chat_histories[chat_id]
+                            self.new_chat_created_signal.emit(response)
+                        elif response['command'] == 'add_turn':
+                            pass
+                        else:
+                            raise Exception(response.get('comment', 'Unknown error'))
+                        #response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type, scene_id=scene_id)
+                        logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
                     break
                 except curl_cffi.curl.CurlError:
-                    self.connect = self.create_connect()
+                    self.ws = self.create_connect()
                     logging.warning(f"QThreads.py: ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}) Reconnecting to websockets...")
 
     @asyncSlot
@@ -1074,7 +1052,7 @@ class VoiceModeThread(QThread):
         self.used_emotes = []
 
         self.session = curl_cffi.AsyncSession()
-        self.connect = ChatClient(self.session, self.token)
+        self.ws = None
         self.chat_thread = self.mw.chat_thread
         self.recognizer = speech_recognition.Recognizer()
         self.eec = EEC(self.mw)
@@ -1147,26 +1125,55 @@ class VoiceModeThread(QThread):
             }
         response = await self.request("multimodal/api/v1/memo/replay", data)
         link = response["replayUrl"]
-        download = self.session.get(link, stream=True)
+        download = requests.get(link, stream=True)
         if download.status_code == 200:
             audio_bytes = io.BytesIO(download.content)
             audio_array, sample_rate = soundfile.read(audio_bytes)
             return audio_array, sample_rate
 
+    async def _send_message(self, char: str, chat_id: str, text: str, author: dict = {}, attachments: list = []):
+        message = {
+            'command': 'create_and_generate_turn',
+            'payload': {
+                'attachments': attachments,
+                'character_id': char,
+                'turn': {
+                    'turn_key': {
+                        'chat_id': chat_id
+                    },
+                    'author': author,
+                    'candidates': [
+                        {
+                            'raw_content': text
+                        }
+                    ]
+                }
+            }
+        }
+        await self.ws.send_str(json.dumps(message))
+
+        while True:
+            msg = await self.ws.recv_str()
+            response = json.loads(msg)
+            if 'turn' not in response:
+                raise Exception(response['comment'])
+            yield response
+
     async def send_message(self, text):
         while True:
             try:
-                async for response in self.connect.send_message(self.char, self.chat_id, text):
+                async for response in self._send_message(self.char, self.chat_id, text):
                     if not response['turn']['author']['author_id'].isdigit():
                             if response.get('turn', {}).get('candidates', [])[0].get('is_final'):
                                 return response['turn']
             except curl_cffi.curl.CurlError:
                 self.connected_signal.emit(False)
-                await self.connect.connect()
+                self.ws = await self.session.ws_connect('wss://neo.character.ai/ws/', cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'},
+                                                        autoclose=False)
                 self.connected_signal.emit(True)
 
     async def process_user_input(self):
-        await self.connect.connect()
+        self.ws = await self.session.ws_connect('wss://neo.character.ai/ws/', cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'}, autoclose=False)
         if self.vtube_studio: await self.eec.connect()
         self.connected_signal.emit(True)
         while True:
