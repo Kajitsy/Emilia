@@ -92,6 +92,9 @@ class UserProfile(QWidget):
         self.chats_label.setStyleSheet("color: #a2a2ac;")
         sub_layout.addWidget(self.chats_label)
 
+        self.bio_label = QLabel()
+        layout.addWidget(self.bio_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
         but_frame = QFrame(self)
         but_layout = QHBoxLayout()
         but_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -288,6 +291,9 @@ class UserProfile(QWidget):
             self.mw.threads.append(load_avatar_thread)
         else:
             color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
+
+        if self.data.get('bio'):
+            self.bio_label.setText(self.data.get('bio'))
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
             if self.data.get('avatar_file_name') and self.mw.drpc_show_username:
@@ -509,7 +515,7 @@ class UserProfile(QWidget):
 class EditOverlay(QFrame):
     def __init__(self, main_window):
         super().__init__()
-        self.setFixedSize(500, 200)
+        self.setFixedSize(500, 250)
         self.mw = main_window
         self.svg_icons = Svg()
 
@@ -557,18 +563,24 @@ class EditOverlay(QFrame):
         names_layout = QVBoxLayout()
         fh_layout.addLayout(names_layout)
 
+        self.display_name_label = QLabel(self.tr("Display Name"))
+        names_layout.addWidget(self.display_name_label)
         self.display_name_edit = LineEdit()
         self.display_name_edit.setPlaceholderText(self.tr("Display Name"))
         self.display_name_edit.setText(self.data['name'])
         self.display_name_edit.setMaxLength(20)
         names_layout.addWidget(self.display_name_edit)
 
+        self.username_label = QLabel(self.tr("Username"))
+        names_layout.addWidget(self.username_label)
         self.username_edit = LineEdit()
         self.username_edit.setPlaceholderText(self.tr("Username"))
         self.username_edit.setText(self.data['username'])
         self.username_edit.setMaxLength(20)
         names_layout.addWidget(self.username_edit)
 
+        self.bio_label = QLabel(self.tr("Background"))
+        layout.addWidget(self.bio_label)
         self.bio_edit = CustomTextEdit()
         self.bio_edit.setPlaceholderText(self.tr("Background"))
         self.bio_edit.setText(self.data.get('bio'))
