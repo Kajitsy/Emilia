@@ -704,7 +704,7 @@ class ChatThread(QThread):
                             if chat_id and chat_id in self.chat_histories: del self.chat_histories[chat_id]
                             self.new_chat_created_signal.emit(response)
                         elif response['command'] == 'add_turn':
-                            pass
+                            break
                         else:
                             raise Exception(response.get('comment', 'Unknown error'))
                         #response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type, scene_id=scene_id)
