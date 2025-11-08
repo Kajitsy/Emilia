@@ -1322,13 +1322,19 @@ class ChatInterface(QWidget):
                     label.animation_timer.stop()
                     label.is_animating = False
 
-                self.setupAnimation(label)
-                label.setText("")
                 new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
-                label.target_text = new_text
-                label.current_text = new_text
-                label.current_index = 0
-                label.is_animating = True
+
+                if not hasattr(label, 'is_animating'):
+                    self.setupAnimation(label)
+                    label.setText("")
+                    label.target_text = new_text
+                    label.current_text = new_text
+                    label.current_index = 0
+                    label.is_animating = True
+
+                new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+                message.text = new_text
+                self.addTextToAnimation(message.message_label, new_text)
 
                 label.animation_timer.start(30)
 
