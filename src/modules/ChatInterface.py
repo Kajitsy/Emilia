@@ -8,7 +8,7 @@ from PyQt6.QtCore import (QPropertyAnimation, QEasingCurve, QRect, QSettings, QT
 from datetime import datetime
 
 from modules.cards import PersonaCards
-from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
+from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame, ComboBox
 from modules.QThreads import (PlayerThread, FileLoaderThread, ImageLoaderThread, ChatThread, DiscordRPC)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
@@ -60,6 +60,7 @@ class MessageBubble(QFrame):
                 "https://characterai.io/i/80/static/avatars/" + self.url + '?webp=true&anim=0', 24, 24)
             load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
             load_avatar_thread.error_loading.connect(lambda: color_avatar(self.avatar_label, 24, 24, self.name, 4))
+            load_avatar_thread.radius = 4
             load_avatar_thread.start()
             self.main_window.threads.append(load_avatar_thread)
         else:
@@ -114,6 +115,7 @@ class ChatInterface(QWidget):
 
         self.voice_enabled = False
 
+        self.show_format_buttons = self.mw.settings.value("show_format_buttons", False, type=bool)
         self.chat_settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", self.character_id)
         self.char_back_message = self.chat_settings.value('colors/char_back_message', '#26272b')
         self.char_text_message = self.chat_settings.value('colors/char_text_message', '#e8eaed')
@@ -150,6 +152,24 @@ class ChatInterface(QWidget):
         self.attach_image_label = QLabel()
         self.attach_image_label.link = ""
         input_layout.addWidget(self.attach_image_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+        format_toolbar = QHBoxLayout()
+        format_widget = QFrame()
+        if self.show_format_buttons: format_widget.setLayout(format_toolbar)
+
+        bold_button = PushButton(self.tr("Bold"))
+        bold_button.clicked.connect(lambda: self.message_input.formatSelectedText("**", "**"))
+        format_toolbar.addWidget(bold_button)
+        italic_button = PushButton(self.tr("Italic"))
+        italic_button.clicked.connect(lambda: self.message_input.formatSelectedText("*", "*"))
+        format_toolbar.addWidget(italic_button)
+        code_button = PushButton(self.tr("Code"))
+        code_button.clicked.connect(lambda: self.message_input.formatSelectedText("`", "`"))
+        format_toolbar.addWidget(code_button)
+        format_toolbar.addStretch()
+
+        input_layout.addWidget(format_widget)
+
         send_layout = QHBoxLayout()
         send_widget = QFrame()
         send_widget.setLayout(send_layout)
@@ -158,11 +178,7 @@ class ChatInterface(QWidget):
         self.message_input.setFixedHeight(32)
         self.message_input.horizontalScrollBar().setVisible(False)
         self.message_input.verticalScrollBar().setVisible(False)
-        self.message_input.textChanged.connect(self.startFormat)
         self.message_input.keyPress = lambda: self.sendMessage()
-        self.format_timer = QTimer()
-        self.format_timer.setSingleShot(True)
-        self.format_timer.timeout.connect(self.formatUserMessage)
         send_layout.addWidget(self.message_input, alignment=Qt.AlignmentFlag.AlignBottom)
         send_button = PushButton()
         send_button.setIcon(self.svg_icons.send())
@@ -176,8 +192,10 @@ class ChatInterface(QWidget):
         select_image_button.setIcon(self.svg_icons.add_image())
         select_image_button.clicked.connect(self.selectImage)
         send_layout.addWidget(select_image_button, alignment=Qt.AlignmentFlag.AlignBottom)
+
         input_layout.addWidget(send_widget)
         self.layout.addLayout(input_layout)
+
 
         self.setLayout(self.layout)
 
@@ -787,37 +805,6 @@ class ChatInterface(QWidget):
 
             self.mw.showNotification(self.tr("Uploading..."))
 
-    def startFormat(self):
-        text = self.message_input.toPlainText()
-        line_count = text.count('\n')
-        line_count += text.count('<br>') + 1 if text else 1
-        height = line_count * self.message_input.fontMetrics().lineSpacing() + 16
-        self.message_input.setFixedHeight(height)
-        self.format_timer.start(500)
-
-    def formatUserMessage(self):
-        self.message_input.blockSignals(True)
-        text = self.message_input.toPlainText()
-        cursor = self.message_input.textCursor()
-        position = cursor.position()
-        replacements = [
-            (r"`(.*?)`", r'<span style="color: gray;">`<code>\1</code>`</span>'),
-            (r"\*\*\*(.*?)\*\*\*", r'<span style="color: gray;">***<b><i>\1</i></b>***</span>'),
-            (r"\*\*(.*?)\*\*", r'<span style="color: gray;">**<b>\1</b>**</span>'),
-            (r"\*(.*?)\*", r'<span style="color: gray;">*<i>\1</i>*</span>'),
-            ("\n", "<br>"),
-        ]
-
-        for pattern, replacement, *flags in replacements:
-            text = re.sub(pattern, replacement, text, flags=flags[0] if flags else 0)
-        line_count = text.count('<br>') + 1 if text else 1
-        height = line_count * self.message_input.fontMetrics().lineSpacing() + 16
-        if text != self.message_input.toPlainText():
-            self.message_input.setHtml(text)
-            cursor.setPosition(position)
-            self.message_input.setTextCursor(cursor)
-        self.message_input.blockSignals(False)
-
     def showChats(self):
         def openChat(self, character_id, character_name, chat_id):
             self.mw.hideOverlay()
@@ -1192,7 +1179,6 @@ class ChatInterface(QWidget):
 
         self.messages_layout.addWidget(message_widget, 1,
                                        Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft)
-        #self.messages_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
         message_widget.addWidget(message_bubble)
         message_widget.setCurrentWidget(message_bubble)
         return message_widget

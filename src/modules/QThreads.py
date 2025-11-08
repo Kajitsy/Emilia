@@ -710,7 +710,6 @@ class ChatThread(QThread):
                     response = await self.connect.new_chat(char, self.me['user']['id'], preferred_model_type=preferred_model_type, scene_id=scene_id)
                     if chat_id and chat_id in self.chat_histories: del self.chat_histories[chat_id]
                     logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): New chat started")
-                    print(response)
                     self.new_chat_created_signal.emit(response)
                     break
                 except curl_cffi.curl.CurlError:

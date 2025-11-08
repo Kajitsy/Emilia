@@ -1,14 +1,11 @@
-import base64, uuid
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
-                             QSizePolicy, QWidget, QFileDialog, QApplication)
+                             QSizePolicy, QWidget)
 
 from modules.cards.CharacterCards import ClickableMiniCard
-from modules.style.Elements import (CustomTextEdit, PushButton, LineEdit, CheckBox, ComboBox, VerticalScrollPage,
-    CardFrame)
-from modules.style.Icons import Svg
-from modules.style.Utils import format_text, format_number, color_avatar
+from modules.style.Elements import (PushButton, VerticalScrollPage, CardFrame)
+from modules.style.Utils import format_text
 from modules.QThreads import ImageLoaderThread
 
 class MainCard(CardFrame):

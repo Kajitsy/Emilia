@@ -164,7 +164,6 @@ class EmiliaNext(QMainWindow):
     def initUI(self):
         self.layout = QHBoxLayout()
 
-        # Left Sidebar
         self.left_sidebar = self.createLeftSidebar()
         self.layout.addWidget(self.left_sidebar)
 
@@ -343,6 +342,7 @@ class EmiliaNext(QMainWindow):
                 "https://characterai.io/i/80/static/avatars/" + character_avatar_url + '?webp=true&anim=0',
                 45, 45)
             load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(avatar_label, 45, 45, character_name))
             load_avatar_thread.start()
             self.threads.append(load_avatar_thread)
         else:
@@ -359,6 +359,7 @@ class EmiliaNext(QMainWindow):
                 "https://characterai.io/i/80/static/avatars/" + character_avatar_url + '?webp=true&anim=0',
                 55, 55)
             load_avatar_thread.image_loaded.connect(avatar_label_2.setPixmap)
+            load_avatar_thread.error_loading.connect(lambda _: color_avatar(avatar_label_2, 55, 55, character_name))
             load_avatar_thread.start()
             self.threads.append(load_avatar_thread)
         else:
@@ -1302,6 +1303,7 @@ class SettingsPage(QWidget):
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
                     {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
+                    {"type": "checkbox", "label": self.tr("Display text formatting buttons"), "key": "show_format_buttons", "def_value": False},
                     {"type": "combobox", "label": self.tr("Input Device"), "items": self.mw.input_devices.values(), "key": "input_device"},
                     {"type": "combobox", "label": self.tr("Output Device"), "items": self.mw.output_devices.values(), "key": "output_device"},
                     {"type": "keybind", "label": self.tr("Microphone mute key"), "def_value": "Ctrl+M", "key": "microphone_mute_key_bind"},
