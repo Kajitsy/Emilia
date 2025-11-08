@@ -285,6 +285,7 @@ class ChatThread(QThread):
     voices_search_username_signal = pyqtSignal(object)
     featured_voices_signal = pyqtSignal(object)
     replay_signal = pyqtSignal(object)
+    edit_message_signal = pyqtSignal(object)
     get_voice_signal = pyqtSignal(object)
     voice_override_signal = pyqtSignal(object)
     voice_override_update_signal = pyqtSignal(object)
@@ -475,22 +476,42 @@ class ChatThread(QThread):
                     self.ws = self.create_connect()
                     logging.warning(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Reconnecting to websockets...")
 
-    async def _edit_message(self, chat_id: str, message_id: str, text: str):
+    @asyncSlot
+    async def edit_message(self, chat_id: str, turn_id: str, text: str):
         payload = {
             'command': 'edit_turn_candidate',
             'payload': {
                 'turn_key': {
                     'chat_id': chat_id,
-                    'turn_id': message_id
+                    'turn_id': turn_id
                 },
                 'new_candidate_raw_content': text
             }
         }
         await self.ws.send_str(json.dumps(payload))
-        response = json.loads((await self.ws.recv_str()))
-        if 'turn' not in response:
-            raise Exception(response['comment'])
-        return response['turn']
+
+        while True:
+            response = json.loads((await self.ws.recv_str()))
+            if 'turn' not in response:
+                raise Exception(response['comment'])
+            if response['command'] == 'update_turn':
+                pci = response.get("turn", {}).get('primary_candidate_id')
+                for candidate in response.get("turn", {}).get('candidates', []):
+                    if candidate.get('candidate_id', pci) == pci:
+                        current = candidate.get('raw_content', '')
+                        current_id = candidate.get('candidate_id', '')
+
+                for message in self.chat_histories.get(chat_id, []):
+                    if message['turn_key']['turn_id'] == turn_id:
+                        message['candidates'][0]['raw_content'] = current
+                        message['candidates'][0]['candidate_id'] = current_id
+                        message['primary_candidate_id'] = pci
+
+                        logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Message in chat_histories updated")
+                        break
+                self.edit_message_signal.emit(response)
+            else:
+                pass
 
     @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):
@@ -679,7 +700,6 @@ class ChatThread(QThread):
 
                     while True:
                         response = json.loads((await self.ws.recv_str()))
-                        print(response)
                         if response['command'] == 'create_chat_response':
                             if chat_id and chat_id in self.chat_histories: del self.chat_histories[chat_id]
                             self.new_chat_created_signal.emit(response)

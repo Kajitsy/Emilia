@@ -1,4 +1,4 @@
-import re, os
+import os
 
 from curl_cffi import CurlMime
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
@@ -8,7 +8,8 @@ from PyQt6.QtCore import (QPropertyAnimation, QEasingCurve, QRect, QSettings, QT
 from datetime import datetime
 
 from modules.cards import PersonaCards
-from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame, ComboBox
+from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame, \
+    ComboBox, LineEdit
 from modules.QThreads import (PlayerThread, FileLoaderThread, ImageLoaderThread, ChatThread, DiscordRPC)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
@@ -367,16 +368,40 @@ class ChatInterface(QWidget):
         self.user_personas = data
 
     def userMessageSignal(self, response):
-        for i in reversed(range(self.messages_layout.count())):
-            item = self.messages_layout.itemAt(i)
-            widget = item.widget()
-            if hasattr(widget, 'is_user') and widget.is_user:
-                message_stacked = widget
-                message = message_stacked.currentWidget()
-                message.turn_id = response['turn']['turn_key']['turn_id']
-                message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
-                message.customContextMenuRequested.disconnect()
-                message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+        command = response['command']
+        if command == 'add_turn':
+            for i in reversed(range(self.messages_layout.count())):
+                item = self.messages_layout.itemAt(i)
+                widget = item.widget()
+                if hasattr(widget, 'is_user') and widget.is_user:
+                    message_stacked = widget
+                    message = message_stacked.currentWidget()
+                    message.turn_id = response['turn']['turn_key']['turn_id']
+                    message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+                    message.customContextMenuRequested.disconnect()
+                    message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+        elif command == 'update_turn':
+            for i in reversed(range(self.messages_layout.count())):
+                item = self.messages_layout.itemAt(i)
+                widget = item.widget()
+                if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                    message_stacked = widget
+                    break
+
+            message = message_stacked.currentWidget()
+
+            older = []
+            pci = response.get("turn", {}).get('primary_candidate_id')
+            for candidate in response.get("turn", {}).get('candidates', []):
+                if candidate.get('candidate_id', pci) == pci:
+                    new_text = format_text(candidate.get('raw_content', ''), self.mw.username)
+                    message.text = new_text
+                    message.message_label.setText(new_text)
+                else:
+                    older.append(candidate)
+
+            message.setMinimumHeight(0)
+            message.adjustSize()
 
     def charMessageSignal(self, response):
         command = response['command']
@@ -397,10 +422,11 @@ class ChatInterface(QWidget):
                     break
 
             message = message_stacked.currentWidget()
-            if not hasattr(message.message_label, 'animation_queue'):
+            if getattr(message.message_label, 'animation_queue'):
                 self.setupAnimation(message.message_label)
 
             new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+            message.text = new_text
             self.addTextToAnimation(message.message_label, new_text)
 
             message.setMinimumHeight(0)
@@ -1110,14 +1136,14 @@ class ChatInterface(QWidget):
                     message_stacked = self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False), candidate.get('attachments', []))
                 else:
                     older.append(candidate)
-            if len(turn.get('candidates', [])) > 1:
-                sorted_older = sorted(
-                    older,
-                    key=lambda x: datetime.fromisoformat(x["create_time"].replace("Z", "")),
-                    reverse=True
-                )
-                for candidate in sorted_older:
-                    message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False)))
+           #if len(turn.get('candidates', [])) > 1:
+           #    sorted_older = sorted(
+           #        older,
+           #        key=lambda x: datetime.fromisoformat(x["create_time"].replace("Z", "")),
+           #        reverse=True
+           #    )
+           #    for candidate in sorted_older:
+           #        message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False)))
 
     def _getChat(self, chat):
         self.chat_thread.chat_signal.disconnect()
@@ -1319,6 +1345,45 @@ class ChatInterface(QWidget):
             elif item and item.spacerItem():
                 pass
 
+    def _editMessage(self, turn_id):
+        self.chat_thread.edit_message_signal.connect(self.__editMessage)
+        self.chat_thread.edit_message(self.chat_id, turn_id, self.message_input.toPlainText())
+
+    def editMessage(self, turn_id):
+        for i in reversed(range(self.messages_layout.count())):
+            item = self.messages_layout.itemAt(i)
+            widget = item.widget()
+            if hasattr(widget, 'turn_id') and widget.turn_id == turn_id:
+                message_stacked = widget
+                break
+
+        message = message_stacked.currentWidget()
+        self.message_input.setText(message.text)
+        self.message_input.keyPress = lambda: self._editMessage(turn_id)
+
+    def __editMessage(self, response):
+        self.chat_thread.edit_message_signal.disconnect()
+        self.message_input.setText(None)
+        self.message_input.keyPress = lambda: self.sendMessage()
+        for i in reversed(range(self.messages_layout.count())):
+            item = self.messages_layout.itemAt(i)
+            widget = item.widget()
+            if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                message_stacked = widget
+                break
+
+        message = message_stacked.currentWidget()
+
+        pci = response.get("turn", {}).get('primary_candidate_id')
+        for candidate in response.get("turn", {}).get('candidates', []):
+            if candidate.get('candidate_id', pci) == pci:
+                new_text = format_text(candidate.get('raw_content', ''), self.mw.username)
+                message.text = new_text
+                message.message_label.setText(new_text)
+
+        message.setMinimumHeight(0)
+        message.adjustSize()
+
     def showContextMenu(self, pos, message_bubble):
         def copy(text):
             QApplication.clipboard().setText(text)
@@ -1346,6 +1411,10 @@ class ChatInterface(QWidget):
             regenerate_action = QAction(self.tr("Regenerate"), self)
             regenerate_action.triggered.connect(lambda event: self.turnRegenerate(message_bubble.turn_id))
             if not message_bubble.is_user: context_menu.addAction(regenerate_action)
+
+            edit_message_action = QAction(self.tr("Edit message"), self)
+            edit_message_action.triggered.connect(lambda event: self.editMessage(message_bubble.turn_id))
+            context_menu.addAction(edit_message_action)
 
         context_menu.exec(message_bubble.mapToGlobal(pos))
 
