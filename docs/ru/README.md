@@ -3,11 +3,11 @@
 
  # Emilia - неофициальное настольное приложение для [Character.AI](https://character.ai)
 [![GitHub Release](https://img.shields.io/github/v/release/kajitsy/emilia?&label=%D0%92%D0%B5%D1%80%D1%81%D0%B8%D1%8F%0A)](https://github.com/Kajitsy/Emilia/releases/latest)
-![GitHub Downloads](https://img.shields.io/github/downloads/kajitsy/emilia/total?&label=%D0%97%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BE%D0%BA)
+![GitHub Downloads](https://img.shields.io/github/downloads/kajitsy/emilia/latest/total?&label=%D0%97%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BE%D0%BA)
 [![GitHub License](https://img.shields.io/github/license/kajitsy/emilia?label=%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)](LICENSE)
 </div>
 
-[![ru](https://img.shields.io/badge/FIX_ERROR-ru-red "Russian FIX_ERROR.md")](FIX_ERROR.md)
+[![ru](https://img.shields.io/badge/FIX_ERROR-ru-red "Russian FIX_ERROR.md")](FIX_ERROR.md) 
 [![en](https://img.shields.io/badge/README-en-red.svg)](../../README.md)
 [![en](https://img.shields.io/badge/FIX_ERROR-en-red)](../../docs/en/FIX_ERROR.md)
 
