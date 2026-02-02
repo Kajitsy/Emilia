@@ -33,6 +33,7 @@ class GetCookies(QWidget):
         super().__init__()
         self.browser = QWebEngineView()
         self.profile = QWebEngineProfile.defaultProfile()
+        self.profile.setHttpUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0")
         self.interceptor = RequestInterceptor()
         self.svg_icons = Svg()
 

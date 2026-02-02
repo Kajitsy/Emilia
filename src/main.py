@@ -1705,8 +1705,8 @@ class SettingsPage(QWidget):
                     if item and item.widget():
                         item.widget().deleteLater()
 
-            self.chat_thread.create_client(self.mw.token)
-            self.chat_thread.set_cookie(self.mw.cookie)
+            self.chat_thread.token = self.mw.token
+            self.chat_thread.cookie = self.mw.cookie
             self.chat_thread.create_connect()
 
             self.chat_thread.get_recent_chats()
