@@ -7,6 +7,7 @@ from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
 from gpytranslate import Translator
 from functools import wraps
 from pypresence import AioPresence
+from livekit import rtc
 
 from modules.VTubeCore import EEC
 
@@ -320,7 +321,7 @@ class ChatThread(QThread):
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
             "Cookie": f"web-next-auth={self.cookie}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
         }
 
         if domain == "neo":
@@ -1044,7 +1045,7 @@ class ChatThread(QThread):
             "Content-Type": "multipart/form-data",
             "Authorization": f"Token {self.token}",
             "Cookie": f"web-next-auth={self.cookie}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
         }
 
         response = await self.session.request("POST", "https://neo.character.ai/image/upload_private_image", headers=headers, multipart=multipart, timeout=100, impersonate="chrome")
@@ -1117,7 +1118,7 @@ class VoiceModeThread(QThread):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
         }
 
         response = await self.session.request('POST', f"https://neo.character.ai/{endpoint}", headers=headers, json=data, timeout=100)
@@ -1208,3 +1209,150 @@ class VoiceModeThread(QThread):
             sounddevice.play(audio_array, sample_rate)
             sounddevice.wait()
             sounddevice.stop()
+
+class VoiceModeThreadV2(QThread):
+    connected_signal = pyqtSignal(bool)
+    speech_signal = pyqtSignal(object)
+    speech_error_signal = pyqtSignal(object)
+
+    user_message = pyqtSignal(str)
+    char_message = pyqtSignal(object)
+
+    def __init__(self, parent, token, char, chat_id, username, char_name=None, voice_id=None):
+        super().__init__()
+        self.parent = parent
+        self.mw = self.parent.mw
+        self.token = token
+        self.char = char
+        self.chat_id = chat_id
+        self.username = username
+        self.char_name = char_name
+        self.voice_id = voice_id
+        self.muted = self.mw.muted
+        self.lang = self.mw.current_language
+        self.used_emotes = []
+
+        self.session = None
+        self.chat_thread = self.mw.chat_thread
+        self.eec = EEC(self.mw)
+        self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
+        if self.mw.settings.value('input_device', False) is False:
+            self.input_index = 0
+        else:
+            self.input_index = self.mw.settings.value('input_device', 0, type=int) + 1
+
+        if self.mw.settings.value('output_device', False) is False:
+            self.output_index = 0
+        else:
+            self.output_index = self.mw.settings.value('output_device', 0, type=int) + 1
+
+        self.room = None
+        self.audio_devices = None
+        self.mic_track = None
+        self.speaker_player = None
+
+    def run(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.stop_event = asyncio.Event()
+
+        try:
+            self.loop.run_until_complete(self.start_call())
+        except Exception as e:
+            print(str(e))
+        finally:
+            pending = asyncio.all_tasks(self.loop)
+            for task in pending:
+                task.cancel()
+
+            if pending:
+                self.loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+
+    async def start_call(self):
+        self.session = curl_cffi.AsyncSession()
+        self.room = rtc.Room()
+        self.audio_devices = rtc.MediaDevices()
+
+        url = "https://neo.character.ai/multimodal/api/v1/sessions/joinOrCreateSession"
+        headers = {
+            "Authorization": f"Token {self.token}",
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
+        }
+
+        payload = {
+            "enableASR": True,
+            "platform": "web",
+            "roomId": self.chat_id,
+            "rtcBackend": "lk",
+            "userAuthToken": self.token,
+            "username": self.username,
+            "voiceQueries": {},
+            "voices": {
+                self.char: self.voice_id
+            }
+        }
+
+        async with curl_cffi.AsyncSession() as session:
+            request = await session.post(url, headers=headers, json=payload, timeout=100)
+            data = request.json()
+            print(data)
+            call_token = data['lkToken']
+            ws_url = data['lkUrl']
+
+            await self.connect_livekit(ws_url, call_token)
+
+    async def connect_livekit(self, url, token):
+        @self.room.on("track_subscribed")
+        def on_track_subscribed(track, publication, participant):
+            if track.kind == rtc.TrackKind.KIND_AUDIO:
+                print("Персонаж говорит")
+                asyncio.create_task(self.speaker_player.add_track(track))
+
+        @self.room.on("track_unsubscribed")
+        def on_track_unsubscribed(track, publication, participant):
+            if track.kind == rtc.TrackKind.KIND_AUDIO:
+                print("Персонаж замолк")
+                asyncio.create_task(self.speaker_player.remove_track(track))
+
+        @self.room.on("disconnected")
+        def on_disconnected():
+            print("Звонок завершен.")
+
+        try:
+            self.speaker_player = self.audio_devices.open_output()
+            await self.speaker_player.start()
+
+            await self.room.connect(url, token)
+            self.connected_signal.emit(True)
+
+            await self._enable_microphone()
+
+            await self.stop_event.wait()
+
+        except Exception as e:
+            await self.room.disconnect()
+            raise Exception(f"LiveKit error: {e}")
+        finally:
+            if self.speaker_player:
+                await self.speaker_player.aclose()
+            await self.room.disconnect()
+            self.connected_signal.emit(False)
+
+    async def _enable_microphone(self):
+        try:
+            mic_device = self.audio_devices.open_input(input_device=self.input_index, enable_aec=True, noise_suppression=True)
+            self.mic_track = rtc.LocalAudioTrack.create_audio_track("microphone", mic_device.source)
+
+            await self.room.local_participant.publish_track(self.mic_track)
+            self.speech_signal.emit(True)
+        except Exception as e:
+            print(f"Не удалось включить микрофон: {e}")
+
+    def stop_call(self):
+        if hasattr(self, 'loop') and self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(self._safe_stop(), self.loop)
+
+    async def _safe_stop(self):
+        if hasattr(self, 'stop_event'):
+            self.stop_event.set()

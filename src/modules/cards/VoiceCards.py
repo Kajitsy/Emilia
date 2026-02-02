@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
 from modules.cards import CharacterCards
 from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame, LineEdit
 from modules.style.Icons import Svg
-from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, VoiceModeThread
+from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, VoiceModeThread, VoiceModeThreadV2
 from modules.style.Utils import color_avatar, format_text
 
 class VoiceCard(QFrame):
@@ -455,15 +455,15 @@ class VoiceMode(QWidget):
 
     def stopThread(self):
         if self.thread.isRunning():
-            self.thread.sd_stop()
-            self.thread.terminate()
+            self.thread.stop_call()
+            self.thread.quit()
             self.thread.wait()
             self.mw.hide_overlay = True
             self.mw.hideOverlay()
             keyboard.remove_hotkey(self.mute_keybind)
 
     def _run(self):
-        self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
+        self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, voice_id=self.voice_id)
         self.thread.speech_signal.connect(self.updateSpeakingIndicator)
         self.thread.speech_error_signal.connect(self.handleSpeechError)
         self.thread.user_message.connect(self._userMessage)
