@@ -463,7 +463,7 @@ class VoiceMode(QWidget):
             keyboard.remove_hotkey(self.mute_keybind)
 
     def _run(self):
-        self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, voice_id=self.voice_id)
+        self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, voice_id=self.voice_id)
         self.thread.speech_signal.connect(self.updateSpeakingIndicator)
         self.thread.speech_error_signal.connect(self.handleSpeechError)
         self.thread.user_message.connect(self._userMessage)
