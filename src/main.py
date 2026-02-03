@@ -298,10 +298,10 @@ class EmiliaNext(QMainWindow):
 
         return left_sidebar
 
-    def addRecentChatCard(self, character_id, character_name, chat_id, character_avatar_url):
+    def addRecentChatCard(self, character_id, character_name, chat_id, character_avatar_url, scene_id=None):
         def openChat(event):
             if event.button() == Qt.MouseButton.LeftButton:
-                self.openChat(character_id, character_name, chat_id, card)
+                self.openChat(character_id, character_name, chat_id, card, scene_id)
             elif event.button() == Qt.MouseButton.RightButton:
                 showContextMenu(QPoint(avatar_label.pos().x() + 45 , avatar_label.pos().y() + 22), card)
 
@@ -940,7 +940,7 @@ class EmiliaNext(QMainWindow):
 
         self.recent_chats = chats
         for chat in self.recent_chats:
-            card = self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'))
+            card = self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'), chat.get('scene_id'))
             if self.current_chat_interface is not None:
                 if self.current_chat_interface.chat_id == chat.get('id'):
                     setattr(self.current_chat_interface, 'recent_card', card)
