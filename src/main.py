@@ -112,7 +112,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.0"
+        self.version = "3.2.1b"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -146,8 +146,9 @@ class EmiliaNext(QMainWindow):
         for index, device in enumerate(QMediaDevices().audioInputs()):
             self.input_devices[str(index)] = device.description()
 
-        for index, device in enumerate(QMediaDevices().audioOutputs()):
-            self.output_devices[str(index)] = device.description()
+        for index, device in enumerate(sounddevice.query_devices()):
+            if device['max_output_channels'] > 0:
+                self.output_devices[str(index)] = device['name']
 
         self.chat_thread = ChatThread(self)
         self.threads.append(self.chat_thread)
@@ -1307,6 +1308,7 @@ class SettingsPage(QWidget):
                     {"type": "combobox", "label": self.tr("Input Device"), "items": self.mw.input_devices.values(), "key": "input_device"},
                     {"type": "combobox", "label": self.tr("Output Device"), "items": self.mw.output_devices.values(), "key": "output_device"},
                     {"type": "keybind", "label": self.tr("Microphone mute key"), "def_value": "Ctrl+M", "key": "microphone_mute_key_bind"},
+                    {"type": "checkbox", "label": self.tr("Use the old implementation of voice chat"), "key": "use_old_voice_chat"},
                 ]
             }, {
                 "label": self.tr("VTube Studio Plugin"),
@@ -1705,8 +1707,8 @@ class SettingsPage(QWidget):
                     if item and item.widget():
                         item.widget().deleteLater()
 
-            self.chat_thread.create_client(self.mw.token)
-            self.chat_thread.set_cookie(self.mw.cookie)
+            self.chat_thread.token = self.mw.token
+            self.chat_thread.cookie = self.mw.cookie
             self.chat_thread.create_connect()
 
             self.chat_thread.get_recent_chats()

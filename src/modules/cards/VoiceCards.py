@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
 from modules.cards import CharacterCards
 from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame, LineEdit
 from modules.style.Icons import Svg
-from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, VoiceModeThread
+from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, VoiceModeThread, VoiceModeThreadV2
 from modules.style.Utils import color_avatar, format_text
 
 class VoiceCard(QFrame):
@@ -447,7 +447,7 @@ class VoiceMode(QWidget):
 
     def toggleMute(self):
         self.muted = not self.muted
-        self.thread.muted = self.muted
+        self.thread.set_mute(self.muted)
         if self.muted:
             self.mute_button.setIcon(self.svg_icons.muted())
         else:
@@ -455,21 +455,28 @@ class VoiceMode(QWidget):
 
     def stopThread(self):
         if self.thread.isRunning():
-            self.thread.sd_stop()
-            self.thread.terminate()
+            self.thread.stop_call()
+            self.thread.quit()
             self.thread.wait()
             self.mw.hide_overlay = True
             self.mw.hideOverlay()
             keyboard.remove_hotkey(self.mute_keybind)
 
     def _run(self):
-        self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
-        self.thread.speech_signal.connect(self.updateSpeakingIndicator)
-        self.thread.speech_error_signal.connect(self.handleSpeechError)
-        self.thread.user_message.connect(self._userMessage)
-        self.thread.char_message.connect(self._charMessage)
-        self.thread.start()
-        self.mw.threads.append(self.thread)
+        if self.mw.settings.value('use_old_voice_chat', False, type=bool):
+            self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
+            self.thread.speech_signal.connect(self.updateSpeakingIndicator)
+            self.thread.speech_error_signal.connect(self.handleSpeechError)
+            self.thread.user_message.connect(self._userMessage)
+            self.thread.char_message.connect(self._charMessage)
+            self.thread.start()
+            self.mw.threads.append(self.thread)
+        else:
+            self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, self.voice_id)
+            self.thread.speech_signal.connect(self.updateSpeakingIndicator)
+            self.thread.error_signal.connect(self.mw.showNotification)
+            self.thread.start()
+            self.mw.threads.append(self.thread)
 
     def _userMessage(self, text):
         self.chi.addMessage(text, "", is_user=True)
