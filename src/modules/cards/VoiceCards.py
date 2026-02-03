@@ -447,7 +447,7 @@ class VoiceMode(QWidget):
 
     def toggleMute(self):
         self.muted = not self.muted
-        self.thread.muted = self.muted
+        self.thread.set_mute(self.muted)
         if self.muted:
             self.mute_button.setIcon(self.svg_icons.muted())
         else:

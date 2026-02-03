@@ -1316,6 +1316,14 @@ class VoiceModeThreadV2(QThread):
 
             await self.connect_livekit(ws_url, call_token)
 
+    def set_mute(self, is_muted: bool):
+        self.muted = is_muted
+        if self.mic_track:
+            if is_muted:
+                self.mic_track.mute()
+            else:
+                self.mic_track.unmute()
+
     async def connect_livekit(self, url, token):
         @self.room.on("track_subscribed")
         def on_track_subscribed(track, publication, participant):
