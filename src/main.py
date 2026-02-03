@@ -1308,6 +1308,7 @@ class SettingsPage(QWidget):
                     {"type": "combobox", "label": self.tr("Input Device"), "items": self.mw.input_devices.values(), "key": "input_device"},
                     {"type": "combobox", "label": self.tr("Output Device"), "items": self.mw.output_devices.values(), "key": "output_device"},
                     {"type": "keybind", "label": self.tr("Microphone mute key"), "def_value": "Ctrl+M", "key": "microphone_mute_key_bind"},
+                    {"type": "checkbox", "label": self.tr("Use the old implementation of voice chat"), "key": "use_old_voice_chat"},
                 ]
             }, {
                 "label": self.tr("VTube Studio Plugin"),
