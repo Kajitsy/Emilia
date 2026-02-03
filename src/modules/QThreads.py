@@ -29,7 +29,7 @@ class ImageLoaderThread(QThread):
         self.cache_dir = cache_dir
         self.width = width
         self.height = height
-        self.radius: int or float | None = 100
+        self.radius = 100
 
         os.makedirs(self.cache_dir, exist_ok=True)
 
@@ -72,8 +72,10 @@ class ImageLoaderThread(QThread):
             return
 
         try:
-            response = requests.get(self.url, stream=True)
-            response.raise_for_status()
+            with requests.get(self.url, stream=True, timeout=10) as response:
+                response.raise_for_status()
+                data = response.content
+
             if pixmap.loadFromData(response.content):
                 if not pixmap.save(cache_path):
                     logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File saving error: {cache_path}")
@@ -127,6 +129,7 @@ class FileLoaderThread(QThread):
             except Exception as e:
                 logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File download error: {e}")
 
+
 class PlayerThread(QThread):
     play_signal = pyqtSignal(object)
     stop_signal = pyqtSignal(object)
@@ -134,27 +137,41 @@ class PlayerThread(QThread):
     def __init__(self, data):
         super().__init__()
         self.data = data
+        self._is_running = False
 
     def run(self):
+        self._is_running = True
         self.play(self.data)
 
     def play(self, data):
-        audio_bytes = io.BytesIO(data)
-        audio_array, sample_rate = soundfile.read(audio_bytes)
+        try:
+            audio_bytes = io.BytesIO(data)
+            audio_array, sample_rate = soundfile.read(audio_bytes)
 
-        new_length = int(round(len(audio_array) * 44100 / sample_rate))
-        audio_array = scipy.signal.resample(audio_array, new_length)
-        sample_rate = 44100
+            target_rate = 44100
+            if sample_rate != target_rate:
+                new_length = int(round(len(audio_array) * target_rate / sample_rate))
+                audio_array = scipy.signal.resample(audio_array, new_length)
+                sample_rate = target_rate
 
-        self.play_signal.emit(True)
-        sounddevice.play(audio_array, sample_rate)
-        time.sleep(len(audio_array) / sample_rate)
-        sounddevice.stop()
-        self.stop_signal.emit(True)
+            self.play_signal.emit(True)
+            sounddevice.play(audio_array, sample_rate)
+
+            duration = len(audio_array) / sample_rate
+            time.sleep(duration)
+
+            sounddevice.stop()
+        except Exception as e:
+            logging.error(f"PlayerThread Error: {e}")
+        finally:
+            self.stop_signal.emit(True)
+            self._is_running = False
 
     def stop(self):
-        sounddevice.stop()
-        self.stop_signal.emit(True)
+        if self._is_running:
+            sounddevice.stop()
+            self._is_running = False
+            self.stop_signal.emit(True)
 
 class DiscordRPC(QThread):
     rpc_connected = pyqtSignal(object)
@@ -320,52 +337,63 @@ class ChatThread(QThread):
         self.users = {}
         self.similar_characters = {}
 
-    async def request(self, endpoint, data = {}, method = "GET", domain="neo", text = False):
+    def _get_headers(self, additional=None):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
             "Cookie": f"web-next-auth={self.cookie}",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
         }
+        if additional:
+            headers.update(additional)
+        return headers
 
-        if domain == "neo":
-            url = f"https://neo.character.ai/{endpoint}"
-        elif domain == "trpc":
-            url = f"https://character.ai/api/trpc/{endpoint}"
-        elif domain == "plus":
-            url = f"https://plus.character.ai/{endpoint}"
-        else:
-            url = f"https://plus.character.ai/{endpoint}"
+    async def _make_request(self, method, url, headers, data=None, json_data=None, return_text=False):
+        """Централизованный метод запросов с обработкой ошибок"""
+        try:
+            response = await self.session.request(method, url, headers=headers, data=data, json=json_data, timeout=100)
+            logging.debug(f"Req: {url} [{response.status_code}]")
 
-        if method.lower() == "post":
-            response = await self.session.request(method, url, headers=headers, json=data, timeout=100)
-        else:
-            response = await self.session.request(method, url, headers=headers, data=data, timeout=100)
-        logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async request: {url}")
-        if response.status_code == 200:
-            return response.json() if not text else json.loads(response.text)
-        elif response.status_code == 207:
-            return response.json() if not text else json.loads(response.text)
-        elif response.status_code == 400:
-            return response.json() if not text else json.loads(response.text)
-        else:
-            raise Exception(f"Failed to get data, status code: {response.status_code}")
+            if response.status_code in [200, 207, 400]:
+                return response.json() if not return_text else json.loads(response.text)
+            else:
+                logging.error(f"Request failed: {url} - {response.status_code}")
+                return {"error": True, "status": response.status_code}
+        except Exception as e:
+            logging.error(f"Async request error ({url}): {e}")
+            raise
 
-    async def custom_request(self, url, data = {}, method = "get", text=False, headers={}):
-        if method.lower() == "post":
-            response = await self.session.request(method, url, headers=headers, json=data, timeout=100)
-        else:
-            response = await self.session.request(method, url, headers=headers, data=data, timeout=100)
-        logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Async custom_request: {url}")
-        if response.status_code == 200:
-            return response.json() if not text else json.loads(response.text)
-        else:
-            raise Exception(f"Failed to get data, status code: {response.status_code}")
+    async def request(self, endpoint, data={}, method="GET", domain="neo", text=False):
+        headers = self._get_headers()
+        base_urls = {
+            "neo": "https://neo.character.ai/",
+            "trpc": "https://character.ai/api/trpc/",
+            "plus": "https://plus.character.ai/",
+        }
+        base_url = base_urls.get(domain, "https://plus.character.ai/")
+        url = f"{base_url}{endpoint}"
+
+        kwargs = {"json_data": data} if method.lower() == "post" else {"data": data}
+        return await self._make_request(method, url, headers, return_text=text, **kwargs)
+
+    async def custom_request(self, url, data={}, method="get", text=False, headers={}):
+        kwargs = {"json_data": data} if method.lower() == "post" else {"data": data}
+        return await self._make_request(method, url, headers, return_text=text, **kwargs)
 
     @asyncSlot
     async def create_connect(self):
-        self.ws = await self.session.ws_connect('wss://neo.character.ai/ws/', cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'}, autoclose=False)
-        return self.ws
+        if self.ws and not self.ws.closed:
+            return self.ws
+        try:
+            self.ws = await self.session.ws_connect(
+                'wss://neo.character.ai/ws/',
+                cookies={'HTTP_AUTHORIZATION': f'Token {self.token}'},
+                autoclose=False
+            )
+            return self.ws
+        except Exception as e:
+            logging.error(f"WebSocket connection failed: {e}")
+            return None
 
     @asyncSlot
     async def check_vtube_connect(self):
@@ -500,20 +528,25 @@ class ChatThread(QThread):
             if 'turn' not in response:
                 raise Exception(response['comment'])
             if response['command'] == 'update_turn':
-                pci = response.get("turn", {}).get('primary_candidate_id')
-                for candidate in response.get("turn", {}).get('candidates', []):
-                    if candidate.get('candidate_id', pci) == pci:
-                        current = candidate.get('raw_content', '')
-                        current_id = candidate.get('candidate_id', '')
+                turn = response.get("turn", {})
+                pci = turn.get('primary_candidate_id')
 
-                for message in self.chat_histories.get(chat_id, []):
-                    if message['turn_key']['turn_id'] == turn_id:
+                current = ""
+                current_id = ""
+                for candidate in turn.get('candidates', []):
+                    if candidate.get('candidate_id') == pci:
+                        current = candidate.get('raw_content', '')
+                        current_id = candidate.get('candidate_id')
+                        break
+
+                history = self.chat_histories.get(chat_id, [])
+                for message in history:
+                    if message.get('turn_key', {}).get('turn_id') == turn_id:
                         message['candidates'][0]['raw_content'] = current
                         message['candidates'][0]['candidate_id'] = current_id
                         message['primary_candidate_id'] = pci
-
-                        logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Message in chat_histories updated")
                         break
+
                 self.edit_message_signal.emit(response)
             else:
                 pass
@@ -1228,28 +1261,17 @@ class VoiceModeThreadV2(QThread):
         self.username = username
         self.char_name = char_name
         self.voice_id = voice_id
-        self.muted = self.mw.muted
-        self.lang = self.mw.current_language
-        self.used_emotes = []
-
-        self.session = None
-        self.chat_thread = self.mw.chat_thread
-        self.eec = EEC(self.mw)
-        self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
 
         input_dev = self.mw.settings.value('input_device', False)
         self.input_index = 0 if input_dev is False else self.mw.settings.value('input_device', 0, type=int) + 1
-
         output_dev = self.mw.settings.value('output_device', False)
         self.output_index = 0 if output_dev is False else self.mw.settings.value('output_device', 0, type=int)
 
         self.room = None
-        self.audio_devices = None
-        self.mic_track = None
-        self.speaker_player = None
-
         self.output_stream = None
         self.is_bot_speaking = False
+        self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
+        self.eec = EEC(self.mw)
 
     def run(self):
         self.loop = asyncio.new_event_loop()
@@ -1317,7 +1339,6 @@ class VoiceModeThreadV2(QThread):
             await self.connect_livekit(ws_url, call_token)
 
     def set_mute(self, is_muted: bool):
-        self.muted = is_muted
         if self.mic_track:
             if is_muted:
                 self.mic_track.mute()
