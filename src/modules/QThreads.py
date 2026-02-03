@@ -1212,11 +1212,8 @@ class VoiceModeThread(QThread):
 
 class VoiceModeThreadV2(QThread):
     connected_signal = pyqtSignal(bool)
-    speech_signal = pyqtSignal(object)
-    speech_error_signal = pyqtSignal(object)
-
-    user_message = pyqtSignal(str)
-    char_message = pyqtSignal(object)
+    speech_signal = pyqtSignal(bool)
+    error_signal = pyqtSignal(str)
 
     def __init__(self, parent, token, char, chat_id, username, char_name=None, voice_id=None):
         super().__init__()
@@ -1260,7 +1257,7 @@ class VoiceModeThreadV2(QThread):
             self.loop.run_until_complete(self.start_call())
         except Exception as e:
             print(f"Critical Error in run: {e}")
-            self.speech_error_signal.emit(str(e))
+            self.error_signal.emit(str(e))
         finally:
             pending = asyncio.all_tasks(self.loop)
             for task in pending:
@@ -1338,17 +1335,14 @@ class VoiceModeThreadV2(QThread):
                 device=self.output_index
             )
             self.output_stream.start()
-
             await self.room.connect(url, token)
             self.connected_signal.emit(True)
-
             await self._enable_microphone()
-
             await self.stop_event.wait()
 
         except Exception as e:
             await self.room.disconnect()
-            raise Exception(f"LiveKit error: {e}")
+            self.error_signal.emit(f"LiveKit error: {e}")
         finally:
             if self.output_stream:
                 self.output_stream.stop()
@@ -1380,6 +1374,7 @@ class VoiceModeThreadV2(QThread):
             if rms > 500:
                 if not self.is_bot_speaking:
                     self.is_bot_speaking = True
+                    if self.vtube_studio: await self.eec.UseEmote("Says")
                     self.speech_signal.emit(False)
                 silence_timer = 0
             else:
@@ -1388,6 +1383,7 @@ class VoiceModeThreadV2(QThread):
 
                     if silence_timer > silence_threshold:
                         self.is_bot_speaking = False
+                        if self.vtube_studio: await self.eec.UseEmote("Listening")
                         self.speech_signal.emit(True)
 
     async def _enable_microphone(self):
