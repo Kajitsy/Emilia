@@ -146,8 +146,9 @@ class EmiliaNext(QMainWindow):
         for index, device in enumerate(QMediaDevices().audioInputs()):
             self.input_devices[str(index)] = device.description()
 
-        for index, device in enumerate(QMediaDevices().audioOutputs()):
-            self.output_devices[str(index)] = device.description()
+        for index, device in enumerate(sounddevice.query_devices()):
+            if device['max_output_channels'] > 0:
+                self.output_devices[str(index)] = device['name']
 
         self.chat_thread = ChatThread(self)
         self.threads.append(self.chat_thread)
