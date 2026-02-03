@@ -20,6 +20,7 @@ def asyncSlot(func):
 
 class ImageLoaderThread(QThread):
     image_loaded = pyqtSignal(QPixmap)
+    image_cache_path = pyqtSignal(str)
     error_loading = pyqtSignal(object)
 
     def __init__(self, url, width, height, cache_dir="cache/avatars"):
@@ -67,6 +68,7 @@ class ImageLoaderThread(QThread):
                                    Qt.AspectRatioMode.KeepAspectRatioByExpanding,
                                    Qt.TransformationMode.SmoothTransformation)
             self.image_loaded.emit(self.round_qpixmap(pixmap))
+            self.image_cache_path.emit(cache_path)
             return
 
         try:
@@ -80,6 +82,7 @@ class ImageLoaderThread(QThread):
                                    Qt.AspectRatioMode.KeepAspectRatioByExpanding,
                                    Qt.TransformationMode.SmoothTransformation)
             self.image_loaded.emit(self.round_qpixmap(pixmap))
+            self.image_cache_path.emit(cache_path)
         except Exception as e:
             logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Image download error: {e}")
             self.error_loading.emit(QPixmap())

@@ -1,16 +1,16 @@
-import os
+import os, math
 
 from curl_cffi import CurlMime
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
-                             QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog)
-from PyQt6.QtGui import QMouseEvent, QAction, QPixmap
-from PyQt6.QtCore import (QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt)
+                             QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
+from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt
 from datetime import datetime
+from PIL import Image
 
 from modules.cards import PersonaCards
-from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame, \
-    ComboBox, LineEdit
-from modules.QThreads import (PlayerThread, FileLoaderThread, ImageLoaderThread, ChatThread, DiscordRPC)
+from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
+from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, ChatThread, DiscordRPC
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
 from modules.cards.VoiceCards import VoiceSearch, VoiceMode
@@ -32,6 +32,9 @@ class MessageBubble(QFrame):
         self.initUI()
 
     def initUI(self):
+        self.opacity_effect = QGraphicsOpacityEffect(self)
+        self.opacity_effect.setOpacity(0)
+        self.setGraphicsEffect(self.opacity_effect)
         layout = QVBoxLayout()
         layout_2 = QHBoxLayout()
         lw2 = QFrame()
@@ -68,6 +71,12 @@ class MessageBubble(QFrame):
             color_avatar(self.avatar_label, 24, 24, self.name, 4)
 
         self.m_frame = QFrame()
+        self.m_frame.setObjectName("messageBubbleFrame")
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setOffset(0, 4)
+        shadow.setColor(QColor(0, 0, 0, 60))
+        self.m_frame.setGraphicsEffect(shadow)
         m_layout = QVBoxLayout()
         self.m_frame.setLayout(m_layout)
 
@@ -79,22 +88,37 @@ class MessageBubble(QFrame):
 
         if self.is_user:
             self.message_label.setStyleSheet(f"color: {self.parent.user_text_message};")
-            self.m_frame.setStyleSheet(
-                f"background-color: {self.parent.user_back_message};"
-                "border-radius: 4px;")
+            self.m_frame.setStyleSheet(f"#messageBubbleFrame {{ background-color: {self.parent.char_back_message}; border-radius: 4px; }}")
             layout_2.addWidget(self.m_frame)
             layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
         else:
             self.message_label.setStyleSheet(f"color: {self.parent.char_text_message};")
-            self.m_frame.setStyleSheet(
-                f"background-color: {self.parent.char_back_message};"
-                "border-radius: 4px;")
+            self.m_frame.setStyleSheet(f"#messageBubbleFrame {{ background-color: {self.parent.char_back_message}; border-radius: 4px; }}")
             layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
             layout_2.addWidget(self.m_frame)
 
         self.setLayout(layout)
         self.adjustSize()
         self.setMinimumHeight(self.height())
+
+        self.animate_entry()
+
+    def animate_entry(self):
+        self.opacity_effect = QGraphicsOpacityEffect(self)
+        self.opacity_effect.setOpacity(0)
+        self.setGraphicsEffect(self.opacity_effect)
+
+        self.anim = QPropertyAnimation(self.opacity_effect, b"opacity")
+        self.anim.setDuration(400)
+        self.anim.setStartValue(0)
+        self.anim.setEndValue(1)
+        self.anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+
+        self.anim.finished.connect(self.remove_opacity_effect)
+        self.anim.start()
+
+    def remove_opacity_effect(self):
+        self.setGraphicsEffect(None)
 
 class ChatInterface(QWidget):
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None, scene_id: str | None = None):
@@ -122,8 +146,10 @@ class ChatInterface(QWidget):
         self.char_text_message = self.chat_settings.value('colors/char_text_message', '#e8eaed')
         self.user_back_message = self.chat_settings.value('colors/user_back_message', '#303136')
         self.user_text_message = self.chat_settings.value('colors/user_text_message', '#e8eaed')
+        self.background_image = self.chat_settings.value('background_image', '')
 
         self.initUI()
+        self.applyBackground(self.background_image)
         self.createRightSidebar()
 
         self.chat_thread.message_signal.connect(self.charMessageSignal)
@@ -142,8 +168,12 @@ class ChatInterface(QWidget):
         main_area_layout = QHBoxLayout()
 
         self.messages_area = VerticalScrollPage()
+        self.messages_area.setObjectName("chatScrollArea")
+        self.messages_area.viewport.setAutoFillBackground(False)
+        self.messages_area.setFrameShape(QFrame.Shape.NoFrame)
         self.messages_area.verticalScrollBar().rangeChanged.connect(self.scrollToBottomIfNeeded)
         self.messages_content = self.messages_area.viewport
+        self.messages_content.setObjectName("chatContent")
         self.messages_layout = self.messages_area.layout
         main_area_layout.addWidget(self.messages_area)
 
@@ -156,7 +186,7 @@ class ChatInterface(QWidget):
 
         format_toolbar = QHBoxLayout()
         format_widget = QFrame()
-        if self.show_format_buttons: format_widget.setLayout(format_toolbar)
+        format_widget.setLayout(format_toolbar)
 
         bold_button = PushButton(self.tr("Bold"))
         bold_button.clicked.connect(lambda: self.message_input.formatSelectedText("**", "**"))
@@ -169,9 +199,10 @@ class ChatInterface(QWidget):
         format_toolbar.addWidget(code_button)
         format_toolbar.addStretch()
 
-        input_layout.addWidget(format_widget)
+        if self.show_format_buttons: input_layout.addWidget(format_widget)
 
         send_layout = QHBoxLayout()
+        send_layout.setContentsMargins(0, 0, 0, 0)
         send_widget = QFrame()
         send_widget.setLayout(send_layout)
         self.message_input = CustomTextEdit()
@@ -207,6 +238,111 @@ class ChatInterface(QWidget):
         self.chat_thread.voice_override(self.character_id)
         self.chat_thread.get_user_personas()
         if self.scene_id: self.chat_thread.get_scene_by_id(self.scene_id)
+
+    def applyBackground(self, path):
+        if path and os.path.exists(path):
+            path = path.replace('\\', '/')
+            self.messages_area.setStyleSheet(f"""
+                #chatScrollArea {{
+                    border-image: url("{path}") 0 0 0 0 stretch stretch;
+                }}
+            """)
+            self.messages_content.setStyleSheet("#chatContent { background: transparent; }")
+
+        else:
+            self.messages_area.setStyleSheet("#chatScrollArea {}")
+            self.messages_content.setStyleSheet("#chatContent {}")
+
+    def extract_theme_colors(self, image_path):
+        try:
+            img = Image.open(image_path)
+            img = img.resize((150, 150))
+            result = img.quantize(colors=5)
+            palette = result.getpalette()
+
+            colors = []
+            for i in range(0, 15, 3):
+                rgb = (palette[i], palette[i + 1], palette[i + 2])
+                colors.append(rgb)
+
+            def rgb_to_hex(rgb):
+                return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
+
+            def get_brightness(rgb):
+                return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
+
+            valid_colors = [c for c in colors]
+
+            if len(valid_colors) < 2:
+                valid_colors.append(valid_colors[0])
+
+            char_rgb = valid_colors[0]
+
+            user_rgb = valid_colors[1]
+
+            for i in range(1, len(valid_colors)):
+                c = valid_colors[i]
+                dist = math.sqrt(sum([(a - b) ** 2 for a, b in zip(char_rgb, c)]))
+                if dist > 30:
+                    user_rgb = c
+                    break
+
+            char_hex = rgb_to_hex(char_rgb)
+            user_hex = rgb_to_hex(user_rgb)
+
+            char_text = "#ffffff" if get_brightness(char_rgb) < 130 else "#000000"
+            user_text = "#ffffff" if get_brightness(user_rgb) < 130 else "#000000"
+
+            return {
+                "char_back": char_hex,
+                "char_text": char_text,
+                "user_back": user_hex,
+                "user_text": user_text
+            }
+
+        except Exception as e:
+            print(f"Error extracting colors: {e}")
+            return None
+
+    def setBackgroundFromUrl(self, url):
+        if url:
+            self.mw.showNotification(self.tr("Downloading background..."))
+            loader = ImageLoaderThread(url, 720, 1280)
+            loader.image_cache_path.connect(self._onBackgroundDownloaded)
+            loader.error_loading.connect(lambda: self.mw.showNotification(self.tr("Error downloading image")))
+            loader.start()
+            self.mw.threads.append(loader)
+
+    def _onBackgroundDownloaded(self, file_path):
+        self.background_image = file_path
+        self.chat_settings.setValue("background_image", file_path)
+        self.applyBackground(file_path)
+
+        theme = self.extract_theme_colors(file_path)
+        if theme:
+            self.char_back_message = theme['char_back']
+            self.char_text_message = theme['char_text']
+            self.user_back_message = theme['user_back']
+            self.user_text_message = theme['user_text']
+
+            self.chat_settings.setValue("colors/char_back_message", self.char_back_message)
+            self.chat_settings.setValue("colors/char_text_message", self.char_text_message)
+            self.chat_settings.setValue("colors/user_back_message", self.user_back_message)
+            self.chat_settings.setValue("colors/user_text_message", self.user_text_message)
+
+            self._update_current_chat_colors()
+
+    def _update_current_chat_colors(self):
+        for i in range(self.messages_layout.count()):
+            item = self.messages_layout.itemAt(i)
+            if item.widget():
+                bubble = item.widget().currentWidget()
+                if bubble.objectName() == 'user_message':
+                    self.setBackMessageColor(bubble, self.user_back_message)
+                    self.setTextMessageColor(bubble, self.user_text_message)
+                elif bubble.objectName() == 'char_message':
+                    self.setBackMessageColor(bubble, self.char_back_message)
+                    self.setTextMessageColor(bubble, self.char_text_message)
 
     def createTopBar(self):
         header_frame = QWidget()
@@ -362,6 +498,8 @@ class ChatInterface(QWidget):
         self.header_scene_title_label.setText(self.scene["title"])
         self.header_scene_title_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.header_scene_title_label.mousePressEvent = lambda _: self.mw.openScene(self.scene, self.scene_id)
+        if self.scene.get('background_image_url'):
+            self.setBackgroundFromUrl(self.scene.get('background_image_url'))
 
     def getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()
@@ -664,6 +802,9 @@ class ChatInterface(QWidget):
                 "user_back_message": "#303136",
                 "user_text_message": "#e8eaed"
             }
+            self.chat_settings.setValue("background_image", "")
+            self.applyBackground("")
+
             for key, value in data.items():
                 self.chat_settings.setValue(f"colors/{key}", value)
                 setattr(self, key, value)
@@ -678,6 +819,52 @@ class ChatInterface(QWidget):
                         self.setBackMessageColor(item.currentWidget(), self.char_back_message)
                         self.setTextMessageColor(item.currentWidget(), self.char_text_message)
             self.mw.hideOverlay()
+
+        def pickBackgroundImage():
+            file_dialog = QFileDialog()
+            file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.webp *.gif *.bmp)")
+            if file_dialog.exec():
+                selected_files = file_dialog.selectedFiles()
+                if selected_files:
+                    path = selected_files[0]
+                    self.background_image = path
+                    self.chat_settings.setValue("background_image", path)
+                    self.applyBackground(path)
+
+                    theme = self.extract_theme_colors(path)
+                    if theme:
+                        self.char_back_message = theme['char_back']
+                        self.char_text_message = theme['char_text']
+                        self.user_back_message = theme['user_back']
+                        self.user_text_message = theme['user_text']
+
+                        self.char_back_message_picker.setStyleSheet(f"background-color: {self.char_back_message};")
+                        self.char_text_message_picker.setStyleSheet(f"background-color: {self.char_text_message};")
+                        self.user_back_message_picker.setStyleSheet(f"background-color: {self.user_back_message};")
+                        self.user_text_message_picker.setStyleSheet(f"background-color: {self.user_text_message};")
+
+                        self.chat_settings.setValue("colors/char_back_message", self.char_back_message)
+                        self.chat_settings.setValue("colors/char_text_message", self.char_text_message)
+                        self.chat_settings.setValue("colors/user_back_message", self.user_back_message)
+                        self.chat_settings.setValue("colors/user_text_message", self.user_text_message)
+
+                        for i in range(self.messages_layout.count()):
+                            item = self.messages_layout.itemAt(i)
+                            if item.widget():
+                                widget = item.widget()
+                                bubble = widget.currentWidget()
+
+                                if bubble.objectName() == 'user_message':
+                                    self.setBackMessageColor(bubble, self.user_back_message)
+                                    self.setTextMessageColor(bubble, self.user_text_message)
+                                elif bubble.objectName() == 'char_message':
+                                    self.setBackMessageColor(bubble, self.char_back_message)
+                                    self.setTextMessageColor(bubble, self.char_text_message)
+
+        def clearBackgroundImage():
+            self.background_image = ""
+            self.chat_settings.setValue("background_image", "")
+            self.applyBackground("")
 
         def pickCharBackMessageColor():
             color = QColorDialog.getColor()
@@ -725,8 +912,7 @@ class ChatInterface(QWidget):
             self.mw.hideOverlay()
 
         color_picker_widget = QWidget()
-        color_picker_widget.setFixedWidth(250)
-        color_picker_widget.setFixedHeight(200)
+        color_picker_widget.setFixedHeight(300)
         color_picker_layout = QVBoxLayout()
         color_picker_widget.setLayout(color_picker_layout)
 
@@ -770,6 +956,20 @@ class ChatInterface(QWidget):
         user_back_message_layout.addWidget(self.user_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
         color_pickers_layout.addLayout(user_back_message_layout)
         color_picker_layout.addWidget(color_pickers_frame, alignment=Qt.AlignmentFlag.AlignTop)
+
+        background_layout = QHBoxLayout()
+        bg_label = QLabel(self.tr("Background Image:"))
+        background_layout.addWidget(bg_label)
+
+        pick_bg_button = PushButton(self.tr("Select"))
+        pick_bg_button.clicked.connect(pickBackgroundImage)
+        background_layout.addWidget(pick_bg_button)
+
+        clear_bg_button = PushButton(self.tr("Clear"))
+        clear_bg_button.clicked.connect(clearBackgroundImage)
+        background_layout.addWidget(clear_bg_button)
+
+        color_picker_layout.addLayout(background_layout)
 
         buttons_layout = QHBoxLayout()
         apply_button = PushButton(self.tr("Apply"))
@@ -1198,6 +1398,8 @@ class ChatInterface(QWidget):
 
     def addMessage(self, text, turn_id, is_user=False, attachments=[]):
         message_widget = QStackedWidget()
+        message_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        message_widget.setStyleSheet("background: transparent;")
         message_widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         message_widget.turn_id = turn_id
         message_widget.is_user = is_user
