@@ -1,0 +1,70 @@
+name: Build Emilia Setup
+
+on:
+  push:
+    tags: 
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Download repo
+        uses: actions/checkout@v6.0.2
+
+      - name: Python Setup
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: '3.12' 
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+
+      - name: Build with PyInstaller
+        shell: pwsh
+        run: |
+          $LK_PATH = python -c "import livekit; print(list(livekit.__path__)[0])"
+          echo "LiveKit path: $LK_PATH"
+
+          pyinstaller --noconfirm --onedir --windowed `
+            --icon "src\icon.ico" `
+            --uac-admin `
+            --add-data "$LK_PATH\rtc\resources\livekit_ffi.dll;livekit/rtc/resources" `
+            --hidden-import "urllib3.contrib.resolver.system" `
+            --hidden-import "urllib3.contrib.hface.protocols.http1" `
+            --hidden-import "urllib3.contrib.hface.protocols.http2" `
+            --hidden-import "livekit.rtc.resources" `
+            "src\main.py"
+
+          if (Test-Path "dist\main\main.exe") {
+              Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
+          } else {
+              Write-Error "Ошибка: файл main.exe не найден!"
+              exit 1
+          }
+
+      - name: Build Setup file
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        with:
+          path: installer.iss
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v6
+        with:
+          name: Emilia_Installer
+          path: EmiliaSetup.exe
+
+      - name: Public release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: EmiliaSetup.exe
+          generate_release_notes: true
