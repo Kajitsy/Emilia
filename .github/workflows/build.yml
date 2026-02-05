@@ -3,7 +3,7 @@ name: Build Emilia Setup
 on:
   push:
     tags: 
-      - 'v*'
+      - '*'
   workflow_dispatch:
 
 permissions:
