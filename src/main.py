@@ -1,4 +1,4 @@
-import sys, ctypes, platform, webbrowser, subprocess, datetime, os, json, logging
+import sys, ctypes, platform, webbrowser, argparse, datetime, os, logging
 
 os.makedirs("logs", exist_ok=True)
 
@@ -26,6 +26,10 @@ logging.getLogger("qasync").setLevel(logging.WARNING)
 logging.getLogger("websockets").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
+argparser = argparse.ArgumentParser(description='Emilia')
+argparser.add_argument('--force', '-f', action='store_true', help='Force overwrite of manifest.json')
+args = argparser.parse_args()
+
 class LoggerWriter:
     def __init__(self, level, stream):
         self.level = level
@@ -45,7 +49,8 @@ Started at:   {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 Python:       {sys.version.split()[0]} ({platform.architecture()[0]})
 Frozen EXE:   {getattr(sys, 'frozen', False)}
 Python Path:  {sys.executable}
-Process ID:   {os.getpid()}""")
+Process ID:   {os.getpid()}
+Force: {args.force}""")
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QPushButton, QFrame, QSizePolicy, QStackedWidget,
@@ -76,9 +81,7 @@ if platform.system() == 'Windows':
 app = QApplication(sys.argv)
 
 translator = QTranslator()
-
-translator.load(
-    f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
+translator.load(f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
 app.installTranslator(translator)
 
 loop = QEventLoop(app)
@@ -154,7 +157,7 @@ class EmiliaNext(QMainWindow):
         self.threads.append(self.chat_thread)
         self.discord_thread = DiscordRPC(self)
         self.threads.append(self.discord_thread)
-        self.updater_thread = UpdaterThread()
+        self.updater_thread = UpdaterThread(args.force)
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
         self.threads.append(self.updater_thread)
 

@@ -180,8 +180,9 @@ class UpdaterThread(QThread):
     has_update_signal = pyqtSignal(bool)
     error_signal = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, force=False):
         super().__init__()
+        self.force = force
         self.remote_url = "https://emilia-update.ateez.ru/"
         self.local_manifest = {"files": {}}
         self.remote_manifest = {"files": {}}
@@ -194,7 +195,7 @@ class UpdaterThread(QThread):
         self.diff()
 
     def generate_local_manifest(self):
-        if not os.path.exists('./manifest.json'):
+        if self.force or not os.path.exists('./manifest.json'):
             INCLUDE_FILES = [
                 "emilia.exe",
                 "icon.ico",
@@ -313,7 +314,7 @@ class UpdateThread(QThread):
                 self.error_signal.emit(f"Download error {e}: {rel_path}")
                 return False
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers=4) as executor:
             futures = [executor.submit(download_worker, f) for f in self.files_to_download]
 
             for future in as_completed(futures):
@@ -351,7 +352,7 @@ class UpdateThread(QThread):
         rmdir /s /q "{update_dir}"
 
         echo Starting application...
-        start "" "emilia.exe"
+        start "" ".\emilia.exe --force"
 
         del "%~f0"
         """
