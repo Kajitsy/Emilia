@@ -154,10 +154,13 @@ class EmiliaNext(QMainWindow):
         self.threads.append(self.chat_thread)
         self.discord_thread = DiscordRPC(self)
         self.threads.append(self.discord_thread)
+        self.updater_thread = UpdaterThread()
+        self.updater_thread.has_update_signal.connect(self.checkForUpdates)
+        self.thread.append(self.updater_thread)
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
         if getattr(sys, 'frozen', False):
-            self.checkForUpdates()
+            self.updater_thread.start()
 
         self.initUI()
         self.loadUI()
@@ -461,99 +464,25 @@ class EmiliaNext(QMainWindow):
         self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
         self.full_animation.start()
 
-    def checkForUpdates(self):
-        if not getattr(sys, 'frozen', False):
-            return
+    def checkForUpdates(self, has_update):
+        def update():
+            def update_overlay(x, y):
+                self.download_overlay_progress.setValue(x)
+                self.download_overlay_progress.setMaximum(y)
 
-        if not os.path.exists('./manifest.json'):
-            INCLUDE_FILES = [
-                "emilia.exe",
-                "icon.ico",
-            ]
+            overlay = self.createDownloadOverlay()
+            thread = UpdateThread(self.updater_thread.remote_url, self.updater_thread.files_to_download, self.updater_thread.files_to_removed)
+            thread.progress_signal.connect(update_overlay)
+            self.threads.append(thread)
 
-            INCLUDE_DIRS = [
-                "_internal",
-                "lang",
-            ]
+            self.hide_overlay = False
+            self.showOverlay(overlay)
+            thread.start()
 
-            def get_hash(filepath):
-                hasher = hashlib.sha256()
-                try:
-                    with open(filepath, "rb") as f:
-                        for chunk in iter(lambda: f.read(4096), b""):
-                            hasher.update(chunk)
-                    return hasher.hexdigest()
-                except FileNotFoundError:
-                    return None
-
-            manifest = {"files": {}}
-
-            for filename in INCLUDE_FILES:
-                full_path = os.path.join(".", filename)
-                if os.path.exists(full_path):
-                    file_hash = get_hash(full_path)
-                    if file_hash:
-                        manifest["files"][filename] = file_hash
-
-            for directory in INCLUDE_DIRS:
-                dir_full_path = os.path.join(".", directory)
-                if not os.path.exists(dir_full_path):
-                    continue
-
-                for root, _, files in os.walk(dir_full_path):
-                    for filename in files:
-                        full_path = os.path.join(root, filename)
-                        rel_path = os.path.relpath(full_path, ".").replace("\\", "/")
-
-                        file_hash = get_hash(full_path)
-                        if file_hash:
-                            manifest["files"][rel_path] = file_hash
-
-            with open("manifest.json", "w", encoding="utf-8") as f:
-                json.dump(manifest, f, indent=4)
-
-       #try:
-       #    headers = {"Accept": "application/vnd.github.v3+json"}
-       #    response = requests.get(
-       #        "https://api.github.com/repos/Kajitsy/Emilia/releases",
-       #        headers=headers,
-       #        timeout=10
-       #    )
-       #    response.raise_for_status()
-       #    releases = response.json()
-
-       #    latest_release = next((r for r in releases if not r["prerelease"]), None)
-       #    latest_prerelease = next((r for r in releases if r["prerelease"]), None)
-       #    target_release = latest_prerelease if self.beta and latest_prerelease else latest_release
-
-       #    if target_release:
-       #        latest_version = target_release["tag_name"]
-       #        asset = next((a for a in target_release["assets"] if a["name"] == "EmiliaSetup.exe"), None)
-
-       #        if latest_version > self.version and asset:
-       #            self.showNotification(self.tr("A new version is available: ") + latest_version)
-       #            self.update_button.setVisible(True)
-       #            self.update_button.clicked.connect(lambda: self.downloadUpdate(asset["browser_download_url"]))
-       #except:
-       #    pass
-
-    def downloadUpdate(self, url):
-        self.showOverlay(self.createDownloadOverlay())
-        self.hide_overlay = False
-        save_path = os.path.join(os.getcwd(), "update.exe")
-        self.thread = FileLoaderThread(url, save_path=save_path)
-        self.thread.progress.connect(lambda x: self.download_overlay_progress.setValue(x))
-        self.thread.finished.connect(self.runInstaller)
-        self.thread.start()
-
-    def runInstaller(self, save_path):
-        if save_path:
-            self.download_overlay_label.setText(self.tr("Download complete. Running installer..."))
-            self.closeEvent = lambda a0: None
-            self.close()
-            subprocess.Popen(save_path, shell=True)
-        else:
-            self.download_overlay_label.setText(self.tr("Download failed."))
+        if has_update:
+            self.showNotification(self.tr("An update is available"))
+            self.update_button.setVisible(True)
+            self.update_button.clicked.connect(lambda: update())
 
     def createDownloadOverlay(self):
         self.download_overlay_frame = QFrame()
