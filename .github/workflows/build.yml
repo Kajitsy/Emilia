@@ -1,9 +1,8 @@
 name: Build Emilia Setup
 
 on:
-  push:
-    tags: 
-      - '*'
+  release:
+    types: [released]
   workflow_dispatch:
 
 permissions:
@@ -126,25 +125,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download installer artifact
-        uses: actions/download-artifact@v4
+      - uses: vedantmgoyal9/winget-releaser@main
         with:
-          name: Emilia_Installer
-          path: winget
-
-      - name: Install wingetcreate
-        run: |
-          dotnet tool install --global Microsoft.WinGet.Create
-
-      - name: Get version from tag
-        run: |
-          echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
-
-      - name: Update winget package
-        env:
-          GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
-        run: |
-          wingetcreate update Kajitsy.Emilia \
-            --version $VERSION \
-            --urls https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/EmiliaSetup.exe \
-            --submit
+          identifier: Kajitsy.Emilia
+          installers-regex: '\.exe$' # Only .exe files
+          version: ${{ github.event.release.name }}
+          token: ${{ secrets.WINGET_TOKEN }}
