@@ -1,4 +1,4 @@
-import sys, ctypes, platform, webbrowser, argparse, datetime, os, logging
+import sys, ctypes, platform, webbrowser, datetime, os, logging
 
 os.makedirs("logs", exist_ok=True)
 
@@ -26,10 +26,6 @@ logging.getLogger("qasync").setLevel(logging.WARNING)
 logging.getLogger("websockets").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-argparser = argparse.ArgumentParser(description='Emilia')
-argparser.add_argument('--force', '-f', action='store_true', help='Force overwrite of manifest.json')
-args = argparser.parse_args()
-
 class LoggerWriter:
     def __init__(self, level, stream):
         self.level = level
@@ -49,8 +45,7 @@ Started at:   {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 Python:       {sys.version.split()[0]} ({platform.architecture()[0]})
 Frozen EXE:   {getattr(sys, 'frozen', False)}
 Python Path:  {sys.executable}
-Process ID:   {os.getpid()}
-Force: {args.force}""")
+Process ID:   {os.getpid()}""")
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QPushButton, QFrame, QSizePolicy, QStackedWidget,
@@ -157,8 +152,9 @@ class EmiliaNext(QMainWindow):
         self.threads.append(self.chat_thread)
         self.discord_thread = DiscordRPC(self)
         self.threads.append(self.discord_thread)
-        self.updater_thread = UpdaterThread(args.force)
+        self.updater_thread = UpdaterThread()
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
+        self.updater_thread.error_signal.connect(self.checkForUpdatesError)
         self.threads.append(self.updater_thread)
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
@@ -472,10 +468,12 @@ class EmiliaNext(QMainWindow):
             def update_overlay(x, y):
                 self.download_overlay_progress.setValue(x)
                 self.download_overlay_progress.setMaximum(y)
+                self.download_overlay_progress_label.setText(f"{x}/{y}")
 
             overlay = self.createDownloadOverlay()
             thread = UpdateThread(self.updater_thread.remote_url, self.updater_thread.files_to_download, self.updater_thread.files_to_removed)
             thread.progress_signal.connect(update_overlay)
+            thread.error_signal.connect(self.checkForUpdatesError)
             self.threads.append(thread)
 
             self.hide_overlay = False
@@ -487,6 +485,12 @@ class EmiliaNext(QMainWindow):
             self.update_button.setVisible(True)
             self.update_button.clicked.connect(lambda: update())
 
+    def checkForUpdatesError(self, error):
+        self.showNotification(error)
+        if not self.hide_overlay:
+            self.hide_overlay = True
+            self.hideOverlay()
+
     def createDownloadOverlay(self):
         self.download_overlay_frame = QFrame()
         self.download_overlay_frame.setFixedSize(150, 90)
@@ -495,6 +499,10 @@ class EmiliaNext(QMainWindow):
         self.download_overlay_label = QLabel(self.tr("Downloading..."))
         self.download_overlay_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.download_overlay_label)
+
+        self.download_overlay_progress_label = QLabel()
+        self.download_overlay_progress_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.download_overlay_progress_label)
 
         self.download_overlay_progress = QProgressBar()
         self.download_overlay_progress.setTextVisible(False)
