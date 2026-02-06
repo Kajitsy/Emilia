@@ -182,15 +182,15 @@ class UpdaterThread(QThread):
 
     def __init__(self):
         super().__init__()
-        self.remote_url = "https://https://emilia-update.ateez.ru/"
+        self.remote_url = "https://emilia-update.ateez.ru/"
         self.local_manifest = {"files": {}}
         self.remote_manifest = {"files": {}}
         self.files_to_download = []
         self.files_to_removed = []
 
     def run(self):
-        self.generate_local_manifest()
         self.get_remote_manifest()
+        self.generate_local_manifest()
         self.diff()
 
     def generate_local_manifest(self):
