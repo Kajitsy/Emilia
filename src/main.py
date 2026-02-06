@@ -112,7 +112,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.1"
+        self.version = "3.2.2b"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -462,30 +462,80 @@ class EmiliaNext(QMainWindow):
         self.full_animation.start()
 
     def checkForUpdates(self):
-        try:
-            headers = {"Accept": "application/vnd.github.v3+json"}
-            response = requests.get(
-                "https://api.github.com/repos/Kajitsy/Emilia/releases",
-                headers=headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            releases = response.json()
+        if not getattr(sys, 'frozen', False):
+            return
 
-            latest_release = next((r for r in releases if not r["prerelease"]), None)
-            latest_prerelease = next((r for r in releases if r["prerelease"]), None)
-            target_release = latest_prerelease if self.beta and latest_prerelease else latest_release
+        if not os.path.exists('./manifest.json'):
+            INCLUDE_FILES = [
+                "emilia.exe",
+                "icon.ico",
+            ]
 
-            if target_release:
-                latest_version = target_release["tag_name"]
-                asset = next((a for a in target_release["assets"] if a["name"] == "EmiliaSetup.exe"), None)
+            INCLUDE_DIRS = [
+                "_internal",
+                "lang",
+            ]
 
-                if latest_version > self.version and asset:
-                    self.showNotification(self.tr("A new version is available: ") + latest_version)
-                    self.update_button.setVisible(True)
-                    self.update_button.clicked.connect(lambda: self.downloadUpdate(asset["browser_download_url"]))
-        except:
-            pass
+            def get_hash(filepath):
+                hasher = hashlib.sha256()
+                try:
+                    with open(filepath, "rb") as f:
+                        for chunk in iter(lambda: f.read(4096), b""):
+                            hasher.update(chunk)
+                    return hasher.hexdigest()
+                except FileNotFoundError:
+                    return None
+
+            manifest = {"files": {}}
+
+            for filename in INCLUDE_FILES:
+                full_path = os.path.join(".", filename)
+                if os.path.exists(full_path):
+                    file_hash = get_hash(full_path)
+                    if file_hash:
+                        manifest["files"][filename] = file_hash
+
+            for directory in INCLUDE_DIRS:
+                dir_full_path = os.path.join(".", directory)
+                if not os.path.exists(dir_full_path):
+                    continue
+
+                for root, _, files in os.walk(dir_full_path):
+                    for filename in files:
+                        full_path = os.path.join(root, filename)
+                        rel_path = os.path.relpath(full_path, ".").replace("\\", "/")
+
+                        file_hash = get_hash(full_path)
+                        if file_hash:
+                            manifest["files"][rel_path] = file_hash
+
+            with open("manifest.json", "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=4)
+
+       #try:
+       #    headers = {"Accept": "application/vnd.github.v3+json"}
+       #    response = requests.get(
+       #        "https://api.github.com/repos/Kajitsy/Emilia/releases",
+       #        headers=headers,
+       #        timeout=10
+       #    )
+       #    response.raise_for_status()
+       #    releases = response.json()
+
+       #    latest_release = next((r for r in releases if not r["prerelease"]), None)
+       #    latest_prerelease = next((r for r in releases if r["prerelease"]), None)
+       #    target_release = latest_prerelease if self.beta and latest_prerelease else latest_release
+
+       #    if target_release:
+       #        latest_version = target_release["tag_name"]
+       #        asset = next((a for a in target_release["assets"] if a["name"] == "EmiliaSetup.exe"), None)
+
+       #        if latest_version > self.version and asset:
+       #            self.showNotification(self.tr("A new version is available: ") + latest_version)
+       #            self.update_button.setVisible(True)
+       #            self.update_button.clicked.connect(lambda: self.downloadUpdate(asset["browser_download_url"]))
+       #except:
+       #    pass
 
     def downloadUpdate(self, url):
         self.showOverlay(self.createDownloadOverlay())

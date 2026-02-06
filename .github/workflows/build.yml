@@ -27,13 +27,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
-
       - name: Build with PyInstaller
         shell: pwsh
         run: |
           $LK_PATH = python -c "import livekit; print(list(livekit.__path__)[0])"
-          echo "LiveKit path: $LK_PATH"
-
           pyinstaller --noconfirm --onedir --windowed `
             --icon "src\icon.ico" `
             --uac-admin `
@@ -43,13 +40,26 @@ jobs:
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
             --hidden-import "livekit.rtc.resources" `
             "src\main.py"
-
+          copy "src\icon.ico" "dist\main\icon.ico"
+          xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {
-              Write-Error "Ошибка: файл main.exe не найден!"
               exit 1
           }
+      - name: Cleanup Junk Files
+        run: |
+          python clean_dist.py
+      - name: Create manifest
+        shell: pwsh
+        run: |
+          python create_manifest.py
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: app-build
+          path: dist/main/
+          retention-days: 1
 
       - name: Build Setup file
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
@@ -62,9 +72,33 @@ jobs:
           name: Emilia_Installer
           path: EmiliaSetup.exe
 
-      - name: Public release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
-          files: EmiliaSetup.exe
-          generate_release_notes: true
+          name: app-build
+          path: deploy_files
+
+      - name: Execute Remote Commands
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /var/www/emilia
+            rm -rf /var/www/emilia/*
+
+      - name: Copy Files via SCP
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy_files/*"
+          target: "/var/www/emilia"
+          strip_components: 1
