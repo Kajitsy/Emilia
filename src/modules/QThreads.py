@@ -194,7 +194,7 @@ class UpdaterThread(QThread):
         self.diff()
 
     def generate_local_manifest(self):
-        if os.path.exists('./manifest.json'):
+        if not os.path.exists('./manifest.json'):
             INCLUDE_FILES = [
                 "emilia.exe",
                 "icon.ico",

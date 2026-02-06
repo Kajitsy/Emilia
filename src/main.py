@@ -156,7 +156,7 @@ class EmiliaNext(QMainWindow):
         self.threads.append(self.discord_thread)
         self.updater_thread = UpdaterThread()
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
-        self.thread.append(self.updater_thread)
+        self.threads.append(self.updater_thread)
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
         if getattr(sys, 'frozen', False):
