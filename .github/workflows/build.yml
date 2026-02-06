@@ -119,15 +119,3 @@ jobs:
           source: "deploy_files/*"
           target: "/var/www/emilia"
           strip_components: 1
-
-  winget:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: Kajitsy.Emilia
-          installers-regex: '\.exe$' # Only .exe files
-          version: ${{ github.event.release.name }}
-          token: ${{ secrets.WINGET_TOKEN }}
