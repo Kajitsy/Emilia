@@ -285,12 +285,12 @@
 <context>
     <name>ChatThread</name>
     <message>
-        <location filename="../modules/QThreads.py" line="374"/>
+        <location filename="../modules/QThreads.py" line="592"/>
         <source>Successful connection!</source>
         <translation>Erfolgreiche Verbindung!</translation>
     </message>
     <message>
-        <location filename="../modules/QThreads.py" line="377"/>
+        <location filename="../modules/QThreads.py" line="595"/>
         <source>Connection error: </source>
         <translation>Verbindungsfehler: </translation>
     </message>
@@ -557,170 +557,172 @@
 <context>
     <name>EmiliaNext</name>
     <message>
-        <location filename="../main.py" line="97"/>
-        <location filename="../main.py" line="92"/>
+        <location filename="../main.py" line="95"/>
+        <location filename="../main.py" line="90"/>
         <source>Emilia | Happy New Year</source>
         <translation>Emilia | Glückliches neues Jahr</translation>
     </message>
     <message>
-        <location filename="../main.py" line="93"/>
+        <location filename="../main.py" line="91"/>
         <source>Happy birthday Emilia!</source>
         <translation>Alles Gute zum Geburtstag Emilia!</translation>
     </message>
     <message>
-        <location filename="../main.py" line="94"/>
+        <location filename="../main.py" line="92"/>
         <source>Emilia | Happy birthday Kajitsy!</source>
         <translation>Emilia | Alles Gute zum Geburtstag Kajitsy!</translation>
     </message>
     <message>
-        <location filename="../main.py" line="95"/>
+        <location filename="../main.py" line="93"/>
         <source>Emilia | Happy birthday CAI!</source>
         <translation>Emilia | Alles Gute zum Geburtstag CAI!</translation>
     </message>
     <message>
-        <location filename="../main.py" line="142"/>
+        <location filename="../main.py" line="140"/>
         <source>User</source>
         <translation>Benutzer</translation>
     </message>
     <message>
-        <location filename="../main.py" line="285"/>
+        <location filename="../main.py" line="287"/>
         <source>Please re-enter (the login data has expired)</source>
         <translation>Bitte melden Sie sich an (der Datenzeitraum ist abgelaufen)</translation>
     </message>
     <message>
-        <location filename="../main.py" line="326"/>
+        <location filename="../main.py" line="328"/>
         <source>Remove from Recent Chats</source>
         <translation>Aus den letzten entfernen</translation>
     </message>
     <message>
         <location filename="../main.py" line="484"/>
-        <source>A new version is available: </source>
-        <translation>Die neue Version ist verfügbar: </translation>
+        <source>An update is available</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.py" line="501"/>
-        <source>Download complete. Running installer...</source>
-        <translation>Das Herunterladen ist abgeschlossen. Start des Installationsprogramms ...</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="506"/>
-        <source>Download failed.</source>
-        <translation>Download -Fehler.</translation>
-    </message>
-    <message>
-        <location filename="../main.py" line="513"/>
+        <location filename="../main.py" line="499"/>
         <source>Downloading...</source>
         <translation>Herunterladen...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="531"/>
+        <location filename="../main.py" line="521"/>
         <source>Looking at the main page</source>
         <translation>Schaut auf die Mainpage</translation>
     </message>
     <message>
-        <location filename="../main.py" line="542"/>
+        <location filename="../main.py" line="532"/>
         <source>For You</source>
         <translation>Für dich</translation>
     </message>
     <message>
-        <location filename="../main.py" line="545"/>
+        <location filename="../main.py" line="535"/>
         <source>Scenes</source>
         <translation>Szenen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="549"/>
+        <location filename="../main.py" line="539"/>
         <source>Recommended</source>
         <translation>Empfohlen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="552"/>
+        <location filename="../main.py" line="542"/>
         <source>Popular</source>
         <translation>Beliebtes</translation>
     </message>
     <message>
-        <location filename="../main.py" line="555"/>
+        <location filename="../main.py" line="545"/>
         <source>Trending</source>
         <translation>Im Trend</translation>
     </message>
     <message>
-        <location filename="../main.py" line="558"/>
+        <location filename="../main.py" line="548"/>
         <source>Try This</source>
         <translation>Versuchen Sie diese</translation>
     </message>
     <message>
-        <location filename="../main.py" line="601"/>
+        <location filename="../main.py" line="591"/>
         <source>Welcome back, User</source>
         <translation>Mit der Rückgabe, Benutzer</translation>
     </message>
     <message>
-        <location filename="../main.py" line="609"/>
+        <location filename="../main.py" line="599"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../main.py" line="614"/>
+        <location filename="../main.py" line="604"/>
         <source>Character Search</source>
         <translation>Suche nach Zeichen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="686"/>
+        <location filename="../main.py" line="676"/>
         <source>Voices</source>
         <translation>Abstimmung</translation>
     </message>
     <message>
-        <location filename="../main.py" line="703"/>
+        <location filename="../main.py" line="693"/>
         <source>Assistants</source>
         <translation>Assistenten</translation>
     </message>
     <message>
-        <location filename="../main.py" line="704"/>
+        <location filename="../main.py" line="694"/>
         <source>Anime</source>
         <translation>Anime</translation>
     </message>
     <message>
-        <location filename="../main.py" line="705"/>
+        <location filename="../main.py" line="695"/>
         <source>Creativity and Writing</source>
         <translation>Kreativität und Schreiben</translation>
     </message>
     <message>
-        <location filename="../main.py" line="706"/>
+        <location filename="../main.py" line="696"/>
         <source>Entertainment and Gaming</source>
         <translation>Unterhaltung und Spiele</translation>
     </message>
     <message>
-        <location filename="../main.py" line="707"/>
+        <location filename="../main.py" line="697"/>
         <source>History</source>
         <translation>Geschichte</translation>
     </message>
     <message>
-        <location filename="../main.py" line="708"/>
+        <location filename="../main.py" line="698"/>
         <source>Humor</source>
         <translation>Humor</translation>
     </message>
     <message>
-        <location filename="../main.py" line="709"/>
+        <location filename="../main.py" line="699"/>
         <source>Learning</source>
         <translation>Ausbildung</translation>
     </message>
     <message>
-        <location filename="../main.py" line="710"/>
+        <location filename="../main.py" line="700"/>
         <source>Lifestyle</source>
         <translation>Lebensstil</translation>
     </message>
     <message>
-        <location filename="../main.py" line="711"/>
+        <location filename="../main.py" line="701"/>
         <source>Parody</source>
         <translation>Parodie</translation>
     </message>
     <message>
-        <location filename="../main.py" line="712"/>
+        <location filename="../main.py" line="702"/>
         <source>RPG and Puzzles</source>
         <translation>Rollenspiele und Rätsel</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1053"/>
+        <location filename="../main.py" line="1043"/>
         <source>Welcome back, </source>
         <translation>Mit einer Rückkehr, </translation>
+    </message>
+    <message>
+        <source>A new version is available: </source>
+        <translation type="vanished">Die neue Version ist verfügbar: </translation>
+    </message>
+    <message>
+        <source>Download complete. Running installer...</source>
+        <translation type="vanished">Das Herunterladen ist abgeschlossen. Start des Installationsprogramms ...</translation>
+    </message>
+    <message>
+        <source>Download failed.</source>
+        <translation type="vanished">Download -Fehler.</translation>
     </message>
     <message>
         <source>Author: @</source>
@@ -1056,17 +1058,17 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <location filename="../main.py" line="1141"/>
+        <location filename="../main.py" line="1131"/>
         <source>Search characters...</source>
         <translation>Sucht nach Charakteren...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1191"/>
+        <location filename="../main.py" line="1181"/>
         <source>Characters not found</source>
         <translation>Die Charaktere wurden nicht gefunden</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1208"/>
+        <location filename="../main.py" line="1198"/>
         <source>Character Search</source>
         <translation>Suche nach Zeichen</translation>
     </message>
@@ -1074,621 +1076,621 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../main.py" line="1761"/>
-        <location filename="../main.py" line="1759"/>
-        <location filename="../main.py" line="1227"/>
+        <location filename="../main.py" line="1751"/>
+        <location filename="../main.py" line="1749"/>
+        <location filename="../main.py" line="1217"/>
         <source>English</source>
         <translation>Englisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1228"/>
+        <location filename="../main.py" line="1218"/>
         <source>Russian</source>
         <translation>Russisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1229"/>
+        <location filename="../main.py" line="1219"/>
         <source>French</source>
         <translation>Französisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1230"/>
+        <location filename="../main.py" line="1220"/>
         <source>Spanish</source>
         <translation>Spanisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1231"/>
+        <location filename="../main.py" line="1221"/>
         <source>Afrikaans</source>
         <translation>Afrikaans</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1232"/>
+        <location filename="../main.py" line="1222"/>
         <source>Albanian</source>
         <translation>Albanisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1233"/>
+        <location filename="../main.py" line="1223"/>
         <source>Amharic</source>
         <translation>Amharisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1234"/>
+        <location filename="../main.py" line="1224"/>
         <source>Arabic</source>
         <translation>Araber</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1235"/>
+        <location filename="../main.py" line="1225"/>
         <source>Armenian</source>
         <translation>Armenisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1236"/>
+        <location filename="../main.py" line="1226"/>
         <source>Azerbaijani</source>
         <translation>Aserbaidschani</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1237"/>
+        <location filename="../main.py" line="1227"/>
         <source>Basque</source>
         <translation>Baskisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1238"/>
+        <location filename="../main.py" line="1228"/>
         <source>Bengali</source>
         <translation>Bengalen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1239"/>
+        <location filename="../main.py" line="1229"/>
         <source>Bulgarian</source>
         <translation>Bulgarisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1240"/>
+        <location filename="../main.py" line="1230"/>
         <source>Catalan</source>
         <translation>Katalanisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1241"/>
+        <location filename="../main.py" line="1231"/>
         <source>Croatian</source>
         <translation>Kroatisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1242"/>
+        <location filename="../main.py" line="1232"/>
         <source>Czech</source>
         <translation>Tschechisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1243"/>
+        <location filename="../main.py" line="1233"/>
         <source>Danish</source>
         <translation>Dänisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1244"/>
+        <location filename="../main.py" line="1234"/>
         <source>Dutch</source>
         <translation>Niederländisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1245"/>
+        <location filename="../main.py" line="1235"/>
         <source>Estonian</source>
         <translation>Estnisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1246"/>
+        <location filename="../main.py" line="1236"/>
         <source>Filipino</source>
         <translation>Philippine</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1247"/>
+        <location filename="../main.py" line="1237"/>
         <source>Finnish</source>
         <translation>Finnisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1248"/>
+        <location filename="../main.py" line="1238"/>
         <source>Georgian</source>
         <translation>Georgisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1249"/>
+        <location filename="../main.py" line="1239"/>
         <source>German</source>
         <translation>Deutsch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1250"/>
+        <location filename="../main.py" line="1240"/>
         <source>Greek</source>
         <translation>Griechisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1251"/>
+        <location filename="../main.py" line="1241"/>
         <source>Gujarati</source>
         <translation>Gujarat</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1252"/>
+        <location filename="../main.py" line="1242"/>
         <source>Hebrew</source>
         <translation>Jüdisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1253"/>
+        <location filename="../main.py" line="1243"/>
         <source>Hindi</source>
         <translation>Hindi</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1254"/>
+        <location filename="../main.py" line="1244"/>
         <source>Hungarian</source>
         <translation>Ungarisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1255"/>
+        <location filename="../main.py" line="1245"/>
         <source>Icelandic</source>
         <translation>Isländisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1256"/>
+        <location filename="../main.py" line="1246"/>
         <source>Indonesian</source>
         <translation>Indonesisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1257"/>
+        <location filename="../main.py" line="1247"/>
         <source>Irish</source>
         <translation>Irisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1258"/>
+        <location filename="../main.py" line="1248"/>
         <source>Italian</source>
         <translation>Italienisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1259"/>
+        <location filename="../main.py" line="1249"/>
         <source>Japanese</source>
         <translation>Japanisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1260"/>
+        <location filename="../main.py" line="1250"/>
         <source>Kannada</source>
         <translation>Cannada</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1261"/>
+        <location filename="../main.py" line="1251"/>
         <source>Kazakh</source>
         <translation>Kasachisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1262"/>
+        <location filename="../main.py" line="1252"/>
         <source>Korean</source>
         <translation>Koreanisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1263"/>
+        <location filename="../main.py" line="1253"/>
         <source>Lao</source>
         <translation>Laotisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1264"/>
+        <location filename="../main.py" line="1254"/>
         <source>Latvian</source>
         <translation>Lettisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1265"/>
+        <location filename="../main.py" line="1255"/>
         <source>Lithuanian</source>
         <translation>Litauisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1266"/>
+        <location filename="../main.py" line="1256"/>
         <source>Macedonian</source>
         <translation>Mazedonisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1267"/>
+        <location filename="../main.py" line="1257"/>
         <source>Malay</source>
         <translation>Malaiisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1268"/>
+        <location filename="../main.py" line="1258"/>
         <source>Malayalam</source>
         <translation>Malayalam</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1269"/>
+        <location filename="../main.py" line="1259"/>
         <source>Maltese</source>
         <translation>Maltesisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1270"/>
+        <location filename="../main.py" line="1260"/>
         <source>Mongolian</source>
         <translation>Mongolisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1271"/>
+        <location filename="../main.py" line="1261"/>
         <source>Nepali</source>
         <translation>Nepali</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1272"/>
+        <location filename="../main.py" line="1262"/>
         <source>Norwegian</source>
         <translation>Norwegisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1273"/>
+        <location filename="../main.py" line="1263"/>
         <source>Persian</source>
         <translation>Persisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1274"/>
+        <location filename="../main.py" line="1264"/>
         <source>Polish</source>
         <translation>Polieren</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1275"/>
+        <location filename="../main.py" line="1265"/>
         <source>Portuguese</source>
         <translation>Portugiesisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1276"/>
+        <location filename="../main.py" line="1266"/>
         <source>Punjabi</source>
         <translation>Punjabi</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1277"/>
+        <location filename="../main.py" line="1267"/>
         <source>Romanian</source>
         <translation>Rumänisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1278"/>
+        <location filename="../main.py" line="1268"/>
         <source>Serbian</source>
         <translation>Serbisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1279"/>
+        <location filename="../main.py" line="1269"/>
         <source>Slovak</source>
         <translation>Slowakisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1280"/>
+        <location filename="../main.py" line="1270"/>
         <source>Slovenian</source>
         <translation>Slowenisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1281"/>
+        <location filename="../main.py" line="1271"/>
         <source>Swahili</source>
         <translation>Swahili</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1282"/>
+        <location filename="../main.py" line="1272"/>
         <source>Swedish</source>
         <translation>Schwedisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1283"/>
+        <location filename="../main.py" line="1273"/>
         <source>Tamil</source>
         <translation>Tamil</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1284"/>
+        <location filename="../main.py" line="1274"/>
         <source>Telugu</source>
         <translation>Telugu</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1285"/>
+        <location filename="../main.py" line="1275"/>
         <source>Thai</source>
         <translation>Thai</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1286"/>
+        <location filename="../main.py" line="1276"/>
         <source>Turkish</source>
         <translation>Türkisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1287"/>
+        <location filename="../main.py" line="1277"/>
         <source>Ukrainian</source>
         <translation>Ukrainisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1288"/>
+        <location filename="../main.py" line="1278"/>
         <source>Urdu</source>
         <translation>Urdu</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1289"/>
+        <location filename="../main.py" line="1279"/>
         <source>Vietnamese</source>
         <translation>Vietnamesisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1290"/>
+        <location filename="../main.py" line="1280"/>
         <source>Welsh</source>
         <translation>Walisisch</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1291"/>
+        <location filename="../main.py" line="1281"/>
         <source>Xhosa</source>
         <translation>Xhosa</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1295"/>
+        <location filename="../main.py" line="1285"/>
         <source>Character.AI Settings</source>
         <translation>Charakter.AI Einstellungen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1297"/>
-        <location filename="../main.py" line="1297"/>
+        <location filename="../main.py" line="1287"/>
+        <location filename="../main.py" line="1287"/>
         <source>Character.AI Login</source>
         <translation>Charakter.ai Anmeldung</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1297"/>
+        <location filename="../main.py" line="1287"/>
         <source>Valid until: </source>
         <translation>Handlungen vorher: </translation>
     </message>
     <message>
-        <location filename="../main.py" line="1298"/>
+        <location filename="../main.py" line="1288"/>
         <source>Re-Auth with Character.AI</source>
         <translation>Reping in Charakter.ai</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1298"/>
+        <location filename="../main.py" line="1288"/>
         <source>Auth with Character.AI</source>
         <translation>Eingang über Charakter.ai</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1300"/>
+        <location filename="../main.py" line="1290"/>
         <source>User Settings</source>
         <translation>Benutzereinstellungen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1353"/>
-        <location filename="../main.py" line="1349"/>
-        <location filename="../main.py" line="1320"/>
-        <location filename="../main.py" line="1300"/>
+        <location filename="../main.py" line="1343"/>
+        <location filename="../main.py" line="1339"/>
+        <location filename="../main.py" line="1310"/>
+        <location filename="../main.py" line="1290"/>
         <source>Open</source>
         <translation>Offen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1303"/>
+        <location filename="../main.py" line="1293"/>
         <source>Emilia Settings</source>
         <translation>Emilia Einstellungen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1305"/>
+        <location filename="../main.py" line="1295"/>
         <source>Automatically hide the sidebar when the window is narrow</source>
         <translation>Automatisches Verstecken des Seitenfeldes in einem schmalen Fenster</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1306"/>
+        <location filename="../main.py" line="1296"/>
         <source>Working in the background</source>
         <translation>Im Hintergrund arbeiten</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1307"/>
+        <location filename="../main.py" line="1297"/>
         <source>Display text formatting buttons</source>
         <translation>Schaltflächen zur Textformatierung anzeigen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1308"/>
+        <location filename="../main.py" line="1298"/>
         <source>Input Device</source>
         <translation>Eingabegerät</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1309"/>
+        <location filename="../main.py" line="1299"/>
         <source>Output Device</source>
         <translation>Schlussfolgerung Gerät</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1310"/>
+        <location filename="../main.py" line="1300"/>
         <source>Microphone mute key</source>
         <translation>Taste zum Stummschalten des Mikrofons</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1311"/>
+        <location filename="../main.py" line="1301"/>
         <source>Use the old implementation of voice chat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main.py" line="1314"/>
+        <location filename="../main.py" line="1304"/>
         <source>VTube Studio Plugin</source>
         <translation>Vtube Studio Plugin</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1316"/>
+        <location filename="../main.py" line="1306"/>
         <source>Use VTube Studio</source>
         <translation>Verwenden Sie Vtube Studio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1317"/>
+        <location filename="../main.py" line="1307"/>
         <source>VTube Studio Port</source>
         <translation>Vtube Studio Port</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1319"/>
+        <location filename="../main.py" line="1309"/>
         <source>VTube Emotes Editor</source>
         <translation>Einstellungen Vtube -Emotes</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1322"/>
+        <location filename="../main.py" line="1312"/>
         <source>Check the connection to VTube Studio</source>
         <translation>Verbindungsprüfung zu Vtube Studio</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1322"/>
+        <location filename="../main.py" line="1312"/>
         <source>Check</source>
         <translation>Überprüfen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1326"/>
+        <location filename="../main.py" line="1316"/>
         <source>Discord Rich Presence</source>
         <translatorcomment>I do not know how to translate this without losing its meaning.</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main.py" line="1328"/>
+        <location filename="../main.py" line="1318"/>
         <source>Enable DiscordRPC</source>
         <translation>Einschalten DiscordRPC</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1329"/>
+        <location filename="../main.py" line="1319"/>
         <source>Display the current page</source>
         <translation>Aktuelle Seite anzeigen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1330"/>
+        <location filename="../main.py" line="1320"/>
         <source>Displaying the chat name</source>
         <translation>Chat-Name anzeigen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1331"/>
+        <location filename="../main.py" line="1321"/>
         <source>Displaying the nickname of the profile being viewed</source>
         <translation>Den Spitznamen des angezeigten Profils anzeigen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1334"/>
+        <location filename="../main.py" line="1324"/>
         <source>Languages of Emilia</source>
         <translation>Sprachen Emilia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1336"/>
+        <location filename="../main.py" line="1326"/>
         <source>Emilia Language</source>
         <translation>Programmsprache</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1337"/>
+        <location filename="../main.py" line="1327"/>
         <source>Translate user&apos;s messages</source>
         <translation>Benutzernachrichten übersetzen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1338"/>
+        <location filename="../main.py" line="1328"/>
         <source>Translate user&apos;s messages to</source>
         <translation>Übersetzen Sie den Benutzer auf</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1339"/>
+        <location filename="../main.py" line="1329"/>
         <source>Translate character messages</source>
         <translation>Übersetzen Sie die Zeichenmeldungen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1340"/>
+        <location filename="../main.py" line="1330"/>
         <source>Translate character messages to</source>
         <translation>Übersetzen Sie die Zeichenmeldungen auf</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1343"/>
+        <location filename="../main.py" line="1333"/>
         <source>Other</source>
         <translation>Ander</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1345"/>
+        <location filename="../main.py" line="1335"/>
         <source>Did you find a problem?</source>
         <translation>Haben Sie das Problem gefunden?</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1346"/>
+        <location filename="../main.py" line="1336"/>
         <source>Report a Problem</source>
         <translation>Das Problem melden</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1348"/>
+        <location filename="../main.py" line="1338"/>
         <source>Settings Folder</source>
         <translation>Einstellungsordner</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1352"/>
+        <location filename="../main.py" line="1342"/>
         <source>Logs Folder</source>
         <translation>Log-Ordner</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1358"/>
+        <location filename="../main.py" line="1348"/>
         <source>About Emilia</source>
         <translation>Über Emilia</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1361"/>
+        <location filename="../main.py" line="1351"/>
         <source>Emilia is a desktop version of Character.AI with several improvements and additional features.</source>
         <translation>Emilia ist ein Desktop-Client Character.AI mit ein paar Verbesserungen und zusätzlichen Funktionen.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1362"/>
+        <location filename="../main.py" line="1352"/>
         <source>The program is distributed free of charge under the MIT License.</source>
         <translation>Das Programm wird kostenlos unter der MIT-Lizenz vertrieben.</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1365"/>
+        <location filename="../main.py" line="1355"/>
         <source>By using Emilia, you accept the Terms of Use Character.AI and confirm that you have read the Privacy Policy Character.AI</source>
         <translation>Durch die Nutzung von Emilia akzeptieren Sie die Nutzungsbedingungen Character.AI sie stimmen zu und bestätigen, dass Sie die Datenschutzrichtlinie gelesen haben Character.AI</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1448"/>
+        <location filename="../main.py" line="1438"/>
         <source>Parameter Name</source>
         <translation>Der Name des Parameters</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1465"/>
+        <location filename="../main.py" line="1455"/>
         <source>Use Random Value</source>
         <translation>Verwenden Sie den Zufallswert</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1471"/>
+        <location filename="../main.py" line="1461"/>
         <source>From</source>
         <translation>Aus</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1480"/>
+        <location filename="../main.py" line="1470"/>
         <source>To</source>
         <translation>Zu</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1489"/>
+        <location filename="../main.py" line="1479"/>
         <source>Value</source>
         <translation>Bedeutung</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1505"/>
+        <location filename="../main.py" line="1495"/>
         <source>The values for emotions are saved</source>
         <translation>Die Werte für Emotionen werden gespeichert</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1530"/>
+        <location filename="../main.py" line="1520"/>
         <source> | Test</source>
         <translation> | Überprüfen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1545"/>
+        <location filename="../main.py" line="1535"/>
         <source>Add parameter</source>
         <translation>Fügen Sie den Parameter hinzu</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1668"/>
-        <location filename="../main.py" line="1560"/>
+        <location filename="../main.py" line="1658"/>
+        <location filename="../main.py" line="1550"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1564"/>
+        <location filename="../main.py" line="1554"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1602"/>
+        <location filename="../main.py" line="1592"/>
         <source>(Beta)</source>
         <translation>(Beta)</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1670"/>
+        <location filename="../main.py" line="1660"/>
         <source>Cancel</source>
         <translation>Stornierung</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1691"/>
+        <location filename="../main.py" line="1681"/>
         <source>The token is being updated...</source>
         <translation>Das Token wird aktualisiert ...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1800"/>
-        <location filename="../main.py" line="1743"/>
+        <location filename="../main.py" line="1790"/>
+        <location filename="../main.py" line="1733"/>
         <source>Looking at the settings...</source>
         <translation>Schaut sich die Einstellungen an...</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1778"/>
+        <location filename="../main.py" line="1768"/>
         <source> cannot be empty</source>
         <translation> kann nicht leer sein</translation>
     </message>
     <message>
-        <location filename="../main.py" line="1828"/>
+        <location filename="../main.py" line="1818"/>
         <source>Settings saved successfully</source>
         <translation>Die Einstellungen werden erfolgreich aktualisiert</translation>
     </message>
@@ -1703,6 +1705,19 @@
     <message>
         <source>Settings Page</source>
         <translation type="vanished">Die Einstellungsseite</translation>
+    </message>
+</context>
+<context>
+    <name>UpdateThread</name>
+    <message>
+        <location filename="../modules/QThreads.py" line="325"/>
+        <source>File upload error. Check the internet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/QThreads.py" line="331"/>
+        <source>Some files could not be downloaded. Cancel the update.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

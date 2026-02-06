@@ -1,4 +1,4 @@
-import sys, ctypes, platform, webbrowser, subprocess, datetime, os, json, logging
+import sys, ctypes, platform, webbrowser, datetime, os, logging
 
 os.makedirs("logs", exist_ok=True)
 
@@ -76,9 +76,7 @@ if platform.system() == 'Windows':
 app = QApplication(sys.argv)
 
 translator = QTranslator()
-
-translator.load(
-    f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
+translator.load(f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
 app.installTranslator(translator)
 
 loop = QEventLoop(app)
@@ -112,7 +110,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.1"
+        self.version = "3.2.2"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -154,10 +152,14 @@ class EmiliaNext(QMainWindow):
         self.threads.append(self.chat_thread)
         self.discord_thread = DiscordRPC(self)
         self.threads.append(self.discord_thread)
+        self.updater_thread = UpdaterThread()
+        self.updater_thread.has_update_signal.connect(self.checkForUpdates)
+        self.updater_thread.error_signal.connect(self.checkForUpdatesError)
+        self.threads.append(self.updater_thread)
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
         if getattr(sys, 'frozen', False):
-            self.checkForUpdates()
+            self.updater_thread.start()
 
         self.initUI()
         self.loadUI()
@@ -461,49 +463,33 @@ class EmiliaNext(QMainWindow):
         self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
         self.full_animation.start()
 
-    def checkForUpdates(self):
-        try:
-            headers = {"Accept": "application/vnd.github.v3+json"}
-            response = requests.get(
-                "https://api.github.com/repos/Kajitsy/Emilia/releases",
-                headers=headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            releases = response.json()
+    def checkForUpdates(self, has_update):
+        def update():
+            def update_overlay(x, y):
+                self.download_overlay_progress.setValue(x)
+                self.download_overlay_progress.setMaximum(y)
+                self.download_overlay_progress_label.setText(f"{x}/{y}")
 
-            latest_release = next((r for r in releases if not r["prerelease"]), None)
-            latest_prerelease = next((r for r in releases if r["prerelease"]), None)
-            target_release = latest_prerelease if self.beta and latest_prerelease else latest_release
+            overlay = self.createDownloadOverlay()
+            thread = UpdateThread(self.updater_thread.remote_url, self.updater_thread.files_to_download, self.updater_thread.files_to_removed)
+            thread.progress_signal.connect(update_overlay)
+            thread.error_signal.connect(self.checkForUpdatesError)
+            self.threads.append(thread)
 
-            if target_release:
-                latest_version = target_release["tag_name"]
-                asset = next((a for a in target_release["assets"] if a["name"] == "EmiliaSetup.exe"), None)
+            self.hide_overlay = False
+            self.showOverlay(overlay)
+            thread.start()
 
-                if latest_version > self.version and asset:
-                    self.showNotification(self.tr("A new version is available: ") + latest_version)
-                    self.update_button.setVisible(True)
-                    self.update_button.clicked.connect(lambda: self.downloadUpdate(asset["browser_download_url"]))
-        except:
-            pass
+        if has_update:
+            self.showNotification(self.tr("An update is available"))
+            self.update_button.setVisible(True)
+            self.update_button.clicked.connect(lambda: update())
 
-    def downloadUpdate(self, url):
-        self.showOverlay(self.createDownloadOverlay())
-        self.hide_overlay = False
-        save_path = os.path.join(os.getcwd(), "update.exe")
-        self.thread = FileLoaderThread(url, save_path=save_path)
-        self.thread.progress.connect(lambda x: self.download_overlay_progress.setValue(x))
-        self.thread.finished.connect(self.runInstaller)
-        self.thread.start()
-
-    def runInstaller(self, save_path):
-        if save_path:
-            self.download_overlay_label.setText(self.tr("Download complete. Running installer..."))
-            self.closeEvent = lambda a0: None
-            self.close()
-            subprocess.Popen(save_path, shell=True)
-        else:
-            self.download_overlay_label.setText(self.tr("Download failed."))
+    def checkForUpdatesError(self, error):
+        self.showNotification(error)
+        if not self.hide_overlay:
+            self.hide_overlay = True
+            self.hideOverlay()
 
     def createDownloadOverlay(self):
         self.download_overlay_frame = QFrame()
@@ -513,6 +499,10 @@ class EmiliaNext(QMainWindow):
         self.download_overlay_label = QLabel(self.tr("Downloading..."))
         self.download_overlay_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.download_overlay_label)
+
+        self.download_overlay_progress_label = QLabel()
+        self.download_overlay_progress_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.download_overlay_progress_label)
 
         self.download_overlay_progress = QProgressBar()
         self.download_overlay_progress.setTextVisible(False)

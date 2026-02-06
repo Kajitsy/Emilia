@@ -1,4 +1,7 @@
 import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.signal, inspect, json, re, uuid
+import shutil
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import curl_cffi.curl
 import numpy as np
@@ -172,6 +175,193 @@ class PlayerThread(QThread):
             sounddevice.stop()
             self._is_running = False
             self.stop_signal.emit(True)
+
+class UpdaterThread(QThread):
+    has_update_signal = pyqtSignal(bool)
+    error_signal = pyqtSignal(str)
+
+    def __init__(self):
+        super().__init__()
+        self.remote_url = "https://emilia-update.ateez.ru/"
+        self.local_manifest = {"files": {}}
+        self.remote_manifest = {"files": {}}
+        self.files_to_download = []
+        self.files_to_removed = []
+
+    def run(self):
+        self.get_remote_manifest()
+        self.generate_local_manifest()
+        self.diff()
+
+    def generate_local_manifest(self):
+        if not os.path.exists('./manifest.json'):
+            INCLUDE_FILES = [
+                "emilia.exe",
+                "icon.ico",
+            ]
+
+            INCLUDE_DIRS = [
+                "_internal",
+                "lang",
+            ]
+
+            def get_hash(filepath):
+                hasher = hashlib.sha256()
+                try:
+                    with open(filepath, "rb") as f:
+                        for chunk in iter(lambda: f.read(4096), b""):
+                            hasher.update(chunk)
+                    return hasher.hexdigest()
+                except FileNotFoundError:
+                    return None
+
+
+            for filename in INCLUDE_FILES:
+                full_path = os.path.join(".", filename)
+                if os.path.exists(full_path):
+                    file_hash = get_hash(full_path)
+                    if file_hash:
+                        self.local_manifest["files"][filename] = file_hash
+
+            for directory in INCLUDE_DIRS:
+                dir_full_path = os.path.join(".", directory)
+                if not os.path.exists(dir_full_path):
+                    continue
+
+                for root, _, files in os.walk(dir_full_path):
+                    for filename in files:
+                        full_path = os.path.join(root, filename)
+                        rel_path = os.path.relpath(full_path, ".").replace("\\", "/")
+
+                        file_hash = get_hash(full_path)
+                        if file_hash:
+                            self.local_manifest["files"][rel_path] = file_hash
+
+            with open("manifest.json", "w", encoding="utf-8") as f:
+                json.dump(self.local_manifest, f, indent=4)
+        else:
+            with open("manifest.json", "r", encoding="utf-8") as f:
+                self.local_manifest = json.load(f)
+
+    def get_remote_manifest(self):
+        try:
+            response = requests.get(f"{self.remote_url}manifest.json", timeout=5)
+            response.raise_for_status()
+            self.remote_manifest = response.json()
+        except Exception as e:
+            self.error_signal.emit(str(e))
+            return
+
+    def diff(self):
+        for file_path, remote_hash in self.remote_manifest["files"].items():
+            local_hash = self.local_manifest["files"].get(file_path)
+            if local_hash != remote_hash:
+                self.files_to_download.append(file_path)
+
+        for local_path in self.local_manifest["files"]:
+            if local_path not in self.remote_manifest["files"]:
+                self.files_to_removed.append(local_path)
+
+        if self.files_to_download or self.files_to_removed:
+            self.has_update_signal.emit(True)
+        else:
+            self.has_update_signal.emit(False)
+
+class UpdateThread(QThread):
+    finished_signal = pyqtSignal(bool)
+    progress_signal = pyqtSignal(int, int)
+    error_signal = pyqtSignal(str)
+
+    def __init__(self, remote_url, files_to_download, files_to_removed):
+        super().__init__()
+        self.remote_url = remote_url
+        self.files_to_download = files_to_download
+        self.files_to_removed = files_to_removed
+        self.total_files_count = len(self.files_to_download)
+        self.downloaded_files_count = 0
+        self.update_cache_dir = "cache/update"
+
+    def run(self):
+        if self.total_files_count == 0:
+            self.apply_update(self.update_cache_dir)
+            self.finished_signal.emit(True)
+        else:
+            self.download_update()
+
+    def download_update(self):
+        if os.path.exists(self.update_cache_dir):
+            shutil.rmtree(self.update_cache_dir)
+        os.makedirs(self.update_cache_dir, exist_ok=True)
+
+        def download_worker(rel_path):
+            url = self.remote_url + rel_path
+            local_temp_path = os.path.join(self.update_cache_dir, rel_path)
+
+            try:
+                os.makedirs(os.path.dirname(local_temp_path), exist_ok=True)
+
+                r = requests.get(url, stream=True, timeout=10)
+                if r.status_code == 200:
+                    with open(local_temp_path, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    return True
+                else:
+                    self.error_signal.emit(f"HTTP error {r.status_code}: {rel_path}")
+                    return False
+            except Exception as e:
+                self.error_signal.emit(f"Download error {e}: {rel_path}")
+                return False
+
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(download_worker, f) for f in self.files_to_download]
+
+            for future in as_completed(futures):
+                success = future.result()
+                if success:
+                    self.downloaded_files_count += 1
+                    self.progress_signal.emit(self.downloaded_files_count, self.total_files_count)
+                else:
+                    self.error_signal.emit(self.tr("File upload error. Check the internet."))
+                    return
+
+        if all(futures):
+            self.apply_update(self.update_cache_dir)
+        else:
+            self.error_signal.emit(self.tr("Some files could not be downloaded. Cancel the update."))
+
+    def apply_update(self, update_dir):
+        deletion_commands = ""
+        for file_path in self.files_to_removed:
+            win_path = file_path.replace("/", "\\")
+            deletion_commands += f'if exist "{win_path}" del /f /q "{win_path}"\n    '
+
+        bat_script = f"""
+        @echo off
+        echo Waiting for application to close...
+        timeout /t 5 /nobreak > NUL
+
+        echo Deleting obsolete files...
+        if exist manifest.json del /f /q manifest.json
+        {deletion_commands}
+
+        echo Installing new files...
+        xcopy "{update_dir}" "." /E /H /Y /Q
+
+        echo Cleaning up...
+        rmdir /s /q "{update_dir}"
+
+        echo Starting application...
+        start "" "emilia.exe"
+
+        del "%~f0"
+        """
+
+        with open("update_installer.bat", "w") as f:
+            f.write(bat_script)
+
+        os.startfile("update_installer.bat")
+        sys.exit(0)
 
 class DiscordRPC(QThread):
     rpc_connected = pyqtSignal(object)
