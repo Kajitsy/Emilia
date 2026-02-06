@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import QHBoxLayout, QFileDialog, QVBoxLayout, QLabel, QFram
 from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, CheckBox, Menu, CardFrame
 from modules.style.Icons import Svg
 from modules.style.Utils import color_avatar
-from modules.QThreads import ImageLoaderThread
 
 class EditOverlay(QFrame):
     def __init__(self, main_window, data=None, list_card=None):
@@ -46,21 +45,15 @@ class EditOverlay(QFrame):
         self.display_avatar.mousePressEvent = lambda _: self.selectAvatar()
         self.display_avatar.setFixedSize(60, 60)
         if self.data.get("avatar_file_name"):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get("avatar_file_name") + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.mw.me_avatar, 60, 60, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.data.get("avatar_file_name")}?webp=true&anim=0",
+                60, 60, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
         elif self.mw.me_has_avatar:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.mw.me_avatar, 60, 60, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                60, 60, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
         else:
             color_avatar(self.display_avatar, 60, 60, self.mw.name)
         fh_layout.addWidget(self.display_avatar)
@@ -101,12 +94,10 @@ class EditOverlay(QFrame):
         def uploaded(link):
             setattr(self, 'temp_link', link)
             self.data['avatar_rel_path'] = link
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + link + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{link}?webp=true&anim=0",
+                60, 60, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
 
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")
@@ -171,20 +162,15 @@ class EditOverlay(QFrame):
             else:
                 self.list_card.is_default_label.setVisible(False)
             if self.data.get("avatar_file_name"):
-                load_avatar_thread = ImageLoaderThread(
-                    "https://characterai.io/i/80/static/avatars/" + self.data.get(
-                        "avatar_file_name") + '?webp=true&anim=0',
-                    60, 60)
-                load_avatar_thread.image_loaded.connect(self.list_card.display_avatar.setPixmap)
-                load_avatar_thread.start()
-                self.mw.threads.append(load_avatar_thread)
+                self.mw.image_loader.load(
+                    f"https://characterai.io/i/80/static/avatars/{self.data.get("avatar_file_name")}?webp=true&anim=0",
+                    60, 60, 100, label=self.display_avatar,
+                    error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
             elif self.mw.me_has_avatar:
-                load_avatar_thread = ImageLoaderThread(
-                    "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                    60, 60)
-                load_avatar_thread.image_loaded.connect(self.list_card.display_avatar.setPixmap)
-                load_avatar_thread.start()
-                self.mw.threads.append(load_avatar_thread)
+                self.mw.image_loader.load(
+                    f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                    60, 60, 100, label=self.display_avatar,
+                    error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
             else:
                 color_avatar(self.list_card.display_avatar, 60, 60, self.mw.name)
 
@@ -215,22 +201,15 @@ class MainCard(CardFrame):
         self.display_avatar = QLabel()
         self.display_avatar.setFixedSize(60, 60)
         if self.data.get("avatar_file_name"):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get(
-                    "avatar_file_name") + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.mw.me_avatar, 60, 60, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.data.get("avatar_file_name")}?webp=true&anim=0",
+                60, 60, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
         elif self.mw.me_has_avatar:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.mw.me_avatar, 60, 60, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                60, 60, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
         else:
             color_avatar(self.display_avatar, 60, 60, self.mw.name)
         layout.addWidget(self.display_avatar)

@@ -5,8 +5,6 @@ from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon
 from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
     QHBoxLayout, QWidget,QCheckBox, QKeySequenceEdit, QMenu, QComboBox)
 
-from modules.QThreads import ImageLoaderThread
-
 
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -620,12 +618,9 @@ class LeftSidebar(QFrame):
 
         self.profile_button_2 = PushButton()
         if self.mw.me_has_avatar:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                45, 45)
-            load_avatar_thread.image_loaded.connect(lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                                   45, 45, 100, callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
+                                   error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile('white')))
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile('white'))
         self.profile_button_2.clicked.connect(self.openUserPage)
@@ -641,12 +636,10 @@ class LeftSidebar(QFrame):
 
     def avatarUpdate(self):
         if self.mw.me_has_avatar:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                45, 45)
-            load_avatar_thread.image_loaded.connect(lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                                      45, 45, 100,
+                                      callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
+                                      error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile('white')))
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile('white'))
 

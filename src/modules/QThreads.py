@@ -6,8 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import curl_cffi.curl
 import numpy as np
 import requests, speech_recognition
-from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRectF, QLocale
-from PyQt6.QtGui import QPixmap, QPainter, QPainterPath
+from PyQt6.QtCore import QThread, pyqtSignal, QLocale
 from gpytranslate import Translator
 from functools import wraps
 from pypresence import AioPresence
@@ -20,77 +19,6 @@ def asyncSlot(func):
     def wrapper(*args, **kwargs):
         asyncio.ensure_future(func(*args, **kwargs))
     return wrapper
-
-class ImageLoaderThread(QThread):
-    image_loaded = pyqtSignal(QPixmap)
-    image_cache_path = pyqtSignal(str)
-    error_loading = pyqtSignal(object)
-
-    def __init__(self, url, width, height, cache_dir="cache/avatars"):
-        super().__init__()
-        self.url = url
-        self.cache_dir = cache_dir
-        self.width = width
-        self.height = height
-        self.radius = 100
-
-        os.makedirs(self.cache_dir, exist_ok=True)
-
-    def round_qpixmap(self, pixmap: QPixmap):
-        target = QPixmap(self.width, self.height)
-        target.fill(Qt.GlobalColor.transparent)
-
-        painter = QPainter(target)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-
-        path = QPainterPath()
-        path.addRoundedRect(QRectF(0, 0, self.width, self.height), self.radius, self.radius)
-        painter.setClipPath(path)
-
-        scaled_pixmap = pixmap.scaled(self.width, self.height,
-                                      Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-                                      Qt.TransformationMode.SmoothTransformation)
-
-        x = (self.width - scaled_pixmap.width()) // 2
-        y = (self.height - scaled_pixmap.height()) // 2
-        painter.drawPixmap(x, y, scaled_pixmap)
-
-        painter.end()
-        return target
-
-    def get_cache_path(self):
-        filename = hashlib.md5(self.url.encode('utf-8')).hexdigest() + ".png"
-        return os.path.join(self.cache_dir, filename)
-
-    def run(self):
-        cache_path = self.get_cache_path()
-        pixmap = QPixmap()
-        if os.path.exists(cache_path):
-            pixmap.load(cache_path)
-            pixmap = pixmap.scaled(self.width, self.height,
-                                   Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-                                   Qt.TransformationMode.SmoothTransformation)
-            self.image_loaded.emit(self.round_qpixmap(pixmap))
-            self.image_cache_path.emit(cache_path)
-            return
-
-        try:
-            with requests.get(self.url, stream=True, timeout=10) as response:
-                response.raise_for_status()
-                data = response.content
-
-            if pixmap.loadFromData(response.content):
-                if not pixmap.save(cache_path):
-                    logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File saving error: {cache_path}")
-
-            pixmap = pixmap.scaled(self.width, self.height,
-                                   Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-                                   Qt.TransformationMode.SmoothTransformation)
-            self.image_loaded.emit(self.round_qpixmap(pixmap))
-            self.image_cache_path.emit(cache_path)
-        except Exception as e:
-            logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Image download error: {e}")
-            self.error_loading.emit(QPixmap())
 
 class FileLoaderThread(QThread):
     file = pyqtSignal(object)
@@ -131,7 +59,6 @@ class FileLoaderThread(QThread):
                     logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File download error: {response.status_code}")
             except Exception as e:
                 logging.debug(f"QThreads.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): File download error: {e}")
-
 
 class PlayerThread(QThread):
     play_signal = pyqtSignal(object)

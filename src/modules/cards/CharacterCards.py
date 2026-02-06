@@ -2,19 +2,19 @@ import base64, uuid
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
-                             QSizePolicy, QWidget, QFileDialog, QApplication, QFrame)
+                             QSizePolicy, QWidget, QFileDialog, QApplication)
 
 from modules.style.Elements import (CustomTextEdit, PushButton, LineEdit, CheckBox, ComboBox, VerticalScrollPage,
                                     CardFrame, ClickableFrame)
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
-from modules.QThreads import ImageLoaderThread
 
 class MainCard(CardFrame):
     def __init__(self, main_window, name="", avatar_url="", description="", author="", character_id="", chats=0,
                  voted=0, avatar_label_w=90, avatar_label_h=114):
         super().__init__()
         self.mw = main_window
+        self.image_loader = self.mw.image_loader
         self.name = name
         self.avatar_url = avatar_url
         self.description = description
@@ -37,15 +37,9 @@ class MainCard(CardFrame):
         card_layout.addWidget(self.avatar_label)
 
         if self.avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.avatar_url + '?webp=true&anim=0',
-                self.avatar_label_w,
-                self.avatar_label_h)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", self.avatar_label_w, self.avatar_label_h, 4,
+                label=self.avatar_label, error_cb=lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name))
         else:
             color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4)
 
@@ -110,6 +104,7 @@ class ListCard(CardFrame):
     def __init__(self, main_window, data, avatar_label_w=70, avatar_label_h=70):
         super().__init__()
         self.mw = main_window
+        self.image_loader = main_window.image_loader
         self.data = data
         self.avatar_url = self.data.get('avatar_file_name')
         self.name = self.data.get('name')
@@ -128,15 +123,10 @@ class ListCard(CardFrame):
         card_layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         if self.avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.avatar_url + '?webp=true&anim=0',
-                self.avatar_label_w,
-                self.avatar_label_h)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", self.avatar_label_w, self.avatar_label_h, 4,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name))
         else:
             color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4)
 
@@ -187,6 +177,7 @@ class MiniCard(CardFrame):
     def __init__(self, main_window, character_name, character_id, avatar_url, chat_id=None):
         super().__init__()
         self.mw = main_window
+        self.image_loader = main_window.image_loader
         self.name = character_name
         self.character_id = character_id
         self.avatar_url = avatar_url
@@ -204,13 +195,10 @@ class MiniCard(CardFrame):
         card_layout.addWidget(self.avatar_label)
 
         if self.avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.avatar_url + '?webp=true&anim=0', 54, 54)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, 54, 54, self.name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", 54, 54, 4,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, 54, 54, self.name))
         else:
             color_avatar(self.avatar_label, 54, 54, self.name, 4)
 
@@ -229,6 +217,7 @@ class ClickableMiniCard(ClickableFrame):
     def __init__(self, main_window, character_name, character_id, avatar_url, chat_id=None):
         super().__init__()
         self.mw = main_window
+        self.image_loader = main_window.image_loader
         self.name = character_name
         self.character_id = character_id
         self.avatar_url = avatar_url
@@ -246,13 +235,10 @@ class ClickableMiniCard(ClickableFrame):
         card_layout.addWidget(self.avatar_label)
 
         if self.avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.avatar_url + '?webp=true&anim=0', 54, 54)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.avatar_label, 54, 54, self.name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", 54, 54, 4,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, 54, 54, self.name))
         else:
             color_avatar(self.avatar_label, 54, 54, self.name, 4)
 
@@ -268,6 +254,7 @@ class EditPage(QWidget):
         super().__init__(main_window)
         self.setStyleSheet("background-color: transparent; border: none;")
         self.mw = main_window
+        self.image_loader = main_window.image_loader
         self.svg_icons = Svg()
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.initUI()
@@ -310,13 +297,10 @@ class EditPage(QWidget):
         self.display_avatar.setFixedSize(60, 60)
         self.display_avatar.setCursor(Qt.CursorShape.PointingHandCursor)
         if self.mw.me_has_avatar:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0", 60, 60, 100,
+                label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
         else:
             color_avatar(self.display_avatar, 60, 60, self.mw.name)
         scroll_layout.addWidget(self.display_avatar)
@@ -582,13 +566,10 @@ class EditPage(QWidget):
             self.save_chat_button.setVisible(True)
             self.data['avatar_rel_path'] = self.data['avatar_file_name']
             if self.data.get('avatar_rel_path'):
-                load_avatar_thread = ImageLoaderThread(
-                    "https://characterai.io/i/80/static/avatars/" + self.data['avatar_rel_path'] + '?webp=true&anim=0',
-                    60, 60)
-                load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-                load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.display_avatar, 60, 60, data['name']))
-                load_avatar_thread.start()
-                self.mw.threads.append(load_avatar_thread)
+                self.image_loader.load(
+                    f"https://characterai.io/i/80/static/avatars/{self.data['avatar_rel_path']}?webp=true&anim=0", 60, 60, 100,
+                    label=self.display_avatar,
+                    error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, data['name']))
             else:
                 color_avatar(self.display_avatar, 60, 60, data['name'])
             self.character_name_edit.setText(self.data['name'])
@@ -638,12 +619,9 @@ class EditPage(QWidget):
         def uploaded(link):
             setattr(self, 'temp_link', link)
             self.data['avatar_rel_path'] = link
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + link + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{link}?webp=true&anim=0", 60, 60, 100,
+                label=self.display_avatar)
 
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")
@@ -680,6 +658,7 @@ class MainPage(QWidget):
         super().__init__()
         self.setStyleSheet("background-color: transparent; border: none;")
         self.mw = main_window
+        self.image_loader = main_window.image_loader
         self.chat_thread = self.mw.chat_thread
         self.short_id = short_id
         self.character_id = character_id
@@ -811,13 +790,10 @@ class MainPage(QWidget):
         self.vote = data.get('voted', {}).get('vote', None)
         self.character_name_label.setText(self.character_name)
         if self.data.get('avatar_file_name'):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get('avatar_file_name') + '?webp=true&anim=0',
-                120, 120)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.display_avatar, 120, 120, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.data.get('avatar_file_name')}?webp=true&anim=0", 120, 120, 100,
+                label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 120, 120, self.mw.name))
         else:
             color_avatar(self.display_avatar, 120, 120, self.character_name)
         if self.data.get('user__username'):

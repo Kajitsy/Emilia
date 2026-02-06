@@ -1,3 +1,4 @@
+import hashlib
 import os, math
 
 from curl_cffi import CurlMime
@@ -5,21 +6,22 @@ from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, Q
                              QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
 from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt
+from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
 
 from modules.cards import PersonaCards
 from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
-from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, ChatThread, DiscordRPC
+from modules.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPC
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
 from modules.cards.VoiceCards import VoiceSearch, VoiceMode
 
 
 class MessageBubble(QFrame):
-    def __init__(self, mw, parent, text, avatar_url, name, is_user=False, attachments=[]):
+    def __init__(self, main_window, parent, text, avatar_url, name, is_user=False, attachments=[]):
         super().__init__()
-        self.main_window = mw
+        self.mw = main_window
         self.parent = parent
         self.text = text
         self.url = avatar_url
@@ -45,28 +47,24 @@ class MessageBubble(QFrame):
         layout.addWidget(lw2)
         if self.attachments and self.attachments[0]['type'] == "TYPE_IMAGE":
             def z(v):
-                self.attach_image_label.setPixmap(v)
-                self.setMinimumHeight(0)
-                self.adjustSize()
-                self.setMinimumHeight(self.height())
+                if not isdeleted(self.attach_image_label):
+                    self.attach_image_label.setPixmap(v)
+                    self.setMinimumHeight(0)
+                    self.adjustSize()
+                    self.setMinimumHeight(self.height())
             self.attach_image_label.setMinimumSize(100, 100)
-            thread = ImageLoaderThread(self.attachments[0]['url'], 100, 100)
-            thread.radius = 25
-            thread.error_loading.connect(lambda: self.attach_image_label.setMinimumSize(0, 0))
-            thread.image_loaded.connect(z)
-            thread.start()
-            self.main_window.threads.append(thread)
+            self.mw.image_loader.load(
+                self.attachments[0]['url'], 100, 100, 25,
+                callback=z,
+                error_cb=lambda _: self.attach_image_label.setMinimumSize(0, 0))
 
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(24, 24)
         if self.url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.url + '?webp=true&anim=0', 24, 24)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda: color_avatar(self.avatar_label, 24, 24, self.name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.main_window.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.url}?webp=true&anim=0", 24, 24, 4,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, 24, 24, self.name, 4))
         else:
             color_avatar(self.avatar_label, 24, 24, self.name, 4)
 
@@ -307,11 +305,11 @@ class ChatInterface(QWidget):
     def setBackgroundFromUrl(self, url):
         if url:
             self.mw.showNotification(self.tr("Downloading background..."))
-            loader = ImageLoaderThread(url, 720, 1280)
-            loader.image_cache_path.connect(self._onBackgroundDownloaded)
-            loader.error_loading.connect(lambda: self.mw.showNotification(self.tr("Error downloading image")))
-            loader.start()
-            self.mw.threads.append(loader)
+            self.mw.image_loader.load(
+                url, 1280, 720, 0,
+                callback=lambda _: self._onBackgroundDownloaded(os.path.join("cache/background", hashlib.md5(url.encode()).hexdigest() + ".png")),
+                error_cb=lambda _: self.mw.showNotification(self.tr("Error downloading image")),
+                cache_dir="cache/background")
 
     def _onBackgroundDownloaded(self, file_path):
         self.background_image = file_path
@@ -986,12 +984,9 @@ class ChatInterface(QWidget):
         def uploaded(response):
             if response.get("status") == "OK":
                 link = response['value']
-                thread = ImageLoaderThread(
-                    link, 50, 50, "cache/imgs_in_chats")
-                thread.radius = 25
-                thread.image_loaded.connect(self.attach_image_label.setPixmap)
-                thread.start()
-                self.mw.threads.append(thread)
+                self.mw.image_loader.load(
+                    link, 50, 50, 25,
+                    label=self.attach_image_label, cache_dir="cache/imgs_in_chats")
                 self.attach_image_label.setMinimumSize(50, 50)
                 self.attach_image_label.link = link
             else:
@@ -1250,24 +1245,18 @@ class ChatInterface(QWidget):
         self.character_name = self.character['name']
 
         if self.character.get('avatar_file_name'):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0', 70, 70)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda: color_avatar(self.avatar_label, 70, 70, self.character_name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.character.get('avatar_file_name')}?webp=true&anim=0", 70, 70, 4,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, 70, 70, self.character_name, 4))
         else:
             color_avatar(self.avatar_label, 70, 70, self.character_name, 4)
 
         if self.character.get('avatar_file_name'):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0', 40, 40)
-            load_avatar_thread.image_loaded.connect(self.header_avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda: color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4))
-            load_avatar_thread.radius = 4
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.character.get('avatar_file_name')}?webp=true&anim=0",
+                40, 40, 4, label=self.header_avatar_label,
+                error_cb=lambda _: color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4))
         else:
             color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4)
 

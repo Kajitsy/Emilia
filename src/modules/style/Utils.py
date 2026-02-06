@@ -1,7 +1,7 @@
 import re
 from PyQt6.QtCore import Qt, QRectF
 from PyQt6.QtGui import QPixmap, QColor, QPainter, QPainterPath, QLinearGradient, QBrush, QFont
-
+from PyQt6.sip import isdeleted
 
 def format_text(text, username="User"):
     replacements = [
@@ -74,4 +74,5 @@ def color_avatar(avatar_label, avatar_w, avatar_h, name, radius=100):
         return rounded
 
     rounded_pixmap = round_pixmap(pixmap)
-    avatar_label.setPixmap(rounded_pixmap)
+    if not isdeleted(avatar_label):
+        avatar_label.setPixmap(rounded_pixmap)

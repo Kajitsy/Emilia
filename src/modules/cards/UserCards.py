@@ -1,10 +1,10 @@
 import base64
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
     QPushButton, QFileDialog, QFrame, QStackedWidget)
 
 from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, TabButton, VerticalScrollPage, CardFrame
-from modules.QThreads import *
 from modules.style.Icons import Svg
 from modules.style.Utils import format_number, color_avatar
 from modules.cards import VoiceCards, PersonaCards, CharacterCards, ScenesCards
@@ -283,12 +283,10 @@ class UserProfile(QWidget):
         self.username = self.data.get('username')
 
         if self.data.get('avatar_file_name'):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get('avatar_file_name') + '?webp=true&anim=0',
-                80, 80)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.data.get('avatar_file_name')}?webp=true&anim=0",
+                80, 80, 100, label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, 80, 80, self.data.get('name')))
         else:
             color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
 
@@ -417,12 +415,10 @@ class UserProfile(QWidget):
             avatar_label = QLabel()
             avatar_label.setFixedSize(40, 40)
             if data.get('account__avatar_file_name'):
-                load_avatar_thread = ImageLoaderThread(
-                    "https://characterai.io/i/80/static/avatars/" + data.get('account__avatar_file_name') + '?webp=true&anim=0', 40, 40)
-                load_avatar_thread.radius = 4
-                load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
-                load_avatar_thread.start()
-                self.mw.threads.append(load_avatar_thread)
+                self.mw.image_loader.load(
+                    f"https://characterai.io/i/80/static/avatars/{data.get('account__avatar_file_name')}?webp=true&anim=0",
+                    40, 40, 4, label=avatar_label,
+                    error_cb=lambda _: color_avatar(avatar_label, 40, 40, username, 4))
             else:
                 color_avatar(avatar_label, 40, 40, username, 4)
             u_layout.addWidget(avatar_label)
@@ -541,21 +537,15 @@ class EditOverlay(QFrame):
         self.display_avatar.setCursor(Qt.CursorShape.PointingHandCursor)
         self.display_avatar.setFixedSize(70, 70)
         if self.data.get("avatar_file_name"):
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.data.get("avatar_file_name") + '?webp=true&anim=0',
-                70, 70)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.mw.me_avatar, 70, 70, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.data.get('avatar_file_name')}?webp=true&anim=0",
+                70, 70, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 70, 70, self.mw.name))
         elif self.mw.me_has_avatar:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + self.mw.me_avatar + '?webp=true&anim=0',
-                70, 70)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(self.mw.me_avatar, 70, 70, self.mw.name))
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                70, 70, 100, label=self.display_avatar,
+                error_cb=lambda _: color_avatar(self.display_avatar, 70, 70, self.mw.name))
         else:
             color_avatar(self.display_avatar, 70, 70, self.mw.name)
         fh_layout.addWidget(self.display_avatar)
@@ -619,12 +609,9 @@ class EditOverlay(QFrame):
             setattr(self, 'temp_link', link)
             self.data['avatar_rel_path'] = link
             self.data['avatar_type'] = "UPLOADED"
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + link + '?webp=true&anim=0',
-                60, 60)
-            load_avatar_thread.image_loaded.connect(self.display_avatar.setPixmap)
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{link}?webp=true&anim=0",
+                60, 60, 100, label=self.display_avatar)
 
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")

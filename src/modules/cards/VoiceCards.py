@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
 from modules.cards import CharacterCards
 from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame, LineEdit
 from modules.style.Icons import Svg
-from modules.QThreads import PlayerThread, FileLoaderThread, ImageLoaderThread, VoiceModeThread, VoiceModeThreadV2
+from modules.QThreads import PlayerThread, FileLoaderThread, VoiceModeThread, VoiceModeThreadV2
 from modules.style.Utils import color_avatar, format_text
 
 class VoiceCard(QFrame):
@@ -394,12 +394,10 @@ class VoiceMode(QWidget):
 
         self.avatar_label = QLabel()
         if avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + avatar_url + '?webp=true&anim=0', 80, 80)
-            load_avatar_thread.image_loaded.connect(self.avatar_label.setPixmap)
-            load_avatar_thread.radius = 10
-            load_avatar_thread.start()
-            self.mw.threads.append(load_avatar_thread)
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0",
+                80, 80, 10, label=self.avatar_label,
+                error_cb=lambda _: color_avatar(self.avatar_label, 80, 80, self.char_name, 10))
         else:
             color_avatar(self.avatar_label, 80, 80, self.char_name, 10)
         self.layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)

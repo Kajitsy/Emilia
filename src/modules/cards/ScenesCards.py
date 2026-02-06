@@ -4,9 +4,8 @@ from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
                              QSizePolicy, QWidget)
 
 from modules.cards.CharacterCards import ClickableMiniCard
-from modules.style.Elements import (PushButton, VerticalScrollPage, CardFrame)
+from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame
 from modules.style.Utils import format_text
-from modules.QThreads import ImageLoaderThread
 
 class MainCard(CardFrame):
     def __init__(self, main_window, data):
@@ -27,11 +26,8 @@ class MainCard(CardFrame):
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignTop)
         card_layout.addWidget(self.image_label)
 
-        thread = ImageLoaderThread(self.data.get("background_image_url"), 150, 200, "cache/scenes")
-        thread.radius = 4
-        thread.image_loaded.connect(self.image_label.setPixmap)
-        thread.start()
-        self.mw.threads.append(thread)
+        self.mw.image_loader.load(self.data.get("background_image_url"), 150, 200, 4,
+                                  label=self.image_label, cache_dir="cache/scenes")
 
         #text_layout = QVBoxLayout()
         #text_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
@@ -80,11 +76,8 @@ class ListCard(CardFrame):
         self.image_label.setFixedSize(110, 140)
         card_layout.addWidget(self.image_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
-        thread = ImageLoaderThread(self.data.get("background_image_url"), 110, 140, "cache/scenes")
-        thread.image_loaded.connect(self.image_label.setPixmap)
-        thread.radius = 4
-        thread.start()
-        self.mw.threads.append(thread)
+        self.mw.image_loader.load(self.data.get("background_image_url"), 110, 140, 4,
+                                  label=self.image_label, cache_dir="cache/scenes")
 
         text_layout = QVBoxLayout()
         text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -193,11 +186,9 @@ class MainPage(QWidget):
         self.setLayout(main_layout)
 
     def loadUI(self):
-        thread = ImageLoaderThread(self.data.get("background_image_url"), 290, 260, "cache/scenes")
-        thread.image_loaded.connect(self.image_label.setPixmap)
-        thread.radius = 4
-        thread.start()
-        self.mw.threads.append(thread)
+        self.mw.image_loader.load(
+            self.data.get("background_image_url"), 290, 260, 4,
+            label=self.image_label, cache_dir="cache/scenes")
         self.title_label.setText(self.data.get("title"))
         self.author_label.setText(self.tr("Author: @") + self.data.get("creator_username"))
         self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.data.get("creator_username"))

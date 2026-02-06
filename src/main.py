@@ -1,4 +1,4 @@
-import sys, ctypes, platform, webbrowser, datetime, os, logging
+import sys, ctypes, platform, webbrowser, datetime, os, logging, asyncio, json, sounddevice
 
 os.makedirs("logs", exist_ok=True)
 
@@ -53,19 +53,17 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QV
 from PyQt6.QtGui import (QMouseEvent, QAction, QIntValidator, QRegularExpressionValidator,
     QKeySequence, QIcon)
 from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
-    QEasingCurve, QTimer, QTranslator, QParallelAnimationGroup,
-    QRegularExpression, QPoint)
+                          QEasingCurve, QTimer, QTranslator, QParallelAnimationGroup,
+                          QRegularExpression, QPoint, Qt, QLocale)
 from PyQt6.QtMultimedia import QMediaDevices
 from qasync import QEventLoop
 from packaging import version
 
-from modules.ChatInterface import ChatInterface
-from modules.GetCAICookies import GetCookies
-from modules.QThreads import *
+from modules import (ImageLoader, GetCookies, ChatInterface, Svg,
+                     UpdaterThread, UpdateThread, DiscordRPC, ChatThread)
 from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
                                     LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
                                     VerticalScrollPage, HorizontalScrollPage, CardFrame)
-from modules.style.Icons import Svg
 from modules.style.Utils import format_text, color_avatar
 from modules.cards import VoiceCards, CharacterCards, ScenesCards, UserCards
 
@@ -110,7 +108,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.2"
+        self.version = "3.2.3"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -156,6 +154,8 @@ class EmiliaNext(QMainWindow):
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
         self.updater_thread.error_signal.connect(self.checkForUpdatesError)
         self.threads.append(self.updater_thread)
+
+        self.image_loader = ImageLoader()
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
         if getattr(sys, 'frozen', False):
@@ -265,15 +265,16 @@ class EmiliaNext(QMainWindow):
                 self.chat_thread.set_token(self.token)
                 self.chat_thread.create_connect()
 
+                self.chat_thread.get_me()
+                self.chat_thread.get_user_settings()
+
                 self.chat_thread.get_recent_chats()
+                self.chat_thread.get_main_page_chats()
                 self.chat_thread.get_scenes_curated()
                 self.chat_thread.get_trythis_chats()
                 self.chat_thread.get_featured_voices()
-                self.chat_thread.get_me()
-                self.chat_thread.get_main_page_chats()
                 self.chat_thread.get_available_models()
                 self.chat_thread.get_available_models_git()
-                self.chat_thread.get_user_settings()
 
             if self.cookie:
                 self.chat_thread.set_cookie(self.cookie)
@@ -341,13 +342,9 @@ class EmiliaNext(QMainWindow):
         setattr(card, 'avatar_label', avatar_label)
 
         if character_avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + character_avatar_url + '?webp=true&anim=0',
-                45, 45)
-            load_avatar_thread.image_loaded.connect(avatar_label.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(avatar_label, 45, 45, character_name))
-            load_avatar_thread.start()
-            self.threads.append(load_avatar_thread)
+            self.image_loader.load(f"https://characterai.io/i/80/static/avatars/{character_avatar_url}?webp=true&anim=0",
+                                   45, 45, 100, label=avatar_label,
+                                   error_cb=lambda _: color_avatar(avatar_label, 45, 45, character_name))
         else:
             color_avatar(avatar_label, 45, 45, character_name)
 
@@ -358,13 +355,9 @@ class EmiliaNext(QMainWindow):
         setattr(card, 'avatar_label_2', avatar_label_2)
 
         if character_avatar_url:
-            load_avatar_thread = ImageLoaderThread(
-                "https://characterai.io/i/80/static/avatars/" + character_avatar_url + '?webp=true&anim=0',
-                55, 55)
-            load_avatar_thread.image_loaded.connect(avatar_label_2.setPixmap)
-            load_avatar_thread.error_loading.connect(lambda _: color_avatar(avatar_label_2, 55, 55, character_name))
-            load_avatar_thread.start()
-            self.threads.append(load_avatar_thread)
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{character_avatar_url}?webp=true&anim=0", 55, 55, 100,
+                label=avatar_label_2, error_cb=lambda _: color_avatar(avatar_label_2, 55, 55, character_name))
         else:
             color_avatar(avatar_label_2, 55, 55, character_name)
         avatar_label_2.setVisible(False)
