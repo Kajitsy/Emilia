@@ -35,7 +35,6 @@ DisableWelcomePage=no
 ShowLanguageDialog=auto
 
 LicenseFile=LICENSE
-InfoBeforeFile=README.md
 
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
