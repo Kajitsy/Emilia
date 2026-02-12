@@ -218,7 +218,7 @@ class HorizontalMiniVoiceCard(CardFrame):
     def __init__(self, main_window, data):
         super().__init__()
         self.setFixedHeight(60)
-        self.main_window = main_window
+        self.mw = main_window
         self.data = data
         self.svg_icons = Svg()
 
@@ -230,8 +230,9 @@ class HorizontalMiniVoiceCard(CardFrame):
             self.openVoiceCard()
 
     def openVoiceCard(self):
-        vcard = VoiceCard(self.main_window, self.data, search=False)
-        self.main_window.showOverlay(vcard)
+        vcard = VoiceCard(self.mw, self.data, search=False)
+        self.mw.hide_overlay = False
+        self.mw.showOverlay(vcard)
 
     def initUI(self):
         card_layout = QHBoxLayout()
@@ -239,7 +240,7 @@ class HorizontalMiniVoiceCard(CardFrame):
         play_button.setIcon(self.svg_icons.play())
         play_button.setFixedWidth(40)
         play_button.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 32px;")
-        play_button.clicked.connect(lambda _=False: _preview_controller(self.main_window).toggle(self.data.get('previewAudioURI'), play_button))
+        play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), play_button))
         card_layout.addWidget(play_button)
 
         text_layout = QVBoxLayout()
