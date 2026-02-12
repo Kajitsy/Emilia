@@ -265,6 +265,7 @@ class UpdateThread(QThread):
 
         bat_script = f"""
         @echo off
+        cd /d "%~dp0"
         echo Waiting for application to close...
         timeout /t 5 /nobreak > NUL
 
