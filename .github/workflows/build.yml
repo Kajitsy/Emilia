@@ -87,7 +87,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: EmiliaSetup.exe
-          generate_release_notes: true
 
   deploy:
     needs: build
