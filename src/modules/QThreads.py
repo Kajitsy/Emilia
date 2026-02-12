@@ -956,9 +956,9 @@ class ChatThread(QThread):
     @asyncSlot
     async def get_category_characters(self, category):
         if not self.category_characters.get(category, []):
-                response = await self.request(f"discovery.charactersByCurated?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22category%22%3A%22{category.replace(' ', '%20').replace('&', '%26')}%22%7D%7D%7D",
-                                              domain="trpc")
-                self.category_characters[category] = response[0].get("result", {}).get("data", {}).get("json", {}).get("characters", [])
+                response = await self.request(f"recommendation/v1/characters_with_tag/{category.replace(' ', '%20').replace('&', '%26')}",
+                                              domain="neo")
+                self.category_characters[category] = response.get("characters", [])
         self.category_characters_signal.emit(self.category_characters.get(category, {}))
 
     @asyncSlot
