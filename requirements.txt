@@ -26,4 +26,4 @@ websockets==15.0.1
 curl_cffi==0.14.0
 livekit==1.0.25
 numpy==2.4.2
-pillow==12.1.0
+pillow==12.1.1
