@@ -301,7 +301,7 @@ class EmiliaNext(QMainWindow):
 
         return left_sidebar
 
-    def addRecentChatCard(self, character_id, character_name, chat_id, character_avatar_url, scene_id=None):
+    def addRecentChatCard(self, character_id, character_name, chat_id, character_avatar_url, scene_id=None, scene_name=""):
         def openChat(event):
             if event.button() == Qt.MouseButton.LeftButton:
                 self.openChat(character_id, character_name, chat_id, card, scene_id)
@@ -362,10 +362,19 @@ class EmiliaNext(QMainWindow):
             color_avatar(avatar_label_2, 55, 55, character_name)
         avatar_label_2.setVisible(False)
 
+        text_layout = QVBoxLayout()
+        chat_layout.addLayout(text_layout)
+
         name_label = QLabel(character_name)
         name_label.setStyleSheet("background-color: transparent; border: none; color: white;")
-        chat_layout.addWidget(name_label, 1)
+        text_layout.addWidget(name_label, 1)
         setattr(card, 'name_label', name_label)
+
+        scene_label = QLabel(scene_name)
+        scene_label.setStyleSheet("background-color: transparent; border: none; color: gray;")
+        if scene_name:
+            text_layout.addWidget(scene_label, 1)
+            setattr(card, 'scene_label', scene_label)
 
         menu_button = QPushButton()
         menu_button.visibility = True
@@ -387,7 +396,7 @@ class EmiliaNext(QMainWindow):
         """)
         menu_button.setVisible(False)
         menu_button.clicked.connect(lambda: showContextMenu(menu_button.pos(), card))
-        chat_layout.addWidget(menu_button, 0, Qt.AlignmentFlag.AlignRight)
+        chat_layout.addWidget(menu_button, 1, Qt.AlignmentFlag.AlignRight)
         setattr(card, 'menu_button', menu_button)
 
         chat_layout.addStretch()
@@ -923,7 +932,7 @@ class EmiliaNext(QMainWindow):
 
         self.recent_chats = chats
         for chat in self.recent_chats:
-            card = self.addRecentChatCard(chat.get('character_id'), chat.get('name'), chat.get('id'), chat.get('avatar_file_name'), chat.get('scene_id'))
+            card = self.addRecentChatCard(chat.get('character_id'), chat.get('character_name'), chat.get('chat_id'), chat.get('character_avatar_uri'), chat.get('scene_id'), chat.get('name', ''))
             if self.current_chat_interface is not None:
                 if self.current_chat_interface.chat_id == chat.get('id'):
                     setattr(self.current_chat_interface, 'recent_card', card)

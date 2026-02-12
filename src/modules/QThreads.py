@@ -921,9 +921,9 @@ class ChatThread(QThread):
         self.get_history_signal.emit(self.chat_histories[chat_id])
 
     @asyncSlot
-    async def get_recent_chats(self, userCanUseRooms: bool = False):
-        response = await self.request(f"discovery.recent?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22userCanUseRooms%22%3A{str(userCanUseRooms).lower()}%7D%7D%7D", domain="trpc")
-        self.recent_chats_signal.emit(response[0].get("result", {}).get("data", {}).get("json", []))
+    async def get_recent_chats(self):
+        response = await self.request(f"chats/recent", domain="neo")
+        self.recent_chats_signal.emit(response.get('chats', []))
 
     @asyncSlot
     async def get_featured_voices(self):
@@ -959,7 +959,7 @@ class ChatThread(QThread):
         if not self.category_characters.get(category, []):
                 response = await self.request(f"recommendation/v1/characters_with_tag/{category.replace(' ', '%20').replace('&', '%26')}",
                                               domain="neo")
-                self.category_characters[category] = response.get("characters", [])
+                self.category_characters[category] = response.get("characters", [])[:20]
         self.category_characters_signal.emit(self.category_characters.get(category, {}))
 
     @asyncSlot
