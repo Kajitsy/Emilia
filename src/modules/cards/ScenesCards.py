@@ -197,7 +197,7 @@ class MainPage(QWidget):
         self.description_label.adjustSize()
 
         for char in self.mw.recent_chats:
-            card = ClickableMiniCard(self.mw, char['name'], char['character_id'], char['avatar_file_name'])
+            card = ClickableMiniCard(self.mw, char.get('character_name'), char.get('character_id'), char.get('character_avatar_uri'))
             card.setFixedHeight(80)
             card.mousePress = lambda _, c=card: self._selCharacter(c)
             card.chat_id = char['id']

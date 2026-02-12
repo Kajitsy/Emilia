@@ -163,8 +163,7 @@ class VoiceCard(QFrame):
 
         if not self.search:
             for chat in self.mw.recent_chats:
-                card = self.createCard(chat.get('name'), chat.get('avatar_file_name'), chat.get('character_id'),
-                                       chat.get('id'))
+                card = self.createCard(chat.get('character_name'), chat.get('character_avatar_uri'), chat.get('character_id'), chat.get('chat_id'))
                 self.scroll_character_layout.addWidget(card)
             layout.addWidget(recent_label, alignment=Qt.AlignmentFlag.AlignHCenter)
             layout.addWidget(character_scroll_page)
@@ -227,12 +226,8 @@ class HorizontalMiniVoiceCard(CardFrame):
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)
         if a0.button() == Qt.MouseButton.RightButton:
-            self.openVoiceCard()
-
-    def openVoiceCard(self):
-        vcard = VoiceCard(self.mw, self.data, search=False)
-        self.mw.hide_overlay = False
-        self.mw.showOverlay(vcard)
+            self.mw.hideOverlay()
+            self.mw.showOverlay(VoiceCard(self.mw, self.data, search=False))
 
     def initUI(self):
         card_layout = QHBoxLayout()
