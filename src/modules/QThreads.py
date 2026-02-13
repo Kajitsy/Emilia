@@ -902,11 +902,8 @@ class ChatThread(QThread):
         self.copy_chat_signal.emit(response)
 
     @asyncSlot
-    async def hide_chat(self, character_external_id):
-        data = {
-            "character_external_id": character_external_id
-        }
-        response = await self.request(f"chat/history/hide/", data, "post", domain="plus", text=True)
+    async def hide_chat(self, character_id):
+        response = await self.request(f"chats/recent/{character_id}/hide", method="put", domain="neo")
         self.hide_chat_signal.emit(response)
 
     @asyncSlot
@@ -1013,7 +1010,7 @@ class ChatThread(QThread):
             if not character_id in self.characters:
                 response = await self.request(f"character.info?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22externalId%22%3A%22{character_id}%22%7D%7D%7D", domain="trpc")
                 character = response[0].get("result", {}).get("data", {}).get("json", {}).get("character", {})
-                voted = await self.request(f"chat/character/{character_id}/voted/", method="get", domain="plus", text=True)
+                voted = await self.request(f"character/v1/character_voted/{character_id}/voted", method="get", domain="neo")
                 headers = {
                     "Cookie": f"web-next-auth={self.cookie}"
                 }

@@ -108,7 +108,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.4"
+        self.version = "3.2.5"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
