@@ -1306,6 +1306,8 @@ class SettingsPage(QWidget):
                 "label": self.tr("VTube Studio Plugin"),
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Use VTube Studio"), "key": "vtube/use", "def_value": False},
+                    {"type": "lineedit", "label": self.tr("VTube Studio Address"), "key": "vtube/address",
+                     "def_value": "127.0.0.1", "may_be_empty": False},
                     {"type": "lineedit", "label": self.tr("VTube Studio Port"), "key": "vtube/port",
                      "validator": QIntValidator(0, 99999999), "def_value": 8001, "may_be_empty": False},
                     {"type": "pushbutton", "label": self.tr("VTube Emotes Editor"),
@@ -1771,7 +1773,9 @@ class SettingsPage(QWidget):
                     return
                 self.mw.settings.setValue(key, widget.text())
                 if key == "vtube/port":
-                    self.chat_thread.eec.create_vts_with_port(int(widget.text()))
+                    self.chat_thread.eec.set_port(int(widget.text()))
+                if key == "vtube/address":
+                    self.chat_thread.eec.set_host(str(widget.text()))
             elif isinstance(widget, CheckBox):
                 self.mw.settings.setValue(key, 'true' if widget.isChecked() else 'false')
                 if key == "discord_rpc/enable":

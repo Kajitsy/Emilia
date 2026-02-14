@@ -442,7 +442,7 @@ class ChatThread(QThread):
         self.connect = None
         self.ws = None
         self.me = {}
-        self.eec = EEC(self.mw, self.mw.settings.value("vtube/port", 8001))
+        self.eec = EEC(self.mw, self.mw.settings.value("vtube/address", "127.0.0.1"), self.mw.settings.value("vtube/port", 8001))
 
         self.microphone_muted = True
         self.voiced = False
@@ -1238,7 +1238,7 @@ class VoiceModeThread(QThread):
         self.ws = None
         self.chat_thread = self.mw.chat_thread
         self.recognizer = speech_recognition.Recognizer()
-        self.eec = EEC(self.mw)
+        self.eec = EEC(self.mw, self.mw.settings.value("vtube/address", "127.0.0.1"), self.mw.settings.value("vtube/port", 8001))
         self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
         if self.mw.settings.value('input_device', False) is False:
             self.input_index = 0
@@ -1397,7 +1397,7 @@ class VoiceModeThreadV2(QThread):
         self.output_stream = None
         self.is_bot_speaking = False
         self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
-        self.eec = EEC(self.mw)
+        self.eec = EEC(self.mw, self.mw.settings.value("vtube/address", "127.0.0.1"), self.mw.settings.value("vtube/port", 8001))
 
     def run(self):
         self.loop = asyncio.new_event_loop()
