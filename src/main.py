@@ -1,4 +1,4 @@
-import sys, ctypes, platform, webbrowser, datetime, os, logging, asyncio, json, sounddevice
+import sys, ctypes, platform, webbrowser, datetime, os, logging, asyncio, json, sounddevice, inspect
 
 os.makedirs("logs", exist_ok=True)
 

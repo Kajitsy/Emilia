@@ -377,7 +377,7 @@ class ChatThread(QThread):
     turn_regenerate_signal = pyqtSignal(object, object, object)
     new_chat_created_signal = pyqtSignal(object)
     chat_signal = pyqtSignal(object)
-    get_history_signal = pyqtSignal(object)
+    get_history_signal = pyqtSignal(object, str)
     get_char_signal = pyqtSignal(object)
     get_recommend_chars_by_id_signal = pyqtSignal(object)
     get_chat_by_id_signal = pyqtSignal(object)
@@ -450,6 +450,7 @@ class ChatThread(QThread):
         self.translator = Translator()
 
         self.chat_histories = {}
+        self.chat_next_tokens = {}
         self.category_characters = {}
         self.characters = {}
         self.users = {}
@@ -907,15 +908,25 @@ class ChatThread(QThread):
         self.hide_chat_signal.emit(response)
 
     @asyncSlot
-    async def get_history(self, chat_id, next_token=None):
-        if not chat_id in self.chat_histories:
+    async def get_history(self, chat_id, next_tokenq=None):
+        if next_tokenq or not chat_id in self.chat_histories:
             url = f"turns/{chat_id}"
-            if next_token: url += f"?next_token={next_token}"
+            if next_tokenq: url += f"?next_token={next_tokenq}"
             response = await self.request(url, domain="neo")
             chat = response.get("turns", [])
             next_token = response.get("meta", {}).get("next_token", "")
-            self.chat_histories[chat_id] = list(reversed(chat))
-        self.get_history_signal.emit(self.chat_histories[chat_id])
+            if next_tokenq:
+                new_chat_history = []
+                for i in list(reversed(chat)):
+                    new_chat_history.append(i)
+                if self.chat_histories.get(chat_id):
+                    for i in self.chat_histories[chat_id]:
+                        new_chat_history.append(i)
+                self.chat_histories[chat_id] = new_chat_history
+            else:
+                self.chat_histories[chat_id] = list(reversed(chat))
+            self.chat_next_tokens[chat_id] = {"token": next_token}
+        self.get_history_signal.emit(self.chat_histories[chat_id], self.chat_next_tokens.get(chat_id, {}).get('token'))
 
     @asyncSlot
     async def get_recent_chats(self):

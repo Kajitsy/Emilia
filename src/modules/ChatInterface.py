@@ -5,7 +5,7 @@ from curl_cffi import CurlMime
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
                              QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
 from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
-from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt, QSize
 from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
@@ -132,6 +132,7 @@ class ChatInterface(QWidget):
         self.character = None
         self.cis_visible = False
         self.voice_id = None
+        self.next_token = None
         self.user_personas = []
         self.avatar_labels = {}
         self.svg_icons = Svg()
@@ -166,6 +167,7 @@ class ChatInterface(QWidget):
         main_area_layout = QHBoxLayout()
 
         self.messages_area = VerticalScrollPage()
+        self.messages_area.verticalScrollBar().valueChanged.connect(self.on_scroll)
         self.messages_area.setObjectName("chatScrollArea")
         self.messages_area.viewport.setAutoFillBackground(False)
         self.messages_area.setFrameShape(QFrame.Shape.NoFrame)
@@ -236,6 +238,29 @@ class ChatInterface(QWidget):
         self.chat_thread.voice_override(self.character_id)
         self.chat_thread.get_user_personas()
         if self.scene_id: self.chat_thread.get_scene_by_id(self.scene_id)
+
+    def on_scroll(self, value):
+        if value == self.messages_area.verticalScrollBar().minimum() and self.chat_next_token:
+            self.handle_infinite_scroll()
+
+    def handle_infinite_scroll(self):
+        old_height = self.messages_content.height()
+        scrollbar = self.messages_area.verticalScrollBar()
+
+        scrollbar.valueChanged.disconnect(self.on_scroll)
+        scrollbar.rangeChanged.disconnect(self.scrollToBottomIfNeeded)
+
+        self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
+        self.chat_thread.get_history(self.chat_id, self.chat_next_token)
+
+        QApplication.processEvents()
+
+        new_height = self.messages_content.height()
+        delta = new_height - old_height
+        scrollbar.setValue(delta)
+
+        scrollbar.valueChanged.connect(self.on_scroll)
+        scrollbar.rangeChanged.connect(self.scrollToBottomIfNeeded)
 
     def applyBackground(self, path):
         if path and os.path.exists(path):
@@ -1313,26 +1338,18 @@ class ChatInterface(QWidget):
             else:
                 self.discord_thread.update(details=self.tr("Chatting"))
 
-    def _addMessagesFromHistory(self, turns):
+    def _addMessagesFromHistory(self, turns, next_token):
+        self.chat_next_token = next_token
         self.clearMessages()
         self.chat_thread.get_history_signal.disconnect()
-        message_stacked = QStackedWidget
         for turn in turns:
             older = []
             pci = turn.get('primary_candidate_id')
             for candidate in turn.get('candidates', []):
                 if candidate.get('candidate_id', pci) == pci:
-                    message_stacked = self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False), candidate.get('attachments', []))
+                    self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False), candidate.get('attachments', []))
                 else:
                     older.append(candidate)
-           #if len(turn.get('candidates', [])) > 1:
-           #    sorted_older = sorted(
-           #        older,
-           #        key=lambda x: datetime.fromisoformat(x["create_time"].replace("Z", "")),
-           #        reverse=True
-           #    )
-           #    for candidate in sorted_older:
-           #        message_stacked.addWidget(self.createMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False)))
 
     def _getChat(self, chat):
         self.chat_thread.chat_signal.disconnect()
