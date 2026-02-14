@@ -108,7 +108,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.5"
+        self.version = "3.2.6"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -1829,6 +1829,12 @@ async def main():
     tray_icon = QSystemTrayIcon()
     tray_menu = Menu()
     main_window = EmiliaNext()
+
+    if platform.system() == 'Windows':
+        from modules.WinDarkTheme import ChangeDWMAttrib, detect
+
+        ChangeDWMAttrib(detect(main_window), 19, ctypes.c_int(1))
+        ChangeDWMAttrib(detect(main_window), 20, ctypes.c_int(1))
 
     tray_icon.activated.connect(
         lambda reason: main_window.show() or main_window.raise_() or main_window.activateWindow()
