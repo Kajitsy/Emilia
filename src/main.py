@@ -1349,7 +1349,7 @@ class SettingsPage(QWidget):
                      "click": lambda: os.startfile(os.path.join(os.getcwd(), "logs"))},
                 ]
             }, {
-                "label": self.tr("About Emilia"),
+                "label": f"{self.tr('About Emilia')} {self.mw.version}",
                 "settings": [
                     {
                         "label": self.tr("Emilia is a desktop version of Character.AI with several improvements and additional features.")+
