@@ -50,3 +50,7 @@
   <img src="docs/en/images/ml_user_page.png" width="200"/>
   <img src="docs/en/images/ml_settings_page.png" width="200"/>
 </div>
+
+## Which features are unlikely to be implemented
+- The Feed section, and AvatarFX
+- - It will be difficult to optimize, and as an author, I don't like this section and consider it superfluous.
