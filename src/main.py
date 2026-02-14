@@ -473,7 +473,7 @@ class EmiliaNext(QMainWindow):
                 self.download_overlay_progress_label.setText(f"{x}/{y}")
 
             overlay = self.createDownloadOverlay()
-            thread = UpdateThread(self.updater_thread.remote_url, self.updater_thread.files_to_download, self.updater_thread.files_to_removed)
+            thread = UpdateThread(self, self.updater_thread.remote_url, self.updater_thread.files_to_download, self.updater_thread.files_to_removed)
             thread.progress_signal.connect(update_overlay)
             thread.error_signal.connect(self.checkForUpdatesError)
             self.threads.append(thread)

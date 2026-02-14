@@ -199,8 +199,9 @@ class UpdateThread(QThread):
     progress_signal = pyqtSignal(int, int)
     error_signal = pyqtSignal(str)
 
-    def __init__(self, remote_url, files_to_download, files_to_removed):
+    def __init__(self, main_window, remote_url, files_to_download, files_to_removed):
         super().__init__()
+        self.mw = main_window
         self.remote_url = remote_url
         self.files_to_download = files_to_download
         self.files_to_removed = files_to_removed
@@ -289,7 +290,7 @@ class UpdateThread(QThread):
             f.write(bat_script)
 
         os.startfile("update_installer.bat")
-        sys.exit(0)
+        self.mw.close()
 
 class DiscordRPC(QThread):
     rpc_connected = pyqtSignal(object)
