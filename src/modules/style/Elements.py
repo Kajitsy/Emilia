@@ -1,7 +1,7 @@
 import re
 
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon
+from PyQt6.QtCore import Qt, QTimer, QPoint
+from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon, QAction
 from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
     QHBoxLayout, QWidget,QCheckBox, QKeySequenceEdit, QMenu, QComboBox)
 
@@ -174,6 +174,32 @@ class Menu(QMenu):
                 border-radius: 4px;
             }
         """)
+
+class PushButtonMenu(QMenu):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setStyleSheet("""
+            QMenu {
+                background-color: #5f6368;
+                border-radius: 4px;
+            }
+            QMenu::item {
+                color: white;
+                background-color: #5f6368;
+                padding: 8px 15px;
+                border-radius: 4px;
+            }
+            QMenu::item:selected {
+                color: white;
+                background-color: #494a4d;
+            }
+        """)
+        self.setWindowFlag(
+            self.windowFlags() |
+            Qt.WindowType.NoDropShadowWindowHint
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
 
 class ComboBox(QComboBox):
     def __init__(self, *args, **kwargs):
@@ -612,8 +638,7 @@ class LeftSidebar(QFrame):
         self.left_sidebar_layout.addLayout(self.bottom_button_layout)
 
         self.profile_button = PushButton(self.tr("Profile"))
-        self.profile_button.clicked.connect(self.openUserPage)
-        self.profile_button.setCheckable(True)
+        self.profile_button.clicked.connect(lambda: self.showContextMenu(self.profile_button))
         self.bottom_button_layout.addWidget(self.profile_button, 1)
 
         self.profile_button_2 = PushButton()
@@ -623,16 +648,23 @@ class LeftSidebar(QFrame):
                                    error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile('white')))
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile('white'))
-        self.profile_button_2.clicked.connect(self.openUserPage)
-        self.profile_button_2.setCheckable(True)
+        self.profile_button_2.clicked.connect(lambda: self.showContextMenu(self.profile_button_2))
         self.bottom_button_layout.addWidget(self.profile_button_2, 1)
         self.profile_button_2.setVisible(False)
 
-        self.settings_button = PushButton()
-        self.settings_button.setIcon(self.mw.svg_icons.settings('white'))
-        self.settings_button.clicked.connect(self.mw.openSettings)
-        self.settings_button.setCheckable(True)
-        self.bottom_button_layout.addWidget(self.settings_button)
+    def showContextMenu(self, button: PushButton):
+        context_menu = PushButtonMenu(self)
+        context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
+
+        profile_action = QAction(self.tr("Profile"))
+        profile_action.triggered.connect(self.openUserPage)
+        context_menu.addAction(profile_action)
+
+        settings_action = QAction(self.tr("Settings"))
+        settings_action.triggered.connect(self.mw.openSettings)
+        context_menu.addAction(settings_action)
+
+        context_menu.exec(button.mapToGlobal(QPoint(0, -2*context_menu.height())))
 
     def avatarUpdate(self):
         if self.mw.me_has_avatar:

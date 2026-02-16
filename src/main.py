@@ -289,9 +289,7 @@ class EmiliaNext(QMainWindow):
 
     def createLeftSidebar(self):
         left_sidebar = LeftSidebar(self)
-        self.settings_button = left_sidebar.settings_button
         self.profile_button = left_sidebar.profile_button
-        self.profile_button_2 = left_sidebar.profile_button_2
         self.recent_chat_scroll_layout = left_sidebar.recent_chat_scroll_layout
 
         self.left_sidebar_animation = QPropertyAnimation(left_sidebar, b"geometry")
@@ -1735,10 +1733,6 @@ class SettingsPage(QWidget):
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
         self.loadSettings()
         if self.mw.drpc_enable and self.mw.drpc_show_current_page: self.discord_thread.update(details=self.tr("Looking at the settings..."))
-
-    def hideEvent(self, a0):
-        super().hideEvent(a0)
-        self.mw.settings_button.setChecked(False)
 
     def loadSettings(self):
         for key, widget in self.setting_widgets.items():

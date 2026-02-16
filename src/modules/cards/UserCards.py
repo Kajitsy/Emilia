@@ -502,12 +502,6 @@ class UserProfile(QWidget):
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
 
-    def hideEvent(self, a0):
-        super().hideEvent(a0)
-        self.mw.profile_button.setChecked(False)
-        self.mw.profile_button_2.setChecked(False)
-        self.deleteLater()
-
 class EditOverlay(QFrame):
     def __init__(self, main_window):
         super().__init__()
