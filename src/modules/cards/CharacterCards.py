@@ -560,7 +560,8 @@ class EditPage(QWidget):
     def loadData(self, data):
         data = data['character']
         self.data = data
-        if self.data['external_id']:
+        print(data)
+        if self.data:
             self.create_button.setVisible(False)
             self.save_button.setVisible(True)
             self.save_chat_button.setVisible(True)
