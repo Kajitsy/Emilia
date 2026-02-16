@@ -216,3 +216,12 @@ class Svg:
             return pixmap
         else:
             return QIcon(pixmap)
+
+    def create(self, color='#A2A2AC', pixmap_ret=False):
+        svg = f"""<svg viewBox="0 0 24 24" fill="none" height="2em"><path d="M12 4v8m0 0v8m0-8H4m8 0h8" stroke="{color}" stroke-linecap="round" stroke-width="2"></path></svg>"""
+        pixmap = self._svg_to_pixmap(svg)
+
+        if pixmap_ret:
+            return pixmap
+        else:
+            return QIcon(pixmap)
