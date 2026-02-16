@@ -576,17 +576,17 @@ class LeftSidebar(QFrame):
         if self.width() <= 100:
             self.profile_button.setVisible(False)
             self.to_main_page_button.setVisible(False)
-            self.create_character_button.setVisible(False)
+            self.create_button.setVisible(False)
             self.profile_button_2.setVisible(True)
             self.to_main_page_button_2.setVisible(True)
-            self.create_character_button_2.setVisible(True)
+            self.create_button_2.setVisible(True)
         else:
             self.profile_button.setVisible(True)
             self.to_main_page_button.setVisible(True)
-            self.create_character_button.setVisible(True)
+            self.create_button.setVisible(True)
             self.profile_button_2.setVisible(False)
             self.to_main_page_button_2.setVisible(False)
-            self.create_character_button_2.setVisible(False)
+            self.create_button_2.setVisible(False)
 
     def initUI(self):
         self.left_sidebar_layout = QVBoxLayout()
@@ -612,17 +612,15 @@ class LeftSidebar(QFrame):
         self.sidebar_collapse_button.setVisible(self.mw.left_sidebar_visible)
         self.buttons_layout.addWidget(self.sidebar_collapse_button, 0)
 
-        self.create_character_button = PushButton(self.tr('Create Character'))
-        self.create_character_button.setCheckable(True)
-        self.create_character_button.clicked.connect(self.openCreateCharacterPage)
-        self.left_sidebar_layout.addWidget(self.create_character_button)
+        self.create_button = PushButton(self.tr('Create'))
+        self.create_button.clicked.connect(lambda: self.showCreateContextMenu(self.create_button))
+        self.left_sidebar_layout.addWidget(self.create_button)
 
-        self.create_character_button_2 = PushButton()
-        self.create_character_button_2.setIcon(self.mw.svg_icons.create_character('white'))
-        self.create_character_button_2.setCheckable(True)
-        self.create_character_button_2.clicked.connect(self.openCreateCharacterPage)
-        self.left_sidebar_layout.addWidget(self.create_character_button_2)
-        self.create_character_button_2.setVisible(False)
+        self.create_button_2 = PushButton()
+        self.create_button_2.setIcon(self.mw.svg_icons.create('white'))
+        self.create_button_2.clicked.connect(lambda: self.showCreateContextMenu(self.create_button_2))
+        self.left_sidebar_layout.addWidget(self.create_button_2)
+        self.create_button_2.setVisible(False)
 
         self.recent_chat_scroll_page = VerticalScrollPage()
         self.recent_chat_scroll_page.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
@@ -638,7 +636,7 @@ class LeftSidebar(QFrame):
         self.left_sidebar_layout.addLayout(self.bottom_button_layout)
 
         self.profile_button = PushButton(self.tr("Profile"))
-        self.profile_button.clicked.connect(lambda: self.showContextMenu(self.profile_button))
+        self.profile_button.clicked.connect(lambda: self.showProfileContextMenu(self.profile_button))
         self.bottom_button_layout.addWidget(self.profile_button, 1)
 
         self.profile_button_2 = PushButton()
@@ -648,11 +646,29 @@ class LeftSidebar(QFrame):
                                    error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile('white')))
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile('white'))
-        self.profile_button_2.clicked.connect(lambda: self.showContextMenu(self.profile_button_2))
+        self.profile_button_2.clicked.connect(lambda: self.showProfileContextMenu(self.profile_button_2))
         self.bottom_button_layout.addWidget(self.profile_button_2, 1)
         self.profile_button_2.setVisible(False)
 
-    def showContextMenu(self, button: PushButton):
+    def showCreateContextMenu(self, button: PushButton):
+        context_menu = PushButtonMenu(self)
+        context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
+
+        character_action = QAction(self.tr("Character"))
+        character_action.triggered.connect(self.mw.openCreateCharacterPage)
+        context_menu.addAction(character_action)
+
+        scene_action = QAction(self.tr("Scene"))
+        #settings_action.triggered.connect(self.mw.openSettings)
+        context_menu.addAction(scene_action)
+
+        voice_action = QAction(self.tr("Voice"))
+        #settings_action.triggered.connect(self.mw.openSettings)
+        context_menu.addAction(voice_action)
+
+        context_menu.exec(button.mapToGlobal(QPoint(0, context_menu.height())))
+
+    def showProfileContextMenu(self, button: PushButton):
         context_menu = PushButtonMenu(self)
         context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
 
@@ -679,11 +695,6 @@ class LeftSidebar(QFrame):
         self.mw.openUserPage(self.mw.username)
         self.profile_button.setChecked(True)
         self.profile_button_2.setChecked(True)
-
-    def openCreateCharacterPage(self):
-        self.mw.openCreateCharacterPage()
-        self.create_character_button.setChecked(True)
-        self.create_character_button_2.setChecked(True)
 
     def resizeCards(self):
         for i in range(self.recent_chat_scroll_layout.count()):
@@ -726,17 +737,17 @@ class LeftSidebar(QFrame):
             if self.width() <= 100:
                 self.profile_button.setVisible(False)
                 self.to_main_page_button.setVisible(False)
-                self.create_character_button.setVisible(False)
+                self.create_button.setVisible(False)
                 self.profile_button_2.setVisible(True)
                 self.to_main_page_button_2.setVisible(True)
-                self.create_character_button_2.setVisible(True)
+                self.create_button_2.setVisible(True)
             else:
                 self.profile_button.setVisible(True)
                 self.to_main_page_button.setVisible(True)
-                self.create_character_button.setVisible(True)
+                self.create_button.setVisible(True)
                 self.profile_button_2.setVisible(False)
                 self.to_main_page_button_2.setVisible(False)
-                self.create_character_button_2.setVisible(False)
+                self.create_button_2.setVisible(False)
 
         else:
             if frame_rect.right() - edge_size < event.pos().x() < frame_rect.right():

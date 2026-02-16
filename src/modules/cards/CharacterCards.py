@@ -641,16 +641,12 @@ class EditPage(QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
-        self.mw.left_sidebar.create_character_button.setChecked(True)
-        self.mw.left_sidebar.create_character_button_2.setChecked(True)
         self.mw.top_bar_stacked_widget.setFixedHeight(0)
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
 
     def hideEvent(self, event):
         super().hideEvent(event)
-        self.mw.left_sidebar.create_character_button.setChecked(False)
-        self.mw.left_sidebar.create_character_button_2.setChecked(False)
         self.deleteLater()
 
 class MainPage(QWidget):
