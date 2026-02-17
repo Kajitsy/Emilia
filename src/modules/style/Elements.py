@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFr
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setStyleSheet("""
             QPushButton {
                 background-color: #494a4d;
@@ -55,6 +56,7 @@ class PushButton(QPushButton):
 class TabButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setStyleSheet("""
             QPushButton {
                 background-color: #494a4d;
@@ -199,7 +201,6 @@ class PushButtonMenu(QMenu):
             Qt.WindowType.NoDropShadowWindowHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
 
 class ComboBox(QComboBox):
     def __init__(self, *args, **kwargs):
@@ -518,21 +519,22 @@ class ClickableFrame(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.default_style = """
-        QFrame {
-            border-radius: 4px;
-        }
-        QFrame:hover {
-            background-color: #3c3d3f;
-        }
-    """
+            QFrame {
+                border-radius: 4px;
+            }
+            QFrame:hover {
+                background-color: #3c3d3f;
+            }
+        """
         self.press_style = """
-        QFrame {
-            border-radius: 4px;
-            background-color: #3c3d3f;
-        }
-    """
+            QFrame {
+                border-radius: 4px;
+                background-color: #3c3d3f;
+            }
+        """
         self.checkable = False
         self.setStyleSheet(self.default_style)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
@@ -659,7 +661,6 @@ class LeftSidebar(QFrame):
         context_menu.addAction(character_action)
 
         scene_action = QAction(self.tr("Scene"))
-        #settings_action.triggered.connect(self.mw.openSettings)
         context_menu.addAction(scene_action)
 
         voice_action = QAction(self.tr("Voice"))
