@@ -200,7 +200,7 @@ class MainPage(QWidget):
             card = ClickableMiniCard(self.mw, char.get('character_name'), char.get('character_id'), char.get('character_avatar_uri'))
             card.setFixedHeight(80)
             card.mousePress = lambda _, c=card: self._selCharacter(c)
-            card.chat_id = char['id']
+            card.chat_id = char['chat_id']
             self.selchar_layout.addWidget(card)
             self.character_cards.append(card)
 
