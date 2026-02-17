@@ -660,11 +660,13 @@ class LeftSidebar(QFrame):
         character_action.triggered.connect(self.mw.openCreateCharacterPage)
         context_menu.addAction(character_action)
 
-        scene_action = QAction(self.tr("Scene"))
+        scene_action = QAction(self.tr("Scene (WIP)"))
+        scene_action.triggered.connect(self.mw.openCreateScenePage)
         context_menu.addAction(scene_action)
 
         voice_action = QAction(self.tr("Voice"))
         #settings_action.triggered.connect(self.mw.openSettings)
+        voice_action.setEnabled(False)
         context_menu.addAction(voice_action)
 
         context_menu.exec(button.mapToGlobal(QPoint(0, context_menu.height())))

@@ -498,7 +498,11 @@ class ChatThread(QThread):
         base_url = base_urls.get(domain, "https://plus.character.ai/")
         url = f"{base_url}{endpoint}"
 
-        kwargs = {"json_data": data} if method.lower() == "post" else {"data": data}
+        if method.lower() in ("post", "put", "patch"):
+            kwargs = {"json_data": data}
+        else:
+            kwargs = {"data": data}
+
         return await self._make_request(method, url, headers, return_text=text, **kwargs)
 
     async def custom_request(self, url, data={}, method="get", text=False, headers={}):
@@ -895,9 +899,6 @@ class ChatThread(QThread):
     async def get_available_models_git(self):
         response = await self.custom_request("https://raw.githubusercontent.com/Kajitsy/Emilia/refs/heads/emilia/data/CAI_Available_Models.json",
                                             text=True)
-        # with open("../data/CAI_Available_Models.json", "r", encoding="utf-8") as file:
-        #    response = json.load(file)
-        #    print(response)
         self.get_available_models_git_signal.emit(response)
 
     @asyncSlot
@@ -1433,7 +1434,7 @@ class VoiceModeThreadV2(QThread):
         try:
             self.loop.run_until_complete(self.start_call())
         except Exception as e:
-            print(f"Critical Error in run: {e}")
+            logging.error(f"Critical Error in run: {e}")
             self.error_signal.emit(str(e))
         finally:
             pending = asyncio.all_tasks(self.loop)

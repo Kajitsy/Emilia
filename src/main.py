@@ -901,6 +901,24 @@ class EmiliaNext(QMainWindow):
             self.current_chat_interface.setVisible(False)
             self.search_bar.setText("")
 
+    def openCreateScenePage(self, scene_id=None):
+        if scene_id:
+            self.chat_thread.get_scene_by_id(scene_id)
+            self.chat_thread.get_scene_by_id_signal.connect(self._openEditScenePage)
+        else:
+            self.create_scene_page = ScenesCards.ChoiceStep(self)
+            self.main_content_area.addWidget(self.create_scene_page)
+            self.main_content_area.setCurrentWidget(self.create_scene_page)
+        if self.current_chat_interface:
+            self.current_chat_interface.setVisible(False)
+            self.search_bar.setText("")
+
+    def _openEditScenePage(self, data):
+        self.chat_thread.get_scene_by_id_signal.disconnect(self._openEditScenePage)
+        self.edit_scene_page = ScenesCards.CreatePage(self, data, False, data['scene_id'])
+        self.main_content_area.addWidget(self.edit_scene_page)
+        self.main_content_area.setCurrentWidget(self.edit_scene_page)
+
     def openUserPage(self, username):
         self.user_page = UserCards.UserProfile(self, username)
         self.main_content_area.addWidget(self.user_page)

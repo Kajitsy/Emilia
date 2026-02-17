@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
                              QSizePolicy, QWidget)
 
 from modules.cards.CharacterCards import ClickableMiniCard
+from modules.cards.CreateScenesCards import ChoiceStep, CreatePage
 from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame
 from modules.style.Utils import format_text
 
@@ -66,11 +67,10 @@ class ListCard(CardFrame):
         self.title = self.data.get('title')
 
         self.initUI()
-        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        #self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
     def initUI(self):
         card_layout = QHBoxLayout()
-        self.setLayout(card_layout)
 
         self.image_label = QLabel()
         self.image_label.setFixedSize(110, 140)
@@ -103,6 +103,13 @@ class ListCard(CardFrame):
             text_layout.addWidget(description_label)
             self.setToolTip(format_text(self.data.get('title')))
 
+        if self.data.get('creator_username') == self.mw.username:
+            edit_button = PushButton(self.tr("Edit"))
+            edit_button.clicked.connect(lambda: self.mw.openCreateScenePage(self.data.get('scene_id')))
+            card_layout.addWidget(edit_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        self.setLayout(card_layout)
+
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)
         self.mw.openScene(self.data)
@@ -113,11 +120,11 @@ class MainPage(QWidget):
         self.setStyleSheet("background-color: transparent; border: none;")
         self.mw = main_window
         self.chat_thread = self.mw.chat_thread
-        if data:
-            self.data = data
+        self.data = data
+        self.scene_id = scene_id
+        if self.data:
             self.scene_id = self.data['scene_id']
         else:
-            self.scene_id = scene_id
             self.chat_thread.get_scene_by_id_signal.connect(self._getScene)
             self.chat_thread.get_scene_by_id(self.scene_id)
 
