@@ -415,6 +415,8 @@ class ChatThread(QThread):
     create_persona_signal = pyqtSignal(object)
     update_persona_signal = pyqtSignal(object)
     remove_persona_signal = pyqtSignal(object)
+
+    get_scene_signal = pyqtSignal(object)
     create_scene_signal = pyqtSignal(object)
     update_scene_signal = pyqtSignal(object)
     remove_scene_signal = pyqtSignal(object)
@@ -1198,6 +1200,11 @@ class ChatThread(QThread):
         data['archived'] = True
         response = await self.request("character/v1/update_persona", data, "post", True)
         self.remove_persona_signal.emit(response)
+
+    @asyncSlot
+    async def get_scene(self, scene_id):
+        response = await self.request(f"scene/v1/scenes/{scene_id}", method= "get", domain="neo")
+        self.get_scene_signal.emit(response.get('scene', {}))
 
     @asyncSlot
     async def create_scene(self, data):
