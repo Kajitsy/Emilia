@@ -415,6 +415,9 @@ class ChatThread(QThread):
     create_persona_signal = pyqtSignal(object)
     update_persona_signal = pyqtSignal(object)
     remove_persona_signal = pyqtSignal(object)
+    create_scene_signal = pyqtSignal(object)
+    update_scene_signal = pyqtSignal(object)
+    remove_scene_signal = pyqtSignal(object)
 
     join_or_create_session_signal = pyqtSignal(object)
 
@@ -1195,6 +1198,21 @@ class ChatThread(QThread):
         data['archived'] = True
         response = await self.request("character/v1/update_persona", data, "post", True)
         self.remove_persona_signal.emit(response)
+
+    @asyncSlot
+    async def create_scene(self, data):
+        response = await self.request("scene/v1/scenes", data, "post", "neo")
+        self.create_scene_signal.emit(response.get('scene', {}))
+
+    @asyncSlot
+    async def update_scene(self, data, scene_id):
+        response = await self.request(f"scene/v1/scenes/{scene_id}", data, "put", domain="neo")
+        self.update_scene_signal.emit(response.get('scene', {}))
+
+    @asyncSlot
+    async def remove_scene(self, scene_id):
+        response = await self.request(f"scene/v1/scenes/{scene_id}", method= "delete", domain="neo")
+        self.remove_scene_signal.emit(response)
 
     @asyncSlot
     async def upload_avatar(self, filetype, image):
