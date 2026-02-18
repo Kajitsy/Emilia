@@ -660,7 +660,7 @@ class LeftSidebar(QFrame):
         character_action.triggered.connect(self.mw.openCreateCharacterPage)
         context_menu.addAction(character_action)
 
-        scene_action = QAction(self.tr("Scene (WIP)"))
+        scene_action = QAction(self.tr("Scene"))
         scene_action.triggered.connect(self.mw.openCreateScenePage)
         context_menu.addAction(scene_action)
 
