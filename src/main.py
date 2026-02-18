@@ -63,7 +63,7 @@ from modules import (ImageLoader, GetCookies, ChatInterface, Svg,
                      UpdaterThread, UpdateThread, DiscordRPC, ChatThread)
 from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
                                     LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
-                                    VerticalScrollPage, HorizontalScrollPage, CardFrame)
+                                    VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton)
 from modules.style.Utils import format_text, color_avatar
 from modules.cards import VoiceCards, CharacterCards, ScenesCards, UserCards
 
@@ -533,7 +533,7 @@ class EmiliaNext(QMainWindow):
         scroll_layout.addWidget(for_you_section)
 
         scenes_section, self.scenes_layout = self.createSection(self.tr("Scenes"))
-        scenes_section.setFixedHeight(350)
+        scenes_section.setFixedHeight(375)
         scroll_layout.addWidget(scenes_section)
 
         recommended_section, self.recommended_layout = self.createSection(self.tr("Recommended"))
@@ -720,31 +720,9 @@ class EmiliaNext(QMainWindow):
         self.category_buttons = []
 
         for key, value in categories.items():
-            btn = QPushButton(value)
-            btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #494a4d;
-                    color: #e8eaed;
-                    border: none;
-                    border-radius: 4px;
-                    padding: 8px 15px;
-                    text-align: center;
-                }
-                QPushButton:disabled {
-                    background-color: #555;
-                    color: #a2a2ac;
-                }
-                QPushButton:hover {
-                    background-color: #5f6368;
-                }
-                QPushButton:pressed, QPushButton:checked {
-                    background-color: #494a4d;
-                    border-bottom: 5px solid #555;
-                    padding-bottom: 3px;
-                }
-            """)
-            btn.setObjectName(key)
+            btn = TabButton(value)
             btn.setCheckable(True)
+            btn.setObjectName(key)
             btn.clicked.connect(lambda checked, b=btn, cat=key: self.onCategoryClicked(b, cat))
             self.category_buttons.append(btn)
             button_scroll_layout.addWidget(btn)
