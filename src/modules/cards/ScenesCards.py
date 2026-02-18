@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem,
                              QSizePolicy, QWidget)
 
 from modules.cards.CharacterCards import ClickableMiniCard
-from modules.cards.CreateScenesCards import ChoiceStep, CreatePage
+from modules.cards.CreateScenesCards import ChoiceStep, AnyCharCreatePage, MainCharCreatePage
 from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame
 from modules.style.Utils import format_text
 

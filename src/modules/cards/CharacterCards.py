@@ -106,9 +106,9 @@ class ListCard(CardFrame):
         self.mw = main_window
         self.image_loader = main_window.image_loader
         self.data = data
-        self.avatar_url = self.data.get('avatar_file_name')
-        self.name = self.data.get('name')
-        self.character_id = self.data.get('external_id')
+        self.avatar_url = self.data.get('avatar_file_name', '')
+        self.name = self.data.get('name', '')
+        self.character_id = self.data.get('external_id', '')
         self.avatar_label_w = avatar_label_w
         self.avatar_label_h = avatar_label_h
 

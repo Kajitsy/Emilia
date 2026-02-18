@@ -915,7 +915,10 @@ class EmiliaNext(QMainWindow):
 
     def _openEditScenePage(self, data):
         self.chat_thread.get_scene_by_id_signal.disconnect(self._openEditScenePage)
-        self.edit_scene_page = ScenesCards.CreatePage(self, data, False, data['scene_id'])
+        if data.get("character_id"):
+            self.edit_scene_page = ScenesCards.MainCharCreatePage(self, data, False, data['scene_id'])
+        else:
+            self.edit_scene_page = ScenesCards.AnyCharCreatePage(self, data, False, data['scene_id'])
         self.main_content_area.addWidget(self.edit_scene_page)
         self.main_content_area.setCurrentWidget(self.edit_scene_page)
 
