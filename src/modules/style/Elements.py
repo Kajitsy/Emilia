@@ -696,8 +696,6 @@ class LeftSidebar(QFrame):
 
     def openUserPage(self):
         self.mw.openUserPage(self.mw.username)
-        self.profile_button.setChecked(True)
-        self.profile_button_2.setChecked(True)
 
     def resizeCards(self):
         for i in range(self.recent_chat_scroll_layout.count()):

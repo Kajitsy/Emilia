@@ -15,6 +15,8 @@ def format_text(text, username="User"):
         ("{{user}}", username)
     ]
 
+    text = str(text)
+
     for pattern, replacement, *flags in replacements:
         text = re.sub(pattern, replacement, text, flags=flags[0] if flags else 0)
 
