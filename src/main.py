@@ -108,7 +108,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.6"
+        self.version = "3.2.7"
         self.beta = version.parse(self.version).is_prerelease
 
         self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
@@ -681,7 +681,7 @@ class EmiliaNext(QMainWindow):
         section_layout.addWidget(title_label)
 
         scroll_page = HorizontalScrollPage()
-        sctoll_viewport = scroll_page.viewport
+        scroll_viewport = scroll_page.viewport
         scroll_layout = scroll_page.layout
 
         section_layout.addWidget(scroll_page)
@@ -721,7 +721,6 @@ class EmiliaNext(QMainWindow):
 
         for key, value in categories.items():
             btn = TabButton(value)
-            btn.setCheckable(True)
             btn.setObjectName(key)
             btn.clicked.connect(lambda checked, b=btn, cat=key: self.onCategoryClicked(b, cat))
             self.category_buttons.append(btn)
@@ -768,11 +767,11 @@ class EmiliaNext(QMainWindow):
         self.notification_message_label.setWordWrap(True)
         self.notification_message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.notification_message_label.setStyleSheet("""
-                    background-color: white;
-                    color: black;
-                    border-radius: 4px;
-                    padding: 10px;
-                """)
+            background-color: white;
+            color: black;
+            border-radius: 4px;
+            padding: 10px;
+        """)
         self.notification_message_label.setFixedSize(300, 50)
         self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), -50, 300, 50))
         self.notification_message_label.hide()
@@ -829,7 +828,7 @@ class EmiliaNext(QMainWindow):
         self.main_content_area.addWidget(search_page)
         self.main_content_area.setCurrentWidget(search_page)
 
-        self.chat_thread.character_search_signal.connect(search_page.populate)
+        self.chat_thread.character_search_signal.connect(search_page.character_populate)
         self.chat_thread.character_search(search_query)
         self.search_bar.setText("")
 
@@ -1132,8 +1131,8 @@ class SearchPage(QWidget):
     def initUI(self):
         self.layout = QVBoxLayout(self.mw)
 
-        self.scroll_area, self.cards_viewport, self.cards_layout = self.createMainContentPage()
         self.top_bar, self.top_bar_layout = self.createTopBar()
+        self.scroll_area, self.cards_viewport, self.cards_layout = self.createScrollPage()
 
         self.layout.addWidget(self.scroll_area, alignment=Qt.AlignmentFlag.AlignHCenter)
 
@@ -1143,7 +1142,7 @@ class SearchPage(QWidget):
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
 
-    def createMainContentPage(self):
+    def createScrollPage(self):
         scroll_page = VerticalScrollPage()
         scroll_page.setFixedWidth(700)
         scroll_viewport = scroll_page.viewport
@@ -1162,11 +1161,10 @@ class SearchPage(QWidget):
         self.mw.main_content_area.addWidget(search_page)
         self.mw.main_content_area.setCurrentWidget(search_page)
 
-        self.chat_thread.character_search_signal.connect(search_page.populate)
+        self.chat_thread.character_search_signal.connect(search_page.character_populate)
         self.chat_thread.character_search(search_query)
-        self.deleteLater()
 
-    def populate(self, data):
+    def character_populate(self, data):
         self.data = data[0].get("result", {}).get("data", {}).get("json", []).get('characters', [])
         if self.data:
             for character in self.data:
@@ -1187,8 +1185,9 @@ class SearchPage(QWidget):
 
     def createTopBar(self):
         top_bar = QWidget()
-        top_bar.setFixedHeight(50)
+        top_bar.setFixedHeight(35)
         top_bar_layout = QVBoxLayout()
+        top_bar_layout.setContentsMargins(0, 0, 0, 0)
         top_bar.setLayout(top_bar_layout)
 
         self.search_bar = LineEdit()
@@ -1203,6 +1202,7 @@ class SearchPage(QWidget):
     def hideEvent(self, a0):
         super().hideEvent(a0)
         self.mw.search_bar.setText("")
+        self.deleteLater()
 
 class SettingsPage(QWidget):
     def __init__(self, parent=None):

@@ -1466,13 +1466,11 @@ E.g. Unmask the stranger before the final waltz ends.
         buttons_frame.setLayout(buttons_layout)
 
         your_button = TabButton(self.tr("Your Characters"))
-        your_button.setCheckable(True)
         your_button.clicked.connect(lambda: pages_widget.setCurrentWidget(your_page))
         your_button.clicked.connect(lambda: recent_button.setChecked(False))
         buttons_layout.addWidget(your_button)
 
         recent_button = TabButton(self.tr("Recent"))
-        recent_button.setCheckable(True)
         recent_button.clicked.connect(lambda: pages_widget.setCurrentWidget(recent_page))
         recent_button.clicked.connect(lambda: your_button.setChecked(False))
         buttons_layout.addWidget(recent_button)

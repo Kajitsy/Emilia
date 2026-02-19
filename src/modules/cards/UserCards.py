@@ -125,7 +125,6 @@ class UserProfile(QWidget):
         content_layout.addWidget(buttons_frame)
 
         self.characters_button = TabButton(self.tr("Characters"))
-        self.characters_button.setCheckable(True)
         self.characters_button.setChecked(True)
         self.characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.character_list))
         self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
@@ -134,7 +133,6 @@ class UserProfile(QWidget):
         self.characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
 
         self.voices_button = TabButton(self.tr("Voices"))
-        self.voices_button.setCheckable(True)
         self.voices_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.voice_list))
         self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
@@ -142,7 +140,6 @@ class UserProfile(QWidget):
         self.voices_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
 
         self.scenes_button = TabButton(self.tr("Scenes"))
-        self.scenes_button.setCheckable(True)
         self.scenes_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.scenes_list))
         self.scenes_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.scenes_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
@@ -150,7 +147,6 @@ class UserProfile(QWidget):
         self.scenes_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
 
         self.up_characters_button = TabButton(self.tr("Liked"))
-        self.up_characters_button.setCheckable(True)
         self.up_characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.upvoted_characters_list))
         self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
@@ -159,7 +155,6 @@ class UserProfile(QWidget):
         self.up_characters_button.setVisible(False)
 
         self.personas_button = TabButton(self.tr("Personas"))
-        self.personas_button.setCheckable(True)
         self.personas_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.personas_list))
         self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
         self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
@@ -457,13 +452,11 @@ class UserProfile(QWidget):
         buttons_frame.setLayout(buttons_layout)
 
         followers_button = TabButton(self.tr("Followers"))
-        followers_button.setCheckable(True)
         followers_button.clicked.connect(lambda: pages_widget.setCurrentWidget(followers_page))
         followers_button.clicked.connect(lambda: following_button.setChecked(False))
         buttons_layout.addWidget(followers_button)
 
         following_button = TabButton(self.tr("Following"))
-        following_button.setCheckable(True)
         following_button.clicked.connect(lambda: pages_widget.setCurrentWidget(following_page))
         following_button.clicked.connect(lambda: followers_button.setChecked(False))
         buttons_layout.addWidget(following_button)

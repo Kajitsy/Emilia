@@ -57,6 +57,7 @@ class TabButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setCheckable(True)
         self.setStyleSheet("""
             QPushButton {
                 background-color: #494a4d;
