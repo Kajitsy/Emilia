@@ -77,7 +77,7 @@ class ListCard(CardFrame):
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)
-        self.mw.openUserPage(self.data)
+        self.mw.openUserPage(self.username)
 
 class UserProfile(QWidget):
     def __init__(self, main_window, username):
