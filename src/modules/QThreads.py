@@ -393,6 +393,7 @@ class ChatThread(QThread):
 
     character_search_signal = pyqtSignal(object)
     scene_search_signal = pyqtSignal(object)
+    user_search_signal = pyqtSignal(object)
 
     recent_chats_signal = pyqtSignal(object)
     get_main_page_chats_signal = pyqtSignal(object)
@@ -1110,7 +1111,14 @@ class ChatThread(QThread):
     async def scene_search(self, query: str | None = None):
         response = await self.request(f"search.searchScenes?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{query}%22%7D%7D%7D",
                                      domain="trpc")
-        self.scene_search_signal.emit(response[0].get('result',{}).get('data', {}).get('json', {}).get('scenes', []))
+        self.scene_search_signal.emit(response[0].get('result',{}).get('data', {}).get('json', {}).get('creators', []))
+
+    @asyncSlot
+    async def user_search(self, query: str | None = None):
+        response = await self.request(
+            f"search.searchCreators?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{query}%22%2C%22sortedBy%22%3A%22relevance%22%7D%7D%7D",
+            domain="trpc")
+        self.user_search_signal.emit(response[0].get('result', {}).get('data', {}).get('json', {}).get('creators', []))
 
     @asyncSlot
     async def voices_search(self, query: str | None = None, character_name: str| None = None):
