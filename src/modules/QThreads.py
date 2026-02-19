@@ -1104,7 +1104,7 @@ class ChatThread(QThread):
     async def character_search(self, query: str | None = None):
         response = await self.request(f"search.search?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22searchQuery%22%3A%22{query}%22%7D%7D%7D",
                                       domain="trpc")
-        self.character_search_signal.emit(response)
+        self.character_search_signal.emit(response[0].get("result", {}).get("data", {}).get("json", []).get('characters', []))
 
     @asyncSlot
     async def scene_search(self, query: str | None = None):
