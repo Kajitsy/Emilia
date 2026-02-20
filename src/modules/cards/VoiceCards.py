@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
                              QGraphicsDropShadowEffect)
 
 from modules.cards import CharacterCards
-from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame, LineEdit
+from modules.style.Elements import PushButton, VerticalScrollPage, CardFrame, LineEdit, SearchLineEdit
 from modules.style.Icons import Svg
 from modules.QThreads import PlayerThread, FileLoaderThread, VoiceModeThread, VoiceModeThreadV2
 from modules.style.Utils import color_avatar, format_text
@@ -286,7 +286,7 @@ class VoiceSearch(QWidget):
         search_layout = QVBoxLayout()
         layout.addLayout(search_layout)
 
-        self.search_input = LineEdit()
+        self.search_input = SearchLineEdit(self.mw)
         self.search_input.setIcon(QIcon(self.svg_icons.search()))
         self.search_input.returnPressed.connect(self.showSearchResults)
         self.search_input.setPlaceholderText(self.tr('Search'))
