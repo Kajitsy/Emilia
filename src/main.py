@@ -111,8 +111,11 @@ class EmiliaNext(QMainWindow):
         self.version = "3.2.7"
         self.beta = version.parse(self.version).is_prerelease
 
-        self.setGeometry(self.settings.value("main_window/x", 100, type=int), self.settings.value("main_window/y", 100, type=int),
-                         self.settings.value("main_window/width", 1360, type=int), self.settings.value("main_window/height", 800, type=int))
+        geometry = self.settings.value("main_window/geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+        else:
+            self.setGeometry(100, 100, 1360, 800)
         self.left_sidebar_visible = True
         self.left_sidebar_hide_user = False
         self.left_sidebar_hide_auto = False
@@ -1084,8 +1087,7 @@ class EmiliaNext(QMainWindow):
             self.overlay.setGeometry(self.rect())
         if hasattr(self, 'notification_message_label'):
             self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), self.notification_message_label.y(), 300, 50))
-        self.settings.setValue("main_window/height", self.geometry().height())
-        self.settings.setValue("main_window/width", self.geometry().width())
+        self.settings.setValue("main_window/geometry", self.saveGeometry())
 
     def changeEvent(self, a0):
         super().changeEvent(a0)
@@ -1094,8 +1096,7 @@ class EmiliaNext(QMainWindow):
 
     def moveEvent(self, a0):
         super().moveEvent(a0)
-        self.settings.setValue("main_window/x", self.geometry().x())
-        self.settings.setValue("main_window/y", self.geometry().y())
+        self.settings.setValue("main_window/geometry", self.saveGeometry())
 
     def showEvent(self, a0):
         super().showEvent(a0)
@@ -1114,6 +1115,7 @@ class EmiliaNext(QMainWindow):
         if self.settings.value("backwork", False, type=bool):
             a0.ignore()
             self.hide()
+        self.settings.setValue("main_window/geometry", self.saveGeometry())
 
 class SearchPage(QWidget):
     def __init__(self, main_window, search='character'):
