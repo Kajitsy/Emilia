@@ -717,6 +717,7 @@ class EmiliaNext(QMainWindow):
 
         button_scroll_viewport = QWidget()
         button_scroll_layout = QHBoxLayout()
+        button_scroll_layout.setContentsMargins(0, 0, 0, 0)
         button_scroll_viewport.setLayout(button_scroll_layout)
         button_scroll_area.setWidget(button_scroll_viewport)
 
