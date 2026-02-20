@@ -531,6 +531,7 @@ class SearchLineEdit(LineEdit):
         self.custom_completer = QCompleter()
         self.custom_completer.setModel(self.completer_model)
         self.custom_completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
+        self.custom_completer.activated.connect(self.simulateEnter)
         self.setCompleter(self.custom_completer)
 
         popup = self.custom_completer.popup()
@@ -604,6 +605,10 @@ class SearchLineEdit(LineEdit):
             return
         self.completer_model.setStringList(data)
         self.custom_completer.complete()
+
+    def simulateEnter(self, text):
+        self.setText(text)
+        self.returnPressed.emit()
 
 class ClickableFrame(QFrame):
     def __init__(self, parent=None):
