@@ -1,9 +1,9 @@
 import re
 
-from PyQt6.QtCore import Qt, QTimer, QPoint
+from PyQt6.QtCore import Qt, QTimer, QPoint, QStringListModel
 from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon, QAction
 from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
-    QHBoxLayout, QWidget,QCheckBox, QKeySequenceEdit, QMenu, QComboBox)
+                             QHBoxLayout, QWidget, QCheckBox, QKeySequenceEdit, QMenu, QComboBox, QCompleter)
 
 
 class PushButton(QPushButton):
@@ -388,17 +388,17 @@ class CustomTextEdit(QTextEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setStyleSheet("""
-        QTextEdit {
-            background-color: #494a4d; 
-            color: #e8eaed; 
-            border-radius: 4px; 
-            padding: 7px;
-        }
-        QTextEdit:disabled {
-            background-color: #3c3d3f;
-            color: #a2a2ac;
-        }
-    """)
+            QTextEdit {
+                background-color: #494a4d; 
+                color: #e8eaed; 
+                border-radius: 4px; 
+                padding: 7px;
+            }
+            QTextEdit:disabled {
+                background-color: #3c3d3f;
+                color: #a2a2ac;
+            }
+        """)
         self.format_timer = QTimer()
         self.format_timer.setSingleShot(True)
         self.format_timer.timeout.connect(self.formatUserMessage)
@@ -515,6 +515,95 @@ class CustomTextEdit(QTextEdit):
 
         self.format_timer.start(500)
 
+
+class SearchLineEdit(LineEdit):
+    def __init__(self, main_window, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.chat_thread = main_window.chat_thread
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.showAutoCompleteMenu)
+        self.textChanged.connect(self.startAutoComplete)
+
+        self.setPlaceholderText(self.tr("Character Search"))
+
+        self.completer_model = QStringListModel()
+        self.custom_completer = QCompleter()
+        self.custom_completer.setModel(self.completer_model)
+        self.custom_completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
+        self.setCompleter(self.custom_completer)
+
+        popup = self.custom_completer.popup()
+        popup.setWindowFlag(
+            self.windowFlags() |
+            Qt.WindowType.NoDropShadowWindowHint
+        )
+        popup.setStyleSheet("""
+            QListView {
+                background-color: #494a4d;
+                border-radius: 4px;
+            }
+            QListView::item {
+                color: white;
+                background-color: #494a4d;
+                padding: 8px 15px;
+                border-radius: 4px;
+            }
+            QListView::item:selected {
+                background-color: #5f6368;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #494a4d;
+                width: 8px;
+                margin: 0px 0 0px 0;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px; 
+            }
+            QScrollBar::sub-control:vertical {
+                background: #f0f0f0;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical {
+                height: 0px;
+                subcontrol-position: bottom;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+                subcontrol-position: top;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #777;
+            }
+        """)
+
+    def startAutoComplete(self):
+        self.timer.start(500)
+
+    def showAutoCompleteMenu(self):
+        self.blockSignals(True)
+        self.chat_thread.query_autocomplete_signal.connect(self._showAutoCompleteMenu)
+        self.chat_thread.query_autocomplete(self.text())
+        self.blockSignals(False)
+
+    def _showAutoCompleteMenu(self, data):
+        self.chat_thread.query_autocomplete_signal.disconnect()
+
+        if not data:
+            self.completer_model.setStringList([])
+            return
+        self.completer_model.setStringList(data)
+        self.custom_completer.complete()
 
 class ClickableFrame(QFrame):
     def __init__(self, parent=None):

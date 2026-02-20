@@ -63,7 +63,7 @@ from modules import (ImageLoader, GetCookies, ChatInterface, Svg,
                      UpdaterThread, UpdateThread, DiscordRPC, ChatThread)
 from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
                                     LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
-                                    VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton)
+                                    VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
 from modules.style.Utils import format_text, color_avatar
 from modules.cards import VoiceCards, CharacterCards, ScenesCards, UserCards
 
@@ -600,9 +600,9 @@ class EmiliaNext(QMainWindow):
         top_bar_layout.addWidget(self.update_button)
         self.update_button.setVisible(False)
 
-        self.search_bar = LineEdit()
-        self.search_bar.setPlaceholderText(self.tr("Character Search"))
+        self.search_bar = SearchLineEdit(self)
         self.search_bar.returnPressed.connect(self.showSearchResultsV2)
+        self.search_bar.setFixedWidth(200)
         top_bar_layout.addWidget(self.search_bar)
 
         t_layout.addWidget(self.top_bar_collapse_button)
@@ -1132,7 +1132,6 @@ class SearchPage(QWidget):
     def initUI(self):
         self.layout = QVBoxLayout(self.mw)
 
-
         self.stacked_widget = QStackedWidget(self.mw)
         self.stacked_widget.setContentsMargins(0, 0, 0, 0)
         self.chars_scroll_area, cards_viewport, self.chars_cards_layout = self.createScrollPage()
@@ -1183,8 +1182,6 @@ class SearchPage(QWidget):
         if not search_query:
             return
 
-        self.mw.search_bar.setText(search_query)
-
         self.chars_scroll_area.deleteLater()
         self.chars_scroll_area, cards_viewport, self.chars_cards_layout = self.createScrollPage()
         self.stacked_widget.addWidget(self.chars_scroll_area)
@@ -1217,8 +1214,6 @@ class SearchPage(QWidget):
         if not search_query:
             return
 
-        self.mw.search_bar.setText(search_query)
-
         self.scenes_scroll_area.deleteLater()
         self.scenes_scroll_area, cards_viewport, self.scenes_cards_layout = self.createScrollPage()
         self.stacked_widget.addWidget(self.scenes_scroll_area)
@@ -1247,8 +1242,6 @@ class SearchPage(QWidget):
         search_query = self.search_bar.text().strip()
         if not search_query:
             return
-
-        self.mw.search_bar.setText(search_query)
 
         self.users_scroll_area.deleteLater()
         self.users_scroll_area, cards_viewport, self.users_cards_layout = self.createScrollPage()
@@ -1281,12 +1274,14 @@ class SearchPage(QWidget):
         top_bar_layout.setContentsMargins(0, 0, 0, 0)
         top_bar.setLayout(top_bar_layout)
 
-        self.search_bar = LineEdit()
+        self.search_bar = SearchLineEdit(self.mw)
+        self.search_bar.blockSignals(True)
         self.search_bar.setIcon(QIcon(self.svg_icons.search()))
         self.search_bar.setText(self.mw.search_bar.text())
         self.search_bar.setPlaceholderText(self.tr("Search"))
         self.search_bar.returnPressed.connect(self.showCharSearchResults)
         top_bar_layout.addWidget(self.search_bar, alignment=Qt.AlignmentFlag.AlignTop)
+        self.search_bar.blockSignals(False)
 
         self.tab_layout = QHBoxLayout()
         self.tab_layout.setContentsMargins(0, 0, 0, 0)
@@ -1324,7 +1319,6 @@ class SearchPage(QWidget):
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
-        self.mw.search_bar.setText("")
         self.deleteLater()
 
 class SettingsPage(QWidget):

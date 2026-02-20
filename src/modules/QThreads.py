@@ -1,6 +1,5 @@
 import os, hashlib, logging, sounddevice, soundfile, io, asyncio, time, scipy.signal, inspect, json, re, uuid
 import shutil
-import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import curl_cffi.curl
@@ -391,6 +390,7 @@ class ChatThread(QThread):
     get_user_signal = pyqtSignal(object)
     hide_chat_signal = pyqtSignal(object)
 
+    query_autocomplete_signal = pyqtSignal(object)
     character_search_signal = pyqtSignal(object)
     scene_search_signal = pyqtSignal(object)
     user_search_signal = pyqtSignal(object)
@@ -1056,6 +1056,11 @@ class ChatThread(QThread):
             response = await self.request(f"recommendation/v1/character/similar/{character_id}", domain="neo")
             self.similar_characters[character_id] = response.get("characters", [])
         self.get_recommend_chars_by_id_signal.emit(self.similar_characters[character_id])
+
+    @asyncSlot
+    async def query_autocomplete(self, query_prefix):
+        response = await self.request(f"search/v1/query/autocomplete?query_prefix={query_prefix}", method= "get", domain="neo")
+        self.query_autocomplete_signal.emit(response.get('search_autocomplete', []))
 
     @asyncSlot
     async def get_user_following(self, pageParam=1, username=""):
