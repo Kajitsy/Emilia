@@ -547,7 +547,7 @@ class SearchLineEdit(LineEdit):
             QListView::item {
                 color: white;
                 background-color: #494a4d;
-                padding: 8px 15px;
+                padding: 4px 15px;
                 border-radius: 4px;
             }
             QListView::item:selected {
@@ -607,7 +607,6 @@ class SearchLineEdit(LineEdit):
         self.custom_completer.complete()
 
     def simulateEnter(self, text):
-        self.setText(text)
         self.returnPressed.emit()
 
 class ClickableFrame(QFrame):
