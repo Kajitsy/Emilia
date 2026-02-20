@@ -1,4 +1,4 @@
-name: Build Emilia Setup
+name: Build and Deploy Emilia
 
 on:
   release:
