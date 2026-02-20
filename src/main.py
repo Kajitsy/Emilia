@@ -1132,7 +1132,6 @@ class SearchPage(QWidget):
     def initUI(self):
         self.layout = QVBoxLayout(self.mw)
 
-        self.top_bar, self.top_bar_layout = self.createTopBar()
 
         self.stacked_widget = QStackedWidget(self.mw)
         self.stacked_widget.setContentsMargins(0, 0, 0, 0)
@@ -1143,48 +1142,17 @@ class SearchPage(QWidget):
         self.users_scroll_area, cards_viewport, self.users_cards_layout = self.createScrollPage()
         self.stacked_widget.addWidget(self.users_scroll_area)
 
-        self.tab_layout = QHBoxLayout()
-        self.tab_layout.setContentsMargins(0, 0, 0, 0)
-        self.tab_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-
-        self.character_tab_button = TabButton(self.tr("Characters"))
-        self.character_tab_button.clicked.connect(lambda: self.scene_tab_button.setChecked(False))
-        self.character_tab_button.clicked.connect(lambda: self.user_tab_button.setChecked(False))
-        self.character_tab_button.clicked.connect(lambda: self.changeSearch("character"))
-        self.tab_layout.addWidget(self.character_tab_button)
-        self.user_tab_button = TabButton(self.tr("Users"))
-        self.user_tab_button.clicked.connect(lambda: self.character_tab_button.setChecked(False))
-        self.user_tab_button.clicked.connect(lambda: self.scene_tab_button.setChecked(False))
-        self.user_tab_button.clicked.connect(lambda: self.changeSearch("user"))
-        self.tab_layout.addWidget(self.user_tab_button)
-        self.scene_tab_button = TabButton(self.tr("Scenes"))
-        self.scene_tab_button.clicked.connect(lambda: self.character_tab_button.setChecked(False))
-        self.scene_tab_button.clicked.connect(lambda: self.user_tab_button.setChecked(False))
-        self.scene_tab_button.clicked.connect(lambda: self.changeSearch("scene"))
-        self.tab_layout.addWidget(self.scene_tab_button)
-
-        if self.search == 'character':
-            self.character_tab_button.setChecked(True)
-            self.stacked_widget.setCurrentWidget(self.chars_scroll_area)
-        elif self.search == 'scene':
-            self.character_tab_button.setChecked(True)
-            self.stacked_widget.setCurrentWidget(self.scenes_scroll_area)
-        elif self.search == 'user':
-            self.user_tab_button.setChecked(True)
-            self.stacked_widget.setCurrentWidget(self.users_scroll_area)
-
-        self.layout.addLayout(self.tab_layout)
         self.layout.addWidget(self.stacked_widget, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.setLayout(self.layout)
 
-        self.mw.top_bar_stacked_widget.setFixedHeight(40)
+        self.top_bar, self.top_bar_layout = self.createTopBar()
+        self.mw.top_bar_stacked_widget.setFixedHeight(70)
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar)
 
     def changeSearch(self, search):
         self.search = search
-        print(search)
         if search == 'character':
             self.stacked_widget.setCurrentWidget(self.chars_scroll_area)
             self.search_bar.returnPressed.disconnect()
@@ -1308,7 +1276,7 @@ class SearchPage(QWidget):
 
     def createTopBar(self):
         top_bar = QWidget()
-        top_bar.setFixedHeight(35)
+        top_bar.setFixedHeight(70)
         top_bar_layout = QVBoxLayout()
         top_bar_layout.setContentsMargins(0, 0, 0, 0)
         top_bar.setLayout(top_bar_layout)
@@ -1319,6 +1287,38 @@ class SearchPage(QWidget):
         self.search_bar.setPlaceholderText(self.tr("Search"))
         self.search_bar.returnPressed.connect(self.showCharSearchResults)
         top_bar_layout.addWidget(self.search_bar, alignment=Qt.AlignmentFlag.AlignTop)
+
+        self.tab_layout = QHBoxLayout()
+        self.tab_layout.setContentsMargins(0, 0, 0, 0)
+        self.tab_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        self.character_tab_button = TabButton(self.tr("Characters"))
+        self.character_tab_button.clicked.connect(lambda: self.scene_tab_button.setChecked(False))
+        self.character_tab_button.clicked.connect(lambda: self.user_tab_button.setChecked(False))
+        self.character_tab_button.clicked.connect(lambda: self.changeSearch("character"))
+        self.tab_layout.addWidget(self.character_tab_button)
+        self.user_tab_button = TabButton(self.tr("Users"))
+        self.user_tab_button.clicked.connect(lambda: self.character_tab_button.setChecked(False))
+        self.user_tab_button.clicked.connect(lambda: self.scene_tab_button.setChecked(False))
+        self.user_tab_button.clicked.connect(lambda: self.changeSearch("user"))
+        self.tab_layout.addWidget(self.user_tab_button)
+        self.scene_tab_button = TabButton(self.tr("Scenes"))
+        self.scene_tab_button.clicked.connect(lambda: self.character_tab_button.setChecked(False))
+        self.scene_tab_button.clicked.connect(lambda: self.user_tab_button.setChecked(False))
+        self.scene_tab_button.clicked.connect(lambda: self.changeSearch("scene"))
+        self.tab_layout.addWidget(self.scene_tab_button)
+
+        if self.search == 'character':
+            self.character_tab_button.setChecked(True)
+            self.stacked_widget.setCurrentWidget(self.chars_scroll_area)
+        elif self.search == 'scene':
+            self.character_tab_button.setChecked(True)
+            self.stacked_widget.setCurrentWidget(self.scenes_scroll_area)
+        elif self.search == 'user':
+            self.user_tab_button.setChecked(True)
+            self.stacked_widget.setCurrentWidget(self.users_scroll_area)
+
+        top_bar_layout.addLayout(self.tab_layout)
 
         return top_bar, top_bar_layout
 
