@@ -88,10 +88,9 @@ jobs:
         with:
           files: EmiliaSetup.exe
 
-  deploy:
+  deploy_server1:
     needs: build
     runs-on: ubuntu-latest
-
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
@@ -99,21 +98,31 @@ jobs:
           name: app-build
           path: deploy_files
 
-      - name: Execute Remote Commands
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mkdir -p /var/www/emilia
-            rm -rf /var/www/emilia/*
-
-      - name: Copy Files via SCP
+      - name: Deploy to Server 1
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy_files/*"
+          target: "/var/www/emilia"
+          strip_components: 1
+
+  deploy_server2:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: deploy_files
+
+      - name: Deploy to Server 2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS2_HOST }}
+          username: ${{ secrets.VPS2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "deploy_files/*"
           target: "/var/www/emilia"
