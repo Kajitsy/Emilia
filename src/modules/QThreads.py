@@ -106,9 +106,9 @@ class UpdaterThread(QThread):
     has_update_signal = pyqtSignal(bool)
     error_signal = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, remote_url="https://emilia-update.ateez.ru/"):
         super().__init__()
-        self.remote_url = "https://emilia-update.ateez.ru/"
+        self.remote_url = remote_url
         self.local_manifest = {"files": {}}
         self.remote_manifest = {"files": {}}
         self.files_to_download = []

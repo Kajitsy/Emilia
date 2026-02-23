@@ -108,7 +108,7 @@ class EmiliaNext(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.2.7"
+        self.version = "3.2.8"
         self.beta = version.parse(self.version).is_prerelease
 
         geometry = self.settings.value("main_window/geometry")
@@ -153,7 +153,7 @@ class EmiliaNext(QMainWindow):
         self.threads.append(self.chat_thread)
         self.discord_thread = DiscordRPC(self)
         self.threads.append(self.discord_thread)
-        self.updater_thread = UpdaterThread()
+        self.updater_thread = UpdaterThread(self.settings.value("update_server", "https://germany.emiupd.ateez.ru/", type=str))
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
         self.updater_thread.error_signal.connect(self.checkForUpdatesError)
         self.threads.append(self.updater_thread)
@@ -1399,6 +1399,10 @@ class SettingsPage(QWidget):
             "cy_GB": {"title": self.tr("Welsh"), "lang_available": False, "google_code": "cy"},
             "xh_ZA": {"title": self.tr("Xhosa"), "lang_available": False, "google_code": "xh"}
         }
+        self.update_servers = {
+            "https://germany.emiupd.ateez.ru/": self.tr("Germany"),
+            "https://russia.emiupd.ateez.ru/": self.tr("Russia")
+        }
         self.settings_data = [
             {
                 "label": self.tr("Character.AI Settings"),
@@ -1414,6 +1418,7 @@ class SettingsPage(QWidget):
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
                     {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Display text formatting buttons"), "key": "show_format_buttons", "def_value": False},
+                    {"type": "combobox", "label": self.tr("Update Server"), "items": list(self.update_servers.values()), "key": "update_server", "def_value": "https://germany.emiupd.ateez.ru/"},
                     {"type": "combobox", "label": self.tr("Input Device"), "items": self.mw.input_devices.values(), "key": "input_device"},
                     {"type": "combobox", "label": self.tr("Output Device"), "items": self.mw.output_devices.values(), "key": "output_device"},
                     {"type": "keybind", "label": self.tr("Microphone mute key"), "def_value": "Ctrl+M", "key": "microphone_mute_key_bind"},
@@ -1864,6 +1869,8 @@ class SettingsPage(QWidget):
             elif isinstance(widget, ComboBox):
                 if key == "emilia_language":
                     widget.setCurrentText(self.languages.get(self.mw.current_language, {}).get("title", self.tr("English")))
+                elif key == "update_server":
+                    widget.setCurrentText(self.update_servers.get(value, self.tr("Germany")))
                 elif key in {"tr_char_msg_to", "tr_user_msg_to"}:
                     widget.setCurrentText(self.languages.get(value, {}).get("title", self.tr("English")))
                 elif key in {"input_device", "output_device"}:
@@ -1923,6 +1930,9 @@ class SettingsPage(QWidget):
                         global main_window
                         main_window = EmiliaNext()
                         main_window.show()
+                elif key == "update_server":
+                    url = next((k for k, v in self.update_servers.items() if v == widget.currentText()), "https://germany.emiupd.ateez.ru/")
+                    self.mw.settings.setValue(key, url)
                 elif key in {"tr_char_msg_to", "tr_user_msg_to"}:
                     lang = next(k for k, v in self.languages.items() if v["title"] == widget.currentText())
                     self.mw.settings.setValue(key, lang)
