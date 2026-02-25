@@ -2,10 +2,10 @@ import hashlib
 import os, math
 
 from curl_cffi import CurlMime
-from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton,
+from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton,
                              QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
 from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
-from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt, QSize
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt
 from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
@@ -16,6 +16,7 @@ from modules.QThreads import PlayerThread, FileLoaderThread, ChatThread, Discord
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
 from modules.cards.VoiceCards import VoiceSearch, VoiceMode
+from modules.vmodel.sel_model import VTubeModelViewer
 
 
 class MessageBubble(QFrame):
@@ -157,14 +158,14 @@ class ChatInterface(QWidget):
         self.chat_thread.get_scene_by_id_signal.connect(self.getScene)
 
     def initUI(self):
-        self.layout = QVBoxLayout(self)
+        self.layout = QHBoxLayout(self)
+
+        chat_container_layout = QVBoxLayout()
 
         self.top_bar_frame, self.top_bar_layout = self.createTopBar()
         self.mw.top_bar_stacked_widget.setFixedHeight(75)
         self.mw.top_bar_stacked_widget.addWidget(self.top_bar_frame)
         self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar_frame)
-
-        main_area_layout = QHBoxLayout()
 
         self.messages_area = VerticalScrollPage()
         self.messages_area.verticalScrollBar().valueChanged.connect(self.on_scroll)
@@ -175,9 +176,14 @@ class ChatInterface(QWidget):
         self.messages_content = self.messages_area.viewport
         self.messages_content.setObjectName("chatContent")
         self.messages_layout = self.messages_area.layout
-        main_area_layout.addWidget(self.messages_area)
 
-        self.layout.addLayout(main_area_layout)
+        self.messages_overlay_container = QWidget()
+        self.messages_overlay_layout = QGridLayout(self.messages_overlay_container)
+        self.messages_overlay_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.messages_overlay_layout.addWidget(self.messages_area, 0, 0)
+
+        chat_container_layout.addWidget(self.messages_overlay_container)
 
         input_layout = QVBoxLayout()
         self.attach_image_label = QLabel()
@@ -199,49 +205,57 @@ class ChatInterface(QWidget):
         format_toolbar.addWidget(code_button)
         format_toolbar.addStretch()
 
-        if self.show_format_buttons: input_layout.addWidget(format_widget)
+        if self.show_format_buttons:
+            input_layout.addWidget(format_widget)
 
         send_layout = QHBoxLayout()
         send_layout.setContentsMargins(0, 0, 0, 0)
         send_widget = QFrame()
         send_widget.setLayout(send_layout)
+
         self.message_input = CustomTextEdit()
         self.message_input.mousePressEvent = lambda _: self.hideCharacterInfoSidebar2()
         self.message_input.setFixedHeight(32)
         self.message_input.horizontalScrollBar().setVisible(False)
         self.message_input.verticalScrollBar().setVisible(False)
         self.message_input.keyPress = lambda: self.sendMessage()
+
         send_layout.addWidget(self.message_input, alignment=Qt.AlignmentFlag.AlignBottom)
-        send_button = PushButton()
-        send_button.setIcon(self.svg_icons.send())
-        send_button.clicked.connect(self.sendMessage)
-        send_layout.addWidget(send_button, alignment=Qt.AlignmentFlag.AlignBottom)
-        call_button = PushButton()
-        call_button.setIcon(self.svg_icons.call())
-        call_button.clicked.connect(self.callCharacter)
-        send_layout.addWidget(call_button, alignment=Qt.AlignmentFlag.AlignBottom)
-        select_image_button = PushButton()
-        select_image_button.setIcon(self.svg_icons.add_image())
-        select_image_button.clicked.connect(self.selectImage)
-        send_layout.addWidget(select_image_button, alignment=Qt.AlignmentFlag.AlignBottom)
+
+        for icon_func, callback in [
+            (self.svg_icons.send, self.sendMessage),
+            (self.svg_icons.call, self.callCharacter),
+            (self.svg_icons.add_image, self.selectImage)
+        ]:
+            btn = PushButton()
+            btn.setIcon(icon_func())
+            btn.clicked.connect(callback)
+            send_layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignBottom)
 
         input_layout.addWidget(send_widget)
-        self.layout.addLayout(input_layout)
+        chat_container_layout.addLayout(input_layout)
 
+        self.layout.addLayout(chat_container_layout)
 
         self.setLayout(self.layout)
-
         self.chat_thread.get_char_signal.connect(self.initData)
         self.chat_thread.get_character(self.character_id)
-
         self.chat_thread.voice_override_signal.connect(self._voiceOverride)
         self.chat_thread.voice_override(self.character_id)
         self.chat_thread.get_user_personas()
-        if self.scene_id: self.chat_thread.get_scene_by_id(self.scene_id)
+        if self.scene_id:
+            self.chat_thread.get_scene_by_id(self.scene_id)
 
     def on_scroll(self, value):
         if value == self.messages_area.verticalScrollBar().minimum() and self.chat_next_token:
             self.handle_infinite_scroll()
+
+    def mouseDoubleClickEvent(self, event):
+        super().mouseDoubleClickEvent(event)
+        if event.button() == Qt.MouseButton.LeftButton:
+            if hasattr(self, "vmodel_widget"):
+                if not self.vmodel_widget.translucent:
+                    self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
 
     def handle_infinite_scroll(self):
         old_height = self.messages_content.height()
@@ -513,6 +527,10 @@ class ChatInterface(QWidget):
         self.chat_style_button.clicked.connect(self.openModelOverlay)
         self.char_info_layout.addWidget(self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
+        self.vmodel_button = PushButton(self.tr("VModel"))
+        self.vmodel_button.clicked.connect(self.openVModelOverlay)
+        self.char_info_layout.addWidget(self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft)
+
         self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
 
     def getScene(self, data):
@@ -646,6 +664,19 @@ class ChatInterface(QWidget):
             else:
                 label.animation_timer.stop()
                 label.is_animating = False
+
+    def openVModelOverlay(self):
+        def setWidget(widget):
+            self.mw.hideOverlay()
+            self.vmodel_widget = widget
+            self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+            self.vmodel_widget.setStyleSheet("background: transparent;")
+            self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
+            self.vmodel_widget.raise_()
+
+        overlay_widget = VTubeModelViewer()
+        overlay_widget.vmodel_widget.connect(setWidget)
+        self.mw.showOverlay(overlay_widget)
 
     def openPersonaOverlay(self):
         overlay_widget = QWidget()
