@@ -55,20 +55,26 @@ class ImageTask(QRunnable):
 
     def run(self):
         try:
-            cache_path = self._cache_path()
 
-            if os.path.exists(cache_path):
-                img = QImage(cache_path)
+            if os.path.exists(self.url) and os.path.isfile(self.url):
+                img = QImage(self.url)
                 if img.isNull():
-                    os.remove(cache_path)
-                    raise RuntimeError("Broken cache image")
+                    raise RuntimeError(f"Не удалось прочитать локальный файл: {self.url}")
             else:
-                r = requests.get(self.url, timeout=10)
-                r.raise_for_status()
-                img = QImage.fromData(r.content)
-                if img.isNull():
-                    raise RuntimeError("Invalid image data")
-                img.save(cache_path, "PNG")
+                cache_path = self._cache_path()
+
+                if os.path.exists(cache_path):
+                    img = QImage(cache_path)
+                    if img.isNull():
+                        os.remove(cache_path)
+                        raise RuntimeError("Broken cache image")
+                else:
+                    r = requests.get(self.url, timeout=10)
+                    r.raise_for_status()
+                    img = QImage.fromData(r.content)
+                    if img.isNull():
+                        raise RuntimeError("Invalid image data")
+                    img.save(cache_path, "PNG")
 
             result = self._round(img)
             self.signals.finished.emit(result)
