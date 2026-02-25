@@ -77,6 +77,8 @@ class VModelWidget(QOpenGLWidget):
         self.model_x = 0
         self.model_y = 0
         self.model_scale = 1
+        self.stream_volume = 0.0
+        self.volume_smoothing = 0.6
 
         self.text_in_model_center = ""
         self.text_rect = QRectF()
@@ -116,6 +118,9 @@ class VModelWidget(QOpenGLWidget):
         self.control_panel.setVisible(not self.translucent)
         self.setLayout(main_layout)
         self.setMouseTracking(True)
+
+    def set_stream_volume(self, volume: float):
+        self.stream_volume = (self.stream_volume * self.volume_smoothing) + (volume * (1.0 - self.volume_smoothing))
 
     def set_window_stay_on_top(self, stay_on_top):
         flags = self.windowFlags()
@@ -250,12 +255,17 @@ class VModelWidget(QOpenGLWidget):
                 self.model.SetParameterValue(param_id, animated_param.value, 1)
 
             if self.wavhandler.Update():
-                self.model.AddParameterValue(
+                self.model.SetParameterValue(
                     StandardParams.ParamMouthOpenY, self.wavhandler.GetRms() * self.lipSyncN
                 )
 
+            if self.stream_volume > 0.005:
+                self.model.SetParameterValue(
+                    StandardParams.ParamMouthOpenY, self.stream_volume * self.lipSyncN
+                )
+
             self.model.Draw()
-        self.draw_movable_text(self.text_x, self.text_y)
+        #self.draw_movable_text(self.text_x, self.text_y)
 
     def draw_movable_text(self, x, y):
         painter = QPainter(self)

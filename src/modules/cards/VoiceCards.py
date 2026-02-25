@@ -467,6 +467,8 @@ class VoiceMode(QWidget):
             self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, self.voice_id)
             self.thread.speech_signal.connect(self.updateSpeakingIndicator)
             self.thread.error_signal.connect(self.mw.showNotification)
+            if hasattr(self.chi, 'vmodel_widget'):
+                self.thread.volume_signal.connect(self.chi.vmodel_widget.set_stream_volume)
             self.thread.start()
             self.mw.threads.append(self.thread)
 

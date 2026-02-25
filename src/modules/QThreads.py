@@ -1424,6 +1424,7 @@ class VoiceModeThreadV2(QThread):
     connected_signal = pyqtSignal(bool)
     speech_signal = pyqtSignal(bool)
     error_signal = pyqtSignal(str)
+    volume_signal = pyqtSignal(float)
 
     def __init__(self, parent, token, char, chat_id, username, char_name=None, voice_id=None):
         super().__init__()
@@ -1566,8 +1567,12 @@ class VoiceModeThreadV2(QThread):
 
             if len(data_np) > 0:
                 rms = np.max(np.abs(data_np))
+                volume = min(1.0, float(rms) / 32768.0)
             else:
                 rms = 0
+                volume = 0.0
+
+            self.volume_signal.emit(volume)
 
             if rms > 500:
                 if not self.is_bot_speaking:
