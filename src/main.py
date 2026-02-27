@@ -48,8 +48,8 @@ Python Path:  {sys.executable}
 Process ID:   {os.getpid()}""")
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-    QPushButton, QFrame, QSizePolicy, QStackedWidget,
-    QSystemTrayIcon, QProgressBar)
+                             QPushButton, QFrame, QSizePolicy, QStackedWidget,
+                             QSystemTrayIcon, QProgressBar, QFileDialog)
 from PyQt6.QtGui import (QMouseEvent, QAction, QIntValidator, QRegularExpressionValidator,
     QKeySequence, QIcon)
 from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
@@ -1433,10 +1433,16 @@ class SettingsPage(QWidget):
                     {"type": "lineedit", "label": self.tr("VTube Studio Port"), "key": "vtube/port",
                      "validator": QIntValidator(0, 99999999), "def_value": 8001, "may_be_empty": False},
                     {"type": "pushbutton", "label": self.tr("VTube Emotes Editor"),
-                     "buttonlabel": self.tr("Open"),
-                     "key": "vtube/emotes_editor", "click": self.openEmotesEditor},
+                     "buttonlabel": self.tr("Open"), "key": "vtube/emotes_editor", "click": self.openEmotesEditor},
                     {"type": "pushbutton", "label": self.tr("Check the connection to VTube Studio"), "buttonlabel": self.tr("Check"),
                      "key": "vtube/check_connect", "click": self.vtubeCheck},
+                ]
+            }, {
+                "label": self.tr("Virtual Model Plugin (VModel)"),
+                "settings": [
+                    {"type": "checkbox", "label": self.tr("Use VModel"), "key": "vmodel/use", "def_value": False},
+                    {"type": "pushbutton", "label": self.tr("Models folder"),
+                     "buttonlabel": self.tr("Change"), "key": "vmodel/change_default_folder", "click": self.changeVModelFolder},
                 ]
             }, {
                 "label": self.tr("Discord Rich Presence"),
@@ -1500,6 +1506,17 @@ class SettingsPage(QWidget):
     def openUserSettings(self):
         overlay = UserCards.EditOverlay(self.mw)
         self.mw.showOverlay(overlay)
+
+    def changeVModelFolder(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Select folder", self.mw.settings.value("vmodel/default_folder", "./vtubes"))
+        if os.path.exists(folder_path):
+            models_count = 0
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    if file.endswith(".vtube.json"):
+                        models_count += 1
+            self.mw.settings.setValue("vmodel/default_folder", folder_path)
+            self.mw.showNotification(self.tr("(mc) models found").replace("(mc)", str(models_count)))
 
     def openEmotesEditor(self):
         with open(f"./data/VTube_Emotes.json", "r") as f:

@@ -17,7 +17,7 @@ class VTubeModelViewer(QWidget):
         self.mw = main_window
         self.setWindowTitle("VTube Model Viewer")
         self.setGeometry(100, 100, 600, 500)
-        self.default_vtube_folder = "./vtubes"
+        self.default_vtube_folder = self.mw.settings.value("vmodel/default_folder", "./vtubes")
 
         self.main_layout = QVBoxLayout()
 
