@@ -455,7 +455,7 @@ class VModelWidget(QOpenGLWidget):
         else:
             log.Error('emote', emote_name, 'not found')
 
-class VTubeModelViewer(QWidget):
+class VModelViewer(QWidget):
     vmodel_widget = pyqtSignal(QOpenGLWidget)
     def __init__(self, main_window):
         super().__init__()

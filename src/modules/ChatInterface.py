@@ -672,7 +672,7 @@ class ChatInterface(QWidget):
             self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
             self.vmodel_widget.raise_()
 
-        overlay_widget = VTubesCards.VTubeModelViewer(self.mw)
+        overlay_widget = VTubesCards.VModelViewer(self.mw)
         overlay_widget.vmodel_widget.connect(setWidget)
         overlay_widget.setFixedWidth(350)
         overlay_widget.setStyleSheet("background: transparent;")
