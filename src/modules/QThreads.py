@@ -6,6 +6,7 @@ import curl_cffi.curl
 import numpy as np
 import requests, speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal, QLocale
+from PyQt6.QtWidgets import QApplication
 from gpytranslate import Translator
 from functools import wraps
 from pypresence import AioPresence
@@ -289,7 +290,7 @@ class UpdateThread(QThread):
             f.write(bat_script)
 
         os.startfile("update_installer.bat")
-        self.mw.close()
+        QApplication.instance().quit()
 
 class DiscordRPC(QThread):
     rpc_connected = pyqtSignal(object)
