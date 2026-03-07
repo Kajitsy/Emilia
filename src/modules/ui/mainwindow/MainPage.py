@@ -216,6 +216,7 @@ class MainPage(QMainWindow):
 
                 self.chat_thread.get_recent_chats()
                 self.chat_thread.get_main_page_chats()
+                self.chat_thread.get_recommended_chars()
                 self.chat_thread.get_scenes_curated()
                 self.chat_thread.get_trythis_chats()
                 self.chat_thread.get_featured_voices()
