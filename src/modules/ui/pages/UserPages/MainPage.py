@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
 
 from modules.ui.Elements import PushButton, TabButton, VerticalScrollPage, CardFrame
 from modules.Utils import format_number, color_avatar
-from modules.ui.cards import CharacterCards, PersonaCards, SceneCards, VoiceCards
+from modules.ui.cards import CharacterCards, PersonaCards, SceneCards, VoiceCards, UserCards
 
 
 class MainPage(QWidget):
@@ -186,7 +186,7 @@ class MainPage(QWidget):
         self.setLayout(layout)
 
     def openUserSettings(self):
-        overlay = EditOverlay(self.mw)
+        overlay = UserCards.EditCard(self.mw)
         self.mw.showOverlay(overlay)
 
     def _getFollowing(self, data):
