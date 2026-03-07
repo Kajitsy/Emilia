@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
 from modules.style.Elements import PushButton, Menu, CardFrame
 from modules.style.Icons import Svg
 from modules.style.Utils import color_avatar
-from modules.cards.Persona import EditCard
+from modules.cards.PersonaCards import EditCard
 
 class MainCard(CardFrame):
     def __init__(self, main_window, data=None, character_id=None):

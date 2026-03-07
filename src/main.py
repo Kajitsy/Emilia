@@ -66,7 +66,7 @@ from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, 
                                     VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
 from modules.style.Utils import format_text, color_avatar
 from modules.cards import VoiceCards, CharacterCards, SceneCards, UserCards
-from modules.pages import CharacterPages, ScenePages
+from modules.pages import CharacterPages, ScenePages, UserPages
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -905,7 +905,7 @@ class EmiliaNext(QMainWindow):
         self.main_content_area.setCurrentWidget(self.edit_scene_page)
 
     def openUserPage(self, username):
-        self.user_page = UserCards.UserProfile(self, username)
+        self.user_page = UserPages.MainPage(self, username)
         self.main_content_area.addWidget(self.user_page)
         self.main_content_area.setCurrentWidget(self.user_page)
         if self.current_chat_interface:
@@ -1504,7 +1504,7 @@ class SettingsPage(QWidget):
         self.setLayout(main_layout)
 
     def openUserSettings(self):
-        overlay = UserCards.EditOverlay(self.mw)
+        overlay = UserCards.EditCard(self.mw)
         self.mw.showOverlay(overlay)
 
     def changeVModelFolder(self):
