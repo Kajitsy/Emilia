@@ -947,7 +947,7 @@ class EmiliaNext(QMainWindow):
 
         self.featured_voices = voices
         for voice in self.featured_voices:
-            card = VoiceCards.HorizontalMiniVoiceCard(self, voice)
+            card = VoiceCards.HorizontalMiniCard(self, voice)
             card.setFixedWidth(277)
             self.featured_voices_layout.addWidget(card)
 

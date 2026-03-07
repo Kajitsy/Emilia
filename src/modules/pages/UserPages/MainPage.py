@@ -219,7 +219,7 @@ class MainPage(QWidget):
 
         if self.voice_data:
             for voice in self.voice_data:
-                card = VoiceCards.HorizontalMiniVoiceCard(self.mw, voice)
+                card = VoiceCards.HorizontalMiniCard(self.mw, voice)
                 self.voice_list_layout.addWidget(card)
         else:
             empty_label = QLabel(self.tr("And it's empty here..."))

@@ -16,7 +16,7 @@ from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, M
 from modules.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPC
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
-from modules.cards.VoiceCards import VoiceSearch, VoiceMode
+from modules.cards.VoiceCards import SearchCard, ModeCard
 from modules.WinDarkTheme import ChangeDWMAttrib, detect
 
 class MessageBubble(QFrame):
@@ -1216,7 +1216,7 @@ class ChatInterface(QWidget):
         self.select_char_voice_label.setText(f"{voice_name}")
 
     def searchVoice(self):
-        search_widget = VoiceSearch(self.mw, self.character_name, self.voice_id, self.character_id)
+        search_widget = SearchCard(self.mw, self.character_name, self.voice_id, self.character_id)
         self.mw.hideOverlay()
         self.mw.showOverlay(search_widget)
 
@@ -1263,7 +1263,7 @@ class ChatInterface(QWidget):
     def callCharacter(self):
         self.hideCharacterInfoSidebar2()
         self.mw.hide_overlay = False
-        vsmode = VoiceMode(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
+        vsmode = ModeCard(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
         vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
         self.mw.showOverlay(vsmode)
 
