@@ -1,5 +1,6 @@
 import hashlib
 import os, math
+import ctypes, platform
 
 from curl_cffi import CurlMime
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton,
@@ -16,6 +17,7 @@ from modules.QThreads import PlayerThread, FileLoaderThread, ChatThread, Discord
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
 from modules.cards.VoiceCards import VoiceSearch, VoiceMode
+from modules.WinDarkTheme import ChangeDWMAttrib, detect
 
 class MessageBubble(QFrame):
     def __init__(self, main_window, parent, text, avatar_url, name, is_user=False, attachments=[]):
@@ -136,6 +138,7 @@ class ChatInterface(QWidget):
         self.avatar_labels = {}
         self.svg_icons = Svg()
         self.vmodel_show = False
+        self.setObjectName("ChatInterface")
 
         self.voice_enabled = False
 
@@ -530,6 +533,10 @@ class ChatInterface(QWidget):
         self.vmodel_button.clicked.connect(self.openVModelOverlay)
         self.char_info_layout.addWidget(self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
+        self.detach_chat_button = PushButton(self.tr("Detach Chat"))
+        self.detach_chat_button.clicked.connect(self.detachChat)
+        self.char_info_layout.addWidget(self.detach_chat_button, alignment=Qt.AlignmentFlag.AlignLeft)
+
         self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
 
     def getScene(self, data):
@@ -663,6 +670,58 @@ class ChatInterface(QWidget):
             else:
                 label.animation_timer.stop()
                 label.is_animating = False
+
+    def detachChat(self):
+        self.setParent(None)
+        self.show()
+        self.hideCharacterInfoSidebar()
+        self.setStyleSheet("""
+            #ChatInterface {
+                background-color: #202124;
+                color: #e8eaed;
+            }
+            QScrollArea {
+                background-color: #303134;
+                border: none;
+                border-radius: 4px;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #303134;
+                width: 8px;
+                margin: 0px 0 0px 0;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px; 
+            }
+            QScrollBar::sub-control:vertical {
+                background: #f0f0f0;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical {
+                height: 0px;
+                subcontrol-position: bottom;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+                subcontrol-position: top;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #777;
+            }
+        """)
+        if platform.system() == 'Windows':
+            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
+            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
     def openVModelOverlay(self):
         if self.vmodel_show:
