@@ -258,7 +258,7 @@ class EditPage(QWidget):
         self.svg_icons = Svg()
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.initUI()
-        if character_id is None:
+        if not character_id:
             self.loadData({'character': {
                 'allow_dynamic_greeting': True,
                 'avatar_rel_path': "",
@@ -268,7 +268,7 @@ class EditPage(QWidget):
                 'default_voice_id': "",
                 'definition': "",
                 'description': "",
-                'dynamic_greeting_enabled': "",
+                'dynamic_greeting_enabled': False,
                 'greeting': "",
                 'identifier': f"id:{uuid.uuid4()}",
                 'img_gen_enabled': False,
@@ -558,13 +558,13 @@ class EditPage(QWidget):
             self.data['visibility'] = "PRIVATE"
 
     def loadData(self, data):
-        data = data['character']
+        data = data.get('character', {})
         self.data = data
         if self.data:
             self.create_button.setVisible(False)
             self.save_button.setVisible(True)
             self.save_chat_button.setVisible(True)
-            self.data['avatar_rel_path'] = self.data['avatar_file_name']
+            self.data['avatar_rel_path'] = self.data.get('avatar_file_name', '')
             if self.data.get('avatar_rel_path'):
                 self.image_loader.load(
                     f"https://characterai.io/i/80/static/avatars/{self.data['avatar_rel_path']}?webp=true&anim=0", 60, 60, 100,
