@@ -1172,14 +1172,17 @@ class ChatInterface(QWidget):
             if self.chat_id == data.get('chat_id'):
                 card_layout.addWidget(current_chat, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
-            timestamp = data.get('preview_turns')[0].get('last_update_time')
-            formatted_time = datetime.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%Y.%m.%d %H:%M:%S')
+            timestamp = data.get('preview_turns', [{}])[0].get('last_update_time')
+            if data.get('preview_turns', [{}])[0].get('last_update_time'):
+                formatted_time = datetime.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%Y.%m.%d %H:%M:%S')
+            else:
+                formatted_time = "Unavailable"
             chat_time = QLabel(formatted_time)
 
             chat_time.setStyleSheet("color: #dbdbdb; font-size: 12px;")
             card_layout.addWidget(chat_time, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
-            chat_text = QLabel(format_text(data.get('preview_turns')[0].get('candidates')[0].get('raw_content'), self.mw.username))
+            chat_text = QLabel(format_text(data.get('preview_turns', [{}])[0].get('candidates', [{}])[0].get('raw_content'), self.mw.username))
             chat_text.setStyleSheet("color: #a2a2ac; font-size: 14px;")
             chat_text.setWordWrap(True)
             card_layout.addWidget(chat_text)

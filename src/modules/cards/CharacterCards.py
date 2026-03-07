@@ -258,31 +258,13 @@ class EditPage(QWidget):
         self.svg_icons = Svg()
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.initUI()
-        if character_id is None:
-            self.loadData({'character': {
-                'allow_dynamic_greeting': True,
-                'avatar_rel_path': "",
-                'base_img_prompt': "",
-                'categories': [],
-                'copyable': False,
-                'default_voice_id': "",
-                'definition': "",
-                'description': "",
-                'dynamic_greeting_enabled': "",
-                'greeting': "",
-                'identifier': f"id:{uuid.uuid4()}",
-                'img_gen_enabled': False,
-                'name': "",
-                'strip_img_prompt_from_msg': False,
-                'tags': [],
-                'title': "",
-                'visibility': "",
-                'voice_id': "",
-                'external_id': ""
-            }})
-        else:
+        self.has_data = False
+        if character_id:
+            self.has_data = True
             self.mw.chat_thread.get_char_signal.connect(self.loadData)
             self.mw.chat_thread.get_character(character_id)
+        else:
+            self.create_button.setVisible(True)
 
     def initUI(self):
         main_layout = QVBoxLayout()
@@ -558,13 +540,13 @@ class EditPage(QWidget):
             self.data['visibility'] = "PRIVATE"
 
     def loadData(self, data):
-        data = data['character']
+        data = data.get('character', {})
         self.data = data
-        if self.data:
+        if self.data and self.has_data:
             self.create_button.setVisible(False)
             self.save_button.setVisible(True)
             self.save_chat_button.setVisible(True)
-            self.data['avatar_rel_path'] = self.data['avatar_file_name']
+            self.data['avatar_rel_path'] = self.data.get('avatar_file_name', '')
             if self.data.get('avatar_rel_path'):
                 self.image_loader.load(
                     f"https://characterai.io/i/80/static/avatars/{self.data['avatar_rel_path']}?webp=true&anim=0", 60, 60, 100,
@@ -572,13 +554,13 @@ class EditPage(QWidget):
                     error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, data['name']))
             else:
                 color_avatar(self.display_avatar, 60, 60, data['name'])
-            self.character_name_edit.setText(self.data['name'])
-            self.tagline_edit.setText(self.data['title'])
-            self.description_edit.setText(self.data['description'])
-            self.greeting_edit.setText(self.data['greeting'])
-            self.dg_checkbox.setChecked(self.data['dynamic_greeting_enabled'])
-            self.definition_edit.setText(self.data['definition'])
-            self.kcdp_checkbox.setChecked(self.data['copyable'])
+            self.character_name_edit.setText(self.data.get('name'))
+            self.tagline_edit.setText(self.data.get('title'))
+            self.description_edit.setText(self.data.get('description'))
+            self.greeting_edit.setText(self.data.get('greeting'))
+            self.dg_checkbox.setChecked(self.data.get('dynamic_greeting_enabled', False))
+            self.definition_edit.setText(self.data.get('definition'))
+            self.kcdp_checkbox.setChecked(self.data.get('copyable', False))
             if self.data['visibility'] == "PUBLIC":
                 self.visible_combobox.setCurrentText(self.tr('Public'))
             elif self.data['visibility'] == "UNLISTED":
