@@ -388,6 +388,7 @@ class ChatInterface(QWidget):
         header_frame.hideEvent = lambda event: self.mw.t_bar.setStyleSheet(None)
         header_frame.setFixedHeight(75)
         header_layout = QHBoxLayout()
+        header_layout.setContentsMargins(0, 0, 0, 0)
 
         self.header_character_frame = QWidget()
         header_layout.addWidget(self.header_character_frame)

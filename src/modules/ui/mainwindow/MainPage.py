@@ -11,7 +11,7 @@ from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimatio
 from PyQt6.QtMultimedia import QMediaDevices
 from packaging import version
 
-from modules import (ImageLoader, ChatInterface, Svg,
+from modules import (ImageLoader, Svg,
                      UpdaterThread, UpdateThread, ChatThread)
 from modules.ui.Elements import (PushButton, HorizontalScrollArea, ClickableFrame,
                                  LeftSidebar, CheckBox, Menu,
@@ -20,7 +20,7 @@ from modules.Utils import color_avatar
 from modules.logic.QThreads import DiscordRPCThread
 from modules.ui.cards import CharacterCards, SceneCards, VoiceCards
 from modules.ui.pages import UserPages, ScenePages, CharacterPages
-from modules.ui.mainwindow import SettingsPage, SearchPage
+from modules.ui.mainwindow import SettingsPage, SearchPage, ChatInterface
 
 class MainPage(QMainWindow):
     mw_show_signal = pyqtSignal()
@@ -120,6 +120,7 @@ class MainPage(QMainWindow):
         self.layout.addLayout(self.main_layout, 1)
 
         self.top_widget, self.top_bar_stacked_widget, self.t_bar = self.createTopBar()
+        self.top_bar_stacked_widget.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addWidget(self.t_bar)
 
         self.main_content_area = QStackedWidget()
