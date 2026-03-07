@@ -11,7 +11,7 @@ from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
 
-from modules.cards import PersonaCards, VTubesCards
+from modules.cards import Persona, VTubesCards
 from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
 from modules.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPC
 from modules.style.Icons import Svg
@@ -791,7 +791,7 @@ class ChatInterface(QWidget):
             self.chat_thread.update_user_settings(self.mw.user_settings)
 
         for persona in self.user_personas:
-            card = PersonaCards.MainCard(self.mw, persona, self.character_id)
+            card = Persona.MainCard(self.mw, persona, self.character_id)
             card.mousePressEvent = lambda _: onCardClicked(card)
             scroll_layout.addWidget(card)
             card_list.append(card)

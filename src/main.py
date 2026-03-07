@@ -65,7 +65,8 @@ from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, 
                                     LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
                                     VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
 from modules.style.Utils import format_text, color_avatar
-from modules.cards import VoiceCards, CharacterCards, ScenesCards, UserCards
+from modules.cards import VoiceCards, CharacterCards, SceneCards, UserCards
+from modules.pages import CharacterPages, ScenePages
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -843,12 +844,12 @@ class EmiliaNext(QMainWindow):
         self.top_widget.setVisible(True)
 
     def openCharacter(self, path=None, character_id=None):
-        widget = CharacterCards.MainPage(self, path, character_id)
+        widget = CharacterPages.MainPage(self, path, character_id)
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
     def openScene(self, data={}, scene_id=None):
-        widget = ScenesCards.MainPage(self, data, scene_id)
+        widget = ScenePages.MainPage(self, data, scene_id)
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
@@ -887,7 +888,7 @@ class EmiliaNext(QMainWindow):
             self.chat_thread.get_scene_by_id(scene_id)
             self.chat_thread.get_scene_by_id_signal.connect(self._openEditScenePage)
         else:
-            self.create_scene_page = ScenesCards.ChoiceStep(self)
+            self.create_scene_page = ScenePages.CreatePages.ChoiceStep(self)
             self.main_content_area.addWidget(self.create_scene_page)
             self.main_content_area.setCurrentWidget(self.create_scene_page)
         if self.current_chat_interface:
@@ -897,9 +898,9 @@ class EmiliaNext(QMainWindow):
     def _openEditScenePage(self, data):
         self.chat_thread.get_scene_by_id_signal.disconnect(self._openEditScenePage)
         if data.get("character_id"):
-            self.edit_scene_page = ScenesCards.MainCharCreatePage(self, data, False, data['scene_id'])
+            self.edit_scene_page = ScenePages.CreatePages.MainCharCreatePage(self, data, False, data['scene_id'])
         else:
-            self.edit_scene_page = ScenesCards.AnyCharCreatePage(self, data, False, data['scene_id'])
+            self.edit_scene_page = ScenePages.CreatePages.AnyCharCreatePage(self, data, False, data['scene_id'])
         self.main_content_area.addWidget(self.edit_scene_page)
         self.main_content_area.setCurrentWidget(self.edit_scene_page)
 
@@ -919,8 +920,8 @@ class EmiliaNext(QMainWindow):
 
         for character in characters:
             card = CharacterCards.MainCard(self, character.get('participant__name', "Unknown"), character.get('avatar_file_name'),
-                                           character.get('title'), character.get('user__username'),
-                                           character.get('external_id'), character.get('participant__num_interactions'))
+                                      character.get('title'), character.get('user__username'),
+                                      character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(277, 134)
             self.category_layout.addWidget(card)
 
@@ -991,8 +992,7 @@ class EmiliaNext(QMainWindow):
         self.curated_scenes = scenes
 
         for scene in self.curated_scenes:
-            card = ScenesCards.MainCard(self, scene)
-            #card.setFixedSize(277, 134)
+            card = SceneCards.MainCard(self, scene)
             self.scenes_layout.addWidget(card)
 
     def addForYouChats(self, chats):
@@ -1230,7 +1230,7 @@ class SearchPage(QWidget):
         self.data = data
         if self.data:
             for scene in self.data:
-                card = ScenesCards.ListCard(self.mw, scene)
+                card = SceneCards.ListCard(self.mw, scene)
                 card.setFixedHeight(140)
                 self.scenes_cards_layout.addWidget(card)
         else:

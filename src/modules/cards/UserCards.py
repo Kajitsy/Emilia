@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
 from modules.style.Elements import CustomTextEdit, PushButton, LineEdit, TabButton, VerticalScrollPage, CardFrame
 from modules.style.Icons import Svg
 from modules.style.Utils import format_number, color_avatar
-from modules.cards import VoiceCards, PersonaCards, CharacterCards, ScenesCards
+from modules.cards import VoiceCards, Persona, CharacterCards, SceneCards
 
 class ListCard(CardFrame):
     def __init__(self, main_window, data):
@@ -319,7 +319,7 @@ class UserProfile(QWidget):
 
         if self.scenes:
             for scene in self.scenes:
-                card = ScenesCards.ListCard(self.mw, scene)
+                card = SceneCards.ListCard(self.mw, scene)
                 self.scenes_list_layout.addWidget(card)
         else:
             empty_label = QLabel(self.tr("And it's empty here..."))
@@ -332,12 +332,12 @@ class UserProfile(QWidget):
 
         if self.user_personas:
             for persona in self.user_personas:
-                card = PersonaCards.MainCard(self.mw, persona)
+                card = Persona.MainCard(self.mw, persona)
                 card.setFixedHeight(87)
                 self.personas_layout.addWidget(card)
 
         button = PushButton(self.tr("New"))
-        button.clicked.connect(lambda _: self.mw.showOverlay(PersonaCards.EditOverlay(self.mw)))
+        button.clicked.connect(lambda _: self.mw.showOverlay(Persona.EditCard(self.mw)))
         self.personas_layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     def _getUser(self, data):
