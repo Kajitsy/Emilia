@@ -671,8 +671,17 @@ class ChatInterface(QWidget):
                 label.animation_timer.stop()
                 label.is_animating = False
 
+    def showEvent(self, a0):
+        super().showEvent(a0)
+        if platform.system() == 'Windows':
+            from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
+
+            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
+            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
+
     def detachChat(self):
         self.setParent(None)
+        self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
         self.hideCharacterInfoSidebar()
         self.setStyleSheet("""
@@ -719,6 +728,7 @@ class ChatInterface(QWidget):
                 background: #777;
             }
         """)
+        self.mw.showMainPage()
 
     def openVModelOverlay(self):
         if self.vmodel_show:
