@@ -1,7 +1,5 @@
-import hashlib
-import os
+import hashlib, os, requests
 
-import requests
 from PyQt6.QtCore import QThreadPool, QObject, Qt, QRectF, QRunnable, pyqtSignal
 from PyQt6.QtGui import QPixmap, QImage, QPainter, QPainterPath
 from PyQt6.sip import isdeleted
@@ -81,7 +79,6 @@ class ImageTask(QRunnable):
 
         except Exception as e:
             self.signals.error.emit(e)
-
 
 class ImageLoader(QObject):
     def __init__(self):

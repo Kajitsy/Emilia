@@ -13,7 +13,7 @@ from PIL import Image
 
 from modules.ui.cards import PersonaCards
 from modules.ui.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
-from modules.logic.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPC
+from modules.logic.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPCThread
 from modules.ui.Icons import Svg
 from modules.Utils import format_text, format_number, color_avatar
 from modules.ui.cards.VoiceCards import SearchCard, ModeCard
@@ -125,7 +125,7 @@ class ChatInterface(QWidget):
         super().__init__()
         self.mw = main_window
         self.chat_thread: ChatThread | None = self.mw.chat_thread
-        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
+        self.discord_thread: DiscordRPCThread | None = self.mw.discord_thread
         self.character_name = character_name
         self.character_id = character_id
         self.chat_id = chat_id

@@ -60,11 +60,12 @@ from qasync import QEventLoop
 from packaging import version
 
 from modules import (ImageLoader, ChatInterface, Svg,
-                     UpdaterThread, UpdateThread, DiscordRPC, ChatThread)
+                     UpdaterThread, UpdateThread, ChatThread)
 from modules.ui.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
                                  LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
                                  VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
 from modules.Utils import format_text, color_avatar
+from modules.logic.QThreads import DiscordRPCThread
 from modules.ui.cards import CharacterCards, UserCards, SceneCards, VoiceCards, CookieCards
 from modules.ui.pages import UserPages, ScenePages, CharacterPages
 
@@ -152,7 +153,7 @@ class EmiliaNext(QMainWindow):
 
         self.chat_thread = ChatThread(self)
         self.threads.append(self.chat_thread)
-        self.discord_thread = DiscordRPC(self)
+        self.discord_thread = DiscordRPCThread(self)
         self.threads.append(self.discord_thread)
         self.updater_thread = UpdaterThread(self.settings.value("update_server", "https://germany.emiupd.ateez.ru/", type=str))
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
@@ -1124,7 +1125,7 @@ class SearchPage(QWidget):
         self.mw = main_window
         self.search = search
         self.chat_thread: ChatThread | None = self.mw.chat_thread
-        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
+        self.discord_thread: DiscordRPCThread | None = self.mw.discord_thread
         self.svg_icons = Svg()
         self.setStyleSheet("background-color: transparent; border: none;")
 
@@ -1330,7 +1331,7 @@ class SettingsPage(QWidget):
         main_layout = QVBoxLayout()
         self.mw: EmiliaNext | None = parent
         self.chat_thread: ChatThread | None = self.mw.chat_thread
-        self.discord_thread: DiscordRPC | None = self.mw.discord_thread
+        self.discord_thread: DiscordRPCThread | None = self.mw.discord_thread
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.languages = {
             "en_US": {"title": self.tr("English"), "lang_available": True, "google_code": "en"},
