@@ -61,12 +61,12 @@ from packaging import version
 
 from modules import (ImageLoader, GetCookies, ChatInterface, Svg,
                      UpdaterThread, UpdateThread, DiscordRPC, ChatThread)
-from modules.style.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
-                                    LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
-                                    VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
-from modules.style.Utils import format_text, color_avatar
-from modules.cards import VoiceCards, CharacterCards, SceneCards, UserCards
-from modules.pages import CharacterPages, ScenePages, UserPages
+from modules.ui.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
+                                 LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
+                                 VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
+from modules.Utils import format_text, color_avatar
+from modules.ui.cards import CharacterCards, UserCards, SceneCards, VoiceCards
+from modules.ui.pages import UserPages, ScenePages, CharacterPages
 
 if platform.system() == 'Windows':
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
@@ -920,8 +920,8 @@ class EmiliaNext(QMainWindow):
 
         for character in characters:
             card = CharacterCards.MainCard(self, character.get('participant__name', "Unknown"), character.get('avatar_file_name'),
-                                      character.get('title'), character.get('user__username'),
-                                      character.get('external_id'), character.get('participant__num_interactions'))
+                                           character.get('title'), character.get('user__username'),
+                                           character.get('external_id'), character.get('participant__num_interactions'))
             card.setFixedSize(277, 134)
             self.category_layout.addWidget(card)
 
@@ -1971,7 +1971,7 @@ async def main():
     main_window = EmiliaNext()
 
     if platform.system() == 'Windows':
-        from modules.WinDarkTheme import ChangeDWMAttrib, detect
+        from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
 
         ChangeDWMAttrib(detect(main_window), 19, ctypes.c_int(1))
         ChangeDWMAttrib(detect(main_window), 20, ctypes.c_int(1))
