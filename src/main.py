@@ -47,8 +47,8 @@ Frozen EXE:   {getattr(sys, 'frozen', False)}
 Python Path:  {sys.executable}
 Process ID:   {os.getpid()}""")
 
-from PyQt6.QtWidgets import QApplication, QSystemTrayIcon
-from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QSplashScreen
+from PyQt6.QtGui import QAction, QIcon, QPixmap
 from PyQt6.QtCore import QSettings, QTranslator, QLocale
 from qasync import QEventLoop
 
@@ -70,7 +70,7 @@ asyncio.set_event_loop(loop)
 
 mw_show = True
 
-async def main():
+async def main(splash=None):
     def actions_toggle():
         global mw_show
         mw_show = not mw_show
@@ -106,14 +106,24 @@ async def main():
     quit_action.triggered.connect(lambda: app.quit())
     tray_menu.addAction(quit_action)
 
+    await asyncio.sleep(2.5)
+
     if main_window.settings.value("main_window/maximized", False, type=bool):
         main_window.showMaximized()
     else:
         main_window.show()
 
+    if splash:
+        splash.finish(main_window)
+
     tray_icon.show()
 
+
 if __name__ == "__main__":
+    pixmap = QPixmap("icon.ico")
+    splash = QSplashScreen(pixmap)
+    splash.show()
+
     with loop:
-        loop.create_task(main())
+        loop.create_task(main(splash))
         loop.run_forever()
