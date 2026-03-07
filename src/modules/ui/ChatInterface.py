@@ -18,7 +18,6 @@ from modules.ui.Icons import Svg
 from modules.Utils import format_text, format_number, color_avatar
 from modules.ui.cards.VoiceCards import SearchCard, ModeCard
 from modules.ui.cards.VModelCards import ViewerCard
-from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
 
 class MessageBubble(QFrame):
     def __init__(self, main_window, parent, text, avatar_url, name, is_user=False, attachments=[]):
@@ -720,9 +719,6 @@ class ChatInterface(QWidget):
                 background: #777;
             }
         """)
-        if platform.system() == 'Windows':
-            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
-            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
     def openVModelOverlay(self):
         if self.vmodel_show:
@@ -740,9 +736,6 @@ class ChatInterface(QWidget):
                 self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
                 self.vmodel_widget.setStyleSheet("background: transparent;")
                 self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
-                if platform.system() == 'Windows':
-                    ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
-                    ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
 
             overlay_widget = ViewerCard(self.mw)

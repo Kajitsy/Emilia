@@ -82,11 +82,7 @@ async def main():
     main_window.mw_hide_signal.connect(actions_toggle)
     main_window.mw_show_signal.connect(actions_toggle)
 
-    if platform.system() == 'Windows':
-        from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
 
-        ChangeDWMAttrib(detect(main_window), 19, ctypes.c_int(1))
-        ChangeDWMAttrib(detect(main_window), 20, ctypes.c_int(1))
 
     tray_icon.activated.connect(
         lambda reason: main_window.show() or main_window.raise_() or main_window.activateWindow()

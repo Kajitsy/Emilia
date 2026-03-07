@@ -1,13 +1,14 @@
-import sys, asyncio, ctypes, logging, platform, datetime, sounddevice
+import ctypes
+import platform
+import sys, datetime, sounddevice
 
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                              QPushButton, QFrame, QSizePolicy, QStackedWidget, QProgressBar)
 from PyQt6.QtGui import QMouseEvent, QAction
 from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
-                          QEasingCurve, QTimer, QTranslator, QParallelAnimationGroup,
+                          QEasingCurve, QTimer, QParallelAnimationGroup,
                           QPoint, Qt, QLocale, pyqtSignal)
 from PyQt6.QtMultimedia import QMediaDevices
-from qasync import QEventLoop
 from packaging import version
 
 from modules import (ImageLoader, ChatInterface, Svg,
@@ -19,22 +20,7 @@ from modules.Utils import color_avatar
 from modules.logic.QThreads import DiscordRPCThread
 from modules.ui.cards import CharacterCards, SceneCards, VoiceCards
 from modules.ui.pages import UserPages, ScenePages, CharacterPages
-from modules.ui.mainwindow import SettingsPage
-
-from modules.ui.mainwindow import SearchPage
-
-if platform.system() == 'Windows':
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
-    logging.debug("ctypes SetCurrentProcessExplicitAppUserModelID")
-
-app = QApplication(sys.argv)
-
-translator = QTranslator()
-translator.load(f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm")
-app.installTranslator(translator)
-
-loop = QEventLoop(app)
-asyncio.set_event_loop(loop)
+from modules.ui.mainwindow import SettingsPage, SearchPage
 
 class MainPage(QMainWindow):
     mw_show_signal = pyqtSignal()
@@ -1059,6 +1045,11 @@ class MainPage(QMainWindow):
         super().showEvent(a0)
         self.mw_show_signal.emit()
         self.discord_thread.update_wlrpc()
+        if platform.system() == 'Windows':
+            from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
+
+            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
+            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
