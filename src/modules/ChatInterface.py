@@ -739,6 +739,9 @@ class ChatInterface(QWidget):
                 self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
                 self.vmodel_widget.setStyleSheet("background: transparent;")
                 self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
+                if platform.system() == 'Windows':
+                    ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
+                    ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
 
             overlay_widget = VTubesCards.VModelViewer(self.mw)
