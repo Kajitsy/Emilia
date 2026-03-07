@@ -1,61 +1,20 @@
 import logging
-import os, json, time
+import os, time
 
 import OpenGL.GL as gl
 from PyQt6.QtCore import QTimerEvent, Qt, QPropertyAnimation, pyqtProperty, QObject, pyqtSignal, QTimer
 from PyQt6.QtGui import QMouseEvent, QCursor, QWheelEvent, QGuiApplication, QSurfaceFormat
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QFileDialog
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 
 import live2d.v3 as live2d
 from live2d.v3 import StandardParams, MotionPriority
 from live2d.utils import log
 from live2d.utils.lipsync import WavHandler
 
-from modules.style.Elements import PushButton, CardFrame, VerticalScrollPage
-from modules.style.Utils import color_avatar
+from modules.style.Elements import PushButton
 
-class ListCard(CardFrame):
-    def __init__(self, main_window, icon_path, name):
-        super().__init__()
-        self.mw = main_window
-        self.image_loader = self.mw.image_loader
-        self.icon_path = icon_path
-        self.name = name
-
-        self.avatar_label_w = 70
-        self.avatar_label_h = 70
-
-        self.initUI()
-
-    def initUI(self):
-        card_layout = QHBoxLayout()
-        self.setLayout(card_layout)
-
-        self.avatar_label = QLabel()
-        self.avatar_label.setFixedSize(self.avatar_label_w, self.avatar_label_h)
-        card_layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        if self.icon_path:
-            self.image_loader.load(self.icon_path, self.avatar_label_w, self.avatar_label_h, 4,
-                label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name))
-        else:
-            color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4)
-
-        text_layout = QVBoxLayout()
-        text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        card_layout.addLayout(text_layout, 1)
-
-        title_label = QLabel(self.name)
-        title_label.setWordWrap(True)
-        font = title_label.font()
-        font.setBold(True)
-        font.setPointSize(10)
-        title_label.setFont(font)
-        text_layout.addWidget(title_label)
-
-class VModelWidget(QOpenGLWidget):
+class MainCard(QOpenGLWidget):
     class AnimatedParameter(QObject):
         value_changed = pyqtSignal(float)
 
@@ -394,104 +353,3 @@ class VModelWidget(QOpenGLWidget):
             self.translucent = not self.translucent
             self.control_panel.setVisible(not self.translucent)
             live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)
-
-class VModelViewer(QWidget):
-    vmodel_widget = pyqtSignal(QOpenGLWidget)
-    def __init__(self, main_window):
-        super().__init__()
-        self.mw = main_window
-        self.setWindowTitle("VTube Model Viewer")
-        self.setGeometry(100, 100, 600, 500)
-        self.default_vtube_folder = self.mw.settings.value("vmodel/default_folder", "./vtubes")
-
-        self.main_layout = QVBoxLayout()
-
-        self.select_folder_button = PushButton("Select folder")
-        self.select_folder_button.clicked.connect(self.select_folder)
-        self.main_layout.addWidget(self.select_folder_button)
-
-        self.model_list_widget = VerticalScrollPage()
-        self.model_list_layout = self.model_list_widget.layout
-        self.main_layout.addWidget(self.model_list_widget)
-
-        self.continue_button = PushButton("Continue")
-        self.continue_button.clicked.connect(self.continuee)
-        self.main_layout.addWidget(self.continue_button)
-
-        self.setLayout(self.main_layout)
-
-        self.selected_folder = None
-
-        if os.path.exists(self.default_vtube_folder):
-            for root, _, files in os.walk(self.default_vtube_folder):
-                for file in files:
-                    if file.endswith(".vtube.json"):
-                        vtube_file_path = os.path.join(root, file)
-                        try:
-                            with open(vtube_file_path, 'r', encoding='utf-8') as f:
-                                data = json.load(f)
-                                model_name = data.get("Name", "Unnamed Model")
-                                file_refs = data.get("FileReferences", {})
-                                model_filename = file_refs.get("Model")
-                                avatar_file_path = ""
-                                idle_path = ""
-                                if data.get("FileReferences", {}).get("Icon"):
-                                    avatar_file_path = os.path.join(root, data.get("FileReferences", {}).get("Icon"))
-
-                                if data.get("FileReferences", {}).get("Icon"):
-                                    idle_path = os.path.join(root, f'animations/{data.get("FileReferences", {}).get("IdleAnimation")}')
-
-                                if model_filename and model_filename.endswith(".model3.json"):
-                                    model3_path = os.path.normpath(os.path.join(root, model_filename))
-
-                                    if os.path.exists(model3_path):
-                                        widget = ListCard(self.mw, avatar_file_path, model_name)
-                                        widget.mousePressEvent = lambda _, path=model3_path, idle=idle_path: self.continuee(path, idle)
-                                        self.model_list_layout.addWidget(widget)
-
-                        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-                            logging.error(f"Error {vtube_file_path}: {e}")
-
-    def select_folder(self):
-        folder_path = QFileDialog.getExistingDirectory(self, "Select folder")
-        if folder_path:
-            self.selected_folder = folder_path
-            self.update_model_list()
-
-    def update_model_list(self):
-        if os.path.exists(self.selected_folder):
-            for root, _, files in os.walk(self.selected_folder):
-                for file in files:
-                    if file.endswith(".vtube.json"):
-                        vtube_file_path = os.path.join(root, file)
-                        try:
-                            with open(vtube_file_path, 'r', encoding='utf-8') as f:
-                                data = json.load(f)
-                                model_name = data.get("Name", "Unnamed Model")
-                                file_refs = data.get("FileReferences", {})
-                                model_filename = file_refs.get("Model")
-                                avatar_file_path = ""
-                                idle_path = ""
-                                if data.get("FileReferences", {}).get("Icon"):
-                                    avatar_file_path = os.path.join(root, data.get("FileReferences", {}).get("Icon"))
-
-                                if data.get("FileReferences", {}).get("IdleAnimation"):
-                                    idle_path = os.path.join(root, f'animations/{data.get("FileReferences", {}).get("IdleAnimation")}')
-
-                                if model_filename and model_filename.endswith(".model3.json"):
-                                    model3_path = os.path.normpath(os.path.join(root, model_filename))
-
-                                    if os.path.exists(model3_path):
-                                        widget = ListCard(self.mw, avatar_file_path, model_name)
-                                        widget.mousePressEvent = lambda _, path=model3_path, idle=idle_path: self.continuee(path, idle)
-                                        self.model_list_layout.addWidget(widget)
-
-                        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-                            logging.error(f"Error {vtube_file_path}: {e}")
-
-    def continuee(self, path, idle):
-        vmodel = VModelWidget()
-        vmodel.model_path = path
-        vmodel.idle_animation_path = idle
-        self.vmodel_widget.emit(vmodel)
-        self.close()

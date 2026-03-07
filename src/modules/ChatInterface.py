@@ -11,12 +11,13 @@ from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
 
-from modules.cards import PersonaCards, VTubesCards
+from modules.cards import PersonaCards
 from modules.style.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
 from modules.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPC
 from modules.style.Icons import Svg
 from modules.style.Utils import format_text, format_number, color_avatar
 from modules.cards.VoiceCards import SearchCard, ModeCard
+from modules.cards.VModelCards import ViewerCard
 from modules.WinDarkTheme import ChangeDWMAttrib, detect
 
 class MessageBubble(QFrame):
@@ -744,7 +745,7 @@ class ChatInterface(QWidget):
                     ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
 
-            overlay_widget = VTubesCards.VModelViewer(self.mw)
+            overlay_widget = ViewerCard(self.mw)
             overlay_widget.vmodel_widget.connect(setWidget)
             overlay_widget.setFixedWidth(350)
             overlay_widget.setStyleSheet("background: transparent;")
