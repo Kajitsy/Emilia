@@ -658,8 +658,7 @@ class LeftSidebar(QFrame):
                 background-color: #303134;
                 border-radius: 4px;
                 border: none;
-            }
-        """)
+        }""")
         self.setMouseTracking(True)
         self.setObjectName("leftSidebar")
         self.resizing = False

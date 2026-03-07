@@ -135,6 +135,7 @@ class ChatInterface(QWidget):
         self.user_personas = []
         self.avatar_labels = {}
         self.svg_icons = Svg()
+        self.vmodel_show = False
 
         self.voice_enabled = False
 
@@ -525,7 +526,7 @@ class ChatInterface(QWidget):
         self.chat_style_button.clicked.connect(self.openModelOverlay)
         self.char_info_layout.addWidget(self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.vmodel_button = PushButton(self.tr("VModel"))
+        self.vmodel_button = PushButton(self.tr("Show VModel"))
         self.vmodel_button.clicked.connect(self.openVModelOverlay)
         self.char_info_layout.addWidget(self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
@@ -664,19 +665,29 @@ class ChatInterface(QWidget):
                 label.is_animating = False
 
     def openVModelOverlay(self):
-        def setWidget(widget):
-            self.mw.hideOverlay()
-            self.vmodel_widget = widget
-            self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-            self.vmodel_widget.setStyleSheet("background: transparent;")
-            self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
-            self.vmodel_widget.raise_()
+        if self.vmodel_show:
+            self.vmodel_button.setText(self.tr("Show VModel"))
+            if hasattr(self, 'vmodel_widget') and self.vmodel_widget:
+                self.messages_overlay_layout.removeWidget(self.vmodel_widget)
+                self.vmodel_widget.hide()
+                self.vmodel_widget.deleteLater()
+                self.vmodel_widget = None
+        else:
+            self.vmodel_button.setText(self.tr("Hide VModel"))
+            def setWidget(widget):
+                self.mw.hideOverlay()
+                self.vmodel_widget = widget
+                self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+                self.vmodel_widget.setStyleSheet("background: transparent;")
+                self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
 
-        overlay_widget = VTubesCards.VModelViewer(self.mw)
-        overlay_widget.vmodel_widget.connect(setWidget)
-        overlay_widget.setFixedWidth(350)
-        overlay_widget.setStyleSheet("background: transparent;")
-        self.mw.showOverlay(overlay_widget)
+
+            overlay_widget = VTubesCards.VModelViewer(self.mw)
+            overlay_widget.vmodel_widget.connect(setWidget)
+            overlay_widget.setFixedWidth(350)
+            overlay_widget.setStyleSheet("background: transparent;")
+            self.mw.showOverlay(overlay_widget)
+        self.vmodel_show = not self.vmodel_show
 
     def openPersonaOverlay(self):
         overlay_widget = QWidget()
