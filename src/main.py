@@ -56,7 +56,7 @@ from modules.ui.Elements import Menu
 from modules.ui.mainwindow import MainPage
 
 if platform.system() == 'Windows':
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia Next")
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia")
     logging.debug("ctypes SetCurrentProcessExplicitAppUserModelID")
 
 app = QApplication(sys.argv)
@@ -68,11 +68,19 @@ app.installTranslator(translator)
 loop = QEventLoop(app)
 asyncio.set_event_loop(loop)
 
+mw_show = True
 
 async def main():
+    def actions_toggle():
+        global mw_show
+        mw_show = not mw_show
+        show_action.setVisible(not mw_show)
+        hide_action.setVisible(mw_show)
     tray_icon = QSystemTrayIcon()
     tray_menu = Menu()
     main_window = MainPage()
+    main_window.mw_hide_signal.connect(actions_toggle)
+    main_window.mw_show_signal.connect(actions_toggle)
 
     if platform.system() == 'Windows':
         from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect

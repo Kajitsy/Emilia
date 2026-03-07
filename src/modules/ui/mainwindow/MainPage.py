@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QV
 from PyQt6.QtGui import QMouseEvent, QAction
 from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
                           QEasingCurve, QTimer, QTranslator, QParallelAnimationGroup,
-                          QPoint, Qt, QLocale)
+                          QPoint, Qt, QLocale, pyqtSignal)
 from PyQt6.QtMultimedia import QMediaDevices
 from qasync import QEventLoop
 from packaging import version
@@ -37,6 +37,8 @@ loop = QEventLoop(app)
 asyncio.set_event_loop(loop)
 
 class MainPage(QMainWindow):
+    mw_show_signal = pyqtSignal()
+    mw_hide_signal = pyqtSignal()
     def __init__(self):
         super().__init__()
         today = datetime.datetime.now().date()
@@ -1055,14 +1057,12 @@ class MainPage(QMainWindow):
 
     def showEvent(self, a0):
         super().showEvent(a0)
-        #hide_action.setVisible(True)
-        #show_action.setVisible(False)
+        self.mw_show_signal.emit()
         self.discord_thread.update_wlrpc()
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
-        #hide_action.setVisible(False)
-        #show_action.setVisible(True)
+        self.mw_hide_signal.emit()
         self.discord_thread.clear()
 
     def closeEvent(self, a0):
