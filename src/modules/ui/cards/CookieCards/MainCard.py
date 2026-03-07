@@ -8,7 +8,7 @@ from modules.ui.Elements import PushButton, LineEdit
 from modules.ui.Icons import Svg
 from modules.logic import RequestInterceptor
 
-class GetCookies(QWidget):
+class MainCard(QWidget):
     auth_cookie_signal = pyqtSignal(str, QDateTime)
     authorization_signal = pyqtSignal(str)
     notification_signal = pyqtSignal(object)

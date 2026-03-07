@@ -59,13 +59,13 @@ from PyQt6.QtMultimedia import QMediaDevices
 from qasync import QEventLoop
 from packaging import version
 
-from modules import (ImageLoader, GetCookies, ChatInterface, Svg,
+from modules import (ImageLoader, ChatInterface, Svg,
                      UpdaterThread, UpdateThread, DiscordRPC, ChatThread)
 from modules.ui.Elements import (PushButton, LineEdit, HorizontalScrollArea, ClickableFrame,
                                  LeftSidebar, CheckBox, KeySequenceEdit, Menu, ComboBox,
                                  VerticalScrollPage, HorizontalScrollPage, CardFrame, TabButton, SearchLineEdit)
 from modules.Utils import format_text, color_avatar
-from modules.ui.cards import CharacterCards, UserCards, SceneCards, VoiceCards
+from modules.ui.cards import CharacterCards, UserCards, SceneCards, VoiceCards, CookieCards
 from modules.ui.pages import UserPages, ScenePages, CharacterPages
 
 if platform.system() == 'Windows':
@@ -1857,7 +1857,7 @@ class SettingsPage(QWidget):
             self.mw.settings.setValue("cai_auth/token", token)
             self.mw.token = token
             if self.cookie_available: cl()
-        cookies = GetCookies()
+        cookies = CookieCards.MainCard()
         self.mw.showOverlay(cookies)
         cookies.auth_cookie_signal.connect(lambda token, date: get(token, date))
         cookies.authorization_signal.connect(lambda token: token_get(token))
