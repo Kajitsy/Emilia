@@ -876,7 +876,7 @@ class EmiliaNext(QMainWindow):
             self.search_bar.setText("")
 
     def openCreateCharacterPage(self, character_id=None):
-        self.create_char_page = CharacterCards.EditPage(self, character_id)
+        self.create_char_page = CharacterPages.EditPage(self, character_id)
         self.main_content_area.addWidget(self.create_char_page)
         self.main_content_area.setCurrentWidget(self.create_char_page)
         if self.current_chat_interface:
