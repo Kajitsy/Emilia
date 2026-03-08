@@ -155,6 +155,9 @@ class ChatInterface(QWidget):
         self.applyBackground(self.background_image)
         self.createRightSidebar()
 
+        TM.theme_changed.connect(self.updateTheme)
+        self.updateTheme()
+
         self.chat_thread.message_signal.connect(self.charMessageSignal)
         self.chat_thread.user_message_signal.connect(self.userMessageSignal)
         self.chat_thread.get_user_personas_signal.connect(self.getUserPersonas)
@@ -225,15 +228,17 @@ class ChatInterface(QWidget):
 
         send_layout.addWidget(self.message_input, alignment=Qt.AlignmentFlag.AlignBottom)
 
-        for icon_func, callback in [
-            (self.svg_icons.send, self.sendMessage),
-            (self.svg_icons.call, self.callCharacter),
-            (self.svg_icons.add_image, self.selectImage)
-        ]:
-            btn = PushButton()
-            btn.setIcon(icon_func())
-            btn.clicked.connect(callback)
-            send_layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignBottom)
+        self.send_message_button = PushButton()
+        self.send_message_button.clicked.connect(self.sendMessage)
+        send_layout.addWidget(self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom)
+
+        self.call_char_button = PushButton()
+        self.call_char_button.clicked.connect(self.callCharacter)
+        send_layout.addWidget(self.call_char_button, alignment=Qt.AlignmentFlag.AlignBottom)
+
+        self.add_image_button = PushButton()
+        self.add_image_button.clicked.connect(self.selectImage)
+        send_layout.addWidget(self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom)
 
         input_layout.addWidget(send_widget)
         chat_container_layout.addLayout(input_layout)
@@ -248,6 +253,22 @@ class ChatInterface(QWidget):
         self.chat_thread.get_user_personas()
         if self.scene_id:
             self.chat_thread.get_scene_by_id(self.scene_id)
+
+    def updateTheme(self):
+        self.send_message_button.setIcon(self.svg_icons.send(TM.c("disabled_text")))
+        self.call_char_button.setIcon(self.svg_icons.call(TM.c("disabled_text")))
+        self.add_image_button.setIcon(self.svg_icons.add_image(TM.c("disabled_text")))
+        self.toggle_info_button.setIcon(self.svg_icons.show_right_sidebar(TM.c("disabled_text")))
+        self.share_char_button.setIcon(self.svg_icons.share(TM.c("disabled_text")))
+        self.edit_char_button.setIcon(self.svg_icons.create_character(TM.c("disabled_text")))
+        self.like_button.setIcon(self.svg_icons.like(TM.c("disabled_text")))
+        self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("disabled_text")))
+        self.create_new_chat_button.setIcon(self.svg_icons.new_chat(TM.c("disabled_text")))
+        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice(TM.c("disabled_text")))
+        self.history_button.setIcon(self.svg_icons.history(TM.c("disabled_text")))
+        self.chat_theme_button.setIcon(self.svg_icons.colors(TM.c("disabled_text")))
+        self.choose_persona_button.setIcon(self.svg_icons.persona(TM.c("disabled_text")))
+        self.chat_style_button.setIcon(self.svg_icons.style(TM.c("disabled_text")))
 
     def on_scroll(self, value):
         if value == self.messages_area.verticalScrollBar().minimum() and self.chat_next_token:
@@ -423,7 +444,6 @@ class ChatInterface(QWidget):
         header_layout.addStretch(1)
 
         self.toggle_info_button = PushButton()
-        self.toggle_info_button.setIcon(self.svg_icons.show_right_sidebar())
         self.toggle_info_button.clicked.connect(self.toggleCharacterInfoSidebar)
         self.toggle_info_button.setEnabled(False)
         header_layout.addWidget(self.toggle_info_button)
@@ -467,23 +487,19 @@ class ChatInterface(QWidget):
         social_buttons_layout = QHBoxLayout()
         self.social_buttons_frame.setLayout(social_buttons_layout)
 
-        share_char_button = PushButton()
-        share_char_button.setIcon(self.svg_icons.share())
-        share_char_button.clicked.connect(self.shareCharacter)
-        social_buttons_layout.addWidget(share_char_button, 1, Qt.AlignmentFlag.AlignLeft)
+        self.share_char_button = PushButton()
+        self.share_char_button.clicked.connect(self.shareCharacter)
+        social_buttons_layout.addWidget(self.share_char_button, 1, Qt.AlignmentFlag.AlignLeft)
 
         self.edit_char_button = PushButton()
-        self.edit_char_button.setIcon(self.svg_icons.create_character())
         self.edit_char_button.clicked.connect(self.editCharacter)
         social_buttons_layout.addWidget(self.edit_char_button, 1, Qt.AlignmentFlag.AlignLeft)
         self.edit_char_button.setVisible(False)
 
         self.like_button = PushButton()
-        self.like_button.setIcon(self.svg_icons.like())
         self.like_button.clicked.connect(self.likeCharacter)
         social_buttons_layout.addWidget(self.like_button, 0, Qt.AlignmentFlag.AlignLeft)
         self.dislike_button = PushButton()
-        self.dislike_button.setIcon(self.svg_icons.dislike())
         self.dislike_button.clicked.connect(self.dislikeCharacter)
         social_buttons_layout.addWidget(self.dislike_button, 0, Qt.AlignmentFlag.AlignLeft)
 
@@ -492,7 +508,6 @@ class ChatInterface(QWidget):
         self.char_info_layout.addWidget(self.title_label)
 
         self.create_new_chat_button = PushButton(self.tr("New Chat"))
-        self.create_new_chat_button.setIcon(self.svg_icons.new_chat())
         self.create_new_chat_button.clicked.connect(self.createNewChat)
         self.char_info_layout.addWidget(self.create_new_chat_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
@@ -500,7 +515,6 @@ class ChatInterface(QWidget):
         character_voice_button_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.char_info_layout.addLayout(character_voice_button_layout)
         self.enable_char_voice_button = PushButton()
-        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice())
         self.enable_char_voice_button.clicked.connect(self.enableVoice)
         character_voice_button_layout.addWidget(self.enable_char_voice_button)
 
@@ -512,22 +526,18 @@ class ChatInterface(QWidget):
         character_voice_button_layout.addWidget(self.select_char_voice_label, alignment=Qt.AlignmentFlag.AlignRight)
 
         self.history_button = PushButton(self.tr("History"))
-        self.history_button.setIcon(self.svg_icons.history())
         self.history_button.clicked.connect(self.showChats)
         self.char_info_layout.addWidget(self.history_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.chat_theme_button = PushButton(self.tr("Chat Theme"))
-        self.chat_theme_button.setIcon(self.svg_icons.colors())
         self.chat_theme_button.clicked.connect(self.openColorPickerOverlay)
         self.char_info_layout.addWidget(self.chat_theme_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.choose_persona_button = PushButton(self.tr("Persona"))
-        self.choose_persona_button.setIcon(self.svg_icons.persona())
         self.choose_persona_button.clicked.connect(self.openPersonaOverlay)
         self.char_info_layout.addWidget(self.choose_persona_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.chat_style_button = PushButton(self.tr("Chat Style"))
-        self.chat_style_button.setIcon(self.svg_icons.style())
         self.chat_style_button.clicked.connect(self.openModelOverlay)
         self.char_info_layout.addWidget(self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
@@ -1299,7 +1309,7 @@ class ChatInterface(QWidget):
 
     def disableVoice(self):
         self.voice_enabled = False
-        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice())
+        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice(TM.c("disabled_text")))
         self.enable_char_voice_button.disconnect()
         self.enable_char_voice_button.clicked.connect(self.enableVoice)
         self.chat_thread.replay_signal.disconnect()
@@ -1341,26 +1351,26 @@ class ChatInterface(QWidget):
         self.chat_thread.new_chat_created_signal.connect(self._createNewChat)
 
     def dislikeCharacter(self):
-        self.like_button.setIcon(self.svg_icons.like())
+        self.like_button.setIcon(self.svg_icons.like(TM.c("disabled_text")))
         if self.vote == False:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
-            self.dislike_button.setIcon(self.svg_icons.dislike())
+            self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("disabled_text")))
         else:
             self.vote = False
             self.chat_thread.character_vote(self.character_id, False)
-            self.dislike_button.setIcon(self.svg_icons.disliked())
+            self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("disabled_text")))
 
     def likeCharacter(self):
-        self.dislike_button.setIcon(self.svg_icons.dislike())
+        self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("disabled_text")))
         if self.vote:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
-            self.like_button.setIcon(self.svg_icons.like())
+            self.like_button.setIcon(self.svg_icons.like(TM.c("disabled_text")))
         else:
             self.vote = True
             self.chat_thread.character_vote(self.character_id, True)
-            self.like_button.setIcon(self.svg_icons.liked())
+            self.like_button.setIcon(self.svg_icons.liked(TM.c("disabled_text")))
 
     def editCharacter(self):
         self.mw.openCreateCharacterPage(self.character_id)
@@ -1421,9 +1431,9 @@ class ChatInterface(QWidget):
 
         if self.voted:
             if self.vote == True:
-                self.like_button.setIcon(self.svg_icons.liked())
+                self.like_button.setIcon(self.svg_icons.liked(TM.c("disabled_text")))
             elif self.vote == False:
-                self.dislike_button.setIcon(self.svg_icons.disliked())
+                self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("disabled_text")))
 
         self.title_label.setText(self.character.get('title'))
         self.toggle_info_button.setEnabled(True)

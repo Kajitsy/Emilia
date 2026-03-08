@@ -1,13 +1,14 @@
 import keyboard
 from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint, QParallelAnimationGroup
 from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import ( QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSizePolicy,
+from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSizePolicy,
                              QGraphicsDropShadowEffect)
 
 from modules.ui.Elements import PushButton
 from modules.ui.Icons import Svg
 from modules.logic.QThreads import VoiceModeThread, VoiceModeThreadV2
 from modules.Utils import color_avatar, format_text
+from modules.ui import TM
 
 class ModeCard(QWidget):
     def __init__(self, main_window, chat_interface, avatar_url, chat_id, character_id, voice_id, character_name):
@@ -60,22 +61,25 @@ class ModeCard(QWidget):
         self.layout.addWidget(self.user_buttons_frame, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
 
         self.mute_button = PushButton()
-        self.mute_button.setIcon(self.svg_icons.mute())
         self.mute_button.clicked.connect(self.toggleMute)
         button_layout.addWidget(self.mute_button)
 
         self.stop_button = PushButton()
-        self.stop_button.setIcon(self.svg_icons.end_call())
         self.stop_button.clicked.connect(self.stopThread)
         button_layout.addWidget(self.stop_button)
 
         self.speaking_indicator = QFrame(self)
         self.speaking_indicator.hide()
+        TM.theme_changed.connect(self.updateTheme)
 
         self.mw.setOutputDevice(self.mw.settings.value('output_device', 0, type=int))
 
         self._run()
         keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
+
+    def updateTheme(self):
+        self.mute_button.setIcon(self.svg_icons.mute(TM.c("disabled_text")))
+        self.stop_button.setIcon(self.svg_icons.end_call(TM.c("disabled_text")))
 
     def toggleMute(self):
         self.muted = not self.muted

@@ -19,10 +19,12 @@ class SearchCard(QWidget):
         self.svg_icons = Svg()
 
         self.initUI()
+        TM.theme_changed.connect(self.updateTheme)
+        self.updateTheme()
 
         if self.search_character:
             self.mw.chat_thread.voices_search_signal.connect(self._showSearchResults)
-            self.mw.chat_thread.voices_search(character_name=self.search_character)
+            self.mw.chat_thread.voices_search(char_name=self.search_character)
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -32,7 +34,6 @@ class SearchCard(QWidget):
         layout.addLayout(search_layout)
 
         self.search_input = SearchLineEdit(self.mw)
-        self.search_input.setIcon(QIcon(self.svg_icons.search()))
         self.search_input.returnPressed.connect(self.showSearchResults)
         self.search_input.setPlaceholderText(self.tr('Search'))
         search_layout.addWidget(self.search_input)
@@ -44,6 +45,9 @@ class SearchCard(QWidget):
         search_layout.addWidget(self.search_scroll_page)
 
         self.setLayout(layout)
+
+    def updateTheme(self):
+        self.search_input.setIcon(QIcon(self.svg_icons.search(TM.c('disabled_text'))))
 
     def openVoiceCard(self, voice_data):
         voiceCard = MainCard(self.mw, voice_data, self.current_character_id, self.current_voice_id)
@@ -58,7 +62,6 @@ class SearchCard(QWidget):
         card_layout = QHBoxLayout()
 
         play_button = QPushButton()
-        play_button.setIcon(self.svg_icons.play())
         play_button.setStyleSheet("background-color: transparent; border: none; padding: 8px;")
         play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(voice_data.get('previewAudioURI'), play_button))
         card_layout.addWidget(play_button)
@@ -84,8 +87,9 @@ class SearchCard(QWidget):
             text_layout.addWidget(author_label)
 
         selected_label = QLabel()
-        selected_label.setPixmap(self.svg_icons.selected())
         def updateTheme():
+            play_button.setIcon(self.svg_icons.play(TM.c('disabled_text')))
+            selected_label.setPixmap(self.svg_icons.selected(TM.c('disabled_text')))
             selected_label.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 16px;")
         TM.theme_changed.connect(updateTheme)
         updateTheme()

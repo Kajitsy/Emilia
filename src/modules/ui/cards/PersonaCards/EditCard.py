@@ -4,7 +4,6 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QHBoxLayout, QFileDialog, QVBoxLayout, QLabel, QFrame
 
 from modules.ui.Elements import CustomTextEdit, PushButton, LineEdit, CheckBox
-from modules.ui.Icons import Svg
 from modules.Utils import color_avatar
 
 class EditCard(QFrame):
@@ -17,7 +16,6 @@ class EditCard(QFrame):
         self.list_card = list_card
         self.new = False
         self.temp_link = ""
-        self.svg_icons = Svg()
 
         if data is None:
             self.data = {}

@@ -3,6 +3,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
 
 from modules import Svg, ChatThread
+from modules.ui import TM
 from modules.ui.Elements import VerticalScrollPage, TabButton, SearchLineEdit
 from modules.logic.QThreads import DiscordRPCThread
 from modules.ui.cards import CharacterCards, UserCards, SceneCards
@@ -168,7 +169,7 @@ class SearchPage(QWidget):
 
         self.search_bar = SearchLineEdit(self.mw)
         self.search_bar.blockSignals(True)
-        self.search_bar.setIcon(QIcon(self.svg_icons.search()))
+        self.search_bar.setIcon(QIcon(self.svg_icons.search(TM.c("disabled_text"))))
         self.search_bar.setText(self.mw.search_bar.text())
         self.search_bar.setPlaceholderText(self.tr("Search"))
         self.search_bar.returnPressed.connect(self.showCharSearchResults)

@@ -4,7 +4,6 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QFileDialog, QFrame
 
 from modules.ui.Elements import CustomTextEdit, PushButton, LineEdit
-from modules.ui.Icons import Svg
 from modules.Utils import color_avatar
 
 class EditCard(QFrame):
@@ -12,7 +11,6 @@ class EditCard(QFrame):
         super().__init__()
         self.setFixedSize(500, 250)
         self.mw = main_window
-        self.svg_icons = Svg()
 
         self.data = {
             "avatar_rel_path": self.mw.me.get('account',{}).get('avatar_file_name'),

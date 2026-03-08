@@ -3,7 +3,6 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
 
 from modules.ui.Elements import PushButton, Menu, CardFrame
-from modules.ui.Icons import Svg
 from modules.Utils import color_avatar
 from modules.ui.cards.PersonaCards import EditCard
 
@@ -15,7 +14,6 @@ class MainCard(CardFrame):
         self.char_id = character_id
         self.new = False
         self.active = False
-        self.svg_icons = Svg()
         if self.data is None:
             self.data = {}
             self.new = True

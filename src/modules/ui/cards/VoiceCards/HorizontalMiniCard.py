@@ -26,7 +26,7 @@ class HorizontalMiniCard(CardFrame):
     def initUI(self):
         card_layout = QHBoxLayout()
         play_button = QPushButton()
-        play_button.setIcon(self.svg_icons.play())
+        play_button.setIcon(self.svg_icons.play(TM.c("disabled_text")))
         play_button.setFixedWidth(40)
         play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), play_button))
         card_layout.addWidget(play_button)

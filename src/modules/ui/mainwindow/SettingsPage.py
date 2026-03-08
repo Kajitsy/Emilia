@@ -6,6 +6,7 @@ from PyQt6.QtGui import QIntValidator, QRegularExpressionValidator, QKeySequence
 from PyQt6.QtCore import QDateTime, QRegularExpression, Qt, QTranslator
 
 from modules import ChatThread
+from modules.ui import TM
 from modules.ui.Elements import (PushButton, LineEdit, CheckBox, KeySequenceEdit,
                                  ComboBox, VerticalScrollPage, CardFrame)
 from modules.Utils import format_text
@@ -274,7 +275,7 @@ class SettingsPage(QWidget):
 
             remove_button = PushButton()
             remove_button.clicked.connect(removeParameter)
-            remove_button.setIcon(self.mw.svg_icons.close())
+            remove_button.setIcon(self.mw.svg_icons.close(TM.c("disabled_text")))
             u_layout.addWidget(remove_button)
 
             u_layout.addStretch()

@@ -745,6 +745,9 @@ class LeftSidebar(QFrame):
             border-radius: 4px;
             border: none;
         }}""")
+        self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('disabled_text')))
+        self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar(TM.c('disabled_text')))
+        self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('disabled_text')))
 
     def initUI(self):
         self.left_sidebar_layout = QVBoxLayout()
@@ -759,13 +762,11 @@ class LeftSidebar(QFrame):
         self.buttons_layout.addWidget(self.to_main_page_button, 1)
 
         self.to_main_page_button_2 = PushButton()
-        self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover('white'))
         self.to_main_page_button_2.clicked.connect(self.mw.showMainPage)
         self.buttons_layout.addWidget(self.to_main_page_button_2, 1)
         self.to_main_page_button_2.setVisible(False)
 
         self.sidebar_collapse_button = PushButton()
-        self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar('white'))
         self.sidebar_collapse_button.clicked.connect(self.mw.toggleLeftSidebar)
         self.sidebar_collapse_button.setVisible(self.mw.left_sidebar_visible)
         self.buttons_layout.addWidget(self.sidebar_collapse_button, 0)
@@ -775,7 +776,6 @@ class LeftSidebar(QFrame):
         self.left_sidebar_layout.addWidget(self.create_button)
 
         self.create_button_2 = PushButton()
-        self.create_button_2.setIcon(self.mw.svg_icons.create('white'))
         self.create_button_2.clicked.connect(lambda: self.showCreateContextMenu(self.create_button_2))
         self.left_sidebar_layout.addWidget(self.create_button_2)
         self.create_button_2.setVisible(False)
@@ -809,7 +809,6 @@ class LeftSidebar(QFrame):
         self.profile_button_2.setVisible(False)
 
     def showCreateContextMenu(self, button: PushButton):
-        from . import TM
         TM.set_theme("light")
         context_menu = PushButtonMenu(self)
         context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)

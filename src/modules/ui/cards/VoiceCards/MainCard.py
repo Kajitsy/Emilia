@@ -23,6 +23,8 @@ class MainCard(QFrame):
         self.iss = self.data.get('id') == self.current_voice_id
 
         self.initUI()
+        TM.theme_changed.connect(self.updateTheme)
+        self.updateTheme()
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -33,15 +35,10 @@ class MainCard(QFrame):
         voice_layout = QHBoxLayout()
         voice_frame.setLayout(voice_layout)
 
-        play_button = QPushButton()
-        play_button.setIcon(self.svg_icons.play())
-        play_button.setFixedWidth(40)
-        play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), play_button))
-        voice_layout.addWidget(play_button)
-        def updateTheme():
-            play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
-        TM.theme_changed.connect(updateTheme)
-        updateTheme()
+        self.play_button = QPushButton()
+        self.play_button.setFixedWidth(40)
+        self.play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), self.play_button))
+        voice_layout.addWidget(self.play_button)
 
         text_frame = QFrame()
         text_layout = QVBoxLayout()
@@ -62,10 +59,9 @@ class MainCard(QFrame):
         button_frame.setLayout(button_layout)
         voice_layout.addWidget(button_frame, 0, Qt.AlignmentFlag.AlignBottom)
 
-        sha_voice_button = PushButton()
-        sha_voice_button.setIcon(self.svg_icons.share())
-        sha_voice_button.clicked.connect(self.voiceOverrideShare)
-        button_layout.addWidget(sha_voice_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.sha_voice_button = PushButton()
+        self.sha_voice_button.clicked.connect(self.voiceOverrideShare)
+        button_layout.addWidget(self.sha_voice_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         sel_voice_button = PushButton(self.tr("Select"))
         sel_voice_button.clicked.connect(self.voiceOverrideSelect)
@@ -93,6 +89,11 @@ class MainCard(QFrame):
             layout.addWidget(character_scroll_page)
             self.setFixedSize(500, 750)
         character_page.setLayout(character_page_layout)
+
+    def updateTheme(self):
+        self.sha_voice_button.setIcon(self.svg_icons.share(TM.c("disabled_text")))
+        self.play_button.setIcon(self.svg_icons.play(TM.c("disabled_text")))
+        self.play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
 
     def createCard(self, name, avatar_url, character_id, chat_id=""):
         def openChat():

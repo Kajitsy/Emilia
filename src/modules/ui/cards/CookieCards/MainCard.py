@@ -7,6 +7,7 @@ from PyQt6.QtNetwork import QNetworkCookie
 from modules.ui.Elements import PushButton, LineEdit
 from modules.ui.Icons import Svg
 from modules.logic import RequestInterceptor
+from modules.ui import TM
 
 class MainCard(QWidget):
     auth_cookie_signal = pyqtSignal(str, QDateTime)
@@ -35,7 +36,7 @@ class MainCard(QWidget):
         self.link_edit = LineEdit()
         self.link_edit.keyPress = lambda: self.open_link()
         self.link_button = PushButton()
-        self.link_button.setIcon(self.svg_icons.send())
+        self.link_button.setIcon(self.svg_icons.send(TM.c("disabled_text")))
         self.link_button.clicked.connect(self.open_link)
         link_layout.addWidget(self.link_edit)
         link_layout.addWidget(self.link_button)
