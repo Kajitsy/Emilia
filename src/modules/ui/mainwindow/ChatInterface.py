@@ -18,6 +18,7 @@ from modules.ui.Icons import Svg
 from modules.Utils import format_text, format_number, color_avatar
 from modules.ui.cards.VoiceCards import SearchCard, ModeCard
 from modules.ui.cards.VModelCards import ViewerCard
+from modules.ui import TM
 
 class MessageBubble(QFrame):
     def __init__(self, main_window, parent, text, avatar_url, name, is_user=False, attachments=[]):
@@ -1161,6 +1162,9 @@ class ChatInterface(QWidget):
             self.mw.showNotification(self.tr("Uploading..."))
 
     def showChats(self):
+        def updateTheme(card):
+            card.chat_text.setStyleSheet(f"color: {TM.c('disabled_text')}; font-size: 14px;")
+
         def openChat(self, character_id, character_name, chat_id):
             self.mw.hideOverlay()
             self.mw.openChat(character_id, character_name, chat_id)
@@ -1188,11 +1192,13 @@ class ChatInterface(QWidget):
             card_layout.addWidget(chat_time, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
             chat_text = QLabel(format_text(data.get('preview_turns', [{}])[0].get('candidates', [{}])[0].get('raw_content'), self.mw.username))
-            chat_text.setStyleSheet("color: #a2a2ac; font-size: 14px;")
             chat_text.setWordWrap(True)
+            setattr(card, "chat_text", chat_text)
             card_layout.addWidget(chat_text)
 
             card.setLayout(card_layout)
+            TM.theme_changed.connect(lambda _: updateTheme(card))
+            updateTheme(card)
             return card
 
         def showChats(self, chats):
