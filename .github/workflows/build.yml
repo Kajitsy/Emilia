@@ -43,10 +43,12 @@ jobs:
             --icon "src\icon.ico" `
             --uac-admin `
             --add-data "$LK_PATH\rtc\resources\livekit_ffi.dll;livekit/rtc/resources" `
+            --add-data ".venv/Lib/site-packages/live2d/v3/FrameworkShaders;live2d/v3/FrameworkShaders" `
             --hidden-import "urllib3.contrib.resolver.system" `
             --hidden-import "urllib3.contrib.hface.protocols.http1" `
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
             --hidden-import "livekit.rtc.resources" `
+            --hidden-import "OpenGL" `
             "src\main.py"
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
