@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButt
 from modules.ui.Elements import VerticalScrollPage, CardFrame, SearchLineEdit
 from modules.ui.Icons import Svg
 from modules.ui.cards.VoiceCards import _preview_controller, MainCard
+from modules.ui import TM
 
 class SearchCard(QWidget):
     def __init__(self, main_window, search_character: str | None = None, current_voice_id="", current_character_id=""):
@@ -73,7 +74,10 @@ class SearchCard(QWidget):
 
         if voice_data.get('creatorInfo', {}).get('username'):
             author_label = QLabel(self.tr("Author: @") + voice_data.get('creatorInfo', {}).get('username'))
-            author_label.setStyleSheet("color: #a2a2ac;")
+            def updateTheme():
+                author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            TM.theme_changed.connect(updateTheme)
+            updateTheme()
             font = author_label.font()
             font.setPointSize(8)
             author_label.setFont(font)
@@ -81,7 +85,10 @@ class SearchCard(QWidget):
 
         selected_label = QLabel()
         selected_label.setPixmap(self.svg_icons.selected())
-        selected_label.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 16px")
+        def updateTheme():
+            selected_label.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 16px;")
+        TM.theme_changed.connect(updateTheme)
+        updateTheme()
         if self.current_voice_id == voice_data.get('id'): card_layout.addWidget(selected_label)
 
         card.setLayout(card_layout)

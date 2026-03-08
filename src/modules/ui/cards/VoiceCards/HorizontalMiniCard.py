@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QPushButton
 from modules.ui.Elements import CardFrame
 from modules.ui.Icons import Svg
 from modules.ui.cards.VoiceCards import _preview_controller, MainCard
-
+from modules.ui import TM
 
 class HorizontalMiniCard(CardFrame):
     def __init__(self, main_window, data):
@@ -28,9 +28,12 @@ class HorizontalMiniCard(CardFrame):
         play_button = QPushButton()
         play_button.setIcon(self.svg_icons.play())
         play_button.setFixedWidth(40)
-        play_button.setStyleSheet("background-color: transparent; color: #e8eaed; border: none; font-size: 32px;")
         play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), play_button))
         card_layout.addWidget(play_button)
+        def updateTheme():
+            play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
+        TM.theme_changed.connect(updateTheme)
+        updateTheme()
 
         text_layout = QVBoxLayout()
         text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
