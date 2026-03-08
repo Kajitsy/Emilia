@@ -21,6 +21,7 @@ from modules.logic.QThreads import DiscordRPCThread
 from modules.ui.cards import CharacterCards, SceneCards, VoiceCards
 from modules.ui.pages import UserPages, ScenePages, CharacterPages
 from modules.ui.mainwindow import SettingsPage, SearchPage, ChatInterface
+from modules.ui import TM
 
 class MainPage(QMainWindow):
     mw_show_signal = pyqtSignal()
@@ -41,10 +42,6 @@ class MainPage(QMainWindow):
             self.setWindowTitle(special_titles[date_key])
         else:
             self.setWindowTitle("Emilia")
-        self.setStyleSheet("""
-            background-color: #202124;
-            color: #e8eaed;
-        """)
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
@@ -110,6 +107,66 @@ class MainPage(QMainWindow):
         self.initUI()
         self.loadUI()
 
+        TM.theme_changed.connect(self.update_theme)
+        self.update_theme()
+
+    def update_theme(self):
+        self.setStyleSheet(f"""
+            background-color: {TM.c("mw_back")};
+            color: {TM.c("mw_color")};
+        """)
+        self.main_content_area.setStyleSheet(f"""
+            QScrollArea {{
+                background-color: {TM.c('primary_bg')};
+                border: none;
+                border-radius: 4px;
+            }}
+            QScrollBar:vertical {{
+                border: none;
+                background: {TM.c('primary_bg')};
+                width: 8px;
+                margin: 0px 0 0px 0;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px; 
+            }}
+            QScrollBar::sub-control:vertical {{
+                background: {TM.c('scroll_sub')};
+                border-radius: 4px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {TM.c('scroll_handle')};
+                min-height: 20px;
+                border-radius: 4px;
+            }}
+            QScrollBar::add-line:vertical {{
+                height: 0px;
+                subcontrol-position: bottom;
+                subcontrol-origin: margin;
+            }}
+            QScrollBar::sub-line:vertical {{
+                height: 0px;
+                subcontrol-position: top;
+                subcontrol-origin: margin;
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: none;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {TM.c('scroll_hover')};
+            }}
+        """)
+        self.overlay_content.setStyleSheet(f"""
+            background-color: {TM.c("mw_back")};
+            border-radius: 4px;
+            border: none;
+        """)
+        self.notification_message_label.setStyleSheet(f"""
+            background-color: {TM.c("text")};
+            color: {TM.c("primary_bg")};
+            border-radius: 4px;
+            padding: 10px;
+        """)
+
     def initUI(self):
         self.layout = QHBoxLayout()
 
@@ -124,46 +181,6 @@ class MainPage(QMainWindow):
         self.main_layout.addWidget(self.t_bar)
 
         self.main_content_area = QStackedWidget()
-        self.main_content_area.setStyleSheet("""
-            QScrollArea {
-                background-color: #303134;
-                border: none;
-                border-radius: 4px;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #303134;
-                width: 8px;
-                margin: 0px 0 0px 0;
-                border-top-right-radius: 4px;
-                border-bottom-right-radius: 4px; 
-            }
-            QScrollBar::sub-control:vertical {
-                background: #f0f0f0;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:vertical {
-                background: #555;
-                min-height: 20px;
-                border-radius: 4px;
-            }
-            QScrollBar::add-line:vertical {
-                height: 0px;
-                subcontrol-position: bottom;
-                subcontrol-origin: margin;
-            }
-            QScrollBar::sub-line:vertical {
-                height: 0px;
-                subcontrol-position: top;
-                subcontrol-origin: margin;
-            }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #777;
-            }
-        """)
         self.main_page = self.createMainContentPage()
         self.search_results_page = QWidget()
         self.search_results_layout = QVBoxLayout(self.search_results_page)
@@ -278,6 +295,24 @@ class MainPage(QMainWindow):
 
             context_menu.exec(card.mapToGlobal(pos))
 
+        def updateTheme(card):
+            card.name_label.setStyleSheet(f"background-color: transparent; border: none; color: {TM.c('text')};")
+            card.menu_button.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: transparent;
+                    border: none;
+                    margin-right: 10px;
+                }}
+                QPushButton:hover {{
+                    background-color: {TM.c("hover_bg")};
+                    border-radius: 4px;
+                }}
+                QPushButton:pressed {{
+                    background-color: {TM.c('pressed_bg')};
+                    border-radius: 4px;
+                }}
+            """)
+
         chat_layout = QHBoxLayout()
         chat_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -312,7 +347,6 @@ class MainPage(QMainWindow):
         chat_layout.addLayout(text_layout)
 
         name_label = QLabel(character_name)
-        name_label.setStyleSheet("background-color: transparent; border: none; color: white;")
         text_layout.addWidget(name_label, 1)
         setattr(card, 'name_label', name_label)
 
@@ -325,21 +359,6 @@ class MainPage(QMainWindow):
         menu_button = QPushButton()
         menu_button.visibility = True
         menu_button.setIcon(self.svg_icons.ellipsis())
-        menu_button.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                border: none;
-                margin-right: 10px;
-            }
-            QPushButton:hover {
-                background-color: #5a5c60;
-                border-radius: 4px;
-            }
-            QPushButton:pressed {
-                background-color: #3e4043;
-                border-radius: 4px;
-            }
-        """)
         menu_button.setVisible(False)
         menu_button.clicked.connect(lambda: showContextMenu(menu_button.pos(), card))
         chat_layout.addWidget(menu_button, 1, Qt.AlignmentFlag.AlignRight)
@@ -350,6 +369,8 @@ class MainPage(QMainWindow):
 
         self.recent_chat_scroll_layout.addWidget(card)
         self.left_sidebar.resizeCard(card)
+        TM.theme_changed.connect(lambda: updateTheme(card))
+        updateTheme(card)
         return card
 
     def leftSidebarAnim(self):
@@ -573,6 +594,7 @@ class MainPage(QMainWindow):
 
         scroll_page = HorizontalScrollPage()
         cards_viewport = scroll_page.viewport
+        cards_viewport.setStyleSheet("background-color: transparent; border: none;")
         cards_layout = scroll_page.layout
 
 
@@ -607,6 +629,7 @@ class MainPage(QMainWindow):
 
         cards_viewport.setLayout(cards_layout_main)
         cards_viewport.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        cards_viewport.setStyleSheet("background-color: transparent; border: none;")
 
         scroll_area.setWidget(cards_viewport)
 
@@ -630,6 +653,7 @@ class MainPage(QMainWindow):
 
         scroll_page = HorizontalScrollPage()
         scroll_viewport = scroll_page.viewport
+        scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
         scroll_layout = scroll_page.layout
 
         section_layout.addWidget(scroll_page)
@@ -661,6 +685,7 @@ class MainPage(QMainWindow):
         button_scroll_area.horizontalScrollBar().setVisible(False)
 
         button_scroll_viewport = QWidget()
+        button_scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
         button_scroll_layout = QHBoxLayout()
         button_scroll_layout.setContentsMargins(0, 0, 0, 0)
         button_scroll_viewport.setLayout(button_scroll_layout)
@@ -681,6 +706,7 @@ class MainPage(QMainWindow):
 
         scroll_page = HorizontalScrollPage()
         scroll_viewport = scroll_page.viewport
+        scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
         scroll_layout = scroll_page.layout
 
         section_layout.addWidget(scroll_page)
@@ -701,10 +727,6 @@ class MainPage(QMainWindow):
         self.overlay_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.overlay_content = QWidget(self.overlay)
-        self.overlay_content.setStyleSheet("""
-            background-color: #202124;
-            border-radius: 4px;
-            border: none;""")
         self.overlay_content_layout = QVBoxLayout(self.overlay_content)
 
         self.overlay_layout.addWidget(self.overlay_content)
@@ -715,12 +737,6 @@ class MainPage(QMainWindow):
         self.notification_message_label = QLabel(self)
         self.notification_message_label.setWordWrap(True)
         self.notification_message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.notification_message_label.setStyleSheet("""
-            background-color: white;
-            color: black;
-            border-radius: 4px;
-            padding: 10px;
-        """)
         self.notification_message_label.setFixedSize(300, 50)
         self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), -50, 300, 50))
         self.notification_message_label.hide()
