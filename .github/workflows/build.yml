@@ -52,6 +52,7 @@ jobs:
             "src\main.py"
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
+          xcopy /E /I /H /Y "src\themes" "dist\main\themes"
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {
