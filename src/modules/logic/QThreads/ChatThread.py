@@ -298,7 +298,7 @@ class ChatThread(QThread):
         while True:
             if self.client.ws:
                 try:
-                    response, new_chat_id = await self.client.create_new_chat(char, self.me.get('id', ''),
+                    response, new_chat_id = await self.client.create_new_chat(char, self.me.get('user', {}).get('id', ''),
                                                                               preferred_model_type, scene_id)
                     if new_chat_id and new_chat_id in self.chat_histories:
                         del self.chat_histories[new_chat_id]
