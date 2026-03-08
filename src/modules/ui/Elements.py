@@ -809,7 +809,6 @@ class LeftSidebar(QFrame):
         self.profile_button_2.setVisible(False)
 
     def showCreateContextMenu(self, button: PushButton):
-        TM.set_theme("light")
         context_menu = PushButtonMenu(self)
         context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
 

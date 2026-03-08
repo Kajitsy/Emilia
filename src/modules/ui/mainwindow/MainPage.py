@@ -44,6 +44,8 @@ class MainPage(QMainWindow):
             self.setWindowTitle("Emilia")
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
+        self.theme = self.settings.value("app_theme", "Dark", type=str)
+        TM.set_theme(self.theme)
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
         self.drpc_show_chat_name = self.settings.value("discord_rpc/show_chat_name", False, type=bool)
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
@@ -1066,9 +1068,12 @@ class MainPage(QMainWindow):
         self.discord_thread.update_wlrpc()
         if platform.system() == 'Windows':
             from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
-
-            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
-            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
+            if TM.get_theme(self.theme).get('titlebar', 'dark') == 'dark':
+                ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
+                ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
+            elif TM.get_theme(self.theme).get('titlebar', 'dark') == 'light':
+                ChangeDWMAttrib(detect(self), 19, ctypes.c_int(0))
+                ChangeDWMAttrib(detect(self), 20, ctypes.c_int(0))
 
     def hideEvent(self, a0):
         super().hideEvent(a0)

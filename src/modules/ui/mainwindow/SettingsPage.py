@@ -1,3 +1,5 @@
+import ctypes
+import platform
 import webbrowser, os, logging,  json, inspect
 
 from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel,
@@ -106,6 +108,7 @@ class SettingsPage(QWidget):
                 "label": self.tr("Emilia Settings"),
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
+                    {"type": "combobox", "label": self.tr("App theme"), "items": TM.get_themes_name(), "key": "app_theme"},
                     {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Display text formatting buttons"), "key": "show_format_buttons", "def_value": False},
                     {"type": "combobox", "label": self.tr("Update Server"), "items": list(self.update_servers.values()), "key": "update_server", "def_value": "https://germany.emiupd.ateez.ru/"},
@@ -650,6 +653,19 @@ class SettingsPage(QWidget):
                         index = next(k for k, v in self.mw.output_devices.items() if v == widget.currentText())
                         self.mw.setOutputDevice(index)
                     self.mw.settings.setValue(key, index)
+                elif key == "app_theme":
+                    theme = widget.currentText()
+                    TM.set_theme(theme)
+                    if platform.system() == 'Windows':
+                        from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
+                        if TM.get_theme(theme).get('titlebar', 'dark') == 'dark':
+                            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
+                            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
+                        elif TM.get_theme(theme).get('titlebar', 'dark') == 'light':
+                            ChangeDWMAttrib(detect(self), 19, ctypes.c_int(0))
+                            ChangeDWMAttrib(detect(self), 20, ctypes.c_int(0))
+                    self.mw.theme = theme
+                    self.mw.settings.setValue(key, theme)
             elif isinstance(widget, KeySequenceEdit):
                 self.mw.settings.setValue(key, widget.keySequence().toString())
         self.mw.showNotification(self.tr("Settings saved successfully"))
