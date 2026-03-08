@@ -181,7 +181,7 @@ class MainCard(QOpenGLWidget):
                 self._on_motion_finished
             )
 
-    def _on_motion_finished(self):
+    def _on_motion_finished(self, z=None, v=None):
         delay_ms = 3000
         QTimer.singleShot(delay_ms, self._play_idle_motion)
 
