@@ -543,7 +543,8 @@ class ChatInterface(QWidget):
 
         self.vmodel_button = PushButton(self.tr("Show VModel"))
         self.vmodel_button.clicked.connect(self.openVModelOverlay)
-        self.char_info_layout.addWidget(self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        if self.mw.settings.value("vmodel/use", False, type=bool):
+            self.char_info_layout.addWidget(self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.detach_chat_button = PushButton(self.tr("Detach Chat"))
         self.detach_chat_button.clicked.connect(self.detachChat)
