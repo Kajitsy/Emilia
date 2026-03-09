@@ -139,6 +139,8 @@ class SettingsPage(QWidget):
                      "buttonlabel": self.tr("Change"), "key": "vmodel/change_default_folder", "click": self.changeVModelFolder},
                     {"type": "lineedit", "label": self.tr("FPS"), "key": "vmodel/fps",
                      "def_value": "60", "may_be_empty": False},
+                    {"type": "checkbox", "label": self.tr("Cursor Tracking"), "key": "vmodel/cursor_tracking", "def_value": True},
+                    {"type": "checkbox", "label": self.tr("Auto Blink"), "key": "vmodel/auto_blink", "def_value": True},
                 ]
             }, {
                 "label": self.tr("Discord Rich Presence"),

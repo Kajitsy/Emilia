@@ -51,8 +51,8 @@ class MainCard(QOpenGLWidget):
     def __init__(self) -> None:
         super().__init__()
         self.fps = 60
-        self.auto_blink_enabled = True
-        self.cursor_tracking_enabled = True
+        self.auto_blink = True
+        self.cursor_tracking = True
         self.window_move_threshold = 1
         self.model_window_move_threshold = 1
         self.translucent = True
@@ -89,24 +89,6 @@ class MainCard(QOpenGLWidget):
         self._animated_parameters = {}
         self.animations = {}
 
-        self.on = 'on'
-        self.off = 'off'
-
-        self.control_panel = QWidget()
-        self.blink_button = PushButton(f"blink_button: {self.on}")
-        self.blink_button.clicked.connect(self.toggle_blinking)
-        self.cursor_button = PushButton(f"cursor_button: {self.on}")
-        self.cursor_button.clicked.connect(self.toggle_cursor_tracking)
-
-        controls_layout = QHBoxLayout()
-        controls_layout.addWidget(self.blink_button)
-        controls_layout.addWidget(self.cursor_button)
-        self.control_panel.setLayout(controls_layout)
-
-        main_layout = QVBoxLayout(self)
-        main_layout.addWidget(self.control_panel)
-        self.control_panel.setVisible(not self.translucent)
-        self.setLayout(main_layout)
         self.setMouseTracking(True)
 
     def set_stream_volume(self, volume: float):
@@ -119,14 +101,6 @@ class MainCard(QOpenGLWidget):
         else:
             self.setWindowFlags(flags & ~Qt.WindowType.WindowStaysOnTopHint)
         self.show()
-
-    def toggle_blinking(self):
-        self.auto_blink_enabled = not self.auto_blink_enabled
-        self.blink_button.setText(f"blink_button: {self.on if self.auto_blink_enabled else self.off}")
-
-    def toggle_cursor_tracking(self):
-        self.cursor_tracking_enabled = not self.cursor_tracking_enabled
-        self.cursor_button.setText(f"cursor_button: {self.on if self.cursor_tracking_enabled else self.off}")
 
     def _get_parameter_value_from_model(self, parameter_id):
         if self.model:
@@ -224,7 +198,7 @@ class MainCard(QOpenGLWidget):
         if not self.model.IsMotionFinished():
             motionUpdated = self.model.UpdateMotion(deltaSecs)
 
-        if self.cursor_tracking_enabled:
+        if self.cursor_tracking:
             local_mouse_pos = QCursor.pos()
             mouse_x = local_mouse_pos.x()
             mouse_y = local_mouse_pos.y()
@@ -277,7 +251,7 @@ class MainCard(QOpenGLWidget):
         self.model.SaveParameters()
 
         if not motionUpdated:
-            if self.auto_blink_enabled:
+            if self.auto_blink:
                 self.model.UpdateBlink(deltaSecs)
 
         self.model.UpdateExpression(deltaSecs)
@@ -351,5 +325,4 @@ class MainCard(QOpenGLWidget):
             else:
                 self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
             self.translucent = not self.translucent
-            self.control_panel.setVisible(not self.translucent)
             live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)
