@@ -105,6 +105,7 @@ class ViewerCard(QWidget):
     def continuee(self, path, idle):
         vmodel = MainCard()
         vmodel.fps = self.mw.settings.value("vmodel/fps", 60, type=int)
+        vmodel.volume_smoothing = self.mw.settings.value("vmodel/volume_smoothing", 0.6, type=float)
         vmodel.auto_blink = self.mw.settings.value("vmodel/auto_blink", True, type=bool)
         vmodel.cursor_tracking = self.mw.settings.value("vmodel/cursor_tracking", True, type=bool)
         vmodel.model_path = path

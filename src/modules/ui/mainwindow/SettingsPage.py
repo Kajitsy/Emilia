@@ -141,6 +141,8 @@ class SettingsPage(QWidget):
                      "def_value": "60", "may_be_empty": False},
                     {"type": "checkbox", "label": self.tr("Cursor Tracking"), "key": "vmodel/cursor_tracking", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Auto Blink"), "key": "vmodel/auto_blink", "def_value": True},
+                    {"type": "lineedit", "label": self.tr("Volume Smoothing"), "key": "vmodel/volume_smoothing",
+                     "def_value": "0.6", "may_be_empty": False},
                 ]
             }, {
                 "label": self.tr("Discord Rich Presence"),
