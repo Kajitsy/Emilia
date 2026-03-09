@@ -104,6 +104,7 @@ class ViewerCard(QWidget):
 
     def continuee(self, path, idle):
         vmodel = MainCard()
+        vmodel.fps = self.mw.settings.value("vmodel/fps", 60, type=int)
         vmodel.model_path = path
         vmodel.idle_animation_path = idle
         self.vmodel_widget.emit(vmodel)

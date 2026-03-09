@@ -137,6 +137,8 @@ class SettingsPage(QWidget):
                     {"type": "checkbox", "label": self.tr("Use VModel"), "key": "vmodel/use", "def_value": False},
                     {"type": "pushbutton", "label": self.tr("Models folder"),
                      "buttonlabel": self.tr("Change"), "key": "vmodel/change_default_folder", "click": self.changeVModelFolder},
+                    {"type": "lineedit", "label": self.tr("FPS"), "key": "vmodel/fps",
+                     "def_value": "60", "may_be_empty": False},
                 ]
             }, {
                 "label": self.tr("Discord Rich Presence"),
