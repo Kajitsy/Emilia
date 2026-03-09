@@ -13,23 +13,18 @@ class ViewerCard(QWidget):
     def __init__(self, main_window):
         super().__init__()
         self.mw = main_window
-        self.setWindowTitle("VTube Model Viewer")
         self.setGeometry(100, 100, 600, 500)
         self.default_vtube_folder = self.mw.settings.value("vmodel/default_folder", "./vtubes")
 
         self.main_layout = QVBoxLayout()
 
-        self.select_folder_button = PushButton("Select folder")
+        self.select_folder_button = PushButton(self.tr("Select folder"))
         self.select_folder_button.clicked.connect(self.select_folder)
         self.main_layout.addWidget(self.select_folder_button)
 
         self.model_list_widget = VerticalScrollPage()
         self.model_list_layout = self.model_list_widget.layout
         self.main_layout.addWidget(self.model_list_widget)
-
-        self.continue_button = PushButton("Continue")
-        self.continue_button.clicked.connect(self.continuee)
-        self.main_layout.addWidget(self.continue_button)
 
         self.setLayout(self.main_layout)
 
@@ -66,7 +61,7 @@ class ViewerCard(QWidget):
                             logging.error(f"Error {vtube_file_path}: {e}")
 
     def select_folder(self):
-        folder_path = QFileDialog.getExistingDirectory(self, "Select folder")
+        folder_path = QFileDialog.getExistingDirectory(self, self.tr("Select folder"))
         if folder_path:
             self.selected_folder = folder_path
             self.update_model_list()
