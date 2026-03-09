@@ -1028,7 +1028,7 @@ class MainPage(QMainWindow):
                 break
 
     def event(self, event):
-        if event.type() == 210:
+        if event.type() == 210 and self.settings.value("app_theme_system_sync", False, type=bool):
             if self._is_updating:
                 return super().event(event)
 

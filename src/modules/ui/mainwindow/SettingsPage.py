@@ -109,6 +109,7 @@ class SettingsPage(QWidget):
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
                     {"type": "combobox", "label": self.tr("App theme"), "items": TM.get_themes_name(), "key": "app_theme"},
+                    {"type": "checkbox", "label": self.tr("Sync theme with system theme"), "key": "app_theme_system_sync"},
                     {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Display text formatting buttons"), "key": "show_format_buttons", "def_value": False},
                     {"type": "combobox", "label": self.tr("Update Server"), "items": list(self.update_servers.values()), "key": "update_server", "def_value": "https://germany.emiupd.ateez.ru/"},
