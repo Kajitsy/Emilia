@@ -4,7 +4,7 @@ import sys, datetime, sounddevice
 
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                              QPushButton, QFrame, QSizePolicy, QStackedWidget, QProgressBar)
-from PyQt6.QtGui import QMouseEvent, QAction
+from PyQt6.QtGui import QMouseEvent, QAction, QGuiApplication
 from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
                           QEasingCurve, QTimer, QParallelAnimationGroup,
                           QPoint, Qt, QLocale, pyqtSignal)
@@ -46,6 +46,7 @@ class MainPage(QMainWindow):
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.theme = self.settings.value("app_theme", "Dark", type=str)
         TM.set_theme(self.theme)
+        self._is_updating = False
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
         self.drpc_show_chat_name = self.settings.value("discord_rpc/show_chat_name", False, type=bool)
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
@@ -1025,6 +1026,29 @@ class MainPage(QMainWindow):
             if dev["name"] == device_name and dev["max_output_channels"] > 0:
                 sounddevice.default.device = (sounddevice.default.device[0], i)
                 break
+
+    def event(self, event):
+        if event.type() == 210:
+            if self._is_updating:
+                return super().event(event)
+
+            self._is_updating = True
+            try:
+                settings = QGuiApplication.styleHints()
+
+                if settings.colorScheme() == Qt.ColorScheme.Dark:
+                    new_theme = "Dark"
+                else:
+                    new_theme = "Light"
+
+                if TM.current != new_theme:
+                    self.theme = new_theme
+                    TM.set_theme(self.theme)
+                    self.update_theme()
+            finally:
+                self._is_updating = False
+
+        return super().event(event)
 
     def mousePressEvent(self, event: QMouseEvent):
         if self.overlay.isVisible() and self.hide_overlay:
