@@ -183,7 +183,6 @@ class PushButtonMenu(QMenu):
             self.windowFlags() |
             Qt.WindowType.NoDropShadowWindowHint
         )
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()
 
