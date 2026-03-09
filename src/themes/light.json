@@ -15,6 +15,10 @@
     "scroll_handle": "#c1c1c1",
     "scroll_hover": "#a8a8a8",
     "mw_back": "#ffffff",
-    "mw_color": "#202124"
+    "mw_color": "#202124",
+    "char_back_message": "#f1f3f4",
+    "char_text_message": "#202124",
+    "user_back_message": "#e8f0fe",
+    "user_text_message": "#202124"
   }
 }

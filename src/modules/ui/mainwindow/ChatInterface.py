@@ -145,10 +145,10 @@ class ChatInterface(QWidget):
 
         self.show_format_buttons = self.mw.settings.value("show_format_buttons", False, type=bool)
         self.chat_settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", self.character_id)
-        self.char_back_message = self.chat_settings.value('colors/char_back_message', '#26272b')
-        self.char_text_message = self.chat_settings.value('colors/char_text_message', '#e8eaed')
-        self.user_back_message = self.chat_settings.value('colors/user_back_message', '#303136')
-        self.user_text_message = self.chat_settings.value('colors/user_text_message', '#e8eaed')
+        self.char_back_message = self.chat_settings.value('colors/char_back_message', TM.c('char_back_message'))
+        self.char_text_message = self.chat_settings.value('colors/char_text_message', TM.c('char_text_message'))
+        self.user_back_message = self.chat_settings.value('colors/user_back_message', TM.c('user_back_message'))
+        self.user_text_message = self.chat_settings.value('colors/user_text_message', TM.c('user_text_message'))
         self.background_image = self.chat_settings.value('background_image', '')
 
         self.initUI()
@@ -941,10 +941,10 @@ class ChatInterface(QWidget):
     def openColorPickerOverlay(self):
         def restoreDefaultColors():
             data = {
-                "char_back_message": "#26272b",
-                "char_text_message": "#e8eaed",
-                "user_back_message": "#303136",
-                "user_text_message": "#e8eaed"
+                "char_back_message": TM.c('char_back_message'),
+                "char_text_message": TM.c('char_text_message'),
+                "user_back_message": TM.c('user_back_message'),
+                "user_text_message": TM.c('user_text_message')
             }
             self.chat_settings.setValue("background_image", "")
             self.applyBackground("")
