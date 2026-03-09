@@ -45,6 +45,15 @@ class MainPage(QMainWindow):
         self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
         self.current_language = self.settings.value("emilia_language", QLocale.system().name())
         self.theme = self.settings.value("app_theme", "Dark", type=str)
+
+        if self.settings.value("app_theme_system_sync", False, type=bool):
+            if QGuiApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark:
+                new_theme = "Dark"
+            else:
+                new_theme = "Light"
+            if TM.current != new_theme:
+                self.theme = new_theme
+
         TM.set_theme(self.theme)
         self._is_updating = False
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
