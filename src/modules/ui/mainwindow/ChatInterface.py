@@ -255,20 +255,20 @@ class ChatInterface(QWidget):
             self.chat_thread.get_scene_by_id(self.scene_id)
 
     def updateTheme(self):
-        self.send_message_button.setIcon(self.svg_icons.send(TM.c("disabled_text")))
-        self.call_char_button.setIcon(self.svg_icons.call(TM.c("disabled_text")))
-        self.add_image_button.setIcon(self.svg_icons.add_image(TM.c("disabled_text")))
-        self.toggle_info_button.setIcon(self.svg_icons.show_right_sidebar(TM.c("disabled_text")))
-        self.share_char_button.setIcon(self.svg_icons.share(TM.c("disabled_text")))
-        self.edit_char_button.setIcon(self.svg_icons.create_character(TM.c("disabled_text")))
-        self.like_button.setIcon(self.svg_icons.like(TM.c("disabled_text")))
-        self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("disabled_text")))
-        self.create_new_chat_button.setIcon(self.svg_icons.new_chat(TM.c("disabled_text")))
-        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice(TM.c("disabled_text")))
-        self.history_button.setIcon(self.svg_icons.history(TM.c("disabled_text")))
-        self.chat_theme_button.setIcon(self.svg_icons.colors(TM.c("disabled_text")))
-        self.choose_persona_button.setIcon(self.svg_icons.persona(TM.c("disabled_text")))
-        self.chat_style_button.setIcon(self.svg_icons.style(TM.c("disabled_text")))
+        self.send_message_button.setIcon(self.svg_icons.send(TM.c("icon")))
+        self.call_char_button.setIcon(self.svg_icons.call(TM.c("icon")))
+        self.add_image_button.setIcon(self.svg_icons.add_image(TM.c("icon")))
+        self.toggle_info_button.setIcon(self.svg_icons.show_right_sidebar(TM.c("icon")))
+        self.share_char_button.setIcon(self.svg_icons.share(TM.c("icon")))
+        self.edit_char_button.setIcon(self.svg_icons.create_character(TM.c("icon")))
+        self.like_button.setIcon(self.svg_icons.like(TM.c("icon")))
+        self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("icon")))
+        self.create_new_chat_button.setIcon(self.svg_icons.new_chat(TM.c("icon")))
+        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice(TM.c("icon")))
+        self.history_button.setIcon(self.svg_icons.history(TM.c("icon")))
+        self.chat_theme_button.setIcon(self.svg_icons.colors(TM.c("icon")))
+        self.choose_persona_button.setIcon(self.svg_icons.persona(TM.c("icon")))
+        self.chat_style_button.setIcon(self.svg_icons.style(TM.c("icon")))
 
     def on_scroll(self, value):
         if value == self.messages_area.verticalScrollBar().minimum() and self.chat_next_token:
@@ -1309,7 +1309,7 @@ class ChatInterface(QWidget):
 
     def disableVoice(self):
         self.voice_enabled = False
-        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice(TM.c("disabled_text")))
+        self.enable_char_voice_button.setIcon(self.svg_icons.no_voice(TM.c("icon")))
         self.enable_char_voice_button.disconnect()
         self.enable_char_voice_button.clicked.connect(self.enableVoice)
         self.chat_thread.replay_signal.disconnect()
@@ -1351,26 +1351,26 @@ class ChatInterface(QWidget):
         self.chat_thread.new_chat_created_signal.connect(self._createNewChat)
 
     def dislikeCharacter(self):
-        self.like_button.setIcon(self.svg_icons.like(TM.c("disabled_text")))
+        self.like_button.setIcon(self.svg_icons.like(TM.c("icon")))
         if self.vote == False:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
-            self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("disabled_text")))
+            self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("icon")))
         else:
             self.vote = False
             self.chat_thread.character_vote(self.character_id, False)
-            self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("disabled_text")))
+            self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("icon")))
 
     def likeCharacter(self):
-        self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("disabled_text")))
+        self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("icon")))
         if self.vote:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
-            self.like_button.setIcon(self.svg_icons.like(TM.c("disabled_text")))
+            self.like_button.setIcon(self.svg_icons.like(TM.c("icon")))
         else:
             self.vote = True
             self.chat_thread.character_vote(self.character_id, True)
-            self.like_button.setIcon(self.svg_icons.liked(TM.c("disabled_text")))
+            self.like_button.setIcon(self.svg_icons.liked(TM.c("icon")))
 
     def editCharacter(self):
         self.mw.openCreateCharacterPage(self.character_id)
@@ -1431,9 +1431,9 @@ class ChatInterface(QWidget):
 
         if self.voted:
             if self.vote == True:
-                self.like_button.setIcon(self.svg_icons.liked(TM.c("disabled_text")))
+                self.like_button.setIcon(self.svg_icons.liked(TM.c("icon")))
             elif self.vote == False:
-                self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("disabled_text")))
+                self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("icon")))
 
         self.title_label.setText(self.character.get('title'))
         self.toggle_info_button.setEnabled(True)

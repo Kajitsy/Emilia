@@ -7,6 +7,7 @@
     "hover_bg": "#e8eaed",
     "pressed_bg": "#bdc1c6",
     "disabled_text": "#80868b",
+    "icon": "#80868b",
     "menu_bg": "#ffffff",
     "menu_item_select": "#f1f3f4",
     "primary_bg": "#f8f9fa",

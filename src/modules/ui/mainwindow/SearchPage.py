@@ -169,7 +169,7 @@ class SearchPage(QWidget):
 
         self.search_bar = SearchLineEdit(self.mw)
         self.search_bar.blockSignals(True)
-        self.search_bar.setIcon(QIcon(self.svg_icons.search(TM.c("disabled_text"))))
+        self.search_bar.setIcon(QIcon(self.svg_icons.search(TM.c("icon"))))
         self.search_bar.setText(self.mw.search_bar.text())
         self.search_bar.setPlaceholderText(self.tr("Search"))
         self.search_bar.returnPressed.connect(self.showCharSearchResults)

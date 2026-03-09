@@ -745,9 +745,9 @@ class LeftSidebar(QFrame):
             border-radius: 4px;
             border: none;
         }}""")
-        self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('disabled_text')))
-        self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar(TM.c('disabled_text')))
-        self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('disabled_text')))
+        self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('icon')))
+        self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar(TM.c('icon')))
+        self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('icon')))
 
     def initUI(self):
         self.left_sidebar_layout = QVBoxLayout()
@@ -801,9 +801,9 @@ class LeftSidebar(QFrame):
         if self.mw.me_has_avatar:
             self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
                                    45, 45, 100, callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
-                                   error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile('white')))
+                                   error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon"))))
         else:
-            self.profile_button_2.setIcon(self.mw.svg_icons.profile('white'))
+            self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon")))
         self.profile_button_2.clicked.connect(lambda: self.showProfileContextMenu(self.profile_button_2))
         self.bottom_button_layout.addWidget(self.profile_button_2, 1)
         self.profile_button_2.setVisible(False)
@@ -846,9 +846,9 @@ class LeftSidebar(QFrame):
             self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
                                       45, 45, 100,
                                       callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
-                                      error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile('white')))
+                                      error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon"))))
         else:
-            self.profile_button_2.setIcon(self.mw.svg_icons.profile('white'))
+            self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon")))
 
     def openUserPage(self):
         self.mw.openUserPage(self.mw.username)

@@ -78,8 +78,8 @@ class ModeCard(QWidget):
         keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
 
     def updateTheme(self):
-        self.mute_button.setIcon(self.svg_icons.mute(TM.c("disabled_text")))
-        self.stop_button.setIcon(self.svg_icons.end_call(TM.c("disabled_text")))
+        self.mute_button.setIcon(self.svg_icons.mute(TM.c("icon")))
+        self.stop_button.setIcon(self.svg_icons.end_call(TM.c("icon")))
 
     def toggleMute(self):
         self.muted = not self.muted

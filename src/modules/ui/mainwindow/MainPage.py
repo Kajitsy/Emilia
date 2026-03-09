@@ -169,7 +169,7 @@ class MainPage(QMainWindow):
             border-radius: 4px;
             padding: 10px;
         """)
-        self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis(TM.c("disabled_text")))
+        self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis(TM.c("icon")))
 
     def initUI(self):
         self.layout = QHBoxLayout()
@@ -316,7 +316,7 @@ class MainPage(QMainWindow):
                     border-radius: 4px;
                 }}
             """)
-            menu_button.setIcon(self.svg_icons.ellipsis(TM.c("disabled_text")))
+            menu_button.setIcon(self.svg_icons.ellipsis(TM.c("icon")))
 
         chat_layout = QHBoxLayout()
         chat_layout.setContentsMargins(0, 0, 0, 0)
@@ -557,7 +557,7 @@ class MainPage(QMainWindow):
         self.top_bar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
         self.top_bar_collapse_button = PushButton()
-        self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis(TM.c("disabled_text")))
+        self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis(TM.c("icon")))
         self.top_bar_collapse_button.clicked.connect(self.toggleLeftSidebar)
         self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
 

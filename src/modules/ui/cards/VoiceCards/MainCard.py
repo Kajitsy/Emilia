@@ -91,8 +91,8 @@ class MainCard(QFrame):
         character_page.setLayout(character_page_layout)
 
     def updateTheme(self):
-        self.sha_voice_button.setIcon(self.svg_icons.share(TM.c("disabled_text")))
-        self.play_button.setIcon(self.svg_icons.play(TM.c("disabled_text")))
+        self.sha_voice_button.setIcon(self.svg_icons.share(TM.c("icon")))
+        self.play_button.setIcon(self.svg_icons.play(TM.c("icon")))
         self.play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
 
     def createCard(self, name, avatar_url, character_id, chat_id=""):

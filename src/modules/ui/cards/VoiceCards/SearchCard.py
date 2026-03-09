@@ -47,7 +47,7 @@ class SearchCard(QWidget):
         self.setLayout(layout)
 
     def updateTheme(self):
-        self.search_input.setIcon(QIcon(self.svg_icons.search(TM.c('disabled_text'))))
+        self.search_input.setIcon(QIcon(self.svg_icons.search(TM.c('icon'))))
 
     def openVoiceCard(self, voice_data):
         voiceCard = MainCard(self.mw, voice_data, self.current_character_id, self.current_voice_id)
@@ -88,8 +88,8 @@ class SearchCard(QWidget):
 
         selected_label = QLabel()
         def updateTheme():
-            play_button.setIcon(self.svg_icons.play(TM.c('disabled_text')))
-            selected_label.setPixmap(self.svg_icons.selected(TM.c('disabled_text')))
+            play_button.setIcon(self.svg_icons.play(TM.c('icon')))
+            selected_label.setPixmap(self.svg_icons.selected(TM.c('icon')))
             selected_label.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 16px;")
         TM.theme_changed.connect(updateTheme)
         updateTheme()

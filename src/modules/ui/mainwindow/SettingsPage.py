@@ -279,7 +279,7 @@ class SettingsPage(QWidget):
 
             remove_button = PushButton()
             remove_button.clicked.connect(removeParameter)
-            remove_button.setIcon(self.mw.svg_icons.close(TM.c("disabled_text")))
+            remove_button.setIcon(self.mw.svg_icons.close(TM.c("icon")))
             u_layout.addWidget(remove_button)
 
             u_layout.addStretch()
