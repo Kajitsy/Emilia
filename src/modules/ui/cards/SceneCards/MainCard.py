@@ -6,7 +6,6 @@ from modules.ui.Elements import CardFrame
 
 class MainCard(CardFrame):
     def __init__(self, main_window, data):
-        super().__init__()
         self.mw = main_window
         self.data = data
         self.title = self.data.get('title')
@@ -16,7 +15,6 @@ class MainCard(CardFrame):
 
     def initUI(self):
         card_layout = QVBoxLayout()
-        self.setLayout(card_layout)
 
         self.image_label = QLabel()
         self.image_label.setFixedSize(150, 200)
@@ -35,14 +33,21 @@ class MainCard(CardFrame):
         card_layout.addWidget(title_label)
 
         if self.author:
-            author_label = QLabel(self.tr("Author: @") + self.author)
-            font = author_label.font()
+            self.author_label = QLabel(self.tr("Author: @") + self.author)
+            font = self.author_label.font()
             font.setPointSize(8)
-            author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
-            author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.author)
-            author_label.setCursor(Qt.CursorShape.PointingHandCursor)
-            author_label.setFont(font)
-            card_layout.addWidget(author_label)
+            self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.author)
+            self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.author_label.setFont(font)
+            card_layout.addWidget(self.author_label)
+
+        super().__init__()
+        self.setLayout(card_layout)
+
+    def update_theme(self):
+        super().update_theme()
+        if self.author:
+            self.author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)

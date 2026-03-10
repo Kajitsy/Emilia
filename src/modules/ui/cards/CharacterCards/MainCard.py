@@ -9,7 +9,6 @@ from modules.Utils import format_text, format_number, color_avatar
 class MainCard(CardFrame):
     def __init__(self, main_window, name="", avatar_url="", description="", author="", character_id="", chats=0,
                  voted=0, avatar_label_w=90, avatar_label_h=114):
-        super().__init__()
         self.mw = main_window
         self.image_loader = self.mw.image_loader
         self.name = name
@@ -26,7 +25,6 @@ class MainCard(CardFrame):
 
     def initUI(self):
         card_layout = QHBoxLayout()
-        self.setLayout(card_layout)
 
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(self.avatar_label_w, self.avatar_label_h)
@@ -53,12 +51,11 @@ class MainCard(CardFrame):
         text_layout.addWidget(title_label)
 
         if self.author:
-            author_label = QLabel(self.tr("Author: @") + self.author)
-            font = author_label.font()
+            self.author_label = QLabel(self.tr("Author: @") + self.author)
+            font = self.author_label.font()
             font.setPointSize(8)
-            author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
-            author_label.setFont(font)
-            text_layout.addWidget(author_label)
+            self.author_label.setFont(font)
+            text_layout.addWidget(self.author_label)
 
         if self.description:
             description_label = QLabel(format_text(self.description, self.name))
@@ -69,29 +66,38 @@ class MainCard(CardFrame):
             fm = QFontMetrics(font)
             description_label.setMaximumHeight(fm.lineSpacing() * 4)
             text_layout.addWidget(description_label)
-            self.setToolTip(format_text(self.description))
 
         spacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         text_layout.addItem(spacer)
 
-        add_info = QLabel()
-        add_info.setStyleSheet("color: #a2a2ac;")
-        font = add_info.font()
+        self.add_info = QLabel()
+        font = self.add_info.font()
         font.setPointSize(10)
-        add_info.setFont(font)
+        self.add_info.setFont(font)
         if self.chats:
-            add_info.setText(add_info.text() + str(format_number(self.chats)) + self.tr(" chats"))
+            self.add_info.setText(self.add_info.text() + str(format_number(self.chats)) + self.tr(" chats"))
         if self.voted:
-            add_info.setText(add_info.text() + " • " + str(format_number(self.voted)) + self.tr(" likes"))
+            self.add_info.setText(self.add_info.text() + " • " + str(format_number(self.voted)) + self.tr(" likes"))
 
-        if add_info.text():
-            text_layout.addWidget(add_info)
+        if self.add_info.text():
+            text_layout.addWidget(self.add_info)
 
         self.edit_button = PushButton(self.tr("Edit"))
         self.edit_button.clicked.connect(lambda: self.mw.openCreateCharacterPage(self.character_id))
 
         if self.author == self.mw.username:
             card_layout.addWidget(self.edit_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        super().__init__()
+        self.setLayout(card_layout)
+        if self.description:
+            self.setToolTip(format_text(self.description))
+
+    def update_theme(self):
+        super().update_theme()
+        self.add_info.setStyleSheet(f"color: {TM.c('disabled_text')};")
+        if self.author:
+            self.author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)

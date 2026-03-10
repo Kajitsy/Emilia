@@ -8,7 +8,6 @@ from modules.Utils import format_text, format_number, color_avatar
 
 class ListCard(CardFrame):
     def __init__(self, main_window, data, avatar_label_w=70, avatar_label_h=70):
-        super().__init__()
         self.mw = main_window
         self.image_loader = main_window.image_loader
         self.data = data
@@ -22,7 +21,6 @@ class ListCard(CardFrame):
 
     def initUI(self):
         card_layout = QHBoxLayout()
-        self.setLayout(card_layout)
 
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(self.avatar_label_w, self.avatar_label_h)
@@ -49,31 +47,39 @@ class ListCard(CardFrame):
         text_layout.addWidget(title_label)
 
         if self.data.get('title'):
-            description_label = QLabel(format_text(self.data.get('title'), self.name))
-            description_label.setWordWrap(True)
-            description_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
-            font = description_label.font()
+            self.description_label = QLabel(format_text(self.data.get('title'), self.name))
+            self.description_label.setWordWrap(True)
+            font = self.description_label.font()
             font.setPointSize(9)
-            description_label.setFont(font)
+            self.description_label.setFont(font)
             fm = QFontMetrics(font)
-            description_label.setMaximumHeight(fm.lineSpacing())
-            text_layout.addWidget(description_label)
-            self.setToolTip(format_text(self.data.get('title')))
+            self.description_label.setMaximumHeight(fm.lineSpacing())
+            text_layout.addWidget(self.description_label)
 
-        add_info = QLabel()
-        add_info.setStyleSheet(f"color: {TM.c('disabled_text')};")
-        font = add_info.font()
+        self.add_info = QLabel()
+        font = self.add_info.font()
         font.setPointSize(10)
-        add_info.setFont(font)
+        self.add_info.setFont(font)
         if self.data.get('participant__num_interactions'):
-            add_info.setText(add_info.text() + str(format_number(self.data.get('participant__num_interactions'))) + self.tr(" chats"))
+            self.add_info.setText(self.add_info.text() + str(format_number(self.data.get('participant__num_interactions'))) + self.tr(" chats"))
 
-        if add_info.text():
-            text_layout.addWidget(add_info)
+        if self.add_info.text():
+            text_layout.addWidget(self.add_info)
 
         self.chat_button = PushButton(self.tr("Chat"))
         self.chat_button.clicked.connect(lambda: self.mw.openChat(self.character_id, self.name))
         card_layout.addWidget(self.chat_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        super().__init__()
+        self.setLayout(card_layout)
+        if self.data.get('title'):
+            self.setToolTip(format_text(self.data.get('title')))
+
+    def update_theme(self):
+        super().update_theme()
+        self.add_info.setStyleSheet(f"color: {TM.c('disabled_text')};")
+        if self.data.get('title'):
+            self.description_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)

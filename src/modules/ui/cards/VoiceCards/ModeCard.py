@@ -15,6 +15,7 @@ class ModeCard(QWidget):
         super().__init__()
         self.mw = main_window
         self.chi = chat_interface
+        self.avatar_url = avatar_url
         self.character_id = character_id
         self.chat_id = chat_id
         self.voice_id = voice_id
@@ -23,14 +24,24 @@ class ModeCard(QWidget):
         self.char_name = character_name
         self.svg_icons = Svg()
 
+        self.initUI()
+        TM.theme_changed.connect(self.updateTheme)
+        self.updateTheme()
+
+        self.mw.setOutputDevice(self.mw.settings.value('output_device', 0, type=int))
+
+        self._run()
+        keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
+
+    def initUI(self):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self.setFixedSize(1000, 600)
 
         self.avatar_label = QLabel()
-        if avatar_url:
+        if self.avatar_url:
             self.mw.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{avatar_url}?webp=true&anim=0",
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0",
                 80, 80, 10, label=self.avatar_label,
                 error_cb=lambda _: color_avatar(self.avatar_label, 80, 80, self.char_name, 10))
         else:
@@ -70,12 +81,6 @@ class ModeCard(QWidget):
 
         self.speaking_indicator = QFrame(self)
         self.speaking_indicator.hide()
-        TM.theme_changed.connect(self.updateTheme)
-
-        self.mw.setOutputDevice(self.mw.settings.value('output_device', 0, type=int))
-
-        self._run()
-        keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
 
     def updateTheme(self):
         self.mute_button.setIcon(self.svg_icons.mute(TM.c("icon")))

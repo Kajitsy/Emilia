@@ -9,31 +9,18 @@ from modules.ui import TM
 
 class HorizontalMiniCard(CardFrame):
     def __init__(self, main_window, data):
-        super().__init__()
-        self.setFixedHeight(60)
         self.mw = main_window
         self.data = data
         self.svg_icons = Svg()
 
         self.initUI()
 
-    def mousePressEvent(self, a0):
-        super().mousePressEvent(a0)
-        if a0.button() == Qt.MouseButton.RightButton:
-            self.mw.hideOverlay()
-            self.mw.showOverlay(MainCard(self.mw, self.data, search=False))
-
     def initUI(self):
         card_layout = QHBoxLayout()
-        play_button = QPushButton()
-        play_button.setIcon(self.svg_icons.play(TM.c("icon")))
-        play_button.setFixedWidth(40)
-        play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), play_button))
-        card_layout.addWidget(play_button)
-        def updateTheme():
-            play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
-        TM.theme_changed.connect(updateTheme)
-        updateTheme()
+        self.play_button = QPushButton()
+        self.play_button.setFixedWidth(40)
+        self.play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), self.play_button))
+        card_layout.addWidget(self.play_button)
 
         text_layout = QVBoxLayout()
         text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -52,7 +39,20 @@ class HorizontalMiniCard(CardFrame):
         description_label.setFont(font)
         text_layout.addWidget(description_label)
 
+        super().__init__()
+        self.setFixedHeight(60)
         self.setLayout(card_layout)
+
+    def update_theme(self):
+        super().update_theme()
+        self.play_button.setIcon(self.svg_icons.play(TM.c("icon")))
+        self.play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
+
+    def mousePressEvent(self, a0):
+        super().mousePressEvent(a0)
+        if a0.button() == Qt.MouseButton.RightButton:
+            self.mw.hideOverlay()
+            self.mw.showOverlay(MainCard(self.mw, self.data, search=False))
 
     def closeEvent(self, a0):
         super().closeEvent(a0)

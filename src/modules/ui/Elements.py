@@ -5,7 +5,7 @@ from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon, QAction
 from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
                              QHBoxLayout, QWidget, QCheckBox, QKeySequenceEdit, QMenu, QComboBox, QCompleter)
 
-from . import TM, TM
+from . import TM
 
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -371,7 +371,6 @@ class ClickableFrame(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.checkable = False
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()

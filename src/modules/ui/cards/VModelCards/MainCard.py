@@ -5,14 +5,11 @@ import OpenGL.GL as gl
 from PyQt6.QtCore import QTimerEvent, Qt, QPropertyAnimation, pyqtProperty, QObject, pyqtSignal, QTimer
 from PyQt6.QtGui import QMouseEvent, QCursor, QWheelEvent, QGuiApplication, QSurfaceFormat
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 
 import live2d.v3 as live2d
 from live2d.v3 import StandardParams, MotionPriority
 from live2d.utils import log
 from live2d.utils.lipsync import WavHandler
-
-from modules.ui.Elements import PushButton
 
 class MainCard(QOpenGLWidget):
     class AnimatedParameter(QObject):

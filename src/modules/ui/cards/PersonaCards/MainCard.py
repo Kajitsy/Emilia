@@ -9,7 +9,6 @@ from modules.ui.cards.PersonaCards import EditCard
 
 class MainCard(CardFrame):
     def __init__(self, main_window, data=None, character_id=None):
-        super().__init__()
         self.mw = main_window
         self.data = data
         self.char_id = character_id
@@ -28,7 +27,6 @@ class MainCard(CardFrame):
 
     def initUI(self):
         layout = QHBoxLayout()
-        self.setLayout(layout)
 
         self.display_avatar = QLabel()
         self.display_avatar.setFixedSize(60, 60)
@@ -69,12 +67,18 @@ class MainCard(CardFrame):
                 self.data['external_id'] == self.mw.user_settings.get('default_persona_id'))
 
         self.background_label = QLabel(self.data.get('definition'))
-        self.background_label.setStyleSheet(f"color: {TM.c('disabled_text')}; font-size: 12px;")
         fh_layout.addWidget(self.background_label, alignment=Qt.AlignmentFlag.AlignTop)
 
         self.edit_button = PushButton(self.tr("Edit"))
         self.edit_button.clicked.connect(self.showOverlay)
         layout.addWidget(self.edit_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        super().__init__()
+        self.setLayout(layout)
+
+    def update_theme(self):
+        super().update_theme()
+        self.background_label.setStyleSheet(f"color: {TM.c('disabled_text')}; font-size: 12px;")
 
     def clearDefault(self):
         def clearedDefault(data):

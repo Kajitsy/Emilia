@@ -8,7 +8,6 @@ from modules.Utils import format_text
 
 class ListCard(CardFrame):
     def __init__(self, main_window, data):
-        super().__init__()
         self.mw = main_window
         self.data = data
         self.title = self.data.get('title')
@@ -38,23 +37,30 @@ class ListCard(CardFrame):
         text_layout.addWidget(title_label)
 
         if self.data.get('description'):
-            description_label = QLabel(format_text(self.data.get('description')))
-            description_label.setWordWrap(True)
-            description_label.setStyleSheet(f"color: #{TM.c('disabled_text')};")
-            font = description_label.font()
+            self.description_label = QLabel(format_text(self.data.get('description')))
+            self.description_label.setWordWrap(True)
+            font = self.description_label.font()
             font.setPointSize(9)
-            description_label.setFont(font)
+            self.description_label.setFont(font)
             fm = QFontMetrics(font)
-            description_label.setMaximumHeight(fm.lineSpacing() * 3)
-            text_layout.addWidget(description_label)
-            self.setToolTip(format_text(self.data.get('title')))
+            self.description_label.setMaximumHeight(fm.lineSpacing() * 3)
+            text_layout.addWidget(self.description_label)
 
         if self.data.get('creator_username') == self.mw.username:
             edit_button = PushButton(self.tr("Edit"))
             edit_button.clicked.connect(lambda: self.mw.openCreateScenePage(self.data.get('scene_id')))
             card_layout.addWidget(edit_button, alignment=Qt.AlignmentFlag.AlignRight)
 
+        super().__init__()
         self.setLayout(card_layout)
+
+        if self.data.get('description'):
+            self.setToolTip(format_text(self.data.get('title')))
+
+    def update_theme(self):
+        super().update_theme()
+        if self.data.get('description'):
+            self.description_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)

@@ -697,49 +697,12 @@ class ChatInterface(QWidget):
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
         self.hideCharacterInfoSidebar()
-        self.setStyleSheet("""
-            #ChatInterface {
-                background-color: #202124;
-                color: #e8eaed;
-            }
-            QScrollArea {
-                background-color: #303134;
-                border: none;
-                border-radius: 4px;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #303134;
-                width: 8px;
-                margin: 0px 0 0px 0;
-                border-top-right-radius: 4px;
-                border-bottom-right-radius: 4px; 
-            }
-            QScrollBar::sub-control:vertical {
-                background: #f0f0f0;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:vertical {
-                background: #555;
-                min-height: 20px;
-                border-radius: 4px;
-            }
-            QScrollBar::add-line:vertical {
-                height: 0px;
-                subcontrol-position: bottom;
-                subcontrol-origin: margin;
-            }
-            QScrollBar::sub-line:vertical {
-                height: 0px;
-                subcontrol-position: top;
-                subcontrol-origin: margin;
-            }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #777;
-            }
+        self.setStyleSheet(f"""
+            #ChatInterface {{
+                background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+            }}
+            {TM.get_style('VerticalScrollArea')}
         """)
 
     def openVModelOverlay(self):
