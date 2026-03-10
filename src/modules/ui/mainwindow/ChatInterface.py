@@ -741,7 +741,6 @@ class ChatInterface(QWidget):
                 background: #777;
             }
         """)
-        self.mw.showMainPage()
 
     def openVModelOverlay(self):
         if self.vmodel_show:

@@ -1,4 +1,6 @@
 import hashlib, os, requests
+from platformdirs import user_data_dir
+from pathlib import Path
 
 from PyQt6.QtCore import QThreadPool, QObject, Qt, QRectF, QRunnable, pyqtSignal
 from PyQt6.QtGui import QPixmap, QImage, QPainter, QPainterPath
@@ -17,14 +19,16 @@ class ImageTask(QRunnable):
         self.h = h
         self.radius = radius
         self.cache_dir = cache_dir
+        self.cache_path = Path(user_data_dir("Emilia", False))
+        self.cache_path.mkdir(parents=True, exist_ok=True)
         self.signals = ImageSignals()
         self.setAutoDelete(True)
 
-        os.makedirs(self.cache_dir, exist_ok=True)
-
     def _cache_path(self):
         name = hashlib.md5(self.url.encode()).hexdigest() + ".png"
-        return os.path.join(self.cache_dir, name)
+        path = Path(self.cache_path / self.cache_dir)
+        path.mkdir(parents=True, exist_ok=True)
+        return os.path.join(self.cache_path / self.cache_dir, name)
 
     def _round(self, img: QImage) -> QImage:
         out = QImage(self.w, self.h, QImage.Format.Format_ARGB32)

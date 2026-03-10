@@ -1,10 +1,13 @@
 import sys, ctypes, platform, datetime, os, logging, asyncio
+from platformdirs import user_log_dir
+from pathlib import Path
 
-os.makedirs("logs", exist_ok=True)
+log_dir = Path(user_log_dir("Emilia", False))
+log_dir.mkdir(parents=True, exist_ok=True)
 
 timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-log_filename = os.path.join("logs", f"{timestamp}.log")
-latest_log_filename = os.path.join("logs", "latest.log")
+log_filename = os.path.join(log_dir, f"{timestamp}.log")
+latest_log_filename = os.path.join(log_dir, "latest.log")
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

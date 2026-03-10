@@ -1,11 +1,13 @@
 import ctypes
 import platform
 import webbrowser, os, logging,  json, inspect
+from pathlib import Path
 
 from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                              QPushButton, QFrame, QFileDialog, QApplication)
 from PyQt6.QtGui import QIntValidator, QRegularExpressionValidator, QKeySequence
 from PyQt6.QtCore import QDateTime, QRegularExpression, Qt, QTranslator
+from platformdirs import user_log_dir
 
 from modules import ChatThread
 from modules.ui import TM
@@ -174,7 +176,7 @@ class SettingsPage(QWidget):
                     {"type": "pushbutton", "label": self.tr("Logs Folder"),
                      "buttonlabel": self.tr("Open"),
                      "key": "other/logs_folder",
-                     "click": lambda: os.startfile(os.path.join(os.getcwd(), "logs"))},
+                     "click": lambda: os.startfile(Path(user_log_dir("Emilia", False)))},
                 ]
             }, {
                 "label": f"{self.tr('About Emilia')} {self.mw.version}",
