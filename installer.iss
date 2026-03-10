@@ -46,6 +46,7 @@ Source: ".\dist\main\emilia.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\dist\main\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs
 Source: ".\src\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\src\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs
+Source: ".\src\themes\*"; DestDir: "{app}\themes"; Flags: ignoreversion recursesubdirs
 Source: ".\src\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs
 
 [Icons]
