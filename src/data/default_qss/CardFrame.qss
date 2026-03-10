@@ -1,0 +1,7 @@
+QFrame {
+    border-radius: 4px;
+    color: @text;
+}
+QFrame:hover {
+    background-color: @pressed_bg;
+}

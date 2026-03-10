@@ -88,12 +88,12 @@ class MessageBubble(QFrame):
 
         if self.is_user:
             self.message_label.setStyleSheet(f"color: {self.parent.user_text_message};")
-            self.m_frame.setStyleSheet(f"#messageBubbleFrame {{ background-color: {self.parent.char_back_message}; border-radius: 4px; }}")
+            self.m_frame.setStyleSheet(TM.get_style("MessageBubbleFrame").replace("%%color%%", self.parent.user_back_message))
             layout_2.addWidget(self.m_frame)
             layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
         else:
             self.message_label.setStyleSheet(f"color: {self.parent.char_text_message};")
-            self.m_frame.setStyleSheet(f"#messageBubbleFrame {{ background-color: {self.parent.char_back_message}; border-radius: 4px; }}")
+            self.m_frame.setStyleSheet(TM.get_style("MessageBubbleFrame").replace("%%color%%", self.parent.char_back_message))
             layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
             layout_2.addWidget(self.m_frame)
 

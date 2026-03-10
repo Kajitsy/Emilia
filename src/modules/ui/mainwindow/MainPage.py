@@ -53,7 +53,6 @@ class MainPage(QMainWindow):
                 new_theme = "Light"
             if TM.current != new_theme:
                 self.theme = new_theme
-
         TM.set_theme(self.theme)
         self._is_updating = False
         self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)

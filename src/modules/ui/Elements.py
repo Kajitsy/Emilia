@@ -5,7 +5,7 @@ from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon, QAction
 from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
                              QHBoxLayout, QWidget, QCheckBox, QKeySequenceEdit, QMenu, QComboBox, QCompleter)
 
-from . import TM
+from . import TM, TM
 
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -18,27 +18,7 @@ class PushButton(QPushButton):
 
     def update_theme(self):
         padding = "8px" if self._has_icon else "8px 15px"
-
-        self.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TM.c('element_bg')};
-                color: {TM.c('text')};
-                border: none;
-                border-radius: 4px;
-                padding: {padding};
-                text-align: left;
-            }}
-            QPushButton:disabled {{
-                background-color: {TM.c('pressed_bg')};
-                color: {TM.c('disabled_text')};
-            }}
-            QPushButton:hover {{
-                background-color: {TM.c('hover_bg')};
-            }}
-            QPushButton:pressed, QPushButton:checked {{
-                background-color: {TM.c('pressed_bg')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("PushButton").replace("%%padding%%", padding))
 
     def setIcon(self, icon):
         super().setIcon(icon)
@@ -57,29 +37,7 @@ class TabButton(QPushButton):
 
     def update_theme(self):
         padding = "8px" if self._has_icon else "8px 15px"
-
-        self.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {TM.c('element_bg')};
-                color: {TM.c('text')};
-                border: none;
-                border-radius: 4px;
-                padding: {padding};
-                text-align: left;
-            }}
-            QPushButton:disabled {{
-                background-color: {TM.c('pressed_bg')};
-                color: {TM.c('disabled_text')};
-            }}
-            QPushButton:hover {{
-                background-color: {TM.c('hover_bg')};
-            }}
-            QPushButton:pressed, QPushButton:checked {{
-                background-color: {TM.c('pressed_bg')};
-                border-bottom: 5px solid #555;
-                padding-bottom: 3px;
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("TabButton").replace("%%padding%%", padding))
 
     def setIcon(self, icon):
         super().setIcon(icon)
@@ -93,18 +51,7 @@ class LineEdit(QLineEdit):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QLineEdit {{
-                background-color: {TM.c('element_bg')};
-                color: {TM.c('text')};
-                border-radius: 4px;
-                padding: 7px;
-            }}
-            QPushButton:disabled {{
-                background-color: {TM.c('pressed_bg')};
-                color: {TM.c('disabled_text')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("LineEdit"))
 
     def setIcon(self, icon: QIcon):
         self.addAction(icon, QLineEdit.ActionPosition.LeadingPosition)
@@ -116,24 +63,7 @@ class CheckBox(QCheckBox):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QCheckBox {{
-                color: {TM.c('text')};
-                padding: 4px;
-                border: none;
-                border-radius: 4px;
-            }}
-            QCheckBox::indicator {{
-                width: 16px;
-                height: 16px;
-                border-radius: 4px;
-                background-color: {TM.c('element_bg')};
-                border: 1px solid {TM.c('element_bg')};
-            }}
-            QCheckBox::indicator:checked {{
-                background-color: #fafafa;
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("CheckBox"))
 
 class KeySequenceEdit(QKeySequenceEdit):
     def __init__(self, *args, **kwargs):
@@ -142,13 +72,7 @@ class KeySequenceEdit(QKeySequenceEdit):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            background-color: {TM.c('element_bg')};
-            color: {TM.c('text')};
-            border: 1px solid #5a5b5e;
-            border-radius: 4px;
-            padding: 6px;
-        """)
+        self.setStyleSheet(TM.get_style("KeySequenceEdit"))
 
 class Menu(QMenu):
     def __init__(self, *args, **kwargs):
@@ -157,24 +81,7 @@ class Menu(QMenu):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QMenu {{
-                background-color: {TM.c('menu_bg')};
-                border-radius: 4px;
-            }}
-            QMenu::item {{
-                background-color: {TM.c('menu_bg')};
-                color: {TM.c('text')};
-                padding: 8px 15px;
-                border-radius: 4px;
-            }}
-            QMenu::item:selected {{
-                background-color: {TM.c('menu_item_select')};
-                color: {TM.c('text')};
-                padding: 8px 15px;
-                border-radius: 4px;
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("Menu"))
 
 class PushButtonMenu(QMenu):
     def __init__(self, *args, **kwargs):
@@ -187,22 +94,7 @@ class PushButtonMenu(QMenu):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QMenu {{
-                background-color: {TM.c('hover_bg')};
-                border-radius: 4px;
-            }}
-            QMenu::item {{
-                background-color: {TM.c('hover_bg')};
-                color: {TM.c('text')};
-                padding: 8px 15px;
-                border-radius: 4px;
-            }}
-            QMenu::item:selected {{
-                background-color: {TM.c('element_bg')};
-                color: {TM.c('text')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("PushButtonMenu"))
 
 class ComboBox(QComboBox):
     def __init__(self, *args, **kwargs):
@@ -211,44 +103,7 @@ class ComboBox(QComboBox):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QComboBox {{
-                background-color: {TM.c('element_bg')};
-                color: {TM.c('text')};
-                border: 2px solid {TM.c('hover_bg')};
-                border-radius: 4px;
-                padding: 5px 8px;
-            }}
-            QComboBox:hover {{
-                border: 2px solid {TM.c('disabled_text')};
-            }}
-            QComboBox::drop-down {{
-                border: none;
-                background: transparent;
-                width: 20px;
-            }}
-            QComboBox QAbstractItemView {{
-                background-color: {TM.c('menu_bg')};
-                border: 1px solid {TM.c('hover_bg')};
-                selection-background-color: {TM.c('menu_item_select')};
-                color: {TM.c('text')};
-                border-radius: 4px;
-                padding: 4px;
-            }}
-            QComboBox::item {{
-                background-color: {TM.c('menu_bg')};
-                padding: 5px 10px;
-                border-radius: 4px;
-            }}
-            QComboBox::item:selected {{
-                background-color: {TM.c('menu_item_select')};
-            }}
-            QComboBox:disabled {{
-                background-color: {TM.c('pressed_bg')};
-                color: {TM.c('disabled_text')};
-                border: 2px solid {TM.c('pressed_bg')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("ComboBox"))
 
 class CardFrame(QFrame):
     def __init__(self, *args, **kwargs):
@@ -258,17 +113,8 @@ class CardFrame(QFrame):
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()
 
-
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QFrame {{
-                border-radius: 4px;
-                color: {TM.c('text')};
-            }}
-            QFrame:hover {{
-                background-color: {TM.c('pressed_bg')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("CardFrame"))
 
 class HorizontalScrollArea(QScrollArea):
     def __init__(self, parent=None):
@@ -281,46 +127,7 @@ class HorizontalScrollArea(QScrollArea):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QScrollArea {{
-                background-color: {TM.c('primary_bg')};
-                border: none;
-                border-radius: 4px;
-            }}
-            QScrollBar:horizontal {{
-                border: none;
-                background: {TM.c('primary_bg')};
-                height: 8px;
-                margin: 0px 0 0px 0;
-                border-bottom-right-radius: 4px;
-                border-bottom-left-radius: 4px; 
-            }}
-            QScrollBar::sub-control:horizontal {{
-                background: {TM.c('scroll_sub')};
-                border-radius: 4px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {TM.c('scroll_handle')};
-                min-width: 20px;
-                border-radius: 4px;
-            }}
-            QScrollBar::add-line:horizontal {{
-                width: 0px;
-                subcontrol-position: right;
-                subcontrol-origin: margin;
-            }}
-            QScrollBar::sub-line:horizontal {{
-                width: 0px;
-                subcontrol-position: left;
-                subcontrol-origin: margin;
-            }}
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
-                background: none;
-            }}
-            QScrollBar::handle:horizontal:hover {{
-                background: {TM.c('scroll_hover')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("HorizontalScrollArea"))
 
     def wheelEvent(self, event: QWheelEvent):
         hbar = self.horizontalScrollBar()
@@ -339,46 +146,7 @@ class VerticalScrollArea(QScrollArea):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-            QScrollArea {{
-                background-color: {TM.c('primary_bg')};
-                border: none;
-                border-radius: 4px;
-            }}
-            QScrollBar:vertical {{
-                border: none;
-                background: {TM.c('primary_bg')};
-                height: 8px;
-                margin: 0px 0 0px 0;
-                border-bottom-right-radius: 4px;
-                border-bottom-left-radius: 4px; 
-            }}
-            QScrollBar::sub-control:vertical {{
-                background: {TM.c('scroll_sub')};
-                border-radius: 4px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {TM.c('scroll_handle')};
-                min-width: 20px;
-                border-radius: 4px;
-            }}
-            QScrollBar::add-line:vertical {{
-                width: 0px;
-                subcontrol-position: right;
-                subcontrol-origin: margin;
-            }}
-            QScrollBar::sub-line:vertical {{
-                width: 0px;
-                subcontrol-position: left;
-                subcontrol-origin: margin;
-            }}
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
-                background: none;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background: {TM.c('scroll_hover')};
-            }}
-        """)
+        self.setStyleSheet(TM.get_style("VerticalScrollArea"))
 
     def wheelEvent(self, event: QWheelEvent):
         hbar = self.verticalScrollBar()
@@ -571,66 +339,8 @@ class SearchLineEdit(QLineEdit):
         self.update_theme()
 
     def update_theme(self):
-        self.popup.setStyleSheet(f"""
-            QListView {{
-                background-color: {TM.c('element_bg')};
-                border-radius: 4px;
-            }}
-            QListView::item {{
-                color: {TM.c('text')};
-                background-color: {TM.c('element_bg')};
-                padding: 4px 15px;
-                border-radius: 4px;
-            }}
-            QListView::item:selected {{
-                background-color: {TM.c('hover_bg')};
-            }}
-            QScrollBar:vertical {{
-                border: none;
-                background: {TM.c('element_bg')};
-                width: 8px;
-                margin: 0px 0 0px 0;
-                border-top-right-radius: 4px;
-                border-bottom-right-radius: 4px; 
-            }}
-            QScrollBar::sub-control:vertical {{
-                background: {TM.c('scroll_sub')};
-                border-radius: 4px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {TM.c('scroll_handle')};
-                min-height: 20px;
-                border-radius: 4px;
-            }}
-            QScrollBar::add-line:vertical {{
-                height: 0px;
-                subcontrol-position: bottom;
-                subcontrol-origin: margin;
-            }}
-            QScrollBar::sub-line:vertical {{
-                height: 0px;
-                subcontrol-position: top;
-                subcontrol-origin: margin;
-            }}
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
-                background: none;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background: {TM.c('scroll_hover')};
-            }}
-        """)
-        self.setStyleSheet(f"""
-            QLineEdit {{
-                background-color: {TM.c('element_bg')};
-                color: {TM.c('text')};
-                border-radius: 4px;
-                padding: 7px;
-            }}
-            QPushButton:disabled {{
-                background-color: {TM.c('pressed_bg')};
-                color: {TM.c('disabled_text')};
-            }}
-        """)
+        self.popup.setStyleSheet(TM.get_style("SearchPopup"))
+        self.setStyleSheet(TM.get_style("SearchLineEdit"))
 
     def setIcon(self, icon: QIcon):
         self.addAction(icon, QLineEdit.ActionPosition.LeadingPosition)
@@ -667,41 +377,20 @@ class ClickableFrame(QFrame):
         self.update_theme()
 
     def update_theme(self):
-        self.default_style = f"""
-            QFrame {{
-                border-radius: 4px;
-            }}
-            QFrame:hover {{
-                background-color: {TM.c('pressed_bg')};
-            }}
-        """
-        self.press_style = f"""
-            QFrame {{
-                border-radius: 4px;
-                background-color: {TM.c('pressed_bg')};
-            }}
-        """
-
         if self.checkable:
-            self.setStyleSheet(self.press_style)
+            self.setStyleSheet(TM.get_style("PressedFrame"))
         else:
-            self.setStyleSheet(self.default_style)
+            self.setStyleSheet(TM.get_style("ClickableFrame"))
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         self.checkable = not self.checkable
-        if self.checkable:
-            self.setStyleSheet(self.press_style)
-        else:
-            self.setStyleSheet(self.default_style)
+        self.update_theme()
         self.mousePress(event)
 
     def setCheckable(self, check):
         self.checkable = check
-        if self.checkable:
-            self.setStyleSheet(self.press_style)
-        else:
-            self.setStyleSheet(self.default_style)
+        self.update_theme()
 
     def mousePress(self, *args, **kwargs):
         pass
@@ -738,12 +427,7 @@ class LeftSidebar(QFrame):
         self.update_theme()
 
     def update_theme(self):
-        self.setStyleSheet(f"""
-        #leftSidebar {{
-            background-color: {TM.c('primary_bg')};
-            border-radius: 4px;
-            border: none;
-        }}""")
+        self.setStyleSheet(TM.get_style("LeftSidebar"))
         self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('icon')))
         self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar(TM.c('icon')))
         self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('icon')))
@@ -799,8 +483,8 @@ class LeftSidebar(QFrame):
         self.profile_button_2 = PushButton()
         if self.mw.me_has_avatar:
             self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
-                                   45, 45, 100, callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
-                                   error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon"))))
+                                      45, 45, 100, callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
+                                      error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon"))))
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon")))
         self.profile_button_2.clicked.connect(lambda: self.showProfileContextMenu(self.profile_button_2))

@@ -1,0 +1,4 @@
+#messageBubbleFrame {
+    background-color: %%color%%;
+    border-radius: 4px;
+}
