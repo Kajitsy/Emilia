@@ -19,6 +19,8 @@
     "char_back_message": "#f1f3f4",
     "char_text_message": "#202124",
     "user_back_message": "#e8f0fe",
-    "user_text_message": "#202124"
+    "user_text_message": "#202124",
+    "avatar_back": "#f47c3b",
+    "avatar_color": "#ffffff"
   }
 }

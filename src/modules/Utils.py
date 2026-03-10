@@ -3,6 +3,8 @@ from PyQt6.QtCore import Qt, QRectF
 from PyQt6.QtGui import QPixmap, QColor, QPainter, QPainterPath, QLinearGradient, QBrush, QFont
 from PyQt6.sip import isdeleted
 
+from modules.ui import TM
+
 def format_text(text, username="User"):
     replacements = [
         (r"^(#{1,6})\s*(.+)$", lambda m: f"<h{len(m.group(1))}>{m.group(2)}</h{len(m.group(1))}>", re.MULTILINE),
@@ -44,7 +46,7 @@ def color_avatar(avatar_label, avatar_w, avatar_h, name, radius=100):
     painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
     gradient = QLinearGradient(0, 0, avatar_w, avatar_h * 0.7)
-    gradient.setColorAt(0, QColor("#f47c3b"))
+    gradient.setColorAt(0, QColor(TM.c('avatar_back')))
     gradient.setColorAt(1, Qt.GlobalColor.transparent)
 
     painter.fillRect(pixmap.rect(), QBrush(gradient))
@@ -53,7 +55,7 @@ def color_avatar(avatar_label, avatar_w, avatar_h, name, radius=100):
     font.setBold(True)
     font.setPointSize(int(avatar_h / 3))
     painter.setFont(font)
-    painter.setPen(QColor(255, 255, 255))
+    painter.setPen(QColor(TM.c('avatar_color')))
 
     first_letter = name[0].upper() if name else ""
     painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, first_letter)

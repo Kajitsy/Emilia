@@ -24,7 +24,9 @@ class ThemeManager(QObject):
                 "scroll_handle": "#555",
                 "scroll_hover": "#777",
                 "mw_back": "#202124",
-                "mw_color": "#e8eaed"
+                "mw_color": "#e8eaed",
+                "avatar_back": "#f47c3b",
+                "avatar_color": "#ffffff"
             }
         }
         self.current = ""
