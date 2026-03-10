@@ -2,6 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
 
+from modules.ui import TM
 from modules.ui.Elements import PushButton, CardFrame
 from modules.Utils import format_text, format_number, color_avatar
 
@@ -55,7 +56,7 @@ class MainCard(CardFrame):
             author_label = QLabel(self.tr("Author: @") + self.author)
             font = author_label.font()
             font.setPointSize(8)
-            author_label.setStyleSheet("color: #a2a2ac;")
+            author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
             author_label.setFont(font)
             text_layout.addWidget(author_label)
 

@@ -2,6 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
 
+from modules.ui import TM
 from modules.ui.Elements import PushButton, CardFrame
 from modules.Utils import format_text, format_number, color_avatar
 
@@ -50,7 +51,7 @@ class ListCard(CardFrame):
         if self.data.get('title'):
             description_label = QLabel(format_text(self.data.get('title'), self.name))
             description_label.setWordWrap(True)
-            description_label.setStyleSheet("color: #a2a2ac;")
+            description_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
             font = description_label.font()
             font.setPointSize(9)
             description_label.setFont(font)
@@ -60,7 +61,7 @@ class ListCard(CardFrame):
             self.setToolTip(format_text(self.data.get('title')))
 
         add_info = QLabel()
-        add_info.setStyleSheet("color: #a2a2ac;")
+        add_info.setStyleSheet(f"color: {TM.c('disabled_text')};")
         font = add_info.font()
         font.setPointSize(10)
         add_info.setFont(font)

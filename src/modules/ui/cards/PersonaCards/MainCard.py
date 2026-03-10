@@ -2,6 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
 
+from modules.ui import TM
 from modules.ui.Elements import PushButton, Menu, CardFrame
 from modules.Utils import color_avatar
 from modules.ui.cards.PersonaCards import EditCard
@@ -68,7 +69,7 @@ class MainCard(CardFrame):
                 self.data['external_id'] == self.mw.user_settings.get('default_persona_id'))
 
         self.background_label = QLabel(self.data.get('definition'))
-        self.background_label.setStyleSheet("color: #a2a2ac; font-size: 12px;")
+        self.background_label.setStyleSheet(f"color: {TM.c('disabled_text')}; font-size: 12px;")
         fh_layout.addWidget(self.background_label, alignment=Qt.AlignmentFlag.AlignTop)
 
         self.edit_button = PushButton(self.tr("Edit"))

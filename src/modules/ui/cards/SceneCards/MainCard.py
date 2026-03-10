@@ -1,6 +1,7 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QVBoxLayout, QLabel
 
+from modules.ui import TM
 from modules.ui.Elements import CardFrame
 
 class MainCard(CardFrame):
@@ -37,7 +38,7 @@ class MainCard(CardFrame):
             author_label = QLabel(self.tr("Author: @") + self.author)
             font = author_label.font()
             font.setPointSize(8)
-            author_label.setStyleSheet("color: #a2a2ac;")
+            author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
             author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.author)
             author_label.setCursor(Qt.CursorShape.PointingHandCursor)
             author_label.setFont(font)

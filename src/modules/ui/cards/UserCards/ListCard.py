@@ -1,6 +1,7 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
 
+from modules.ui import TM
 from modules.ui.Elements import CardFrame
 from modules.Utils import format_number, color_avatar
 
@@ -45,7 +46,7 @@ class ListCard(CardFrame):
             stat_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             if self.data.get('character_info', {}).get('num_interactions'):
                 interactions_label = QLabel(format_number(self.data.get('character_info', {}).get('num_interactions')) + self.tr(" Chats"))
-                interactions_label.setStyleSheet("color: #a2a2ac;")
+                interactions_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
                 font = interactions_label.font()
                 font.setPointSize(10)
                 interactions_label.setFont(font)
@@ -56,12 +57,12 @@ class ListCard(CardFrame):
                 font = span_label.font()
                 font.setPointSize(10)
                 span_label.setFont(font)
-                span_label.setStyleSheet("color: #a2a2ac;")
+                span_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
                 stat_layout.addWidget(span_label)
 
             if self.data.get('character_info', {}).get('num_characters'):
                 characters_label = QLabel(format_number(self.data.get('character_info', {}).get('num_characters')) + self.tr(" Characters"))
-                characters_label.setStyleSheet("color: #a2a2ac;")
+                characters_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
                 font = characters_label.font()
                 font.setPointSize(10)
                 characters_label.setFont(font)
