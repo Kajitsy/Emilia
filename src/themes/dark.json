@@ -20,5 +20,6 @@
     "char_text_message": "#e8eaed",
     "user_back_message": "#303136",
     "user_text_message": "#e8eaed"
-  }
+  },
+  "use_default_elements": false
 }
