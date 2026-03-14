@@ -81,6 +81,19 @@ class ThemeManager(QObject):
                 style = style.replace(f"@{key}", value)
             self.default_styles[element] = style
 
+    def check_theme(self, theme_id):
+        for root, _, files in os.walk(self.theme_path):
+            if 'theme.json' in files:
+                file_path = os.path.join(root, 'theme.json')
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        theme = json.load(f)
+                        if theme.get('theme_id') == theme_id:
+                            return True
+                except (json.JSONDecodeError, OSError):
+                    continue
+        return False
+
     def get_themes_name(self):
         names = []
         for root, _, files in os.walk(self.theme_path):

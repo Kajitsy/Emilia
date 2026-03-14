@@ -6,13 +6,7 @@ import curl_cffi.curl
 
 from modules.logic.VTubeCore import EEC
 
-from modules.api import WSClient
-from modules.api import CharacterAPI
-from modules.api import ChatsAPI
-from modules.api import UsersAPI
-from modules.api import VoicesAPI
-from modules.api import ScenesAPI
-
+from modules.api import WSClient, CharacterAPI, ChatsAPI, ThemesEmiAPI, UsersAPI, VoicesAPI, ScenesAPI
 
 def asyncSlot(func):
     @wraps(func)
@@ -78,6 +72,11 @@ class ChatThread(QThread):
     update_scene_signal = pyqtSignal(object)
     remove_scene_signal = pyqtSignal(object)
 
+    get_themes_signal = pyqtSignal(object)
+    get_user_themes_signal = pyqtSignal(object)
+    get_theme_signal = pyqtSignal(object)
+    download_theme_signal = pyqtSignal(object)
+
     join_or_create_session_signal = pyqtSignal(object)
 
     get_scenes_curated_signal = pyqtSignal(object)
@@ -104,6 +103,7 @@ class ChatThread(QThread):
         self.client = WSClient()
         self.api_chars = CharacterAPI(self.client)
         self.api_chats = ChatsAPI(self.client)
+        self.api_themes = ThemesEmiAPI(self.client)
         self.api_users = UsersAPI(self.client)
         self.api_voices = VoicesAPI(self.client)
         self.api_scenes = ScenesAPI(self.client)
@@ -358,6 +358,22 @@ class ChatThread(QThread):
             char_id = res['character']['external_id']
             if char_id in self.characters:
                 self.characters[char_id]['character'] = res['character']
+
+    @asyncSlot
+    async def get_themes(self, query: str = None, author: str = None):
+        self.get_themes_signal.emit(await self.api_themes.get_themes(query, author))
+
+    @asyncSlot
+    async def get_user_themes(self, creator_id: int):
+        self.get_user_themes_signal.emit(await self.api_themes.get_user_themes(creator_id))
+
+    @asyncSlot
+    async def get_theme(self, theme_id: str):
+        self.get_theme_signal.emit(await self.api_themes.get_theme(theme_id))
+
+    @asyncSlot
+    async def download_theme(self, theme_name: str, theme_id: str):
+        self.download_theme_signal.emit(await self.api_themes.download_theme(theme_name, theme_id))
 
     @asyncSlot
     async def get_user_settings(self):

@@ -1,6 +1,7 @@
 {
   "name": "Dark",
   "titlebar": "dark",
+  "theme_id": "dark",
   "colors": {
     "element_bg": "#494a4d",
     "text": "#e8eaed",

@@ -23,12 +23,14 @@ class BaseClient:
             headers.update(additional)
         return headers
 
-    async def _make_request(self, method: str, url: str, headers: dict, data=None, json_data=None, return_text=False):
+    async def _make_request(self, method: str, url: str, headers: dict, data=None, json_data=None, return_text=False, is_bytes=False):
         try:
             response = await self.session.request(method, url, headers=headers, data=data, json=json_data, timeout=100)
             logging.debug(f"Req: {url} [{response.status_code}]")
 
             if response.status_code in [200, 207, 400]:
+                if is_bytes:
+                    return response.content
                 return response.json() if not return_text else json.loads(response.text)
             else:
                 logging.error(f"Request failed: {url} - {response.status_code}")
@@ -58,11 +60,11 @@ class BaseClient:
 
         return await self._make_request(method, url, headers, return_text=text, **kwargs)
 
-    async def custom_request(self, url: str, data=None, method: str = "get", text: bool = False, headers: dict = None):
+    async def custom_request(self, url: str, data=None, method: str = "get", text: bool = False, headers: dict = None, is_bytes: bool = False, **kwargs):
         if data is None:
             data = {}
         if headers is None:
             headers = {}
 
         kwargs = {"json_data": data} if method.lower() == "post" else {"data": data}
-        return await self._make_request(method, url, headers, return_text=text, **kwargs)
+        return await self._make_request(method, url, headers, return_text=text, is_bytes=is_bytes, **kwargs)

@@ -18,7 +18,7 @@ from modules.ui.Elements import (PushButton, HorizontalScrollArea, ClickableFram
                                  VerticalScrollPage, HorizontalScrollPage, TabButton, SearchLineEdit)
 from modules.Utils import color_avatar
 from modules.logic.QThreads import DiscordRPCThread
-from modules.ui.cards import CharacterCards, SceneCards, VoiceCards
+from modules.ui.cards import CharacterCards, SceneCards, VoiceCards, ThemeCards
 from modules.ui.pages import UserPages, ScenePages, CharacterPages
 from modules.ui.mainwindow import SettingsPage, SearchPage, ChatInterface
 from modules.ui import TM
@@ -809,7 +809,7 @@ class MainPage(QMainWindow):
         self.chat_thread.character_search(search_query)
         self.search_bar.setText("")
 
-    def showMainPage(self, widget: QWidget | None):
+    def showMainPage(self, widget: QWidget = None):
         if widget: widget.setVisible(False)
         self.main_content_area.setCurrentWidget(self.main_page)
         self.current_chat_interface = None
@@ -883,6 +883,11 @@ class MainPage(QMainWindow):
         if self.current_chat_interface:
             self.current_chat_interface.setVisible(False)
             self.search_bar.setText("")
+
+    def openThemeOverlay(self, theme_id):
+        overlay = ThemeCards.MainCard(self, theme_id)
+        self.hide_overlay = False
+        self.showOverlay(overlay)
 
     def addCharacterByCategory(self, characters):
         for i in reversed(range(self.category_layout.count())):

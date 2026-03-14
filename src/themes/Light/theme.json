@@ -1,6 +1,7 @@
 {
   "name": "Light",
   "titlebar": "light",
+  "theme_id": "light",
   "colors": {
     "element_bg": "#dee1e5",
     "text": "#202124",
