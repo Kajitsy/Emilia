@@ -28,7 +28,7 @@ class ImageTask(QRunnable):
         name = hashlib.md5(self.url.encode()).hexdigest() + ".png"
         path = Path(self.cache_path / self.cache_dir)
         path.mkdir(parents=True, exist_ok=True)
-        return os.path.join(self.cache_path / self.cache_dir, name)
+        return os.path.join(path, name)
 
     def _round(self, img: QImage) -> QImage:
         out = QImage(self.w, self.h, QImage.Format.Format_ARGB32)
