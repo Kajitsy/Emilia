@@ -33,7 +33,7 @@ class MainPage(QWidget):
         self.chat_thread.get_user(self.profile_id)
         self.chat_thread.voices_search_username(self.profile_id)
         self.chat_thread.get_scenes_by_user(self.profile_id)
-        self.chat_thread.get_user_themes(self.mw.author_id)
+        self.chat_thread.get_user_themes(self.profile_id)
         if self.is_me:
             self.chat_thread.get_user_personas()
             self.chat_thread.get_upvoted_characters()
