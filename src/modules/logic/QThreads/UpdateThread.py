@@ -1,8 +1,9 @@
-import os, shutil, requests
+import os, shutil, requests, subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from platformdirs import user_data_dir
 
 from PyQt6.QtCore import QThread, pyqtSignal
-from PyQt6.QtWidgets import QApplication
 
 class UpdateThread(QThread):
     finished_signal = pyqtSignal(bool)
@@ -17,7 +18,7 @@ class UpdateThread(QThread):
         self.files_to_removed = files_to_removed
         self.total_files_count = len(self.files_to_download)
         self.downloaded_files_count = 0
-        self.update_cache_dir = "cache/update"
+        self.update_cache_dir = Path(user_data_dir("Emilia", False), "cache", "update")
 
     def run(self):
         if self.total_files_count == 0:
@@ -74,18 +75,27 @@ class UpdateThread(QThread):
             win_path = file_path.replace("/", "\\")
             deletion_commands += f'if exist "{win_path}" del /f /q "{win_path}"\n    '
 
-        bat_script = f"""
-        @echo off
+        bat_script = f"""@echo off
+        setlocal
         cd /d "%~dp0"
-        echo Waiting for application to close...
-        timeout /t 5 /nobreak > NUL
+
+        echo Waiting for process to terminate...
+        timeout /t 3 /nobreak > NUL
+
+        :CHECK_LOCK
+        tasklist /FI "IMAGENAME eq emilia.exe" 2>NUL | find /I /N "emilia.exe">NUL
+        if "%ERRORLEVEL%"=="0" (
+            echo Application is still running, waiting...
+            timeout /t 2 /nobreak > NUL
+            goto CHECK_LOCK
+        )
 
         echo Deleting obsolete files...
-        if exist manifest.json del /f /q manifest.json
+        if exist "manifest.json" del /f /q "manifest.json"
         {deletion_commands}
 
         echo Installing new files...
-        xcopy "{update_dir}" "." /E /H /Y /Q
+        xcopy "{update_dir}" "." /E /H /Y /Q /I
 
         echo Cleaning up...
         rmdir /s /q "{update_dir}"
@@ -93,11 +103,15 @@ class UpdateThread(QThread):
         echo Starting application...
         start "" "emilia.exe"
 
-        del "%~f0"
+        echo Update complete.
+        (goto) 2>nul & del "%~f0"
         """
 
-        with open("update_installer.bat", "w") as f:
+        script_name = "update_installer.bat"
+        with open(script_name, "w", encoding="utf-8") as f:
             f.write(bat_script)
 
-        os.startfile("update_installer.bat")
-        QApplication.instance().quit()
+        subprocess.Popen(["cmd", "/c", script_name],
+                         creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+        os._exit(0)
