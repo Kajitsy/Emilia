@@ -81,43 +81,41 @@ class ThemeManager(QObject):
                 style = style.replace(f"@{key}", value)
             self.default_styles[element] = style
 
-    def get_themes_count(self):
-        count = 0
-        for root, _, files in os.walk(self.theme_path):
-            for file in files:
-                if file.endswith(".json"):
-                    theme = json.load(open(os.path.join(root, file)))
-                    if theme.get('name'):
-                        count += 1
-        return count
-
     def get_themes_name(self):
         names = []
         for root, _, files in os.walk(self.theme_path):
-            for file in files:
-                if file.endswith(".json"):
-                    theme = json.load(open(os.path.join(root, file)))
-                    if theme.get('name'):
-                        names.append(theme['name'])
+            if 'theme.json' in files:
+                file_path = os.path.join(root, 'theme.json')
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        theme = json.load(f)
+                        name = theme.get('name')
+                        if name:
+                            names.append(theme['name'])
+                except (json.JSONDecodeError, OSError):
+                    continue
         return names
 
     def get_themes(self):
         themes = {}
         for root, _, files in os.walk(self.theme_path):
-            for file in files:
-                if file.endswith(".json"):
-                    theme = json.load(open(os.path.join(root, file)))
-                    if theme.get('name'):
-                        themes[theme.get('name')] = theme
+            if 'theme.json' in files:
+                file_path = os.path.join(root, 'theme.json')
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        theme = json.load(f)
+                        name = theme.get('name')
+                        if name:
+                            themes[name] = theme
+                except (json.JSONDecodeError, OSError):
+                    continue
         return themes
 
     def get_theme(self, theme_name):
         if theme_name not in self.get_themes():
             return self.recovery_theme
-        for root, _, files in os.walk(self.theme_path):
-            for file in files:
-                if file.endswith(".json"):
-                    theme = json.load(open(os.path.join(root, file)))
-                    if theme.get('name') == theme_name:
-                        return theme
-        return {}
+        path = Path(self.theme_path, theme_name, "theme.json")
+        if os.path.isfile(path):
+            return json.load(open(path, "r", encoding="utf-8"))
+        else:
+            return self.recovery_theme
