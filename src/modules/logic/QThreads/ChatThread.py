@@ -360,8 +360,8 @@ class ChatThread(QThread):
                 self.characters[char_id]['character'] = res['character']
 
     @asyncSlot
-    async def get_themes(self, query: str = None, author: str = None):
-        self.get_themes_signal.emit(await self.api_themes.get_themes(query, author))
+    async def get_themes(self, query: str = "", author: str = "", count: int = 0, offset: int = 0):
+        self.get_themes_signal.emit(await self.api_themes.get_themes(query, author, count, offset))
 
     @asyncSlot
     async def get_user_themes(self, creator_id: int):

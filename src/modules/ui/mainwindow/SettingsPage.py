@@ -15,7 +15,7 @@ from modules.ui.Elements import (PushButton, LineEdit, CheckBox, KeySequenceEdit
                                  ComboBox, VerticalScrollPage, CardFrame)
 from modules.Utils import format_text
 from modules.logic.QThreads import DiscordRPCThread
-from modules.ui.cards import UserCards, CookieCards
+from modules.ui.cards import UserCards, CookieCards, ThemeCards
 from modules.ui.mainwindow import MainPage
 
 class SettingsPage(QWidget):
@@ -111,6 +111,7 @@ class SettingsPage(QWidget):
                 "settings": [
                     {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
                     {"type": "combobox", "label": self.tr("App theme"), "items": TM.get_themes_name(), "key": "app_theme"},
+                    {"type": "pushbutton", "label": self.tr("Theme Catalog"), "buttonlabel": self.tr("Open"), "key": "app_theme_catalog", "click": self.openThemeCatalog},
                     {"type": "checkbox", "label": self.tr("Sync theme with system theme"), "key": "app_theme_system_sync"},
                     {"type": "checkbox", "label": self.tr("Working in the background"), "key": "backwork", "def_value": True},
                     {"type": "checkbox", "label": self.tr("Display text formatting buttons"), "key": "show_format_buttons", "def_value": False},
@@ -207,6 +208,10 @@ class SettingsPage(QWidget):
 
     def openUserSettings(self):
         overlay = UserCards.EditCard(self.mw)
+        self.mw.showOverlay(overlay)
+
+    def openThemeCatalog(self):
+        overlay = ThemeCards.SearchCard(self.mw)
         self.mw.showOverlay(overlay)
 
     def changeVModelFolder(self):
