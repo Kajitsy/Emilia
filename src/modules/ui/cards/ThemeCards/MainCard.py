@@ -63,7 +63,8 @@ class MainCard(QFrame):
 
         if TM.check_theme(self.theme_id):
             self.button_layout.addWidget(self.sel_button, alignment=Qt.AlignmentFlag.AlignRight)
-            self.button_layout.addWidget(self.uninstall_button, alignment=Qt.AlignmentFlag.AlignRight)
+            if self.name != "Dark" and self.name != "Light":
+                self.button_layout.addWidget(self.uninstall_button, alignment=Qt.AlignmentFlag.AlignRight)
         else:
             self.button_layout.addWidget(self.install_button, alignment=Qt.AlignmentFlag.AlignRight)
             self.button_layout.addWidget(self.install_sel_button, alignment=Qt.AlignmentFlag.AlignRight)
