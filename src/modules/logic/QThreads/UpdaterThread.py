@@ -1,4 +1,6 @@
 import os, hashlib, json, requests
+import sys
+
 from PyQt6.QtCore import QThread, pyqtSignal
 
 class UpdaterThread(QThread):
@@ -20,6 +22,7 @@ class UpdaterThread(QThread):
 
     def generate_local_manifest(self):
         if not os.path.exists('./manifest.json'):
+            base_path = os.path.dirname(sys.executable)
             INCLUDE_FILES = [
                 "emilia.exe",
                 "icon.ico",
@@ -28,8 +31,9 @@ class UpdaterThread(QThread):
             INCLUDE_DIRS = [
                 "_internal",
                 "lang",
-                "themes/Dark",
                 "themes/Light",
+                "themes/Dark",
+                "data/default_qss"
             ]
 
             def get_hash(filepath):
@@ -44,21 +48,21 @@ class UpdaterThread(QThread):
 
 
             for filename in INCLUDE_FILES:
-                full_path = os.path.join("..", filename)
+                full_path = os.path.join(base_path, filename)
                 if os.path.exists(full_path):
                     file_hash = get_hash(full_path)
                     if file_hash:
                         self.local_manifest["files"][filename] = file_hash
 
             for directory in INCLUDE_DIRS:
-                dir_full_path = os.path.join("..", directory)
+                dir_full_path = os.path.join(base_path, directory)
                 if not os.path.exists(dir_full_path):
                     continue
 
                 for root, _, files in os.walk(dir_full_path):
                     for filename in files:
                         full_path = os.path.join(root, filename)
-                        rel_path = os.path.relpath(full_path, "..").replace("\\", "/")
+                        rel_path = os.path.relpath(full_path, base_path).replace("\\", "/")
 
                         file_hash = get_hash(full_path)
                         if file_hash:
