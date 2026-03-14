@@ -40,7 +40,10 @@ class MainCard(QFrame):
         self.install_sel_button.clicked.connect(self.installSelectTheme)
 
         self.install_button = PushButton(self.tr("Install"))
-        self.install_button.clicked.connect(self.selectTheme)
+        self.install_button.clicked.connect(self.downloadSelectTheme)
+
+        self.sel_button = PushButton(self.tr("Select"))
+        self.sel_button.clicked.connect(self.selectTheme)
 
         self.uninstall_button = PushButton(self.tr("Uninstall"))
         self.uninstall_button.clicked.connect(self.uninstallTheme)
@@ -59,6 +62,7 @@ class MainCard(QFrame):
         self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
 
         if TM.check_theme(self.theme_id):
+            self.button_layout.addWidget(self.sel_button, alignment=Qt.AlignmentFlag.AlignRight)
             self.button_layout.addWidget(self.uninstall_button, alignment=Qt.AlignmentFlag.AlignRight)
         else:
             self.button_layout.addWidget(self.install_button, alignment=Qt.AlignmentFlag.AlignRight)
@@ -76,6 +80,12 @@ class MainCard(QFrame):
 
     def selectTheme(self):
         self.mw.hideOverlay()
+        TM.set_theme(self.name)
+        self.mw.theme = self.name
+        self.mw.settings.setValue("theme", self.name)
+
+    def downloadSelectTheme(self):
+        self.mw.hideOverlay()
         self.mw.chat_thread.download_theme(self.name, self.theme_id)
 
     def installSelectTheme(self):
@@ -87,7 +97,6 @@ class MainCard(QFrame):
     def _installSelectTheme(self, path):
         self.mw.chat_thread.download_theme_signal.disconnect(self._installSelectTheme)
         self.mw.hideOverlay()
-        self.mw.showMainPage()
         TM.set_theme(self.name)
         self.mw.theme = self.name
         self.mw.settings.setValue("theme", self.name)
