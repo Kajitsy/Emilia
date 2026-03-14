@@ -28,6 +28,8 @@ class UpdaterThread(QThread):
             INCLUDE_DIRS = [
                 "_internal",
                 "lang",
+                "themes/Dark",
+                "themes/Light",
             ]
 
             def get_hash(filepath):
