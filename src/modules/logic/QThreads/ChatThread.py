@@ -6,7 +6,7 @@ import curl_cffi.curl
 
 from modules.logic.VTubeCore import EEC
 
-from modules.api import WSClient, CharacterAPI, ChatsAPI, ThemesEmiAPI, UsersAPI, VoicesAPI, ScenesAPI
+from modules.api import WSClient, CharacterAPI, ChatsAPI, EmiliaAPI, UsersAPI, VoicesAPI, ScenesAPI
 
 def asyncSlot(func):
     @wraps(func)
@@ -103,7 +103,7 @@ class ChatThread(QThread):
         self.client = WSClient()
         self.api_chars = CharacterAPI(self.client)
         self.api_chats = ChatsAPI(self.client)
-        self.api_themes = ThemesEmiAPI(self.client)
+        self.api_emilia = EmiliaAPI(self.client)
         self.api_users = UsersAPI(self.client)
         self.api_voices = VoicesAPI(self.client)
         self.api_scenes = ScenesAPI(self.client)
@@ -361,19 +361,19 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_themes(self, query: str = "", author: str = "", count: int = 0, offset: int = 0):
-        self.get_themes_signal.emit(await self.api_themes.get_themes(query, author, count, offset))
+        self.get_themes_signal.emit(await self.api_emilia.get_themes(query, author, count, offset))
 
     @asyncSlot
     async def get_user_themes(self, creator_id: int):
-        self.get_user_themes_signal.emit(await self.api_themes.get_user_themes(creator_id))
+        self.get_user_themes_signal.emit(await self.api_emilia.get_user_themes(creator_id))
 
     @asyncSlot
     async def get_theme(self, theme_id: str):
-        self.get_theme_signal.emit(await self.api_themes.get_theme(theme_id))
+        self.get_theme_signal.emit(await self.api_emilia.get_theme(theme_id))
 
     @asyncSlot
     async def download_theme(self, theme_name: str, theme_id: str):
-        self.download_theme_signal.emit(await self.api_themes.download_theme(theme_name, theme_id))
+        self.download_theme_signal.emit(await self.api_emilia.download_theme(theme_name, theme_id))
 
     @asyncSlot
     async def get_user_settings(self):

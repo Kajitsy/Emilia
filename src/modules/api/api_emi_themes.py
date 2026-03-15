@@ -1,6 +1,6 @@
 import asyncio, zipfile, io, os
 
-class ThemesEmiAPI:
+class EmiliaAPI:
     def __init__(self, client):
         self.url = "https://api.emilia.ateez.ru/"
         self.client = client
