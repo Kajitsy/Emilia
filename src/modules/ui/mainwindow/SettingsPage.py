@@ -93,10 +93,8 @@ class SettingsPage(QWidget):
             "cy_GB": {"title": self.tr("Welsh"), "lang_available": False, "google_code": "cy"},
             "xh_ZA": {"title": self.tr("Xhosa"), "lang_available": False, "google_code": "xh"}
         }
-        self.update_servers = {
-            "https://germany.emiupd.ateez.ru/": self.tr("Germany"),
-            "https://russia.emiupd.ateez.ru/": self.tr("Russia")
-        }
+        self.update_servers = {}
+        self.ud_added = False
         self.settings_data = [
             {
                 "label": self.tr("Character.AI Settings"),
@@ -430,7 +428,6 @@ class SettingsPage(QWidget):
         scroll_area.setFixedWidth(800)
 
         settings_viewport = scroll_area.viewport
-        # settings_viewport.setFixedWidth(780)
         settings_layout = scroll_area.layout
         scroll_area.setWidget(settings_viewport)
 
@@ -594,6 +591,10 @@ class SettingsPage(QWidget):
                 if key == "emilia_language":
                     widget.setCurrentText(self.languages.get(self.mw.current_language, {}).get("title", self.tr("English")))
                 elif key == "update_server":
+                    if not self.ud_added:
+                        for server in self.mw.update_servers:
+                            widget.addItem(server['name'])
+                        self.ud_added = True
                     widget.setCurrentText(self.update_servers.get(value, self.tr("Germany")))
                 elif key in {"tr_char_msg_to", "tr_user_msg_to"}:
                     widget.setCurrentText(self.languages.get(value, {}).get("title", self.tr("English")))

@@ -5,6 +5,10 @@ class EmiliaAPI:
         self.url = "https://api.emilia.ateez.ru/"
         self.client = client
 
+    async def get_update_servers(self):
+        response = await self.client.custom_request(f"{self.url}servers/update")
+        return response
+
     async def get_themes(self, query: str = "", author: str = "", count: int = 0, offset: int = 0):
         response = await self.client.custom_request(f"{self.url}themes/?author={author}&q={query}&offset={offset}")
         return response

@@ -72,6 +72,7 @@ class ChatThread(QThread):
     update_scene_signal = pyqtSignal(object)
     remove_scene_signal = pyqtSignal(object)
 
+    get_update_servers_signal = pyqtSignal(object)
     get_themes_signal = pyqtSignal(object)
     get_user_themes_signal = pyqtSignal(object)
     get_theme_signal = pyqtSignal(object)
@@ -358,6 +359,10 @@ class ChatThread(QThread):
             char_id = res['character']['external_id']
             if char_id in self.characters:
                 self.characters[char_id]['character'] = res['character']
+
+    @asyncSlot
+    async def get_update_servers(self):
+        self.get_update_servers_signal.emit(await self.api_emilia.get_update_servers())
 
     @asyncSlot
     async def get_themes(self, query: str = "", author: str = "", count: int = 0, offset: int = 0):

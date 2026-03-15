@@ -85,6 +85,7 @@ class MainPage(QMainWindow):
         self.recommended_chats = []
         self.popular_chats = []
         self.trending_chats = []
+        self.update_servers = []
 
         self.token = self.settings.value("cai_auth/token", "", type=str)
         self.cookie = self.settings.value("cai_auth/cookie", "", type=str)
@@ -231,6 +232,7 @@ class MainPage(QMainWindow):
         self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
         self.chat_thread.get_available_models_signal.connect(self.getAvailableModels)
         self.chat_thread.get_available_models_git_signal.connect(self.getAvailableModelsGit)
+        self.chat_thread.get_update_servers_signal.connect(self.getUpdateServers)
 
         self.chat_thread.start()
         self.discord_thread.start()
@@ -263,6 +265,7 @@ class MainPage(QMainWindow):
             self.openSettings()
             self.settings_page.getCookies()
             self.showNotification(self.tr("Please re-enter (the login data has expired)"))
+        self.chat_thread.get_update_servers()
 
     def createLeftSidebar(self):
         left_sidebar = LeftSidebar(self)
@@ -1031,6 +1034,11 @@ class MainPage(QMainWindow):
 
     def getAvailableModelsGit(self, data):
         self.available_models_git = data
+
+    def getUpdateServers(self, data):
+        self.update_servers = data
+        for server in self.update_servers:
+            self.settings_page.update_servers[server['url']] = server['name']
 
     def setOutputDevice(self, index):
         device_name = self.output_devices.get(index)
