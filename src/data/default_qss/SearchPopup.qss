@@ -1,0 +1,46 @@
+QListView {
+    background-color: @element_bg;
+    border-radius: 4px;
+}
+QListView::item {
+    background-color: @element_bg;
+    color: @text;
+    padding: 4px 15px;
+    border-radius: 4px;
+}
+QListView::item:selected {
+    background-color: @hover_bg;
+}
+QScrollBar:vertical {
+    background: @element_bg;
+    border: none;
+    width: 8px;
+    margin: 0px 0 0px 0;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+QScrollBar::sub-control:vertical {
+    background: @scroll_sub;
+    border-radius: 4px;
+}
+QScrollBar::handle:vertical {
+    background: @scroll_handle;
+    min-height: 20px;
+    border-radius: 4px;
+}
+QScrollBar::add-line:vertical {
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    height: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+QScrollBar::handle:vertical:hover {
+    background: @scroll_hover;
+}

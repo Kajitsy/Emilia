@@ -19,7 +19,7 @@ jobs:
       - name: Python Setup
         uses: actions/setup-python@v6.2.0
         with:
-          python-version: '3.13' 
+          python-version: '3.14'
 
       - name: Install requirements
         run: |
@@ -43,13 +43,17 @@ jobs:
             --icon "src\icon.ico" `
             --uac-admin `
             --add-data "$LK_PATH\rtc\resources\livekit_ffi.dll;livekit/rtc/resources" `
+            --add-data ".venv/Lib/site-packages/live2d/v3/FrameworkShaders;live2d/v3/FrameworkShaders" `
             --hidden-import "urllib3.contrib.resolver.system" `
             --hidden-import "urllib3.contrib.hface.protocols.http1" `
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
             --hidden-import "livekit.rtc.resources" `
+            --hidden-import "OpenGL" `
             "src\main.py"
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
+          xcopy /E /I /H /Y "src\themes" "dist\main\themes"
+          xcopy /E /I /H /Y "src\data\default_qss" "dist\main\data\default_qss"
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {

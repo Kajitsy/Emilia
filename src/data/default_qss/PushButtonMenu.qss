@@ -1,0 +1,13 @@
+QMenu {
+    background-color: @hover_bg;
+    border-radius: 4px;
+}
+QMenu::item {
+    background-color: @hover_bg;
+    color: @text;
+    padding: 8px 15px;
+}
+QMenu::item:selected {
+    background-color: @element_bg;
+    color: @text;
+}

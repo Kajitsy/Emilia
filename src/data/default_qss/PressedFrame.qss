@@ -1,0 +1,4 @@
+QFrame {
+    border-radius: 4px;
+    background-color: @pressed_bg;
+}

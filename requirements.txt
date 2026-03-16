@@ -3,13 +3,14 @@ aiofiles==25.1.0
 eel==0.18.2
 gpytranslate==2.1.0
 keyboard==0.13.5
-opencv-python==4.13.0.90
+opencv-python==4.13.0.92
 packaging==26.0
-pyaudio==0.2.14
+#pyaudio==0.2.14
+./data/pyaudio-0.2.14-cp314-cp314-win_amd64.whl #https://github.com/Kajitsy/pyaudio
 pydantic==2.12.5
 pyqt6==6.10.2
 pyqt6-qt6==6.10.2
-pyqt6-sip==13.11.0
+pyqt6-sip==13.11.1
 pyqt6-webengine==6.10.0
 pyqt6-webengine-qt6==6.10.2
 pyvts==0.3.3
@@ -18,12 +19,17 @@ qasync==0.28.0
 requests==2.32.5
 sounddevice==0.5.5
 soundfile==0.13.1
-scipy==1.17.0
-speechrecognition==3.14.3
+scipy==1.17.1
+speechrecognition==3.15.1
 typing_extensions==4.15.0
 urllib3==2.6.3
-websockets==15.0.1
+websockets==16.0
 curl_cffi==0.14.0
-livekit==1.0.25
-numpy==2.4.2
+livekit==1.1.2
+#live2d-py==0.6.1.1
+./data/live2d_py-0.6.1.1-cp314-cp314-win_amd64.whl #https://github.com/Kajitsy/live2d-py
+numpy==2.4.3
 pillow==12.1.1
+pyopengl==3.1.10
+pyopengl-accelerate==3.1.10
+platformdirs==4.9.4

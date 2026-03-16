@@ -1,0 +1,27 @@
+{
+  "name": "Light",
+  "titlebar": "light",
+  "theme_id": "light",
+  "colors": {
+    "element_bg": "#dee1e5",
+    "text": "#202124",
+    "hover_bg": "#e8eaed",
+    "pressed_bg": "#bdc1c6",
+    "disabled_text": "#80868b",
+    "icon": "#80868b",
+    "menu_bg": "#ffffff",
+    "menu_item_select": "#f1f3f4",
+    "primary_bg": "#f8f9fa",
+    "scroll_sub": "#eeeeee",
+    "scroll_handle": "#c1c1c1",
+    "scroll_hover": "#a8a8a8",
+    "mw_back": "#ffffff",
+    "mw_color": "#202124",
+    "char_back_message": "#f1f3f4",
+    "char_text_message": "#202124",
+    "user_back_message": "#e8f0fe",
+    "user_text_message": "#202124",
+    "avatar_back": "#f47c3b",
+    "avatar_color": "#ffffff"
+  }
+}

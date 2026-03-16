@@ -1,5 +1,5 @@
 #define MyAppName "Emilia"
-#define MyAppVersion "3.2.10"
+#define MyAppVersion "3.3.0"
 #define MyAppPublisher "Kajitsy"
 #define MyAppURL "https://github.com/Kajitsy/Emilia"
 #define MyAppExeName "emilia.exe"
@@ -37,7 +37,6 @@ ShowLanguageDialog=auto
 LicenseFile=LICENSE
 
 PrivilegesRequired=admin
-PrivilegesRequiredOverridesAllowed=dialog
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -47,6 +46,7 @@ Source: ".\dist\main\emilia.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\dist\main\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs
 Source: ".\src\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\src\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs
+Source: ".\src\themes\*"; DestDir: "{app}\themes"; Flags: ignoreversion recursesubdirs
 Source: ".\src\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs
 
 [Icons]
@@ -55,9 +55,9 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDi
 
 
 [Registry]
-Root: HKCU; Subkey: "Software\{#MyAppName}"; ValueName: "InstallPath"; ValueData: "{app}"
-Root: HKCU; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string; ValueName: "Version"; ValueData: "{#MyAppVersion}"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string; ValueName: "InstallDate"; ValueData: "{code:GetInstallDate}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueName: "InstallPath"; ValueData: "{app}"
+Root: HKLM; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string; ValueName: "Version"; ValueData: "{#MyAppVersion}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; ValueType: string; ValueName: "InstallDate"; ValueData: "{code:GetInstallDate}"; Flags: uninsdeletekey
 
 
 [UninstallRun]

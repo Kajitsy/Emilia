@@ -1,0 +1,18 @@
+QPushButton {
+    background-color: @element_bg;
+    color: @text;
+    border: none;
+    border-radius: 4px;
+    padding: %%padding%%;
+    text-align: left;
+}
+QPushButton:disabled {
+    background-color: @pressed_bg;
+    color: @disabled_text;
+}
+QPushButton:hover {
+    background-color: @hover_bg;
+}
+QPushButton:pressed, QPushButton:checked {
+    background-color: @pressed_bg;
+}

@@ -1,0 +1,10 @@
+QLineEdit {
+    background-color: @element_bg;
+    color: @text;
+    border-radius: 4px;
+    padding: 7px;
+}
+QPushButton:disabled {
+    background-color: @pressed_bg;
+    color: @disabled_text;
+}
