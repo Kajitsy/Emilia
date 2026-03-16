@@ -53,6 +53,7 @@ jobs:
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           xcopy /E /I /H /Y "src\themes" "dist\main\themes"
+          xcopy /E /I /H /Y "src\data\default_qss" "dist\main\data\default_qss"
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {
