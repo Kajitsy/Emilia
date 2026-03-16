@@ -48,4 +48,5 @@ class ListCard(CardFrame):
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)
+        self.mw.hideOverlay()
         self.mw.openThemeOverlay(self.data.get('theme_id'))
