@@ -131,3 +131,16 @@ jobs:
           source: "deploy_files/*"
           target: "/var/www/emilia"
           strip_components: 1
+
+  deploy_winget:
+    needs: build
+    runs-on: ubuntu-slim
+    steps:
+      - name: Publish to WinGet
+        uses: vedantmgoyal2009/winget-releaser@main
+        with:
+          identifier: Kajitsy.Emilia 
+          installers-regex: '\.exe$'
+          max-versions-to-keep: 5
+          version: ${{ github.event.release.name }}
+          token: ${{ secrets.WINGET_TOKEN }}
