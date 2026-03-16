@@ -1,10 +1,8 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFontMetrics
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
 
 from modules.ui import TM
-from modules.ui.Elements import PushButton, CardFrame
-from modules.Utils import format_text
+from modules.ui.Elements import CardFrame
 
 class ListCard(CardFrame):
     def __init__(self, main_window, data):
