@@ -5,7 +5,8 @@ gpytranslate==2.1.0
 keyboard==0.13.5
 opencv-python==4.13.0.90
 packaging==26.0
-pyaudio==0.2.14
+#pyaudio==0.2.14
+./data/pyaudio-0.2.14-cp314-cp314-win_amd64.whl #https://github.com/Kajitsy/pyaudio
 pydantic==2.12.5
 pyqt6==6.10.2
 pyqt6-qt6==6.10.2
@@ -25,6 +26,8 @@ urllib3==2.6.3
 websockets==15.0.1
 curl_cffi==0.14.0
 livekit==1.0.25
+#live2d-py==0.6.1.1
+./data/live2d_py-0.6.1.1-cp314-cp314-win_amd64.whl #https://github.com/Kajitsy/live2d-py
 numpy==2.4.2
 pillow==12.1.1
 pyopengl==3.1.10
