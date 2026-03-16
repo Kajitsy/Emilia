@@ -4,6 +4,10 @@ on:
   release:
     types: [released]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag"
+        required: false
 
 permissions:
   contents: write
