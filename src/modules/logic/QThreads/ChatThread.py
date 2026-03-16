@@ -77,6 +77,7 @@ class ChatThread(QThread):
     get_user_themes_signal = pyqtSignal(object)
     get_theme_signal = pyqtSignal(object)
     download_theme_signal = pyqtSignal(object)
+    upload_theme_signal = pyqtSignal(object)
 
     join_or_create_session_signal = pyqtSignal(object)
 
@@ -379,6 +380,23 @@ class ChatThread(QThread):
     @asyncSlot
     async def download_theme(self, theme_name: str, theme_id: str):
         self.download_theme_signal.emit(await self.api_emilia.download_theme(theme_name, theme_id))
+
+    @asyncSlot
+    async def upload_theme(self, theme_name: str):
+        if not self.me:
+            self.me = await self.api_users.get_me()
+        user = self.me.get('user', {})
+        user_id = user.get('id')
+        if not user_id:
+            self.upload_theme_signal.emit({"error": "User not authenticated"})
+            return
+
+        username = user.get('username')
+        avatar_file_name = user.get('account', {}).get('avatar_file_name')
+        token = self.client.token
+
+        res = await self.api_emilia.upload_theme(theme_name, user_id, username, avatar_file_name, token)
+        self.upload_theme_signal.emit(res)
 
     @asyncSlot
     async def get_user_settings(self):

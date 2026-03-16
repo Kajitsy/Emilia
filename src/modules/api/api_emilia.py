@@ -1,4 +1,4 @@
-import asyncio, zipfile, io, os
+import asyncio, zipfile, io, os, requests
 
 class EmiliaAPI:
     def __init__(self, client):
@@ -40,3 +40,32 @@ class EmiliaAPI:
         await loop.run_in_executor(None, extract)
 
         return extract_path
+    
+    async def upload_theme(self, theme_name: str, user_id: int, username: str, avatar_file_name: str, token: str):
+        theme_path = os.path.join("themes", theme_name)
+        if not os.path.exists(theme_path):
+            return {"error": "Theme path not found"}
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for root, dirs, files in os.walk(theme_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, theme_path)
+                    zip_file.write(file_path, arcname)
+        zip_buffer.seek(0)
+
+        data = {
+            "token": token,
+            "id": user_id,
+            "username": username,
+            "avatar_file_name": avatar_file_name,
+        }
+
+        multipart = {
+            "file": (f"{username}_{theme_name}.zip", zip_buffer.getvalue(), "application/zip")
+        }
+        response = requests.post(f"{self.url}themes/upload",data=data, files=multipart)
+        return response.json()
+
+        return response.json()
