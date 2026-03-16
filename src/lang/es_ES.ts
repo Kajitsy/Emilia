@@ -672,12 +672,12 @@ E.g. Unmask the stranger before the final waltz ends.
 <context>
     <name>ChatThread</name>
     <message>
-        <location filename="../modules/logic/QThreads/ChatThread.py" line="142"/>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="145"/>
         <source>Successful connection!</source>
         <translation>Conexión exitosa!</translation>
     </message>
     <message>
-        <location filename="../modules/logic/QThreads/ChatThread.py" line="145"/>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="148"/>
         <source>Connection error: </source>
         <translation>Error de conexión: </translation>
     </message>
@@ -1284,7 +1284,7 @@ E.g. Unmask the stranger before the final waltz ends.
         <translation>Cambiar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/ListCard.py" line="33"/>
+        <location filename="../modules/ui/cards/ThemeCards/ListCard.py" line="31"/>
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
@@ -1326,7 +1326,7 @@ E.g. Unmask the stranger before the final waltz ends.
 <context>
     <name>MainCard</name>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="60"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="71"/>
         <location filename="../modules/ui/cards/SceneCards/MainCard.py" line="36"/>
         <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="54"/>
         <source>Author: @</source>
@@ -1416,6 +1416,36 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="48"/>
         <source>Uninstall</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="51"/>
+        <source>Update on server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="54"/>
+        <source>Delete from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="103"/>
+        <source>Error updating theme: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="105"/>
+        <source>Theme updated successfully!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="116"/>
+        <source>Error deleting theme: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="118"/>
+        <source>Theme deleted successfully!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2198,12 +2228,32 @@ E.g. Unmask the stranger before the final waltz ends.
     <name>SearchCard</name>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="38"/>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="34"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="37"/>
         <source>Search</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="56"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="41"/>
+        <source>Upload Theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="67"/>
+        <source>No custom themes found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="84"/>
+        <source>Error uploading theme: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="86"/>
+        <source>Theme uploaded successfully!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="97"/>
         <source>Themes not found</source>
         <translation type="unfinished"></translation>
     </message>

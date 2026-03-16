@@ -1038,7 +1038,7 @@ class MainPage(QMainWindow):
     def getUpdateServers(self, data):
         self.update_servers = data
         for server in self.update_servers:
-            self.settings_page.update_servers[server['url']] = server['name']
+            self.settings_page.update_servers[server.get('url')] = server.get('name')
 
     def setOutputDevice(self, index):
         device_name = self.output_devices.get(index)

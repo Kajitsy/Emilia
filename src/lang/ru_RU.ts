@@ -682,12 +682,12 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
 <context>
     <name>ChatThread</name>
     <message>
-        <location filename="../modules/logic/QThreads/ChatThread.py" line="142"/>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="145"/>
         <source>Successful connection!</source>
         <translation>Успешное подключение!</translation>
     </message>
     <message>
-        <location filename="../modules/logic/QThreads/ChatThread.py" line="145"/>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="148"/>
         <source>Connection error: </source>
         <translation>Ошибка подключения: </translation>
     </message>
@@ -1298,7 +1298,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <translation>Изменить</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/ListCard.py" line="33"/>
+        <location filename="../modules/ui/cards/ThemeCards/ListCard.py" line="31"/>
         <source>Author: @</source>
         <translation>Автор: @</translation>
     </message>
@@ -1340,7 +1340,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
 <context>
     <name>MainCard</name>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="60"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="71"/>
         <location filename="../modules/ui/cards/SceneCards/MainCard.py" line="36"/>
         <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="54"/>
         <source>Author: @</source>
@@ -1431,6 +1431,36 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="48"/>
         <source>Uninstall</source>
         <translation>Удалить</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="51"/>
+        <source>Update on server</source>
+        <translation>Обновить на сервере</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="54"/>
+        <source>Delete from server</source>
+        <translation>Удалить с сервера</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="103"/>
+        <source>Error updating theme: </source>
+        <translation>Ошибка обновления темы:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="105"/>
+        <source>Theme updated successfully!</source>
+        <translation>Тема успешно обновлена</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="116"/>
+        <source>Error deleting theme: </source>
+        <translation>Ошибка удаления темы:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="118"/>
+        <source>Theme deleted successfully!</source>
+        <translation>Тема успешно удалена</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="78"/>
@@ -2290,12 +2320,32 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <name>SearchCard</name>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="38"/>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="34"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="37"/>
         <source>Search</source>
         <translation>Поиск</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="56"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="41"/>
+        <source>Upload Theme</source>
+        <translation>Загрузить тему</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="67"/>
+        <source>No custom themes found</source>
+        <translation>Новых тем не обнаружено</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="84"/>
+        <source>Error uploading theme: </source>
+        <translation>Ошибка загрузки темы:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="86"/>
+        <source>Theme uploaded successfully!</source>
+        <translation>Тема успешно загружена!</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="97"/>
         <source>Themes not found</source>
         <translation>Темы не найдены</translation>
     </message>
