@@ -66,5 +66,5 @@ class BaseClient:
         if headers is None:
             headers = {}
 
-        kwargs = {"json_data": data} if method.lower() == "post" else {"data": data}
+        kwargs = {"json_data": data} if method.lower() in ["post", "delete"] else {"data": data}
         return await self._make_request(method, url, headers, return_text=text, is_bytes=is_bytes, **kwargs)

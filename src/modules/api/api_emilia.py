@@ -17,6 +17,16 @@ class EmiliaAPI:
         response = await self.client.custom_request(f"{self.url}themes/{theme_id}")
         return response
 
+    async def delete_theme(self, theme_id: str, token: str, user_id: int, username: str, avatar_file_name: str):
+        data = {
+            "token": token,
+            "id": user_id,
+            "username": username,
+            "avatar_file_name": avatar_file_name,
+        }
+        response = await self.client.custom_request(f"{self.url}themes/{theme_id}/delete", data, method="DELETE")
+        return response
+
     async def get_user_themes(self, creator_id: int):
         response = await self.client.custom_request(f"{self.url}user/{creator_id}/themes")
         return response
@@ -68,4 +78,29 @@ class EmiliaAPI:
         response = requests.post(f"{self.url}themes/upload",data=data, files=multipart)
         return response.json()
 
+    async def update_theme(self, theme_name: str, theme_id: str, user_id: int, username: str, avatar_file_name: str, token: str):
+        theme_path = os.path.join("themes", theme_name)
+        if not os.path.exists(theme_path):
+            return {"error": "Theme path not found"}
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for root, dirs, files in os.walk(theme_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, theme_path)
+                    zip_file.write(file_path, arcname)
+        zip_buffer.seek(0)
+
+        data = {
+            "token": token,
+            "id": user_id,
+            "username": username,
+            "avatar_file_name": avatar_file_name,
+        }
+
+        multipart = {
+            "file": (f"{username}_{theme_name}.zip", zip_buffer.getvalue(), "application/zip")
+        }
+        response = requests.post(f"{self.url}themes/{theme_id}/update",data=data, files=multipart)
         return response.json()
