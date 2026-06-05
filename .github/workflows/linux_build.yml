@@ -109,11 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - host: ${{ secrets.VPS_HOST }}
-            user: ${{ secrets.VPS_USER }}
-          - host: ${{ secrets.VPS2_HOST }}
-            user: ${{ secrets.VPS2_USER }}
+        server: [ VPS, VPS2 ]
     steps:
       - name: Download Archive
         uses: actions/download-artifact@v4
@@ -122,18 +118,24 @@ jobs:
 
       - name: Copy Archive
         uses: appleboy/scp-action@v1
+        env:
+          HOST: ${{ secrets[format('{0}_HOST', matrix.server)] }}
+          USER: ${{ secrets[format('{0}_USER', matrix.server)] }}
         with:
-          host: ${{ matrix.host }}
-          username: ${{ matrix.user }}
+          host: ${{ env.HOST }}
+          username: ${{ env.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "emilia-linux.tar.gz"
           target: "/var/www/emilialinux"
 
       - name: Extract Archive
         uses: appleboy/ssh-action@v1
+        env:
+          HOST: ${{ secrets[format('{0}_HOST', matrix.server)] }}
+          USER: ${{ secrets[format('{0}_USER', matrix.server)] }}
         with:
-          host: ${{ matrix.host }}
-          username: ${{ matrix.user }}
+          host: ${{ env.HOST }}
+          username: ${{ env.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/emilialinux
