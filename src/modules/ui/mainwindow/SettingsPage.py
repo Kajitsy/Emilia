@@ -221,7 +221,7 @@ class SettingsPage(QWidget):
                     if file.endswith(".vtube.json"):
                         models_count += 1
             self.mw.settings.setValue("vmodel/default_folder", folder_path)
-            self.mw.showNotification(self.tr("(mc) models found").replace("(mc)", str(models_count)))
+            self.mw.showNotification(self.tr("$mc models found").replace("$mc", str(models_count)))
 
     def openEmotesEditor(self):
         with open(f"./data/VTube_Emotes.json", "r") as f:
