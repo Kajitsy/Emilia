@@ -53,30 +53,21 @@ jobs:
         run: |
           $LK_PATH = python -c "import livekit; print(list(livekit.__path__)[0])"
           $L2D_PATH = python -c "import live2d, os; print(os.path.dirname(live2d.__file__))"
-          
-          $pyinstallerArgs = @(
-            '--noconfirm',
-            '--onedir',
-            '--windowed',
-            '--icon', 'src\icon.ico',
-            '--uac-admin',
-            "--add-data=$LK_PATH\rtc\resources\livekit_ffi.dll;livekit/rtc/resources",
-            "--add-data=$L2D_PATH\v3\FrameworkShaders;live2d/v3/FrameworkShaders",
-            '--hidden-import', 'urllib3.contrib.resolver.system',
-            '--hidden-import', 'urllib3.contrib.hface.protocols.http1',
-            '--hidden-import', 'urllib3.contrib.hface.protocols.http2',
-            '--hidden-import', 'livekit.rtc.resources',
-            '--hidden-import', 'OpenGL',
-            'src\main.py'
-          )
-          
-          & pyinstaller $pyinstallerArgs
-          
+          pyinstaller --noconfirm --onedir --windowed `
+            --icon "src\icon.ico" `
+            --uac-admin `
+            --add-data "$LK_PATH\rtc\resources\livekit_ffi.dll;livekit/rtc/resources" `
+            --add-data "$L2D_PATH\v3\FrameworkShaders;live2d/v3/FrameworkShaders" `
+            --hidden-import "urllib3.contrib.resolver.system" `
+            --hidden-import "urllib3.contrib.hface.protocols.http1" `
+            --hidden-import "urllib3.contrib.hface.protocols.http2" `
+            --hidden-import "livekit.rtc.resources" `
+            --hidden-import "OpenGL" `
+            "src\main.py"
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           xcopy /E /I /H /Y "src\themes" "dist\main\themes"
           xcopy /E /I /H /Y "src\data\default_qss" "dist\main\data\default_qss"
-          
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {
