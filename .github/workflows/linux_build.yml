@@ -33,6 +33,11 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install PortAudio dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y portaudio19-dev python3-dev gcc
+
       - name: Install Live2D
         run: |
           wget https://github.com/EasyLive2D/live2d-py/releases/download/v0.7.0.4/live2d_py-0.7.0.4-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
