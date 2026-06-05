@@ -98,48 +98,44 @@ jobs:
           name: Emilia_Linux_Archive
           path: emilia-linux.tar.gz
 
-     #- name: Public release
-     #  uses: softprops/action-gh-release@v2
-     #  with:
-     #    tag_name: ${{ env.TAG }}
-     #    files: emilia-linux.tar.gz
+      - name: Public release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          files: emilia-linux.tar.gz
 
- #deploy_server1:
- #  needs: build
- #  runs-on: ubuntu-latest
- #  steps:
- #    - name: Download Artifact
- #      uses: actions/download-artifact@v4
- #      with:
- #        name: app-build
- #        path: deploy_files
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - host: ${{ secrets.VPS_HOST }}
+            user: ${{ secrets.VPS_USER }}
+          - host: ${{ secrets.VPS2_HOST }}
+            user: ${{ secrets.VPS2_USER }}
+    steps:
+      - name: Download Archive
+        uses: actions/download-artifact@v4
+        with:
+          name: Emilia_Linux_Archive
 
- #    - name: Deploy to Server 1
- #      uses: appleboy/scp-action@v1
- #      with:
- #        host: ${{ secrets.VPS_HOST }}
- #        username: ${{ secrets.VPS_USER }}
- #        key: ${{ secrets.SSH_PRIVATE_KEY }}
- #        source: "deploy_files/*"
- #        target: "/var/www/emilia_linux"
- #        strip_components: 1
+      - name: Copy Archive
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ matrix.host }}
+          username: ${{ matrix.user }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "emilia-linux.tar.gz"
+          target: "/var/www/emilialinux"
 
- #deploy_server2:
- #  needs: build
- #  runs-on: ubuntu-latest
- #  steps:
- #    - name: Download Artifact
- #      uses: actions/download-artifact@v4
- #      with:
- #        name: app-build
- #        path: deploy_files
-
- #    - name: Deploy to Server 2
- #      uses: appleboy/scp-action@v1
- #      with:
- #        host: ${{ secrets.VPS2_HOST }}
- #        username: ${{ secrets.VPS2_USER }}
- #        key: ${{ secrets.SSH_PRIVATE_KEY }}
- #        source: "deploy_files/*"
- #        target: "/var/www/emilia_linux"
- #        strip_components: 1
+      - name: Extract Archive
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ matrix.host }}
+          username: ${{ matrix.user }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/emilialinux
+            tar -xzf emilia-linux.tar.gz --strip-components=1
+            rm emilia-linux.tar.gz

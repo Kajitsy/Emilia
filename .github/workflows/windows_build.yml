@@ -1,4 +1,4 @@
-name: Build and Deploy Emilia
+name: Build and Deploy Emilia (Windows)
 
 on:
   release:
@@ -106,45 +106,41 @@ jobs:
           tag_name: ${{ env.TAG }}
           files: EmiliaSetup.exe
 
-  deploy_server1:
+  deploy:
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - host: ${{ secrets.VPS_HOST }}
+            user: ${{ secrets.VPS_USER }}
+          - host: ${{ secrets.VPS2_HOST }}
+            user: ${{ secrets.VPS2_USER }}
     steps:
-      - name: Download Artifact
+      - name: Download Archive
         uses: actions/download-artifact@v4
         with:
-          name: app-build
-          path: deploy_files
+          name: Emilia_Windows_Archive
 
-      - name: Deploy to Server 1
+      - name: Copy Archive
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
+          host: ${{ matrix.host }}
+          username: ${{ matrix.user }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy_files/*"
+          source: "emilia-windows.tar.gz"
           target: "/var/www/emilia"
-          strip_components: 1
 
-  deploy_server2:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
+      - name: Extract Archive
+        uses: appleboy/ssh-action@v1
         with:
-          name: app-build
-          path: deploy_files
-
-      - name: Deploy to Server 2
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.VPS2_HOST }}
-          username: ${{ secrets.VPS2_USER }}
+          host: ${{ matrix.host }}
+          username: ${{ matrix.user }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy_files/*"
-          target: "/var/www/emilia"
-          strip_components: 1
+          script: |
+            cd /var/www/emilia
+            tar -xzf emilia-windows.tar.gz --strip-components=1
+            rm emilia-windows.tar.gz
 
   deploy_winget:
     needs: build
