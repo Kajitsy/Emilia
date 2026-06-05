@@ -1,0 +1,146 @@
+name: Build and Deploy Emilia
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Download repo
+        uses: actions/checkout@v6.0.2
+
+      - name: Resolve tag
+        shell: pwsh
+        run: |
+          if ("${{ github.event.release.tag_name }}") {
+              echo "TAG=${{ github.event.release.tag_name }}" >> $env:GITHUB_ENV
+          } else {
+              echo "TAG=${{ github.event.inputs.tag }}" >> $env:GITHUB_ENV
+          }
+      - name: Python Setup
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: '3.14'
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+      
+      - name: Download UPX
+        shell: pwsh
+        run: |
+          $output = "upx.zip"
+          Invoke-WebRequest -Uri "https://github.com/upx/upx/releases/download/v5.1.0/upx-5.1.0-win64.zip" -OutFile $output
+          Expand-Archive -Path $output -DestinationPath upx_temp
+          Move-Item -Path upx_temp/upx-5.1.0-win64/upx.exe -Destination .
+      
+      - name: Build with PyInstaller
+        shell: pwsh
+        run: |
+          $LK_PATH = python -c "import livekit; print(list(livekit.__path__)[0])"
+          $L2D_PATH = python -c "import live2d, os; print(os.path.dirname(live2d.__file__))"
+          pyinstaller --noconfirm --onedir --windowed `
+            --icon "src\icon.ico" `
+            --uac-admin `
+            --add-data "$LK_PATH\rtc\resources\livekit_ffi.dll;livekit/rtc/resources" `
+            --add-data "$L2D_PATH\v3\FrameworkShaders;live2d/v3/FrameworkShaders" `
+            --hidden-import "urllib3.contrib.resolver.system" `
+            --hidden-import "urllib3.contrib.hface.protocols.http1" `
+            --hidden-import "urllib3.contrib.hface.protocols.http2" `
+            --hidden-import "livekit.rtc.resources" `
+            --hidden-import "OpenGL" `
+            "src\main.py"
+          copy "src\icon.ico" "dist\main\icon.ico"
+          xcopy /E /I /H /Y "src\lang" "dist\main\lang"
+          xcopy /E /I /H /Y "src\themes" "dist\main\themes"
+          xcopy /E /I /H /Y "src\data\default_qss" "dist\main\data\default_qss"
+          if (Test-Path "dist\main\main.exe") {
+              Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
+          } else {
+              exit 1
+          }
+      - name: Cleanup Junk Files
+        run: |
+          python clean_dist.py
+          
+      - name: Create manifest
+        shell: pwsh
+        run: |
+          python create_manifest.py
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: app-build
+          path: dist/main/
+          retention-days: 1
+
+      - name: Build Setup file
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        with:
+          path: installer.iss
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v6
+        with:
+          name: Emilia_Installer
+          path: EmiliaSetup.exe
+
+      - name: Public release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          files: EmiliaSetup.exe
+
+  deploy_server1:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: deploy_files
+
+      - name: Deploy to Server 1
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy_files/*"
+          target: "/var/www/emilia"
+          strip_components: 1
+
+  deploy_server2:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: deploy_files
+
+      - name: Deploy to Server 2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS2_HOST }}
+          username: ${{ secrets.VPS2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy_files/*"
+          target: "/var/www/emilia"
+          strip_components: 1
