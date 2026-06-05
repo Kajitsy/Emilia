@@ -685,3 +685,7 @@ class SettingsPage(QWidget):
                 self.mw.settings.setValue(key, widget.keySequence().toString())
         self.mw.showNotification(self.tr("Settings saved successfully"))
         logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings saved successfully")
+
+    def hideEvent(self, a0):
+        super().hideEvent(a0)
+        self.deleteLater()

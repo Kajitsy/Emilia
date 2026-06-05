@@ -198,7 +198,7 @@ class MainPage(QMainWindow):
         self.search_results_page = QWidget()
         self.search_results_layout = QVBoxLayout(self.search_results_page)
         self.settings_page = SettingsPage.SettingsPage(self)
-        self.settings_page.save_button.clicked.connect(self.updateAutoCollapseSidebar)
+
 
         self.main_content_area_animation = QPropertyAnimation(self.main_content_area, b"geometry")
         self.main_content_area_animation.setDuration(500)
@@ -847,6 +847,9 @@ class MainPage(QMainWindow):
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
     def openSettings(self):
+        self.settings_page = SettingsPage.SettingsPage(self)
+        self.settings_page.save_button.clicked.connect(self.updateAutoCollapseSidebar)
+        self.main_content_area.addWidget(self.settings_page)
         self.main_content_area.setCurrentWidget(self.settings_page)
         if self.current_chat_interface:
             self.current_chat_interface.setVisible(False)
