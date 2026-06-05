@@ -10,38 +10,44 @@ from . import TM
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._icon = False
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._has_icon = False
 
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()
 
     def update_theme(self):
-        padding = "8px" if self._has_icon else "8px 15px"
-        self.setStyleSheet(TM.get_style("PushButton").replace("%%padding%%", padding))
+        theme = TM.get_style("PushButton")
+        if self._icon:
+            self.setStyleSheet(theme.replace("text-align: left", "text-align: center"))
+        else:
+            self.setStyleSheet(theme)
 
     def setIcon(self, icon):
         super().setIcon(icon)
-        self._has_icon = True
+        self._icon = True
         self.update_theme()
 
 class TabButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._icon = False
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setCheckable(True)
-        self._has_icon = False
 
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()
 
     def update_theme(self):
-        padding = "8px" if self._has_icon else "8px 15px"
-        self.setStyleSheet(TM.get_style("TabButton").replace("%%padding%%", padding))
+        theme = TM.get_style("TabButton")
+        if self._icon:
+            self.setStyleSheet(theme.replace("text-align: left", "text-align: center"))
+        else:
+            self.setStyleSheet(theme)
 
     def setIcon(self, icon):
         super().setIcon(icon)
-        self._has_icon = True
+        self._icon = True
         self.update_theme()
 
 class LineEdit(QLineEdit):

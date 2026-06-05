@@ -60,7 +60,7 @@ class MainPage(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.3.0"
+        self.version = "3.3.1"
         self.beta = version.parse(self.version).is_prerelease
 
         geometry = self.settings.value("main_window/geometry")
@@ -198,7 +198,7 @@ class MainPage(QMainWindow):
         self.search_results_page = QWidget()
         self.search_results_layout = QVBoxLayout(self.search_results_page)
         self.settings_page = SettingsPage.SettingsPage(self)
-        self.settings_page.save_button.clicked.connect(self.updateAutoCollapseSidebar)
+
 
         self.main_content_area_animation = QPropertyAnimation(self.main_content_area, b"geometry")
         self.main_content_area_animation.setDuration(500)
@@ -257,6 +257,8 @@ class MainPage(QMainWindow):
 
             if self.cookie:
                 self.chat_thread.set_cookie(self.cookie)
+                self.chat_thread.get_voice_limit()
+                self.chat_thread.get_chat_image_attachment_limit()
 
             if not self.cookie or not self.token:
                 self.openSettings()
@@ -837,14 +839,30 @@ class MainPage(QMainWindow):
                 self.chat_thread.replay_signal.disconnect()
             self.current_chat_interface = None
 
+        def attach(_):
+            self.current_chat_interface.setParent(self.main_content_area)
+            self.main_content_area.addWidget(self.current_chat_interface)
+            self.main_content_area.setCurrentWidget(self.current_chat_interface)
+            self.current_chat_interface.show()
+
+        def detach(_):
+            label = QLabel(self.tr("There should be a chat here..."))
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.main_content_area.addWidget(label)
+            self.main_content_area.setCurrentWidget(label)
 
         self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id, scene_id)
+        self.current_chat_interface.attach_signal.connect(attach)
+        self.current_chat_interface.detach_signal.connect(detach)
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
         self.main_content_area.addWidget(self.current_chat_interface)
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
     def openSettings(self):
+        self.settings_page = SettingsPage.SettingsPage(self)
+        self.settings_page.save_button.clicked.connect(self.updateAutoCollapseSidebar)
+        self.main_content_area.addWidget(self.settings_page)
         self.main_content_area.setCurrentWidget(self.settings_page)
         if self.current_chat_interface:
             self.current_chat_interface.setVisible(False)

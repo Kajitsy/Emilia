@@ -6,7 +6,7 @@ from curl_cffi import CurlMime
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton,
                              QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
 from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
-from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt, pyqtSignal
 from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
@@ -121,6 +121,8 @@ class MessageBubble(QFrame):
         self.setGraphicsEffect(None)
 
 class ChatInterface(QWidget):
+    attach_signal = pyqtSignal(object)
+    detach_signal = pyqtSignal(object)
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None, scene_id: str | None = None):
         super().__init__()
         self.mw = main_window
@@ -140,6 +142,7 @@ class ChatInterface(QWidget):
         self.svg_icons = Svg()
         self.vmodel_show = False
         self.setObjectName("ChatInterface")
+        self._detach = False
 
         self.voice_enabled = False
 
@@ -234,10 +237,16 @@ class ChatInterface(QWidget):
 
         self.call_char_button = PushButton()
         self.call_char_button.clicked.connect(self.callCharacter)
+        if self.chat_thread.current_limits.get('voice_limit', {}).get('count_remaining', 0) == 0 and not self.mw.settings.value('use_old_voice_chat', False, type=bool):
+            self.call_char_button.setEnabled(False)
+            self.call_char_button.setToolTip(self.tr("Call limit exceeded"))
         send_layout.addWidget(self.call_char_button, alignment=Qt.AlignmentFlag.AlignBottom)
 
         self.add_image_button = PushButton()
         self.add_image_button.clicked.connect(self.selectImage)
+        if self.chat_thread.current_limits.get('chat_image_attachment', {}).get('count_remaining', 0) == 0:
+            self.add_image_button.setEnabled(False)
+            self.add_image_button.setToolTip(self.tr("Attached message limit exceeded"))
         send_layout.addWidget(self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom)
 
         input_layout.addWidget(send_widget)
@@ -305,7 +314,10 @@ class ChatInterface(QWidget):
             path = path.replace('\\', '/')
             self.messages_area.setStyleSheet(f"""
                 #chatScrollArea {{
-                    border-image: url("{path}") 0 0 0 0 stretch stretch;
+                    background-image: url("{path}");
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-attachment: fixed;
                 }}
             """)
             self.messages_content.setStyleSheet("#chatContent { background: transparent; }")
@@ -693,6 +705,23 @@ class ChatInterface(QWidget):
             ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
     def detachChat(self):
+        self._detach = True
+        self.detach_signal.emit(True)
+        self.setParent(None)
+        self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
+        self.show()
+        self.hideCharacterInfoSidebar()
+        self.setStyleSheet(f"""
+            #ChatInterface {{
+                background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+            }}
+            {TM.get_style('VerticalScrollArea')}
+        """)
+
+    def attach_chat(self):
+        self._detach = False
+        self.attach_signal.emit(True)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
@@ -1245,11 +1274,19 @@ class ChatInterface(QWidget):
             self.cis_visible = False
 
     def callCharacter(self):
-        self.hideCharacterInfoSidebar2()
-        self.mw.hide_overlay = False
-        vsmode = ModeCard(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
-        vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
-        self.mw.showOverlay(vsmode)
+        count = self.chat_thread.current_limits.get('voice_limit', {}).get('count_remaining', 0)
+        if count >> 0:
+            def voicecalllimit(connected: bool):
+                if connected:
+                    self.chat_thread.current_limits['voice_limit']['count_remaining'] -= 1
+            self.hideCharacterInfoSidebar2()
+            self.mw.hide_overlay = False
+            vsmode = ModeCard(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
+            vsmode.thread.connected_signal.connect(voicecalllimit)
+            vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
+            self.mw.showOverlay(vsmode)
+        elif count == 0:
+            self.mw.showNotification(self.tr("Call limit exceeded"))
 
     def _playVoice(self, content):
         thread = PlayerThread(content)
@@ -1736,6 +1773,15 @@ class ChatInterface(QWidget):
         super().hideEvent(a0)
         if hasattr(self, 'recent_card') and not self.scene_id:
             self.recent_card.setCheckable(False)
+
+    def closeEvent(self, a0):
+        if self._detach:
+            a0.ignore()
+            self._detach = False
+            self.attach_signal.emit(True)
+        else:
+            super().closeEvent(a0)
+            self.deleteLater()
 
     def toggleLeftSidebar(self):
         self.mw.left_sidebar_hide_user = not self.mw.left_sidebar_hide_user

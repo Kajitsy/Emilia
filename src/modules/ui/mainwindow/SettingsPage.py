@@ -1,5 +1,6 @@
 import ctypes
 import platform
+import subprocess
 import webbrowser, os, logging,  json, inspect
 from pathlib import Path
 
@@ -171,11 +172,11 @@ class SettingsPage(QWidget):
                     {"type": "pushbutton", "label": self.tr("Settings Folder"),
                      "buttonlabel": self.tr("Open"),
                      "key": "other/settings_folder",
-                     "click": lambda: os.startfile(os.path.dirname(self.mw.settings.fileName()))},
+                     "click": lambda: self.open_folder(os.path.dirname(self.mw.settings.fileName()))},
                     {"type": "pushbutton", "label": self.tr("Logs Folder"),
                      "buttonlabel": self.tr("Open"),
                      "key": "other/logs_folder",
-                     "click": lambda: os.startfile(Path(user_log_dir("Emilia", False)))},
+                     "click": lambda: self.open_folder(Path(user_log_dir("Emilia", False)))},
                 ]
             }, {
                 "label": f"{self.tr('About Emilia')} {self.mw.version}",
@@ -204,6 +205,15 @@ class SettingsPage(QWidget):
 
         self.setLayout(main_layout)
 
+    def open_folder(self, path):
+
+        if platform.system() == "Windows":
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
+
     def openUserSettings(self):
         overlay = UserCards.EditCard(self.mw)
         self.mw.showOverlay(overlay)
@@ -221,7 +231,7 @@ class SettingsPage(QWidget):
                     if file.endswith(".vtube.json"):
                         models_count += 1
             self.mw.settings.setValue("vmodel/default_folder", folder_path)
-            self.mw.showNotification(self.tr("(mc) models found").replace("(mc)", str(models_count)))
+            self.mw.showNotification(self.tr("$mc models found").replace("$mc", str(models_count)))
 
     def openEmotesEditor(self):
         with open(f"./data/VTube_Emotes.json", "r") as f:
@@ -685,3 +695,7 @@ class SettingsPage(QWidget):
                 self.mw.settings.setValue(key, widget.keySequence().toString())
         self.mw.showNotification(self.tr("Settings saved successfully"))
         logging.debug(f"main.py ({self.__class__.__name__}.{inspect.currentframe().f_code.co_name}): Settings saved successfully")
+
+    def hideEvent(self, a0):
+        super().hideEvent(a0)
+        self.deleteLater()
