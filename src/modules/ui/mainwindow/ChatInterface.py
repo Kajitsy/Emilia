@@ -6,7 +6,7 @@ from curl_cffi import CurlMime
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton,
                              QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
 from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
-from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt, pyqtSignal
 from PyQt6.sip import isdeleted
 from datetime import datetime
 from PIL import Image
@@ -121,6 +121,7 @@ class MessageBubble(QFrame):
         self.setGraphicsEffect(None)
 
 class ChatInterface(QWidget):
+    attach_signal = pyqtSignal(object)
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None, scene_id: str | None = None):
         super().__init__()
         self.mw = main_window
@@ -140,6 +141,7 @@ class ChatInterface(QWidget):
         self.svg_icons = Svg()
         self.vmodel_show = False
         self.setObjectName("ChatInterface")
+        self._detach = False
 
         self.voice_enabled = False
 
@@ -699,6 +701,22 @@ class ChatInterface(QWidget):
             ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
     def detachChat(self):
+        self._detach = True
+        self.setParent(None)
+        self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
+        self.show()
+        self.hideCharacterInfoSidebar()
+        self.setStyleSheet(f"""
+            #ChatInterface {{
+                background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+            }}
+            {TM.get_style('VerticalScrollArea')}
+        """)
+
+    def attach_chat(self):
+        self._detach = False
+        self.attach_signal.emit(True)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
@@ -1750,6 +1768,15 @@ class ChatInterface(QWidget):
         super().hideEvent(a0)
         if hasattr(self, 'recent_card') and not self.scene_id:
             self.recent_card.setCheckable(False)
+
+    def closeEvent(self, a0):
+        if self._detach:
+            a0.ignore()
+            self._detach = False
+            self.attach_signal.emit(True)
+        else:
+            super().closeEvent(a0)
+            self.deleteLater()
 
     def toggleLeftSidebar(self):
         self.mw.left_sidebar_hide_user = not self.mw.left_sidebar_hide_user

@@ -839,8 +839,14 @@ class MainPage(QMainWindow):
                 self.chat_thread.replay_signal.disconnect()
             self.current_chat_interface = None
 
+        def attach(_):
+            self.current_chat_interface.setParent(self.main_content_area)
+            self.main_content_area.addWidget(self.current_chat_interface)
+            self.main_content_area.setCurrentWidget(self.current_chat_interface)
+            self.current_chat_interface.show()
 
         self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id, scene_id)
+        self.current_chat_interface.attach_signal.connect(attach)
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
         self.main_content_area.addWidget(self.current_chat_interface)
