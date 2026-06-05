@@ -1,12 +1,13 @@
 import logging, asyncio
 from functools import wraps
 from PyQt6.QtCore import QThread, pyqtSignal, QLocale
+from future.backports.urllib import response
 from gpytranslate import Translator
 import curl_cffi.curl
 
 from modules.logic.VTubeCore import EEC
 
-from modules.api import WSClient, CharacterAPI, ChatsAPI, EmiliaAPI, UsersAPI, VoicesAPI, ScenesAPI
+from modules.api import WSClient, CharacterAPI, ChatsAPI, EmiliaAPI, UsersAPI, VoicesAPI, ScenesAPI, CAILimitAPI
 
 def asyncSlot(func):
     @wraps(func)
@@ -18,6 +19,8 @@ def asyncSlot(func):
 
 class ChatThread(QThread):
     finished = pyqtSignal(object)
+    notification_signal = pyqtSignal(str)
+
     connected_signal = pyqtSignal(bool)
     user_message_signal = pyqtSignal(object)
     message_signal = pyqtSignal(object)
@@ -37,6 +40,9 @@ class ChatThread(QThread):
     get_available_models_git_signal = pyqtSignal(object)
     get_user_signal = pyqtSignal(object)
     hide_chat_signal = pyqtSignal(object)
+
+    get_voice_call_limit_signal = pyqtSignal(dict)
+    get_chat_image_attachment_limit_signal = pyqtSignal(dict)
 
     query_autocomplete_signal = pyqtSignal(object)
     character_search_signal = pyqtSignal(object)
@@ -108,6 +114,7 @@ class ChatThread(QThread):
         self.api_chars = CharacterAPI(self.client)
         self.api_chats = ChatsAPI(self.client)
         self.api_emilia = EmiliaAPI(self.client)
+        self.api_cai_limit = CAILimitAPI(self.client)
         self.api_users = UsersAPI(self.client)
         self.api_voices = VoicesAPI(self.client)
         self.api_scenes = ScenesAPI(self.client)
@@ -127,6 +134,7 @@ class ChatThread(QThread):
         self.users = {}
         self.similar_characters = {}
         self.me = {}
+        self.current_limits = {}
 
     def set_token(self, token):
         self.client.set_token(token)
@@ -156,9 +164,16 @@ class ChatThread(QThread):
         logging.debug(f'ChatThread: The emotion "{emote}" was used')
 
     @asyncSlot
-    async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id="", attachments=[]):
+    async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id="", attachments=None):
         used_emotes = []
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
+        if attachments:
+            count = self.current_limits.get('chat_image_attachment', {}).get('count_remaining', 0)
+            if count >> 0:
+                self.current_limits['chat_image_attachment']['count_remaining'] -= 1
+            elif count == 0:
+                self.notification_signal.emit(self.tr("Attached message limit exceeded"))
+                attachments = None
 
         if vtube_studio:
             await self.eec.connect()
@@ -462,6 +477,18 @@ class ChatThread(QThread):
     @asyncSlot
     async def hide_chat(self, character_id):
         self.hide_chat_signal.emit(await self.api_chats.hide_chat(character_id))
+
+    @asyncSlot
+    async def get_voice_limit(self):
+        response = await self.api_cai_limit.voice_call()
+        self.current_limits['voice_limit'] = response
+        self.get_voice_call_limit_signal.emit(response)
+
+    @asyncSlot
+    async def get_chat_image_attachment_limit_signal(self):
+        response = await self.api_cai_limit.chat_image_attachment()
+        self.current_limits['chat_image_attachment'] = response
+        self.get_chat_image_attachment_limit_signal.emit(response)
 
     @asyncSlot
     async def get_recent_chats(self):
