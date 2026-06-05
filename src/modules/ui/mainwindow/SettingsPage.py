@@ -1,5 +1,6 @@
 import ctypes
 import platform
+import subprocess
 import webbrowser, os, logging,  json, inspect
 from pathlib import Path
 
@@ -171,11 +172,11 @@ class SettingsPage(QWidget):
                     {"type": "pushbutton", "label": self.tr("Settings Folder"),
                      "buttonlabel": self.tr("Open"),
                      "key": "other/settings_folder",
-                     "click": lambda: os.startfile(os.path.dirname(self.mw.settings.fileName()))},
+                     "click": lambda: self.open_folder(os.path.dirname(self.mw.settings.fileName()))},
                     {"type": "pushbutton", "label": self.tr("Logs Folder"),
                      "buttonlabel": self.tr("Open"),
                      "key": "other/logs_folder",
-                     "click": lambda: os.startfile(Path(user_log_dir("Emilia", False)))},
+                     "click": lambda: self.open_folder(Path(user_log_dir("Emilia", False)))},
                 ]
             }, {
                 "label": f"{self.tr('About Emilia')} {self.mw.version}",
@@ -203,6 +204,15 @@ class SettingsPage(QWidget):
         main_layout.addWidget(self.button_bar, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.setLayout(main_layout)
+
+    def open_folder(self, path):
+
+        if platform.system() == "Windows":
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
 
     def openUserSettings(self):
         overlay = UserCards.EditCard(self.mw)
