@@ -314,7 +314,10 @@ class ChatInterface(QWidget):
             path = path.replace('\\', '/')
             self.messages_area.setStyleSheet(f"""
                 #chatScrollArea {{
-                    border-image: url("{path}") 0 0 0 0 stretch stretch;
+                    background-image: url("{path}");
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-attachment: fixed;
                 }}
             """)
             self.messages_content.setStyleSheet("#chatContent { background: transparent; }")
