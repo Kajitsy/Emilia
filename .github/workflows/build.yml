@@ -55,8 +55,8 @@ jobs:
           pyinstaller --noconfirm --onedir --windowed `
             --icon "src\icon.ico" `
             --uac-admin `
-            --add-data "$LK_PATH\rtc\resources\livekit_ffi.dll:livekit/rtc/resources" `
-            --add-data "$L2D_PATH\v3\FrameworkShaders:live2d/v3/FrameworkShaders" `
+            --collect-all "livekit" `
+            --collect-all "live2d" `
             --hidden-import "urllib3.contrib.resolver.system" `
             --hidden-import "urllib3.contrib.hface.protocols.http1" `
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
