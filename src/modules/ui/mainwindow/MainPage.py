@@ -845,8 +845,15 @@ class MainPage(QMainWindow):
             self.main_content_area.setCurrentWidget(self.current_chat_interface)
             self.current_chat_interface.show()
 
+        def detach(_):
+            label = QLabel(self.tr("There should be a chat here..."))
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.main_content_area.addWidget(label)
+            self.main_content_area.setCurrentWidget(label)
+
         self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id, scene_id)
         self.current_chat_interface.attach_signal.connect(attach)
+        self.current_chat_interface.detach_signal.connect(detach)
         if card:
             setattr(self.current_chat_interface, 'recent_card', card)
         self.main_content_area.addWidget(self.current_chat_interface)

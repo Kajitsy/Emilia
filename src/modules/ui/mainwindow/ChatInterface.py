@@ -122,6 +122,7 @@ class MessageBubble(QFrame):
 
 class ChatInterface(QWidget):
     attach_signal = pyqtSignal(object)
+    detach_signal = pyqtSignal(object)
     def __init__(self, main_window, character_name, character_id, chat_id: str | None = None, scene_id: str | None = None):
         super().__init__()
         self.mw = main_window
@@ -702,6 +703,7 @@ class ChatInterface(QWidget):
 
     def detachChat(self):
         self._detach = True
+        self.detach_signal.emit(True)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
