@@ -33,6 +33,11 @@ class ModeCard(QWidget):
         self._run()
         keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
 
+        if self.mw.settings.value('use_old_voice_chat', False, type=bool):
+            self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
+        else:
+            self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, self.voice_id)
+
     def initUI(self):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
@@ -105,7 +110,6 @@ class ModeCard(QWidget):
 
     def _run(self):
         if self.mw.settings.value('use_old_voice_chat', False, type=bool):
-            self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
             self.thread.speech_signal.connect(self.updateSpeakingIndicator)
             self.thread.speech_error_signal.connect(self.handleSpeechError)
             self.thread.user_message.connect(self._userMessage)
@@ -113,7 +117,6 @@ class ModeCard(QWidget):
             self.thread.start()
             self.mw.threads.append(self.thread)
         else:
-            self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, self.voice_id)
             self.thread.speech_signal.connect(self.updateSpeakingIndicator)
             self.thread.error_signal.connect(self.mw.showNotification)
             if hasattr(self.chi, 'vmodel_widget'):

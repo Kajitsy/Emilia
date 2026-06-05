@@ -234,10 +234,16 @@ class ChatInterface(QWidget):
 
         self.call_char_button = PushButton()
         self.call_char_button.clicked.connect(self.callCharacter)
+        if self.chat_thread.current_limits.get('voice_limit', {}).get('count_remaining', 0) == 0 and not self.mw.settings.value('use_old_voice_chat', False, type=bool):
+            self.call_char_button.setEnabled(False)
+            self.call_char_button.setToolTip(self.tr("Call limit exceeded"))
         send_layout.addWidget(self.call_char_button, alignment=Qt.AlignmentFlag.AlignBottom)
 
         self.add_image_button = PushButton()
         self.add_image_button.clicked.connect(self.selectImage)
+        if self.chat_thread.current_limits.get('chat_image_attachment', {}).get('count_remaining', 0) == 0:
+            self.add_image_button.setEnabled(False)
+            self.add_image_button.setToolTip(self.tr("Attached message limit exceeded"))
         send_layout.addWidget(self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom)
 
         input_layout.addWidget(send_widget)
@@ -1245,11 +1251,19 @@ class ChatInterface(QWidget):
             self.cis_visible = False
 
     def callCharacter(self):
-        self.hideCharacterInfoSidebar2()
-        self.mw.hide_overlay = False
-        vsmode = ModeCard(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
-        vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
-        self.mw.showOverlay(vsmode)
+        count = self.chat_thread.current_limits.get('voice_limit', {}).get('count_remaining', 0)
+        if count >> 0:
+            def voicecalllimit(connected: bool):
+                if connected:
+                    self.chat_thread.current_limits['voice_limit']['count_remaining'] -= 1
+            self.hideCharacterInfoSidebar2()
+            self.mw.hide_overlay = False
+            vsmode = ModeCard(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
+            vsmode.thread.connected_signal.connect(voicecalllimit)
+            vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
+            self.mw.showOverlay(vsmode)
+        elif count == 0:
+            self.mw.showNotification(self.tr("Call limit exceeded"))
 
     def _playVoice(self, content):
         thread = PlayerThread(content)

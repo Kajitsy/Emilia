@@ -485,7 +485,7 @@ class ChatThread(QThread):
         self.get_voice_call_limit_signal.emit(response)
 
     @asyncSlot
-    async def get_chat_image_attachment_limit_signal(self):
+    async def get_chat_image_attachment_limit(self):
         response = await self.api_cai_limit.chat_image_attachment()
         self.current_limits['chat_image_attachment'] = response
         self.get_chat_image_attachment_limit_signal.emit(response)

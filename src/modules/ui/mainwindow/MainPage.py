@@ -257,6 +257,8 @@ class MainPage(QMainWindow):
 
             if self.cookie:
                 self.chat_thread.set_cookie(self.cookie)
+                self.chat_thread.get_voice_limit()
+                self.chat_thread.get_chat_image_attachment_limit()
 
             if not self.cookie or not self.token:
                 self.openSettings()
