@@ -25,7 +25,7 @@ urllib3==2.7.0
 websockets==16.0
 curl_cffi==0.15.0
 livekit==1.1.10
-live2d-py==0.7.0.4
+live2d-py
 #./data/live2d_py-0.6.1.1-cp314-cp314-win_amd64.whl #https://github.com/Kajitsy/live2d-py
 numpy==2.4.6
 pillow==12.2.0
