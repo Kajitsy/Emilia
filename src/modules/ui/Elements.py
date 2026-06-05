@@ -10,6 +10,7 @@ from . import TM
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._icon = False
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         TM.theme_changed.connect(self.update_theme)
@@ -17,18 +18,20 @@ class PushButton(QPushButton):
 
     def update_theme(self):
         theme = TM.get_style("PushButton")
-        if self.icon():
+        if self._icon:
             self.setStyleSheet(theme.replace("text-align: left", "text-align: center"))
         else:
             self.setStyleSheet(theme)
 
     def setIcon(self, icon):
         super().setIcon(icon)
+        self._icon = True
         self.update_theme()
 
 class TabButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._icon = False
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setCheckable(True)
 
@@ -37,13 +40,14 @@ class TabButton(QPushButton):
 
     def update_theme(self):
         theme = TM.get_style("TabButton")
-        if self.icon():
+        if self._icon:
             self.setStyleSheet(theme.replace("text-align: left", "text-align: center"))
         else:
             self.setStyleSheet(theme)
 
     def setIcon(self, icon):
         super().setIcon(icon)
+        self._icon = True
         self.update_theme()
 
 class LineEdit(QLineEdit):
