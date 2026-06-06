@@ -1,36 +1,33 @@
 QComboBox {
     background-color: @element_bg;
     color: @text;
-    border: 2px solid @hover_bg;
     border-radius: 4px;
-    padding: 5px 8px;
+    padding: 6px 15px;
 }
 QComboBox:hover {
-    border: 2px solid @disabled_text;
+    background-color: @hover_bg;
 }
 QComboBox::drop-down {
-    border: none;
     background: transparent;
     width: 20px;
 }
 QComboBox QAbstractItemView {
-    background-color: @menu_bg;
-    border: 1px solid @hover_bg;
-    selection-background-color: @menu_item_select;
+    background-color: @hover_bg;
+    selection-background-color: @element_bg;
     color: @text;
     border-radius: 4px;
     padding: 4px;
 }
 QComboBox::item {
-    background-color: @menu_bg;
+    background-color: @hover_bg;
     padding: 5px 10px;
     border-radius: 4px;
+    height: 18px;
 }
 QComboBox::item:selected {
-    background-color: @menu_item_select;
+    background-color: @element_bg;
 }
 QComboBox:disabled {
     background-color: @pressed_bg;
     color: @disabled_text;
-    border: 2px solid @pressed_bg;
 }

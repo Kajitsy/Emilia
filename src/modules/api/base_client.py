@@ -48,6 +48,7 @@ class BaseClient:
             "neo": "https://neo.character.ai/",
             "trpc": "https://character.ai/api/trpc/",
             "plus": "https://plus.character.ai/",
+            "user": "https://user.api.character.ai/"
         }
         base_url = base_urls.get(domain, "https://plus.character.ai/")
         url = f"{base_url}{endpoint}"

@@ -57,18 +57,17 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          LK_PATH=$(python -c "import livekit; print(list(livekit.__path__)[0])")
-          L2D_PATH=$(python -c "import live2d, os; print(os.path.dirname(live2d.__file__))")
+          chmod -R +rx $(python -c "import PyQt6; print(list(PyQt6.__path__)[0])")   
           
           pyinstaller --noconfirm --onedir --windowed \
             --icon "src/icon.ico" \
-            --add-data "$LK_PATH/rtc/resources/liblivekit_ffi.so:livekit/rtc/resources" \
-            --add-data "$L2D_PATH/v3/FrameworkShaders:live2d/v3/FrameworkShaders" \
+            --collect-all "livekit" \
+            --collect-all "live2d" \
+            --collect-all "OpenGL" \
             --hidden-import "urllib3.contrib.resolver.system" \
             --hidden-import "urllib3.contrib.hface.protocols.http1" \
             --hidden-import "urllib3.contrib.hface.protocols.http2" \
             --hidden-import "livekit.rtc.resources" \
-            --hidden-import "OpenGL" \
             "src/main.py"
           
           cp "src/icon.ico" "dist/main/icon.ico"
@@ -114,40 +113,42 @@ jobs:
           tag_name: ${{ env.TAG }}
           files: emilia-linux.tar.gz
 
-  deploy:
+  deploy_server1:
     needs: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        server: [ VPS, VPS2 ]
     steps:
-      - name: Download Archive
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: Emilia_Linux_Archive
+          name: app-build
+          path: deploy_files
 
-      - name: Copy Archive
+      - name: Deploy to Server 1
         uses: appleboy/scp-action@v1
-        env:
-          HOST: ${{ secrets[format('{0}_HOST', matrix.server)] }}
-          USER: ${{ secrets[format('{0}_USER', matrix.server)] }}
         with:
-          host: ${{ env.HOST }}
-          username: ${{ env.USER }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "emilia-linux.tar.gz"
+          source: "deploy_files/*"
           target: "/var/www/emilialinux"
+          strip_components: 1
 
-      - name: Extract Archive
-        uses: appleboy/ssh-action@v1
-        env:
-          HOST: ${{ secrets[format('{0}_HOST', matrix.server)] }}
-          USER: ${{ secrets[format('{0}_USER', matrix.server)] }}
+  deploy_server2:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
-          host: ${{ env.HOST }}
-          username: ${{ env.USER }}
+          name: app-build
+          path: deploy_files
+
+      - name: Deploy to Server 2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS2_HOST }}
+          username: ${{ secrets.VPS2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /var/www/emilialinux
-            tar -xzf emilia-linux.tar.gz --strip-components=1
-            rm emilia-linux.tar.gz
+          source: "deploy_files/*"
+          target: "/var/www/emilialinux"
+          strip_components: 1

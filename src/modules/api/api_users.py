@@ -34,12 +34,12 @@ class UsersAPI:
         return await self.client.request("chat/user/following/", method="get", domain="plus")
 
     async def user_follow(self, username: str):
-        data = {"username": username}
-        return await self.client.request("chat/user/follow/", data, "post", domain="plus")
+        data = {"target_username": username}
+        return await self.client.request("external/user/follow", data, "post", domain="user")
 
     async def user_unfollow(self, username: str):
-        data = {"username": username}
-        return await self.client.request("chat/user/unfollow/", data, "post", domain="neo")
+        data = {"target_username": username}
+        return await self.client.request("external/user/unfollow", data, "post", domain="user")
 
     async def user_search(self, query: str):
         response = await self.client.request(

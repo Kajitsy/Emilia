@@ -419,7 +419,7 @@ class ChatInterface(QWidget):
 
     def createTopBar(self):
         header_frame = QWidget()
-        header_frame.hideEvent = lambda event: self.mw.t_bar.setStyleSheet(None)
+        header_frame.hideEvent = lambda event: self.mw.top_bar_stacked_widget.setStyleSheet(None)
         header_frame.setFixedHeight(75)
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(0, 0, 0, 0)
@@ -707,6 +707,7 @@ class ChatInterface(QWidget):
     def detachChat(self):
         self._detach = True
         self.detach_signal.emit(True)
+        self.toggle_info_button.setEnabled(False)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
@@ -722,6 +723,7 @@ class ChatInterface(QWidget):
     def attach_chat(self):
         self._detach = False
         self.attach_signal.emit(True)
+        self.toggle_info_button.setEnabled(True)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
@@ -1782,13 +1784,3 @@ class ChatInterface(QWidget):
         else:
             super().closeEvent(a0)
             self.deleteLater()
-
-    def toggleLeftSidebar(self):
-        self.mw.left_sidebar_hide_user = not self.mw.left_sidebar_hide_user
-        if self.mw.left_sidebar_hide_user and self.mw.left_sidebar_hide_auto:
-            self.mw.left_sidebar_visible = True
-        else:
-            self.mw.left_sidebar_visible = not self.mw.left_sidebar_visible
-        self.mw.left_sidebar.setVisible(self.mw.left_sidebar_visible)
-        self.mw.top_bar_collapse_button.setVisible(not self.mw.left_sidebar_visible)
-        self.collapse_button.setVisible(not self.mw.left_sidebar_visible)

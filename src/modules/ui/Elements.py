@@ -434,7 +434,6 @@ class LeftSidebar(QFrame):
     def update_theme(self):
         self.setStyleSheet(TM.get_style("LeftSidebar"))
         self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('icon')))
-        self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar(TM.c('icon')))
         self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('icon')))
 
     def initUI(self):
@@ -453,11 +452,6 @@ class LeftSidebar(QFrame):
         self.to_main_page_button_2.clicked.connect(self.mw.showMainPage)
         self.buttons_layout.addWidget(self.to_main_page_button_2, 1)
         self.to_main_page_button_2.setVisible(False)
-
-        self.sidebar_collapse_button = PushButton()
-        self.sidebar_collapse_button.clicked.connect(self.mw.toggleLeftSidebar)
-        self.sidebar_collapse_button.setVisible(self.mw.left_sidebar_visible)
-        self.buttons_layout.addWidget(self.sidebar_collapse_button, 0)
 
         self.create_button = PushButton(self.tr('Create'))
         self.create_button.clicked.connect(lambda: self.showCreateContextMenu(self.create_button))
@@ -572,14 +566,18 @@ class LeftSidebar(QFrame):
 
         if self.resizing:
             diff_x = event.globalPosition().toPoint().x() - self.startPos.x()
-            new_width = min(max(96, self.width() + diff_x), 255)
+            new_width = min(max(88, self.width() + diff_x), 255)
+            if self.width() > 88 and new_width <= 120:
+                new_width = 88
+            elif self.width() == 88 and diff_x > 0:
+                new_width = 121
             self.startPos = event.globalPosition().toPoint()
 
             self.setFixedWidth(new_width)
             self.recent_chat_scroll_page.setFixedWidth(new_width - 20)
             self.mw.settings.setValue("left_sidebar_width", new_width)
             self.resizeCards()
-            if self.width() <= 100:
+            if self.width() <= 120:
                 self.profile_button.setVisible(False)
                 self.to_main_page_button.setVisible(False)
                 self.create_button.setVisible(False)
