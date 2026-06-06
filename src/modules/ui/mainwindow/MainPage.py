@@ -187,9 +187,9 @@ class MainPage(QMainWindow):
         self.main_layout = QVBoxLayout()
         self.layout.addLayout(self.main_layout, 1)
 
-        self.top_widget, self.top_bar_stacked_widget, self.t_bar = self.createTopBar()
+        self.top_widget, self.top_bar_stacked_widget = self.createTopBar()
         self.top_bar_stacked_widget.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.addWidget(self.t_bar)
+        self.main_layout.addWidget(self.top_bar_stacked_widget)
 
         self.main_content_area = QStackedWidget()
         self.main_page = self.createMainContentPage()
@@ -478,14 +478,9 @@ class MainPage(QMainWindow):
         return main_content_area
 
     def createTopBar(self):
-        top_bar = QWidget()
-        top_bar.setObjectName("topBar")
-        t_layout = QHBoxLayout()
-        top_bar.setLayout(t_layout)
-
         def showEvent(event):
             top_bar_stacked_widget.setFixedHeight(50)
-            top_bar.setStyleSheet(None)
+            top_bar_stacked_widget.setStyleSheet(None)
 
         top_widget = QWidget()
         top_widget.showEvent = showEvent
@@ -497,7 +492,7 @@ class MainPage(QMainWindow):
         top_bar_stacked_widget.addWidget(top_widget)
         top_widget.setStyleSheet("background-color: transparent;")
 
-        self.top_bar_animation = QPropertyAnimation(top_bar, b"geometry")
+        self.top_bar_animation = QPropertyAnimation(top_bar_stacked_widget, b"geometry")
         self.top_bar_animation.setDuration(500)
         self.top_bar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
@@ -518,9 +513,7 @@ class MainPage(QMainWindow):
         self.search_bar.setFixedWidth(200)
         top_bar_layout.addWidget(self.search_bar)
 
-        t_layout.addWidget(top_bar_stacked_widget)
-
-        return top_widget, top_bar_stacked_widget, top_bar
+        return top_widget, top_bar_stacked_widget
 
     def createSection(self, title):
         section_frame = QFrame()
