@@ -89,7 +89,6 @@ class MainPage(QMainWindow):
 
         self.token = self.settings.value("cai_auth/token", "", type=str)
         self.cookie = self.settings.value("cai_auth/cookie", "", type=str)
-        self.auto_collapse_sidebar = self.settings.value("auto_collapse_sidebar", False, type=bool)
         self.name = self.tr("User")
         self.input_devices = {}
         self.output_devices = {}
@@ -178,7 +177,6 @@ class MainPage(QMainWindow):
             border-radius: 4px;
             padding: 10px;
         """)
-        self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis(TM.c("icon")))
 
     def initUI(self):
         self.layout = QHBoxLayout()
@@ -216,7 +214,6 @@ class MainPage(QMainWindow):
         self.createOverlay()
 
         self.full_animation = QParallelAnimationGroup()
-        self.full_animation.addAnimation(self.left_sidebar_animation)
         self.full_animation.addAnimation(self.main_content_area_animation)
         self.full_animation.addAnimation(self.top_bar_animation)
 
@@ -273,12 +270,6 @@ class MainPage(QMainWindow):
         left_sidebar = LeftSidebar(self)
         self.profile_button = left_sidebar.profile_button
         self.recent_chat_scroll_layout = left_sidebar.recent_chat_scroll_layout
-
-        self.left_sidebar_animation = QPropertyAnimation(left_sidebar, b"geometry")
-        self.left_sidebar_animation.setDuration(500)
-        self.left_sidebar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
-        self.left_sidebar_animation.finished.connect(lambda: self.leftSidebarAnim())
-
         return left_sidebar
 
     def addRecentChatCard(self, character_id, character_name, chat_id, character_avatar_url, scene_id=None, scene_name=""):
@@ -389,65 +380,6 @@ class MainPage(QMainWindow):
         TM.theme_changed.connect(lambda: updateTheme(card))
         updateTheme(card)
         return card
-
-    def leftSidebarAnim(self):
-        self.left_sidebar.setVisible(self.left_sidebar_visible)
-
-    def toggleLeftSidebar(self):
-        self.left_sidebar_hide_user = not self.left_sidebar_hide_user
-        if self.left_sidebar_hide_user and self.left_sidebar_hide_auto:
-            self.left_sidebar_visible = True
-        else:
-            self.left_sidebar_visible = not self.left_sidebar_visible
-
-        left_current_rect = self.left_sidebar.geometry()
-        main_current_rect = self.main_content_area.geometry()
-        top_current_rect = self.t_bar.geometry()
-
-        offset = left_current_rect.width() + 10
-
-        if self.left_sidebar_visible:
-            self.left_sidebar.setVisible(True)
-            self.top_bar_collapse_button.setVisible(False)
-            self.left_sidebar_animation.setStartValue(left_current_rect)
-            self.left_sidebar_animation.setEndValue(QRect(left_current_rect.x() + offset,
-                                                          left_current_rect.y(),
-                                                          left_current_rect.width(),
-                                                          left_current_rect.height()))
-
-            self.main_content_area_animation.setStartValue(main_current_rect)
-            self.main_content_area_animation.setEndValue(QRect(main_current_rect.x() + offset,
-                                                               main_current_rect.y(),
-                                                               main_current_rect.width() - offset,
-                                                               main_current_rect.height()))
-
-            self.top_bar_animation.setStartValue(top_current_rect)
-            self.top_bar_animation.setEndValue(QRect(top_current_rect.x() + offset,
-                                                     top_current_rect.y(),
-                                                     top_current_rect.width() - offset,
-                                                     top_current_rect.height()))
-
-        else:
-            self.left_sidebar_animation.setStartValue(left_current_rect)
-            self.left_sidebar_animation.setEndValue(QRect(left_current_rect.x() - offset,
-                                                          left_current_rect.y(),
-                                                          left_current_rect.width(),
-                                                          left_current_rect.height()))
-
-            self.main_content_area_animation.setStartValue(main_current_rect)
-            self.main_content_area_animation.setEndValue(QRect(main_current_rect.x() - offset,
-                                                               main_current_rect.y(),
-                                                               main_current_rect.width() + offset,
-                                                               main_current_rect.height()))
-
-            self.top_bar_animation.setStartValue(top_current_rect)
-            self.top_bar_animation.setEndValue(QRect(top_current_rect.x() - offset,
-                                                     top_current_rect.y(),
-                                                     top_current_rect.width() + offset,
-                                                     top_current_rect.height()))
-
-        self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
-        self.full_animation.start()
 
     def checkForUpdates(self, has_update):
         def update():
@@ -569,11 +501,6 @@ class MainPage(QMainWindow):
         self.top_bar_animation.setDuration(500)
         self.top_bar_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
-        self.top_bar_collapse_button = PushButton()
-        self.top_bar_collapse_button.setIcon(self.svg_icons.ellipsis(TM.c("icon")))
-        self.top_bar_collapse_button.clicked.connect(self.toggleLeftSidebar)
-        self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
-
         self.welcome_label = QLabel(self.tr("Welcome back, User"))
         font = self.welcome_label.font()
         font.setPointSize(12)
@@ -591,7 +518,6 @@ class MainPage(QMainWindow):
         self.search_bar.setFixedWidth(200)
         top_bar_layout.addWidget(self.search_bar)
 
-        t_layout.addWidget(self.top_bar_collapse_button)
         t_layout.addWidget(top_bar_stacked_widget)
 
         return top_widget, top_bar_stacked_widget, top_bar
@@ -796,11 +722,6 @@ class MainPage(QMainWindow):
             if item and item.widget():
                 item.widget().deleteLater()
 
-    def updateAutoCollapseSidebar(self):
-        auto_collapse_sidebar_checkbox = self.settings_page.findChild(CheckBox, "auto_collapse_sidebar")
-        self.auto_collapse_sidebar = auto_collapse_sidebar_checkbox.isChecked()
-        self.settings.setValue("auto_collapse_sidebar", self.auto_collapse_sidebar)
-
     def showSearchResultsV2(self):
         search_query = self.search_bar.text().strip()
         if not search_query:
@@ -861,7 +782,6 @@ class MainPage(QMainWindow):
 
     def openSettings(self):
         self.settings_page = SettingsPage.SettingsPage(self)
-        self.settings_page.save_button.clicked.connect(self.updateAutoCollapseSidebar)
         self.main_content_area.addWidget(self.settings_page)
         self.main_content_area.setCurrentWidget(self.settings_page)
         if self.current_chat_interface:
@@ -1101,15 +1021,6 @@ class MainPage(QMainWindow):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if self.auto_collapse_sidebar:
-            if self.left_sidebar_visible and not self.left_sidebar_hide_user or self.left_sidebar_hide_auto:
-                if self.width() < 1100:
-                    self.left_sidebar_hide_auto = True
-                else:
-                    self.left_sidebar_hide_auto = False
-                self.left_sidebar_visible = not self.left_sidebar_hide_auto
-                self.left_sidebar.setVisible(self.left_sidebar_visible)
-                self.top_bar_collapse_button.setVisible(not self.left_sidebar_visible)
         if hasattr(self, 'overlay'):
             self.overlay.setGeometry(self.rect())
         if hasattr(self, 'notification_message_label'):

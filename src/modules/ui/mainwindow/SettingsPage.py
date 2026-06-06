@@ -108,7 +108,6 @@ class SettingsPage(QWidget):
             }, {
                 "label": self.tr("Emilia Settings"),
                 "settings": [
-                    {"type": "checkbox", "label": self.tr("Automatically hide the sidebar when the window is narrow"), "key": "auto_collapse_sidebar"},
                     {"type": "combobox", "label": self.tr("App theme"), "items": TM.get_themes_name(), "key": "app_theme"},
                     {"type": "pushbutton", "label": self.tr("Theme Catalog"), "buttonlabel": self.tr("Open"), "key": "app_theme_catalog", "click": self.openThemeCatalog},
                     {"type": "checkbox", "label": self.tr("Sync theme with system theme"), "key": "app_theme_system_sync"},

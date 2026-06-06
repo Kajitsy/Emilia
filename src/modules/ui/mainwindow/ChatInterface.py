@@ -1782,13 +1782,3 @@ class ChatInterface(QWidget):
         else:
             super().closeEvent(a0)
             self.deleteLater()
-
-    def toggleLeftSidebar(self):
-        self.mw.left_sidebar_hide_user = not self.mw.left_sidebar_hide_user
-        if self.mw.left_sidebar_hide_user and self.mw.left_sidebar_hide_auto:
-            self.mw.left_sidebar_visible = True
-        else:
-            self.mw.left_sidebar_visible = not self.mw.left_sidebar_visible
-        self.mw.left_sidebar.setVisible(self.mw.left_sidebar_visible)
-        self.mw.top_bar_collapse_button.setVisible(not self.mw.left_sidebar_visible)
-        self.collapse_button.setVisible(not self.mw.left_sidebar_visible)

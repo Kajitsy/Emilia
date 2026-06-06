@@ -434,7 +434,6 @@ class LeftSidebar(QFrame):
     def update_theme(self):
         self.setStyleSheet(TM.get_style("LeftSidebar"))
         self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('icon')))
-        self.sidebar_collapse_button.setIcon(self.mw.svg_icons.hide_left_sidebar(TM.c('icon')))
         self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('icon')))
 
     def initUI(self):
@@ -453,11 +452,6 @@ class LeftSidebar(QFrame):
         self.to_main_page_button_2.clicked.connect(self.mw.showMainPage)
         self.buttons_layout.addWidget(self.to_main_page_button_2, 1)
         self.to_main_page_button_2.setVisible(False)
-
-        self.sidebar_collapse_button = PushButton()
-        self.sidebar_collapse_button.clicked.connect(self.mw.toggleLeftSidebar)
-        self.sidebar_collapse_button.setVisible(self.mw.left_sidebar_visible)
-        self.buttons_layout.addWidget(self.sidebar_collapse_button, 0)
 
         self.create_button = PushButton(self.tr('Create'))
         self.create_button.clicked.connect(lambda: self.showCreateContextMenu(self.create_button))
