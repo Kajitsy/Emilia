@@ -572,14 +572,18 @@ class LeftSidebar(QFrame):
 
         if self.resizing:
             diff_x = event.globalPosition().toPoint().x() - self.startPos.x()
-            new_width = min(max(96, self.width() + diff_x), 255)
+            new_width = min(max(88, self.width() + diff_x), 255)
+            if self.width() > 88 and new_width <= 120:
+                new_width = 88
+            elif self.width() == 88 and diff_x > 0:
+                new_width = 121
             self.startPos = event.globalPosition().toPoint()
 
             self.setFixedWidth(new_width)
             self.recent_chat_scroll_page.setFixedWidth(new_width - 20)
             self.mw.settings.setValue("left_sidebar_width", new_width)
             self.resizeCards()
-            if self.width() <= 100:
+            if self.width() <= 120:
                 self.profile_button.setVisible(False)
                 self.to_main_page_button.setVisible(False)
                 self.create_button.setVisible(False)
