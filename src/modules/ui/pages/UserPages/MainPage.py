@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QL
 
 from modules.ui.Elements import PushButton, TabButton, VerticalScrollPage, CardFrame
 from modules.Utils import format_number, color_avatar
-from modules.ui.cards import CharacterCards, PersonaCards, SceneCards, VoiceCards, UserCards, ThemeCards
+from modules.ui.cards import CharacterCards, EmptyCards, PersonaCards, SceneCards, VoiceCards, UserCards, ThemeCards
 
 
 class MainPage(QWidget):
@@ -241,8 +241,8 @@ class MainPage(QWidget):
                 card = VoiceCards.HorizontalMiniCard(self.mw, voice)
                 self.voice_list_layout.addWidget(card)
         else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.voice_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            ecard = EmptyCards.VoiceHorizontalMiniCard()
+            self.voice_list_layout.addWidget(ecard)
 
     def _getUpCharacters(self, data):
         self.chat_thread.get_upvoted_characters_signal.disconnect()
@@ -256,8 +256,9 @@ class MainPage(QWidget):
                 card.setFixedHeight(87)
                 self.upvoted_characters_layout.addWidget(card)
         else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.upvoted_characters_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            ecard = EmptyCards.CharMainCard()
+            ecard.setFixedHeight(87)
+            self.upvoted_characters_layout.addWidget(ecard)
 
     def _getScenes(self, data):
         self.chat_thread.get_scenes_by_user_signal.disconnect()
@@ -268,8 +269,8 @@ class MainPage(QWidget):
                 card = SceneCards.ListCard(self.mw, scene)
                 self.scenes_list_layout.addWidget(card)
         else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.scenes_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            ecard = EmptyCards.SceneListCard()
+            self.scenes_list_layout.addWidget(ecard)
 
     def _getThemes(self, data):
         self.chat_thread.get_user_themes_signal.disconnect()
@@ -280,8 +281,8 @@ class MainPage(QWidget):
                 card = ThemeCards.ListCard(self.mw, theme)
                 self.theme_list_layout.addWidget(card)
         else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.theme_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            ecard = EmptyCards.ThemeListCard()
+            self.theme_list_layout.addWidget(ecard)
 
     def _getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()
@@ -352,8 +353,9 @@ class MainPage(QWidget):
                 card.setFixedHeight(87)
                 self.character_list_layout.addWidget(card)
         else:
-            empty_label = QLabel(self.tr("And it's empty here..."))
-            self.character_list_layout.addWidget(empty_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            ecard = EmptyCards.CharMainCard()
+            ecard.setFixedHeight(87)
+            self.character_list_layout.addWidget(ecard)
 
     def share(self):
         QApplication.clipboard().setText(f'https://character.ai/profile/{self.username}')
