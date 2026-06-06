@@ -13,9 +13,8 @@ from packaging import version
 
 from modules import (ImageLoader, Svg,
                      UpdaterThread, UpdateThread, ChatThread)
-from modules.ui.Elements import (PushButton, HorizontalScrollArea, ClickableFrame,
-                                 LeftSidebar, CheckBox, Menu,
-                                 VerticalScrollPage, HorizontalScrollPage, TabButton, SearchLineEdit)
+from modules.ui.Elements import (PushButton, HorizontalScrollArea, ClickableFrame, LeftSidebar,
+                                 Menu, VerticalScrollPage, HorizontalScrollPage, TabButton, SearchLineEdit)
 from modules.Utils import color_avatar
 from modules.logic.QThreads import DiscordRPCThread
 from modules.ui.cards import CharacterCards, SceneCards, VoiceCards, ThemeCards
@@ -60,7 +59,7 @@ class MainPage(QMainWindow):
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.3.1"
+        self.version = "3.3.2"
         self.beta = version.parse(self.version).is_prerelease
 
         geometry = self.settings.value("main_window/geometry")
@@ -112,7 +111,7 @@ class MainPage(QMainWindow):
         self.image_loader = ImageLoader()
 
         self.setOutputDevice(self.settings.value('output_device', 0, type=int))
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, 'frozen', False) and platform.system() == 'Windows':
             self.updater_thread.start()
 
         self.initUI()
