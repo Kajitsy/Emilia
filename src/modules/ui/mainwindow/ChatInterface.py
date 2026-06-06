@@ -707,6 +707,7 @@ class ChatInterface(QWidget):
     def detachChat(self):
         self._detach = True
         self.detach_signal.emit(True)
+        self.toggle_info_button.setEnabled(False)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
@@ -722,6 +723,7 @@ class ChatInterface(QWidget):
     def attach_chat(self):
         self._detach = False
         self.attach_signal.emit(True)
+        self.toggle_info_button.setEnabled(True)
         self.setParent(None)
         self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
         self.show()
