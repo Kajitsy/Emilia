@@ -1,5 +1,4 @@
-import os, hashlib, json, requests
-import sys
+import os, hashlib, json, requests, sys, platform
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -9,7 +8,15 @@ class UpdaterThread(QThread):
 
     def __init__(self, remote_url="https://ru-emiupd.kajitsy.xyz/"):
         super().__init__()
-        self.remote_url = remote_url
+        
+        system = platform.system()
+        if system == "Windows":
+            self.remote_url = remote_url.rstrip("/") + "/windows/"
+        elif system == "Linux":
+            self.remote_url = remote_url.rstrip("/") + "/linux/"
+        else:
+            self.remote_url = remote_url.rstrip("/") + "/"
+
         self.local_manifest = {"files": {}}
         self.remote_manifest = {"files": {}}
         self.files_to_download = []
