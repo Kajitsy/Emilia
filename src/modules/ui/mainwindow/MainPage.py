@@ -9,6 +9,7 @@ from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimatio
                           QEasingCurve, QTimer, QParallelAnimationGroup,
                           QPoint, Qt, QLocale, pyqtSignal)
 from PyQt6.QtMultimedia import QMediaDevices
+from PyQt6.sip import isdeleted
 from packaging import version
 
 from modules import (ImageLoader, Svg,
@@ -773,8 +774,9 @@ class MainPage(QMainWindow):
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
     def openSettings(self):
-        self.settings_page = SettingsPage.SettingsPage(self)
-        self.main_content_area.addWidget(self.settings_page)
+        if not hasattr(self, 'settings_page') or self.settings_page is None or isdeleted(self.settings_page):
+            self.settings_page = SettingsPage.SettingsPage(self)
+            self.main_content_area.addWidget(self.settings_page)
         self.main_content_area.setCurrentWidget(self.settings_page)
         if self.current_chat_interface:
             self.current_chat_interface.setVisible(False)

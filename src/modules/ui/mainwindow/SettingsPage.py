@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel,
                              QPushButton, QFrame, QFileDialog, QApplication)
 from PyQt6.QtGui import QIntValidator, QRegularExpressionValidator, QKeySequence
 from PyQt6.QtCore import QDateTime, QRegularExpression, Qt, QTranslator
+from PyQt6.sip import isdeleted
 from platformdirs import user_log_dir
 
 from modules import ChatThread
@@ -564,7 +565,7 @@ class SettingsPage(QWidget):
             self.cookie_available = True
             self.mw.settings.setValue("cai_auth/cookie", auth_token)
             self.mw.settings.setValue("cai_auth/expiration_date", expiration_date.toString("yyyy.MM.dd HH:mm"))
-            if self.token_available: cl(self)
+            if self.token_available: cl()
         def token_get(token):
             self.token_available = True
             self.mw.settings.setValue("cai_auth/token", token)
@@ -590,6 +591,8 @@ class SettingsPage(QWidget):
 
     def loadSettings(self):
         for key, widget in self.setting_widgets.items():
+            if isdeleted(widget):
+                continue
             value = self.mw.settings.value(key, str(self.setting_data[key].get('def_value')))
             if isinstance(widget, LineEdit):
                 widget.setText(value if value is not None else "")
@@ -623,6 +626,8 @@ class SettingsPage(QWidget):
         app = QApplication.instance()
         translator = QTranslator()
         for key, widget in self.setting_widgets.items():
+            if isdeleted(widget):
+                continue
             if isinstance(widget, LineEdit):
                 if not self.setting_data.get(key).get('may_be_empty', True) and not widget.text():
                     self.mw.showNotification(self.setting_data[key]['label'] + self.tr(" cannot be empty"))
