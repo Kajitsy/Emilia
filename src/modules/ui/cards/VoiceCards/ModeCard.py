@@ -30,13 +30,13 @@ class ModeCard(QWidget):
 
         self.mw.setOutputDevice(self.mw.settings.value('output_device', 0, type=int))
 
-        self._run()
-        keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
-
         if self.mw.settings.value('use_old_voice_chat', False, type=bool):
             self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
         else:
             self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, self.voice_id)
+
+        self._run()
+        keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
 
     def initUI(self):
         self.layout = QVBoxLayout()

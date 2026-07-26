@@ -6,14 +6,21 @@ from PyQt6.QtCore import pyqtSignal
 class RequestInterceptor(QWebEngineUrlRequestInterceptor):
     authorization_signal = pyqtSignal(str)
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.last_token = None
+
     def interceptRequest(self, info):
         url = info.requestUrl().toString()
-        if url == "https://plus.character.ai/chat/user/settings/":
+        if "character.ai" in url:
             headers = info.httpHeaders()
             for header, value in headers.items():
                 if header.data().decode().lower() == "authorization":
-                    token = value.data().decode().replace("Token ", "")
-                    self.authorization_signal.emit(token)
+                    raw_val = value.data().decode()
+                    token = raw_val.replace("Token ", "").replace("Bearer ", "").strip()
+                    if token and token != self.last_token:
+                        self.last_token = token
+                        self.authorization_signal.emit(token)
                     break
-        elif url[:34] == "https://character.ai/login/polling":
-            logging.debug("Login Pooling...")
+        if "character.ai/login/polling" in url:
+            logging.debug("Login Polling...")

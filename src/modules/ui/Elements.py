@@ -381,11 +381,19 @@ class ClickableFrame(QFrame):
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()
 
+    @property
+    def default_style(self):
+        return TM.get_style("ClickableFrame")
+
+    @property
+    def press_style(self):
+        return TM.get_style("PressedFrame")
+
     def update_theme(self):
         if self.checkable:
-            self.setStyleSheet(TM.get_style("PressedFrame"))
+            self.setStyleSheet(self.press_style)
         else:
-            self.setStyleSheet(TM.get_style("ClickableFrame"))
+            self.setStyleSheet(self.default_style)
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)

@@ -2,7 +2,7 @@ import asyncio, zipfile, io, os, requests
 
 class EmiliaAPI:
     def __init__(self, client):
-        self.url = "https://api.emilia.ateez.ru/"
+        self.url = "https://apiemilia.kajitsy.xyz/"
         self.client = client
 
     async def get_update_servers(self):

@@ -9,6 +9,7 @@ from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimatio
                           QEasingCurve, QTimer, QParallelAnimationGroup,
                           QPoint, Qt, QLocale, pyqtSignal)
 from PyQt6.QtMultimedia import QMediaDevices
+from PyQt6.sip import isdeleted
 from packaging import version
 
 from modules import (ImageLoader, Svg,
@@ -54,12 +55,12 @@ class MainPage(QMainWindow):
                 self.theme = new_theme
         TM.set_theme(self.theme)
         self._is_updating = False
-        self.drpc_enable = self.settings.value("discord_rpc/enable", True, type=bool)
+        self.drpc_enable = self.settings.value("discord_rpc/enable", False, type=bool)
         self.drpc_show_chat_name = self.settings.value("discord_rpc/show_chat_name", False, type=bool)
         self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
         self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
         self.svg_icons = Svg()
-        self.version = "3.3.2"
+        self.version = "3.3.3"
         self.beta = version.parse(self.version).is_prerelease
 
         geometry = self.settings.value("main_window/geometry")
@@ -73,6 +74,7 @@ class MainPage(QMainWindow):
         self.current_chat_interface = None
         self.hide_overlay = True
         self.me_has_avatar = False
+        self.me_has_plus = False
         self.username = None
         self.muted = False
 
@@ -773,8 +775,9 @@ class MainPage(QMainWindow):
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
     def openSettings(self):
-        self.settings_page = SettingsPage.SettingsPage(self)
-        self.main_content_area.addWidget(self.settings_page)
+        if not hasattr(self, 'settings_page') or self.settings_page is None or isdeleted(self.settings_page):
+            self.settings_page = SettingsPage.SettingsPage(self)
+            self.main_content_area.addWidget(self.settings_page)
         self.main_content_area.setCurrentWidget(self.settings_page)
         if self.current_chat_interface:
             self.current_chat_interface.setVisible(False)
@@ -847,7 +850,7 @@ class MainPage(QMainWindow):
             if self.current_chat_interface is not None:
                 if self.current_chat_interface.chat_id == chat.get('id'):
                     setattr(self.current_chat_interface, 'recent_card', card)
-                    card.setStyleSheet(card.press_style)
+                    card.setCheckable(True)
 
     def addFeaturedVoices(self, voices):
         for i in reversed(range(self.featured_voices_layout.count())):
@@ -947,6 +950,7 @@ class MainPage(QMainWindow):
         self.name = self.me['account']['name']
         self.username = self.me['username']
         self.me_has_avatar = True if self.me.get('account', {}).get('avatar_file_name') else False
+        self.me_has_plus = True if self.me.get('subscription', {}) else False
         self.me_avatar = self.me.get('account', {}).get('avatar_file_name')
 
         if self.me_has_avatar:

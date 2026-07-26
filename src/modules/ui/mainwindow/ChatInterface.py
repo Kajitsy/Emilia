@@ -870,6 +870,7 @@ class ChatInterface(QWidget):
             if plus:
                 plus_label = QLabel("C.AI+")
                 card_layout.addWidget(plus_label)
+                card.setEnabled(self.mw.me_has_plus)
 
             if beta:
                 beta_label = QLabel()
@@ -886,8 +887,8 @@ class ChatInterface(QWidget):
 
         def onCardClicked(clicked_card: ClickableFrame):
             for c in card_list:
-                c.setStyleSheet(c.default_style)
-            clicked_card.setStyleSheet(clicked_card.press_style)
+                c.setCheckable(False)
+            clicked_card.setCheckable(True)
             self.overlay_selected_model_type = clicked_card.objectName()
 
             if self.overlay_selected_model_type == self.preferred_model_type:
@@ -1497,7 +1498,7 @@ class ChatInterface(QWidget):
                         card = item.widget()
                         if card.objectName() == self.chat_id:
                             setattr(self, 'recent_card', card)
-                            card.setStyleSheet(card.press_style)
+                            card.setCheckable(True)
                         break
         else:
             self.chat_thread.new_chat_created_signal.connect(self._newChatCreated)
