@@ -1,4 +1,4 @@
-name: Build and Deploy Emilia
+name: 'Build and Deploy Emilia'
 
 on:
   release:
@@ -13,23 +13,29 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  Windows-Build:
     runs-on: windows-latest
+    outputs:
+      target_dir: ${{ steps.resolve.outputs.target }}
 
     steps:
       - name: Download repo
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
 
       - name: Resolve tag
+        id: resolve
         shell: pwsh
         run: |
           if ("${{ github.event.release.tag_name }}") {
               echo "TAG=${{ github.event.release.tag_name }}" >> $env:GITHUB_ENV
+              echo "target=/var/www/emilia" >> $env:GITHUB_OUTPUT
           } else {
               echo "TAG=${{ github.event.inputs.tag }}" >> $env:GITHUB_ENV
+              echo "target=/var/www/test/emilia" >> $env:GITHUB_OUTPUT
           }
+
       - name: Python Setup
-        uses: actions/setup-python@v6.2.0
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
@@ -38,7 +44,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
-      
+
       - name: Download UPX
         shell: pwsh
         run: |
@@ -46,101 +52,211 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/upx/upx/releases/download/v5.1.0/upx-5.1.0-win64.zip" -OutFile $output
           Expand-Archive -Path $output -DestinationPath upx_temp
           Move-Item -Path upx_temp/upx-5.1.0-win64/upx.exe -Destination .
-      
+
       - name: Build with PyInstaller
         shell: pwsh
         run: |
-          $LK_PATH = python -c "import livekit; print(list(livekit.__path__)[0])"
-          $L2D_PATH = python -c "import live2d, os; print(os.path.dirname(live2d.__file__))"
           pyinstaller --noconfirm --onedir --windowed `
             --icon "src\icon.ico" `
             --uac-admin `
             --collect-all "livekit" `
             --collect-all "live2d" `
+            --collect-all "OpenGL" `
             --hidden-import "urllib3.contrib.resolver.system" `
             --hidden-import "urllib3.contrib.hface.protocols.http1" `
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
             --hidden-import "livekit.rtc.resources" `
-            --hidden-import "OpenGL" `
             "src\main.py"
+          
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           xcopy /E /I /H /Y "src\themes" "dist\main\themes"
           xcopy /E /I /H /Y "src\data\default_qss" "dist\main\data\default_qss"
+          
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {
               exit 1
           }
+
       - name: Cleanup Junk Files
         run: |
           python clean_dist.py
-          
+
       - name: Create manifest
         shell: pwsh
         run: |
           python create_manifest.py
-          
+
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: app-build
+          name: windows-app-build
           path: dist/main/
           retention-days: 1
 
       - name: Build Setup file
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.9
         with:
           path: installer.iss
 
       - name: Upload installer
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Emilia_Installer
           path: EmiliaSetup.exe
 
       - name: Public release
-        uses: softprops/action-gh-release@v2
+        if: ${{ github.event.release.tag_name != '' }}
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG }}
           files: EmiliaSetup.exe
 
-  deploy_server1:
-    needs: build
+  Windows-Deploy:
+    needs: Windows-Build
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
-          name: app-build
+          name: windows-app-build
           path: deploy_files
 
-      - name: Deploy to Server 1
+      - name: Deploy windows build to Server
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_PORT }}
           source: "deploy_files/*"
-          target: "/var/www/emilia"
+          target: ${{ needs.Windows-Build.outputs.target_dir }}
           strip_components: 1
 
-  deploy_server2:
-    needs: build
+  Linux-Build:
+    runs-on: ubuntu-latest
+    outputs:
+      target_dir: ${{ steps.resolve.outputs.target }}
+
+    steps:
+      - name: Download repo
+        uses: actions/checkout@v7
+
+      - name: Resolve tag
+        id: resolve
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+              echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+              echo "target=/var/www/emilialinux" >> $GITHUB_OUTPUT
+          else
+              echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+              echo "target=/var/www/test/emilialinux" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Python Setup
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install PortAudio dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y portaudio19-dev python3-dev gcc
+
+      - name: Install Live2D
+        run: |
+          wget https://github.com/EasyLive2D/live2d-py/releases/download/v0.7.0.4/live2d_py-0.7.0.4-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+          pip install live2d_py-0.7.0.4-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller==6.19.0
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Download UPX
+        run: |
+          wget https://github.com/upx/upx/releases/download/v5.1.0/upx-5.1.0-amd64_linux.tar.xz
+          tar -xf upx-5.1.0-amd64_linux.tar.xz
+          mv upx-5.1.0-amd64_linux/upx .
+
+      - name: Build with PyInstaller
+        run: |
+          chmod -R +rx $(python -c "import PyQt6; print(list(PyQt6.__path__)[0])")   
+
+          pyinstaller --noconfirm --onedir --windowed \
+            --icon "src/icon.ico" \
+            --collect-all "livekit" \
+            --collect-all "live2d" \
+            --collect-all "OpenGL" \
+            --hidden-import "urllib3.contrib.resolver.system" \
+            --hidden-import "urllib3.contrib.hface.protocols.http1" \
+            --hidden-import "urllib3.contrib.hface.protocols.http2" \
+            --hidden-import "livekit.rtc.resources" \
+            "src/main.py"
+
+          cp "src/icon.ico" "dist/main/icon.ico"
+          cp -r "src/lang" "dist/main/lang"
+          cp -r "src/themes" "dist/main/themes"
+          mkdir -p "dist/main/data"
+          cp -r "src/data/default_qss" "dist/main/data/default_qss"
+
+          if [ -f "dist/main/main" ]; then
+              mv "dist/main/main" "dist/main/emilia"
+          else
+              exit 1
+          fi
+
+      - name: Cleanup Junk Files
+        run: |
+          python clean_dist.py
+
+      - name: Create manifest
+        run: |
+          python create_manifest.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-app-build
+          path: dist/main/
+          retention-days: 1
+
+      - name: Create Tarball Archive
+        run: |
+          tar -czf emilia-linux.tar.gz -C dist main
+
+      - name: Upload Linux Archive Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Emilia_Linux_Archive
+          path: emilia-linux.tar.gz
+
+      - name: Public release
+        if: ${{ github.event.release.tag_name != '' }}
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.TAG }}
+          files: emilia-linux.tar.gz
+
+  Linux-Deploy:
+    needs: Linux-Build
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
-          name: app-build
+          name: linux-app-build
           path: deploy_files
 
-      - name: Deploy to Server 2
+      - name: Deploy linux build to Server
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.VPS2_HOST }}
-          username: ${{ secrets.VPS2_USER }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_PORT }}
           source: "deploy_files/*"
-          target: "/var/www/emilia"
+          target: ${{ needs.Linux-Build.outputs.target_dir }}
           strip_components: 1
