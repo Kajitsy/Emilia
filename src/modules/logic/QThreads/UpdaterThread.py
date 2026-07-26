@@ -7,7 +7,7 @@ class UpdaterThread(QThread):
     has_update_signal = pyqtSignal(bool)
     error_signal = pyqtSignal(str)
 
-    def __init__(self, remote_url="https://emilia-update.ateez.ru/"):
+    def __init__(self, remote_url="https://ru-emiupd.kajitsy.xyz/"):
         super().__init__()
         self.remote_url = remote_url
         self.local_manifest = {"files": {}}
