@@ -54,8 +54,11 @@ class LoggerWriter:
         self.stream.flush()
 
 
+from version import __version__
+
 logger.info(
     f"""
+Emilia:       {__version__}
 OS:           {platform.system()} {platform.release()} {platform.version()} ({platform.architecture()[0]})
 Script Path:  {os.path.abspath(sys.argv[0])}
 Started at:   {datetime.datetime.now(datetime.timezone.utc).astimezone().strftime('%Y-%m-%d %H:%M:%S')}

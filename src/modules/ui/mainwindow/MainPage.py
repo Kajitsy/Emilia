@@ -55,6 +55,7 @@ from modules.ui.mainwindow.SearchPage import SearchPage
 from modules.ui.mainwindow.SettingsPage import SettingsPage
 from modules.ui.pages import CharacterPages, ScenePages, UserPages
 from modules.Utils import color_avatar
+from version import __version__
 
 
 class MainPage(QMainWindow):
@@ -105,7 +106,7 @@ class MainPage(QMainWindow):
             "discord_rpc/show_current_page", True, type=bool
         )
         self.svg_icons = Svg()
-        self.version = "3.3.3"
+        self.version = __version__
         self.beta = version.parse(self.version).is_prerelease
 
         geometry = self.settings.value("main_window/geometry")
