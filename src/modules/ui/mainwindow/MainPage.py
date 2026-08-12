@@ -189,7 +189,7 @@ class MainPage(QMainWindow):
                 width: 8px;
                 margin: 0px 0 0px 0;
                 border-top-right-radius: 4px;
-                border-bottom-right-radius: 4px; 
+                border-bottom-right-radius: 4px;
             }}
             QScrollBar::sub-control:vertical {{
                 background: {TM.c('scroll_sub')};
@@ -761,7 +761,7 @@ class MainPage(QMainWindow):
         for btn in self.category_buttons:
             if btn is not clicked_button:
                 btn.setChecked(False)
-                
+
         if hasattr(self, "category_layout") and self.category_layout:
             for i in reversed(range(self.category_layout.count())):
                 item = self.category_layout.itemAt(i)
