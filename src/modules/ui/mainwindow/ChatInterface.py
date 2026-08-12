@@ -60,9 +60,11 @@ from modules.Utils import color_avatar, format_number, format_text
 
 class MessageBubble(QFrame):
     def __init__(
-        self, main_window, parent, text, avatar_url, name, is_user=False, attachments=[]
+        self, main_window, parent, text, avatar_url, name, is_user=False, attachments=None
     ):
         super().__init__()
+        if attachments is None:
+            attachments = []
         self.mw = main_window
         self.parent = parent
         self.text = text
@@ -253,7 +255,7 @@ class ChatInterface(QWidget):
     def initUI(self):
         self.layout = QHBoxLayout(self)
 
-        chat_container_layout = QVBoxLayout()
+        self.chat_container_layout = QVBoxLayout()
 
         self.top_bar_frame, self.top_bar_layout = self.createTopBar()
         self.mw.top_bar_stacked_widget.setFixedHeight(75)
@@ -278,7 +280,7 @@ class ChatInterface(QWidget):
 
         self.messages_overlay_layout.addWidget(self.messages_area, 0, 0)
 
-        chat_container_layout.addWidget(self.messages_overlay_container)
+        self.chat_container_layout.addWidget(self.messages_overlay_container)
 
         input_layout = QVBoxLayout()
         self.attach_image_label = QLabel()
@@ -359,9 +361,9 @@ class ChatInterface(QWidget):
         )
 
         input_layout.addWidget(send_widget)
-        chat_container_layout.addLayout(input_layout)
+        self.chat_container_layout.addLayout(input_layout)
 
-        self.layout.addLayout(chat_container_layout)
+        self.layout.addLayout(self.chat_container_layout)
 
         self.setLayout(self.layout)
         self.chat_thread.get_char_signal.connect(self.initData)
@@ -387,6 +389,48 @@ class ChatInterface(QWidget):
         self.chat_theme_button.setIcon(self.svg_icons.colors(TM.c("icon")))
         self.choose_persona_button.setIcon(self.svg_icons.persona(TM.c("icon")))
         self.chat_style_button.setIcon(self.svg_icons.style(TM.c("icon")))
+
+        if hasattr(self, "character_info_sidebar") and self.character_info_sidebar:
+            self.character_info_sidebar.setStyleSheet(f"""
+                QFrame {{
+                    background-color: {TM.c('element_bg')};
+                    color: {TM.c('text')};
+                    border-radius: 4px;
+                }}
+                QLabel {{
+                    color: {TM.c('text')};
+                }}
+            """)
+        if hasattr(self, "top_bar_frame") and self.top_bar_frame:
+            bg_color = TM.c('mw_back') if self._detach else "transparent"
+            self.top_bar_frame.setStyleSheet(f"""
+                QWidget {{
+                    background-color: {bg_color};
+                    color: {TM.c('text')};
+                }}
+                QLabel {{
+                    color: {TM.c('text')};
+                }}
+            """)
+        if hasattr(self, "header_name_label"):
+            self.header_name_label.setStyleSheet(f"color: {TM.c('text')};")
+            self.header_author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            self.header_scene_title_label.setStyleSheet(f"color: {TM.c('text')};")
+            self.name_label.setStyleSheet(f"color: {TM.c('text')};")
+            self.author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            self.chats_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            self.title_label.setStyleSheet(f"color: {TM.c('text')};")
+        if hasattr(self, "overlay_content") and self.overlay_content:
+            self.overlay_content.setStyleSheet(f"""
+                QWidget {{
+                    background-color: {TM.c('mw_back')};
+                    color: {TM.c('text')};
+                    border-radius: 6px;
+                }}
+                QLabel {{
+                    color: {TM.c('text')};
+                }}
+            """)
 
     def on_scroll(self, value):
         if (
@@ -603,11 +647,19 @@ class ChatInterface(QWidget):
     def createRightSidebar(self):
         self.character_info_sidebar = QFrame(self)
         self.character_info_sidebar.setFixedWidth(230)
-        self.character_info_sidebar.setFixedHeight(self.mw.height() - 230)
-        self.char_info_layout = QVBoxLayout()
-        self.character_info_sidebar.setLayout(self.char_info_layout)
-        self.char_info_layout.setContentsMargins(10, 10, 10, 10)
         self.character_info_sidebar.setVisible(False)
+
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        self.character_info_sidebar.setLayout(sidebar_layout)
+
+        scroll_page = VerticalScrollPage()
+        scroll_page.viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
+        self.char_info_layout = scroll_page.layout
+        self.char_info_layout.setContentsMargins(10, 10, 10, 10)
+        sidebar_layout.addWidget(scroll_page)
 
         main_info_about_char_frame = QFrame()
         self.char_info_layout.addWidget(main_info_about_char_frame)
@@ -718,7 +770,7 @@ class ChatInterface(QWidget):
             )
 
         self.detach_chat_button = PushButton(self.tr("Detach Chat"))
-        self.detach_chat_button.clicked.connect(self.detachChat)
+        self.detach_chat_button.clicked.connect(self.toggleDetachChat)
         self.char_info_layout.addWidget(
             self.detach_chat_button, alignment=Qt.AlignmentFlag.AlignLeft
         )
@@ -855,7 +907,6 @@ class ChatInterface(QWidget):
         label.target_text = new_full_text
 
         if label.is_animating:
-            current_length = len(label.current_text)
             label.current_text = label.target_text
         else:
             label.current_text = label.target_text
@@ -890,19 +941,46 @@ class ChatInterface(QWidget):
             ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
             ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
+    def toggleDetachChat(self):
+        if self._detach:
+            self.attach_chat()
+        else:
+            self.detachChat()
+
     def detachChat(self):
         self._detach = True
         self.detach_signal.emit(True)
-        self.toggle_info_button.setEnabled(False)
+        self.toggle_info_button.setEnabled(True)
+
+        if hasattr(self, "top_bar_frame") and self.top_bar_frame:
+            self.mw.top_bar_stacked_widget.removeWidget(self.top_bar_frame)
+            self.top_bar_frame.setParent(self)
+            self.chat_container_layout.insertWidget(0, self.top_bar_frame)
+            self.top_bar_frame.setVisible(True)
+
+        if hasattr(self.mw, "top_widget"):
+            self.mw.top_bar_stacked_widget.setFixedHeight(50)
+            self.mw.top_bar_stacked_widget.setCurrentWidget(self.mw.top_widget)
+
+        if hasattr(self, "detach_chat_button"):
+            self.detach_chat_button.setText(self.tr("Attach Chat"))
+
         self.setParent(None)
         self.setWindowTitle(
             self.tr("Chat with %%char%%").replace("%%char%%", self.character_name)
         )
         self.show()
+        self.hideOverlay()
+        if hasattr(self.mw, "hideOverlay"):
+            self.mw.hideOverlay()
         self.hideCharacterInfoSidebar()
+        self.updateTheme()
         self.setStyleSheet(f"""
             #ChatInterface {{
                 background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+            }}
+            QLabel {{
                 color: {TM.c('text')};
             }}
             {TM.get_style('VerticalScrollArea')}
@@ -910,21 +988,81 @@ class ChatInterface(QWidget):
 
     def attach_chat(self):
         self._detach = False
+
+        if hasattr(self, "top_bar_frame") and self.top_bar_frame:
+            self.chat_container_layout.removeWidget(self.top_bar_frame)
+            self.mw.top_bar_stacked_widget.setFixedHeight(75)
+            self.mw.top_bar_stacked_widget.addWidget(self.top_bar_frame)
+            self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar_frame)
+            self.top_bar_frame.setVisible(True)
+
+        if hasattr(self, "detach_chat_button"):
+            self.detach_chat_button.setText(self.tr("Detach Chat"))
+
         self.attach_signal.emit(True)
         self.toggle_info_button.setEnabled(True)
-        self.setParent(None)
-        self.setWindowTitle(
-            self.tr("Chat with %%char%%").replace("%%char%%", self.character_name)
-        )
-        self.show()
+        self.hideOverlay()
+        if hasattr(self.mw, "hideOverlay"):
+            self.mw.hideOverlay()
         self.hideCharacterInfoSidebar()
+        self.updateTheme()
         self.setStyleSheet(f"""
             #ChatInterface {{
                 background-color: {TM.c('mw_back')};
                 color: {TM.c('text')};
             }}
+            QLabel {{
+                color: {TM.c('text')};
+            }}
             {TM.get_style('VerticalScrollArea')}
         """)
+
+    def createOverlay(self):
+        self.overlay = QFrame(self)
+        self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 150);")
+        self.overlay_layout = QVBoxLayout(self.overlay)
+        self.overlay_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.overlay_content = QWidget(self.overlay)
+        self.overlay_content.setStyleSheet(f"""
+            QWidget {{
+                background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+                border-radius: 6px;
+            }}
+            QLabel {{
+                color: {TM.c('text')};
+            }}
+        """)
+        self.overlay_content_layout = QVBoxLayout(self.overlay_content)
+
+        self.overlay_layout.addWidget(self.overlay_content)
+
+        self.overlay.setGeometry(self.rect())
+        self.overlay.hide()
+
+    def showOverlay(self, widget):
+        if self._detach:
+            if not hasattr(self, "overlay") or self.overlay is None:
+                self.createOverlay()
+            self.overlay_content_layout.addWidget(widget)
+            widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+            self.overlay.setGeometry(self.rect())
+            self.overlay.show()
+            self.overlay.raise_()
+        else:
+            self.mw.showOverlay(widget)
+
+    def hideOverlay(self):
+        if self._detach:
+            if hasattr(self, "overlay") and self.overlay is not None:
+                self.overlay.hide()
+                for i in range(self.overlay_content_layout.count()):
+                    item = self.overlay_content_layout.itemAt(i)
+                    if item and item.widget():
+                        item.widget().deleteLater()
+        else:
+            self.mw.hideOverlay()
 
     def openVModelOverlay(self):
         if self.vmodel_show:
@@ -938,7 +1076,7 @@ class ChatInterface(QWidget):
             self.vmodel_button.setText(self.tr("Hide VModel"))
 
             def setWidget(widget):
-                self.mw.hideOverlay()
+                self.hideOverlay()
                 self.vmodel_widget = widget
                 self.vmodel_widget.setAttribute(
                     Qt.WidgetAttribute.WA_TranslucentBackground
@@ -950,7 +1088,7 @@ class ChatInterface(QWidget):
             overlay_widget.vmodel_widget.connect(setWidget)
             overlay_widget.setFixedWidth(350)
             overlay_widget.setStyleSheet("background: transparent;")
-            self.mw.showOverlay(overlay_widget)
+            self.showOverlay(overlay_widget)
         self.vmodel_show = not self.vmodel_show
 
     def openPersonaOverlay(self):
@@ -983,7 +1121,7 @@ class ChatInterface(QWidget):
             if data.get("success", False):
                 self.mw.user_settings = data["settings"]
                 self.mw.showNotification(self.tr("Successfully updated your persona"))
-            self.mw.hideOverlay()
+            self.hideOverlay()
             self.toggleCharacterInfoSidebar()
 
         def onCardClicked(clicked_card):
@@ -998,11 +1136,11 @@ class ChatInterface(QWidget):
 
         for persona in self.user_personas:
             card = PersonaCards.MainCard(self.mw, persona, self.character_id)
-            card.mousePressEvent = lambda _: onCardClicked(card)
+            card.mousePressEvent = lambda _, c=card: onCardClicked(c)
             scroll_layout.addWidget(card)
             card_list.append(card)
 
-        self.mw.showOverlay(overlay_widget)
+        self.showOverlay(overlay_widget)
 
     def openModelOverlay(self):
         overlay_widget = QWidget()
@@ -1121,7 +1259,7 @@ class ChatInterface(QWidget):
         def apply():
             if self.overlay_selected_model_type != self.preferred_model_type:
                 self.createNewChat(self.overlay_selected_model_type)
-            self.mw.hideOverlay()
+            self.hideOverlay()
             self.toggleCharacterInfoSidebar()
 
         buttons_layout = QHBoxLayout()
@@ -1138,7 +1276,7 @@ class ChatInterface(QWidget):
         # ufac_layout.addWidget(ufac_button)
 
         overlay_layout.addLayout(buttons_layout)
-        self.mw.showOverlay(overlay_widget)
+        self.showOverlay(overlay_widget)
 
     def openColorPickerOverlay(self):
         def restoreDefaultColors():
@@ -1172,7 +1310,7 @@ class ChatInterface(QWidget):
                         self.setTextMessageColor(
                             item.currentWidget(), self.char_text_message
                         )
-            self.mw.hideOverlay()
+            self.hideOverlay()
 
         def pickBackgroundImage():
             file_dialog = QFileDialog()
@@ -1311,7 +1449,7 @@ class ChatInterface(QWidget):
                         self.setTextMessageColor(
                             item.currentWidget(), self.char_text_message
                         )
-            self.mw.hideOverlay()
+            self.hideOverlay()
 
         color_picker_widget = QWidget()
         color_picker_widget.setFixedHeight(300)
@@ -1410,7 +1548,7 @@ class ChatInterface(QWidget):
         )
         color_picker_layout.addLayout(buttons_layout)
 
-        self.mw.showOverlay(color_picker_widget)
+        self.showOverlay(color_picker_widget)
 
     def selectImage(self):
         def uploaded(response):
@@ -1472,7 +1610,7 @@ class ChatInterface(QWidget):
             )
 
         def openChat(self, character_id, character_name, chat_id):
-            self.mw.hideOverlay()
+            self.hideOverlay()
             self.mw.openChat(character_id, character_name, chat_id)
 
         def createCard(self, data):
@@ -1542,7 +1680,7 @@ class ChatInterface(QWidget):
         self.chats_cards_layout = scroll_page.layout
         chats_history_layout.addWidget(scroll_page)
 
-        self.mw.showOverlay(chats_history_widget)
+        self.showOverlay(chats_history_widget)
 
         self.chat_thread.character_chats_signal.connect(
             lambda chats: showChats(self, chats)
@@ -1557,38 +1695,61 @@ class ChatInterface(QWidget):
         search_widget = SearchCard(
             self.mw, self.character_name, self.voice_id, self.character_id
         )
-        self.mw.hideOverlay()
-        self.mw.showOverlay(search_widget)
+        self.hideOverlay()
+        self.showOverlay(search_widget)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        if hasattr(self, "overlay") and self.overlay is not None:
+            self.overlay.setGeometry(self.rect())
+        y_offset = (
+            75
+            if (
+                self._detach
+                and hasattr(self, "top_bar_frame")
+                and self.top_bar_frame.isVisible()
+            )
+            else 0
+        )
+        sidebar_height = max(100, self.height() - y_offset)
         if self.cis_visible:
             self.character_info_sidebar.setGeometry(
-                self.width() - self.character_info_sidebar.width(),
-                0,
-                200,
-                self.height() - 200,
+                self.width() - 230,
+                y_offset,
+                230,
+                sidebar_height,
             )
         else:
             self.character_info_sidebar.setGeometry(
-                self.width(), 0, 200, self.height() - 200
+                self.width(), y_offset, 230, sidebar_height
             )
-        self.character_info_sidebar.setFixedHeight(self.mw.height() - 200)
+        self.character_info_sidebar.setFixedHeight(sidebar_height)
 
     def showCharacterInfoSidebar(self):
+        y_offset = (
+            75
+            if (
+                self._detach
+                and hasattr(self, "top_bar_frame")
+                and self.top_bar_frame.isVisible()
+            )
+            else 0
+        )
+        sidebar_height = max(100, self.height() - y_offset)
+        self.character_info_sidebar.setFixedHeight(sidebar_height)
+        self.character_info_sidebar.setGeometry(
+            self.width(), y_offset, 230, sidebar_height
+        )
         self.character_info_sidebar.show()
-        geom = self.character_info_sidebar.geometry()
+
         self.animation = QPropertyAnimation(self.character_info_sidebar, b"geometry")
         self.animation.setDuration(250)
         self.animation.setEasingCurve(QEasingCurve.Type.OutQuad)
-        self.animation.setStartValue(geom)
+        self.animation.setStartValue(
+            QRect(self.width(), y_offset, 230, sidebar_height)
+        )
         self.animation.setEndValue(
-            QRect(
-                geom.x() - self.character_info_sidebar.width(),
-                geom.y(),
-                geom.width(),
-                geom.height(),
-            )
+            QRect(self.width() - 230, y_offset, 230, sidebar_height)
         )
         self.animation.start()
 
@@ -1600,18 +1761,24 @@ class ChatInterface(QWidget):
             self.cis_visible = True
 
     def hideCharacterInfoSidebar(self):
-        geom = self.character_info_sidebar.geometry()
+        y_offset = (
+            75
+            if (
+                self._detach
+                and hasattr(self, "top_bar_frame")
+                and self.top_bar_frame.isVisible()
+            )
+            else 0
+        )
+        sidebar_height = max(100, self.height() - y_offset)
         self.animation = QPropertyAnimation(self.character_info_sidebar, b"geometry")
         self.animation.setDuration(250)
         self.animation.setEasingCurve(QEasingCurve.Type.OutQuad)
-        self.animation.setStartValue(geom)
+        self.animation.setStartValue(
+            QRect(self.width() - 230, y_offset, 230, sidebar_height)
+        )
         self.animation.setEndValue(
-            QRect(
-                geom.x() + self.character_info_sidebar.width(),
-                geom.y(),
-                geom.width(),
-                geom.height(),
-            )
+            QRect(self.width(), y_offset, 230, sidebar_height)
         )
         self.animation.finished.connect(self.character_info_sidebar.hide)
         self.animation.start()
@@ -1646,7 +1813,7 @@ class ChatInterface(QWidget):
             )
             vsmode.thread.connected_signal.connect(voicecalllimit)
             vsmode.closeEvent = lambda event: setattr(self.mw, "hide_overlay", True)
-            self.mw.showOverlay(vsmode)
+            self.showOverlay(vsmode)
         elif count == 0:
             self.mw.showNotification(self.tr("Call limit exceeded"))
 
@@ -1952,7 +2119,9 @@ class ChatInterface(QWidget):
         self.messages_content.update()
         self.messages_area.verticalScrollBar().setValue(0)
 
-    def addMessage(self, text, turn_id, is_user=False, attachments=[]):
+    def addMessage(self, text, turn_id, is_user=False, attachments=None):
+        if attachments is None:
+            attachments = []
         message_widget = QStackedWidget()
         message_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         message_widget.setStyleSheet("background: transparent;")
@@ -1972,7 +2141,9 @@ class ChatInterface(QWidget):
         message_widget.setCurrentWidget(message_bubble)
         return message_widget
 
-    def createMessage(self, text, turn_id, is_user=False, attachments=[]):
+    def createMessage(self, text, turn_id, is_user=False, attachments=None):
+        if attachments is None:
+            attachments = []
         if is_user:
             message_bubble = MessageBubble(
                 self.mw,
@@ -2283,6 +2454,20 @@ class ChatInterface(QWidget):
         context_menu.exec(message_bubble.mapToGlobal(pos))
 
     def mousePressEvent(self, event: QMouseEvent):
+        if (
+            hasattr(self, "overlay")
+            and self.overlay is not None
+            and self.overlay.isVisible()
+            and self._detach
+        ):
+            global_click_pos = event.globalPosition().toPoint()
+            content_global_pos = self.overlay_content.mapToGlobal(
+                self.overlay_content.rect().topLeft()
+            )
+            content_rect = QRect(content_global_pos, self.overlay_content.size())
+            if not content_rect.contains(global_click_pos):
+                self.hideOverlay()
+
         super().mousePressEvent(event)
         if self.cis_visible:
             global_click_pos = event.globalPosition().toPoint()
@@ -2301,8 +2486,8 @@ class ChatInterface(QWidget):
     def closeEvent(self, a0):
         if self._detach:
             a0.ignore()
-            self._detach = False
-            self.attach_signal.emit(True)
+            self.hideOverlay()
+            self.attach_chat()
         else:
             super().closeEvent(a0)
             self.deleteLater()

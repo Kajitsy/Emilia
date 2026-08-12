@@ -846,6 +846,12 @@ class MainPage(QMainWindow):
         self.notification_message_animation.start()
 
     def hideOverlay(self):
+        if (
+            hasattr(self, "current_chat_interface")
+            and self.current_chat_interface
+            and getattr(self.current_chat_interface, "_detach", False)
+        ):
+            self.current_chat_interface.hideOverlay()
         self.overlay.hide()
         for i in range(self.overlay_content_layout.count()):
             item = self.overlay_content_layout.itemAt(i)
@@ -877,7 +883,9 @@ class MainPage(QMainWindow):
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
-    def openScene(self, data={}, scene_id=None):
+    def openScene(self, data=None, scene_id=None):
+        if data is None:
+            data = {}
         widget = ScenePages.MainPage(self, data, scene_id)
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
@@ -1009,10 +1017,12 @@ class MainPage(QMainWindow):
                 chat.get("scene_id"),
                 chat.get("name", ""),
             )
-            if self.current_chat_interface is not None:
-                if self.current_chat_interface.chat_id == chat.get("id"):
-                    self.current_chat_interface.recent_card = card
-                    card.setCheckable(True)
+            if (
+                self.current_chat_interface is not None
+                and self.current_chat_interface.chat_id == chat.get("id")
+            ):
+                self.current_chat_interface.recent_card = card
+                card.setCheckable(True)
 
     def addFeaturedVoices(self, voices):
         for i in reversed(range(self.featured_voices_layout.count())):
@@ -1160,10 +1170,10 @@ class MainPage(QMainWindow):
         self.author_id = self.me["id"]
         self.name = self.me["account"]["name"]
         self.username = self.me["username"]
-        self.me_has_avatar = (
-            True if self.me.get("account", {}).get("avatar_file_name") else False
+        self.me_has_avatar = bool(
+            self.me.get("account", {}).get("avatar_file_name")
         )
-        self.me_has_plus = True if self.me.get("subscription", {}) else False
+        self.me_has_plus = bool(self.me.get("subscription", {}))
         self.me_avatar = self.me.get("account", {}).get("avatar_file_name")
 
         if self.me_has_avatar:
