@@ -848,7 +848,8 @@ class ChatInterface(QWidget):
         label.current_index = 0
         label.is_animating = True
 
-        label.animation_timer.start(30)
+        speed = self.mw.settings.value("text_animation_speed", 30, type=int)
+        label.animation_timer.start(speed)
 
     def addTextToAnimation(self, label, new_full_text):
         label.target_text = new_full_text
@@ -860,7 +861,8 @@ class ChatInterface(QWidget):
             label.current_text = label.target_text
             label.current_index = len(label.text())
             label.is_animating = True
-            label.animation_timer.start(30)
+            speed = self.mw.settings.value("text_animation_speed", 30, type=int)
+            label.animation_timer.start(speed)
 
     def animateNextChar(self, label):
         if label.current_index < len(label.current_text):

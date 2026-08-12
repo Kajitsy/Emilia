@@ -430,6 +430,13 @@ class SettingsPage(QWidget):
                         "key": "app_theme_system_sync",
                     },
                     {
+                        "type": "lineedit",
+                        "label": self.tr("Text animation speed (ms)"),
+                        "key": "text_animation_speed",
+                        "def_value": "30",
+                        "validator": QIntValidator(0, 1000),
+                    },
+                    {
                         "type": "checkbox",
                         "label": self.tr("Working in the background"),
                         "key": "backwork",
