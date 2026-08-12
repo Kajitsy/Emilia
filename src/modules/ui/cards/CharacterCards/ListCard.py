@@ -1,5 +1,6 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout
+from PyQt6.QtGui import QFontMetrics
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout
 
 from modules.ui import TM
 from modules.ui.Elements import CardFrame, PushButton
@@ -51,10 +52,14 @@ class ListCard(CardFrame):
 
         text_layout = QVBoxLayout()
         text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        text_layout.setSpacing(1)
         card_layout.addLayout(text_layout, 1)
 
         title_label = QLabel(self.name)
         title_label.setWordWrap(True)
+        title_label.setSizePolicy(
+            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+        )
         font = title_label.font()
         font.setBold(True)
         font.setPointSize(10)
@@ -62,10 +67,14 @@ class ListCard(CardFrame):
         text_layout.addWidget(title_label)
 
         if self.data.get("title"):
+            clean_title = str(self.data.get("title", "")).replace("\n", " ").strip()
             self.description_label = QLabel(
-                format_text(self.data.get("title"), self.name)
+                format_text(clean_title, self.name)
             )
-            self.description_label.setWordWrap(True)
+            self.description_label.setWordWrap(False)
+            self.description_label.setSizePolicy(
+                QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+            )
             font = self.description_label.font()
             font.setPointSize(9)
             self.description_label.setFont(font)
@@ -73,7 +82,7 @@ class ListCard(CardFrame):
 
         self.add_info = QLabel()
         font = self.add_info.font()
-        font.setPointSize(10)
+        font.setPointSize(9)
         self.add_info.setFont(font)
         if self.data.get("participant__num_interactions"):
             self.add_info.setText(

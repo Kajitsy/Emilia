@@ -132,7 +132,7 @@ class MainPage(QWidget):
         self.chat_thread.get_recommend_chars_by_id_signal.disconnect()
         for char in data:
             card = ListCard(self.mw, char)
-            card.setFixedHeight(80)
+            card.setFixedHeight(88)
             self.simchars_layout.addWidget(card)
 
     def _getCharacter(self, data):

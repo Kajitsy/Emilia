@@ -86,13 +86,15 @@ class MainCard(CardFrame):
             text_layout.addWidget(self.author_label)
 
         if self.description:
-            description_label = QLabel(format_text(self.description, self.name))
-            description_label.setWordWrap(True)
+            clean_desc = str(self.description).replace("\n", " ").strip()
+            description_label = QLabel(format_text(clean_desc, self.name))
+            description_label.setWordWrap(False)
+            description_label.setSizePolicy(
+                QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+            )
             font = description_label.font()
-            font.setPointSize(10)
+            font.setPointSize(9)
             description_label.setFont(font)
-            fm = QFontMetrics(font)
-            description_label.setMaximumHeight(fm.lineSpacing() * 4)
             text_layout.addWidget(description_label)
 
         spacer = QSpacerItem(

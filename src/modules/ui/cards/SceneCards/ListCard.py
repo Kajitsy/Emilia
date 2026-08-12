@@ -44,13 +44,12 @@ class ListCard(CardFrame):
         text_layout.addWidget(title_label)
 
         if self.data.get("description"):
-            self.description_label = QLabel(format_text(self.data.get("description")))
-            self.description_label.setWordWrap(True)
+            clean_desc = str(self.data.get("description", "")).replace("\n", " ").strip()
+            self.description_label = QLabel(format_text(clean_desc))
+            self.description_label.setWordWrap(False)
             font = self.description_label.font()
             font.setPointSize(9)
             self.description_label.setFont(font)
-            fm = QFontMetrics(font)
-            self.description_label.setMaximumHeight(fm.lineSpacing() * 3)
             text_layout.addWidget(self.description_label)
 
         if self.data.get("creator_username") == self.mw.username:
