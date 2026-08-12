@@ -1,15 +1,18 @@
-import hashlib, os, requests
-from platformdirs import user_data_dir
+import hashlib
+import os
 from pathlib import Path
 
-from PyQt6.QtCore import QThreadPool, QObject, Qt, QRectF, QRunnable, pyqtSignal
-from PyQt6.QtGui import QPixmap, QImage, QPainter, QPainterPath
+import requests
+from platformdirs import user_data_dir
+from PyQt6.QtCore import QObject, QRectF, QRunnable, Qt, QThreadPool, pyqtSignal
+from PyQt6.QtGui import QImage, QPainter, QPainterPath, QPixmap
 from PyQt6.sip import isdeleted
 
 
 class ImageSignals(QObject):
     finished = pyqtSignal(QImage)
     error = pyqtSignal(object)
+
 
 class ImageTask(QRunnable):
     def __init__(self, url: str, w: int, h: int, radius: int, cache_dir: str):
@@ -42,15 +45,14 @@ class ImageTask(QRunnable):
         p.setClipPath(path)
 
         scaled = img.scaled(
-            self.w, self.h,
+            self.w,
+            self.h,
             Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-            Qt.TransformationMode.SmoothTransformation
+            Qt.TransformationMode.SmoothTransformation,
         )
 
         p.drawImage(
-            (self.w - scaled.width()) // 2,
-            (self.h - scaled.height()) // 2,
-            scaled
+            (self.w - scaled.width()) // 2, (self.h - scaled.height()) // 2, scaled
         )
         p.end()
         return out
@@ -61,7 +63,9 @@ class ImageTask(QRunnable):
             if os.path.exists(self.url) and os.path.isfile(self.url):
                 img = QImage(self.url)
                 if img.isNull():
-                    raise RuntimeError(f"Не удалось прочитать локальный файл: {self.url}")
+                    raise RuntimeError(
+                        f"Не удалось прочитать локальный файл: {self.url}"
+                    )
             else:
                 cache_path = self._cache_path()
 
@@ -81,8 +85,9 @@ class ImageTask(QRunnable):
             result = self._round(img)
             self.signals.finished.emit(result)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.signals.error.emit(e)
+
 
 class ImageLoader(QObject):
     def __init__(self):
@@ -90,12 +95,23 @@ class ImageLoader(QObject):
         self.pool = QThreadPool.globalInstance()
         self.pool.setMaxThreadCount(12)
 
-    def load(self, url, w, h, radius, callback=None, label=None, error_cb=None, cache_dir="cache/avatars"):
+    def load(
+        self,
+        url,
+        w,
+        h,
+        radius,
+        callback=None,
+        label=None,
+        error_cb=None,
+        cache_dir="cache/avatars",
+    ):
         """callback or label"""
         task = ImageTask(url, w, h, radius, cache_dir)
         if callback and not label:
             task.signals.finished.connect(lambda img: callback(QPixmap.fromImage(img)))
         elif not callback and label:
+
             def apply(img):
                 if not isdeleted(label):
                     pixmap = QPixmap.fromImage(img)

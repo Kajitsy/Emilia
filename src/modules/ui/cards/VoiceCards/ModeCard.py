@@ -1,17 +1,41 @@
 import keyboard
-from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint, QParallelAnimationGroup
+from PyQt6.QtCore import (
+    QEasingCurve,
+    QParallelAnimationGroup,
+    QPoint,
+    QPropertyAnimation,
+    Qt,
+    QTimer,
+)
 from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSizePolicy,
-                             QGraphicsDropShadowEffect)
+from PyQt6.QtWidgets import (
+    QFrame,
+    QGraphicsDropShadowEffect,
+    QHBoxLayout,
+    QLabel,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
+from modules.logic.QThreads import VoiceModeThread, VoiceModeThreadV2
+from modules.ui import TM
 from modules.ui.Elements import PushButton
 from modules.ui.Icons import Svg
-from modules.logic.QThreads import VoiceModeThread, VoiceModeThreadV2
 from modules.Utils import color_avatar, format_text
-from modules.ui import TM
+
 
 class ModeCard(QWidget):
-    def __init__(self, main_window, chat_interface, avatar_url, chat_id, character_id, voice_id, character_name):
+    def __init__(
+        self,
+        main_window,
+        chat_interface,
+        avatar_url,
+        chat_id,
+        character_id,
+        voice_id,
+        character_name,
+    ):
         super().__init__()
         self.mw = main_window
         self.chi = chat_interface
@@ -20,7 +44,7 @@ class ModeCard(QWidget):
         self.chat_id = chat_id
         self.voice_id = voice_id
         self.muted = False
-        self.mute_keybind = self.mw.settings.value('microphone_mute_key_bind', 'Ctrl+M')
+        self.mute_keybind = self.mw.settings.value("microphone_mute_key_bind", "Ctrl+M")
         self.char_name = character_name
         self.svg_icons = Svg()
 
@@ -28,12 +52,22 @@ class ModeCard(QWidget):
         TM.theme_changed.connect(self.updateTheme)
         self.updateTheme()
 
-        self.mw.setOutputDevice(self.mw.settings.value('output_device', 0, type=int))
+        self.mw.setOutputDevice(self.mw.settings.value("output_device", 0, type=int))
 
-        if self.mw.settings.value('use_old_voice_chat', False, type=bool):
-            self.thread = VoiceModeThread(self, self.mw.token, self.character_id, self.chat_id, self.voice_id)
+        if self.mw.settings.value("use_old_voice_chat", False, type=bool):
+            self.thread = VoiceModeThread(
+                self, self.mw.token, self.character_id, self.chat_id, self.voice_id
+            )
         else:
-            self.thread = VoiceModeThreadV2(self, self.mw.token, self.character_id, self.chat_id, self.mw.username, self.char_name, self.voice_id)
+            self.thread = VoiceModeThreadV2(
+                self,
+                self.mw.token,
+                self.character_id,
+                self.chat_id,
+                self.mw.username,
+                self.char_name,
+                self.voice_id,
+            )
 
         self._run()
         keyboard.add_hotkey(self.mute_keybind, self.toggleMute)
@@ -47,19 +81,32 @@ class ModeCard(QWidget):
         if self.avatar_url:
             self.mw.image_loader.load(
                 f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0",
-                80, 80, 10, label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, 80, 80, self.char_name, 10))
+                80,
+                80,
+                10,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(
+                    self.avatar_label, 80, 80, self.char_name, 10
+                ),
+            )
         else:
             color_avatar(self.avatar_label, 80, 80, self.char_name, 10)
-        self.layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(
+            self.avatar_label,
+            alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
+        )
 
         self.char_msg_label = QLabel()
         self.char_msg_label.setStyleSheet("font-size: 16px;")
         self.char_msg_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.char_msg_label.setWordWrap(True)
-        self.char_msg_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.char_msg_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
         self.char_msg_label.hide()
-        self.layout.addWidget(self.char_msg_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(
+            self.char_msg_label, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         self.layout.addStretch()
 
@@ -67,14 +114,21 @@ class ModeCard(QWidget):
         self.user_msg_label.setStyleSheet("font-size: 16px;")
         self.user_msg_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.user_msg_label.setWordWrap(True)
-        self.user_msg_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.user_msg_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
         self.user_msg_label.hide()
-        self.layout.addWidget(self.user_msg_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(
+            self.user_msg_label, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         self.user_buttons_frame = QFrame()
         button_layout = QHBoxLayout()
         self.user_buttons_frame.setLayout(button_layout)
-        self.layout.addWidget(self.user_buttons_frame, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(
+            self.user_buttons_frame,
+            alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter,
+        )
 
         self.mute_button = PushButton()
         self.mute_button.clicked.connect(self.toggleMute)
@@ -109,7 +163,7 @@ class ModeCard(QWidget):
             keyboard.remove_hotkey(self.mute_keybind)
 
     def _run(self):
-        if self.mw.settings.value('use_old_voice_chat', False, type=bool):
+        if self.mw.settings.value("use_old_voice_chat", False, type=bool):
             self.thread.speech_signal.connect(self.updateSpeakingIndicator)
             self.thread.speech_error_signal.connect(self.handleSpeechError)
             self.thread.user_message.connect(self._userMessage)
@@ -119,29 +173,38 @@ class ModeCard(QWidget):
         else:
             self.thread.speech_signal.connect(self.updateSpeakingIndicator)
             self.thread.error_signal.connect(self.mw.showNotification)
-            if hasattr(self.chi, 'vmodel_widget'):
-                self.thread.volume_signal.connect(self.chi.vmodel_widget.set_stream_volume)
+            if hasattr(self.chi, "vmodel_widget"):
+                self.thread.volume_signal.connect(
+                    self.chi.vmodel_widget.set_stream_volume
+                )
             self.thread.start()
             self.mw.threads.append(self.thread)
 
     def _userMessage(self, text):
         self.chi.addMessage(text, "", is_user=True)
-        self.chi.mw.chat_thread.chat_histories.get(self.chat_id, []).append({
-            'author': {'is_human': True},
-            'candidates': [{'raw_content': text, 'is_final': True}]
-        })
+        self.chi.mw.chat_thread.chat_histories.get(self.chat_id, []).append(
+            {
+                "author": {"is_human": True},
+                "candidates": [{"raw_content": text, "is_final": True}],
+            }
+        )
         self.user_msg_label.setText(text)
         self.user_msg_label.show()
         QTimer.singleShot(3000, self.user_msg_label.hide)
 
     def _charMessage(self, message):
-        raw_text = message['candidates'][0]['raw_content']
-        self.chi.addMessage(raw_text, message['turn_key']['turn_id'], is_user=False)
-        self.chi.mw.chat_thread.chat_histories.get(self.chat_id, []).append({
-            'author': {'is_human': False},
-            'candidates': [{'raw_content': raw_text, 'is_final': True}],
-            'turn_key': {'chat_id': self.chat_id, 'turn_id': message['turn_key']['turn_id']}
-        })
+        raw_text = message["candidates"][0]["raw_content"]
+        self.chi.addMessage(raw_text, message["turn_key"]["turn_id"], is_user=False)
+        self.chi.mw.chat_thread.chat_histories.get(self.chat_id, []).append(
+            {
+                "author": {"is_human": False},
+                "candidates": [{"raw_content": raw_text, "is_final": True}],
+                "turn_key": {
+                    "chat_id": self.chat_id,
+                    "turn_id": message["turn_key"]["turn_id"],
+                },
+            }
+        )
         self.animateCharacterMessage(format_text(raw_text, self.mw.username))
 
     def handleSpeechError(self, is_error):
@@ -149,7 +212,8 @@ class ModeCard(QWidget):
             self.is_error_active = True
 
             self.speaking_indicator.setStyleSheet(
-                "background: transparent; border: 2px solid red; border-radius: 10px;")
+                "background: transparent; border: 2px solid red; border-radius: 10px;"
+            )
             self.speaking_indicator.show()
             self.speaking_indicator.lower()
             effect = QGraphicsDropShadowEffect(self.speaking_indicator)
@@ -176,11 +240,12 @@ class ModeCard(QWidget):
         self.shake_animation.start()
 
     def stopErrorAnimation(self):
-        if hasattr(self, 'shake_animation'):
+        if hasattr(self, "shake_animation"):
             self.shake_animation.stop()
         self.is_error_active = False
         self.speaking_indicator.setStyleSheet(
-            "background: transparent; border: 2px solid #00BFFF; border-radius: 10px;")
+            "background: transparent; border: 2px solid #00BFFF; border-radius: 10px;"
+        )
         effect = QGraphicsDropShadowEffect(self.speaking_indicator)
         effect.setBlurRadius(20)
         effect.setColor(QColor(0, 191, 255))
@@ -188,7 +253,7 @@ class ModeCard(QWidget):
         self.speaking_indicator.setGraphicsEffect(effect)
 
     def animateCharacterMessage(self, full_text):
-        if hasattr(self, 'char_msg_timer') and self.char_msg_timer.isActive():
+        if hasattr(self, "char_msg_timer") and self.char_msg_timer.isActive():
             self.char_msg_timer.stop()
         self.char_msg_label.setText("")
         self.char_msg_label.show()
@@ -200,7 +265,9 @@ class ModeCard(QWidget):
 
     def _updateCharMessage(self):
         self._char_message_current_index += 1
-        text_to_display = self._char_message_full_text[:self._char_message_current_index]
+        text_to_display = self._char_message_full_text[
+            : self._char_message_current_index
+        ]
         self.char_msg_label.setText(text_to_display)
         if self._char_message_current_index >= len(self._char_message_full_text):
             self.char_msg_timer.stop()
@@ -222,7 +289,9 @@ class ModeCard(QWidget):
 
         if not self.speaking_indicator.isVisible():
             self.speaking_indicator.setGeometry(target_geometry)
-            self.speaking_indicator.setStyleSheet("background: transparent; border: 2px solid #00BFFF; border-radius: 10px;")
+            self.speaking_indicator.setStyleSheet(
+                "background: transparent; border: 2px solid #00BFFF; border-radius: 10px;"
+            )
             self.speaking_indicator.show()
             self.speaking_indicator.lower()
         else:

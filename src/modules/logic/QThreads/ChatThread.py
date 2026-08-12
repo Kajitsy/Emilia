@@ -1,13 +1,23 @@
-import logging, asyncio
+import asyncio
+import logging
 from functools import wraps
-from PyQt6.QtCore import QThread, pyqtSignal, QLocale
-from future.backports.urllib import response
-from gpytranslate import Translator
-import curl_cffi.curl
 
+import curl_cffi.curl
+from gpytranslate import Translator
+from PyQt6.QtCore import QLocale, QThread, pyqtSignal
+
+from modules.api import (
+    CAILimitAPI,
+    CharacterAPI,
+    ChatsAPI,
+    EmiliaAPI,
+    ScenesAPI,
+    UsersAPI,
+    VoicesAPI,
+    WSClient,
+)
 from modules.logic.VTubeCore import EEC
 
-from modules.api import WSClient, CharacterAPI, ChatsAPI, EmiliaAPI, UsersAPI, VoicesAPI, ScenesAPI, CAILimitAPI
 
 def asyncSlot(func):
     @wraps(func)
@@ -119,12 +129,15 @@ class ChatThread(QThread):
         self.api_voices = VoicesAPI(self.client)
         self.api_scenes = ScenesAPI(self.client)
 
-        self.eec = EEC(self.mw, self.mw.settings.value("vtube/address", "127.0.0.1"),
-                       self.mw.settings.value("vtube/port", 8001))
+        self.eec = EEC(
+            self.mw,
+            self.mw.settings.value("vtube/address", "127.0.0.1"),
+            self.mw.settings.value("vtube/port", 8001),
+        )
 
         self.microphone_muted = True
         self.voiced = False
-        self.lang = QLocale.system().name().split('_')[0]
+        self.lang = QLocale.system().name().split("_")[0]
         self.translator = Translator()
 
         self.chat_histories = {}
@@ -152,27 +165,33 @@ class ChatThread(QThread):
             await self.eec.connect()
             self.vtube_connect_signal.emit(self.tr("Successful connection!"))
             await self.eec.close()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.vtube_connect_signal.emit(self.tr("Connection error: ") + str(e))
-            logging.debug(f"ChatThread: VTube Check Error: {e}")
+            logging.getLogger(__name__).debug(f"ChatThread: VTube Check Error: {e}")
 
     @asyncSlot
     async def vtube_use_emote(self, emote):
         await self.eec.connect()
         await self.eec.UseEmote(emote)
         await self.eec.close()
-        logging.debug(f'ChatThread: The emotion "{emote}" was used')
+        logging.getLogger(__name__).debug(f'ChatThread: The emotion "{emote}" was used')
 
     @asyncSlot
-    async def send_message(self, char, chat_id, text, tts_enabled=False, voice_id="", attachments=None):
+    async def send_message(
+        self, char, chat_id, text, tts_enabled=False, voice_id="", attachments=None
+    ):
         used_emotes = []
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
         if attachments:
-            count = self.current_limits.get('chat_image_attachment', {}).get('count_remaining', 0)
+            count = self.current_limits.get("chat_image_attachment", {}).get(
+                "count_remaining", 0
+            )
             if count >> 0:
-                self.current_limits['chat_image_attachment']['count_remaining'] -= 1
+                self.current_limits["chat_image_attachment"]["count_remaining"] -= 1
             elif count == 0:
-                self.notification_signal.emit(self.tr("Attached message limit exceeded"))
+                self.notification_signal.emit(
+                    self.tr("Attached message limit exceeded")
+                )
                 attachments = None
 
         if vtube_studio:
@@ -181,87 +200,126 @@ class ChatThread(QThread):
             used_emotes.append("Thinks")
 
         if self.mw.settings.value("tr_user_msg", False, type=bool):
-            lang_code = self.mw.settings_page.languages.get(self.mw.settings.value("tr_user_msg_to", "en_US"))[
-                'google_code']
+            lang_code = self.mw.settings_page.languages.get(
+                self.mw.settings.value("tr_user_msg_to", "en_US")
+            )["google_code"]
             translation = await self.translator.translate(text, targetlang=lang_code)
             text = translation.text
 
         while True:
             if self.client.ws:
                 try:
-                    async for response in self.client.send_message_stream(char, chat_id, text, attachments=attachments):
-                        author = response['turn']['author']
+                    async for response in self.client.send_message_stream(
+                        char, chat_id, text, attachments=attachments
+                    ):
+                        author = response["turn"]["author"]
 
-                        if author['author_id'].isdigit() and author.get('is_human'):
-                            self._append_to_history(chat_id, text, response['turn']['turn_key']['turn_id'], True)
+                        if author["author_id"].isdigit() and author.get("is_human"):
+                            self._append_to_history(
+                                chat_id,
+                                text,
+                                response["turn"]["turn_key"]["turn_id"],
+                                True,
+                            )
                             self.user_message_signal.emit(response)
 
                         if vtube_studio and "Says" not in used_emotes:
                             await self.eec.UseEmote("Says")
                             used_emotes.append("Says")
 
-                        if not author['author_id'].isdigit():
-                            candidate = response.get('turn', {}).get('candidates', [{}])[0]
-                            if candidate.get('is_final'):
+                        if not author["author_id"].isdigit():
+                            candidate = response.get("turn", {}).get(
+                                "candidates", [{}]
+                            )[0]
+                            if candidate.get("is_final"):
                                 if tts_enabled:
-                                    char_name = self.characters.get(char, {}).get('character', {}).get('name', '')
-                                    await self.replay(response['turn']['primary_candidate_id'], chat_id,
-                                                      response['turn']['turn_key']['turn_id'], voice_id, char_name)
+                                    char_name = (
+                                        self.characters.get(char, {})
+                                        .get("character", {})
+                                        .get("name", "")
+                                    )
+                                    await self.replay(
+                                        response["turn"]["primary_candidate_id"],
+                                        chat_id,
+                                        response["turn"]["turn_key"]["turn_id"],
+                                        voice_id,
+                                        char_name,
+                                    )
 
-                                raw_content = candidate['raw_content']
-                                self._append_to_history(chat_id, raw_content, response['turn']['turn_key']['turn_id'],
-                                                        False)
+                                raw_content = candidate["raw_content"]
+                                self._append_to_history(
+                                    chat_id,
+                                    raw_content,
+                                    response["turn"]["turn_key"]["turn_id"],
+                                    False,
+                                )
 
-                                if self.mw.settings.value("tr_char_msg", False, type=bool):
+                                if self.mw.settings.value(
+                                    "tr_char_msg", False, type=bool
+                                ):
                                     lang_code = self.mw.settings_page.languages.get(
-                                        self.mw.settings.value("tr_char_msg_to", self.mw.current_language))[
-                                        'google_code']
-                                    translation = await self.translator.translate(raw_content, targetlang=lang_code)
-                                    response['turn']['candidates'][0]['raw_content'] = translation.text
+                                        self.mw.settings.value(
+                                            "tr_char_msg_to", self.mw.current_language
+                                        )
+                                    )["google_code"]
+                                    translation = await self.translator.translate(
+                                        raw_content, targetlang=lang_code
+                                    )
+                                    response["turn"]["candidates"][0][
+                                        "raw_content"
+                                    ] = translation.text
 
                                 self.message_signal.emit(response)
-                                await self.client.request(f"chat/{chat_id}/resurrect", method="get", domain="neo")
+                                await self.client.request(
+                                    f"chat/{chat_id}/resurrect",
+                                    method="get",
+                                    domain="neo",
+                                )
                                 return
 
                             self.message_signal.emit(response)
                 except curl_cffi.curl.CurlError:
                     await self.client.connect_ws()
-                    logging.warning("ChatThread: Reconnecting to websockets...")
+                    logging.getLogger(__name__).warning("ChatThread: Reconnecting to websockets...")
 
     def _append_to_history(self, chat_id, text, turn_id, is_human):
         if chat_id not in self.chat_histories:
             self.chat_histories[chat_id] = []
-        self.chat_histories[chat_id].append({
-            'author': {'is_human': is_human},
-            'candidates': [{'raw_content': text, 'is_final': True}],
-            'turn_key': {'chat_id': chat_id, 'turn_id': turn_id}
-        })
+        self.chat_histories[chat_id].append(
+            {
+                "author": {"is_human": is_human},
+                "candidates": [{"raw_content": text, "is_final": True}],
+                "turn_key": {"chat_id": chat_id, "turn_id": turn_id},
+            }
+        )
 
     @asyncSlot
     async def edit_message(self, chat_id: str, turn_id: str, text: str):
         response = await self.client.edit_message(chat_id, turn_id, text)
 
         turn = response.get("turn", {})
-        pci = turn.get('primary_candidate_id')
+        pci = turn.get("primary_candidate_id")
         current, current_id = "", ""
 
-        for candidate in turn.get('candidates', []):
-            if candidate.get('candidate_id') == pci:
-                current = candidate.get('raw_content', '')
-                current_id = candidate.get('candidate_id')
+        for candidate in turn.get("candidates", []):
+            if candidate.get("candidate_id") == pci:
+                current = candidate.get("raw_content", "")
+                current_id = candidate.get("candidate_id")
                 break
 
         for message in self.chat_histories.get(chat_id, []):
-            if message.get('turn_key', {}).get('turn_id') == turn_id:
-                message['candidates'][0]['raw_content'] = current
-                message['candidates'][0]['candidate_id'] = current_id
-                message['primary_candidate_id'] = pci
+            if message.get("turn_key", {}).get("turn_id") == turn_id:
+                message["candidates"][0]["raw_content"] = current
+                message["candidates"][0]["candidate_id"] = current_id
+                message["primary_candidate_id"] = pci
                 break
 
         self.edit_message_signal.emit(response)
 
     @asyncSlot
-    async def turn_regenerate(self, char, chat_id, turn_id, user_name="", tts_enabled=False, voice_id=""):
+    async def turn_regenerate(
+        self, char, chat_id, turn_id, user_name="", tts_enabled=False, voice_id=""
+    ):
         used_emotes = []
         message_bubble_added = False
         vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
@@ -274,51 +332,94 @@ class ChatThread(QThread):
         while True:
             if self.client.ws:
                 try:
-                    async for response in self.client.regenerate_turn_stream(char, chat_id, turn_id, user_name):
+                    async for response in self.client.regenerate_turn_stream(
+                        char, chat_id, turn_id, user_name
+                    ):
                         if vtube_studio and "Says" not in used_emotes:
                             await self.eec.UseEmote("Says")
                             used_emotes.append("Says")
 
-                        if not response['turn']['author']['author_id'].isdigit():
-                            candidate = response.get('turn', {}).get('candidates', [{}])[0]
-                            if candidate.get('is_final'):
+                        if not response["turn"]["author"]["author_id"].isdigit():
+                            candidate = response.get("turn", {}).get(
+                                "candidates", [{}]
+                            )[0]
+                            if candidate.get("is_final"):
                                 if tts_enabled:
-                                    char_name = self.characters.get(char, {}).get('character', {}).get('name', '')
-                                    await self.replay(response['turn']['primary_candidate_id'], chat_id,
-                                                      response['turn']['turn_key']['turn_id'], voice_id, char_name)
+                                    char_name = (
+                                        self.characters.get(char, {})
+                                        .get("character", {})
+                                        .get("name", "")
+                                    )
+                                    await self.replay(
+                                        response["turn"]["primary_candidate_id"],
+                                        chat_id,
+                                        response["turn"]["turn_key"]["turn_id"],
+                                        voice_id,
+                                        char_name,
+                                    )
 
-                                raw_content = candidate['raw_content']
-                                self._append_to_history(chat_id, raw_content, response['turn']['turn_key']['turn_id'],
-                                                        False)
+                                raw_content = candidate["raw_content"]
+                                self._append_to_history(
+                                    chat_id,
+                                    raw_content,
+                                    response["turn"]["turn_key"]["turn_id"],
+                                    False,
+                                )
 
-                                if self.mw.settings.value("tr_char_msg", False, type=bool):
+                                if self.mw.settings.value(
+                                    "tr_char_msg", False, type=bool
+                                ):
                                     lang_code = self.mw.settings_page.languages.get(
-                                        self.mw.settings.value("tr_char_msg_to", self.mw.current_language))[
-                                        'google_code']
-                                    translation = await self.translator.translate(raw_content, targetlang=lang_code)
-                                    response['turn']['candidates'][0]['raw_content'] = translation.text
+                                        self.mw.settings.value(
+                                            "tr_char_msg_to", self.mw.current_language
+                                        )
+                                    )["google_code"]
+                                    translation = await self.translator.translate(
+                                        raw_content, targetlang=lang_code
+                                    )
+                                    response["turn"]["candidates"][0][
+                                        "raw_content"
+                                    ] = translation.text
 
-                                self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
-                                await self.client.request(f"chat/{chat_id}/resurrect", method="get", domain="neo")
+                                self.turn_regenerate_signal.emit(
+                                    response, turn_id, message_bubble_added
+                                )
+                                await self.client.request(
+                                    f"chat/{chat_id}/resurrect",
+                                    method="get",
+                                    domain="neo",
+                                )
                                 return
 
-                            self.turn_regenerate_signal.emit(response, turn_id, message_bubble_added)
+                            self.turn_regenerate_signal.emit(
+                                response, turn_id, message_bubble_added
+                            )
                             message_bubble_added = True
-                            turn_id = response['turn']['turn_key']['turn_id']
+                            turn_id = response["turn"]["turn_key"]["turn_id"]
                 except curl_cffi.curl.CurlError:
                     await self.client.connect_ws()
-                    logging.warning("ChatThread: Reconnecting to websockets...")
+                    logging.getLogger(__name__).warning("ChatThread: Reconnecting to websockets...")
 
     @asyncSlot
-    async def new_chat(self, char, chat_id=None, preferred_model_type="MODEL_TYPE_BALANCED", scene_id=""):
+    async def new_chat(
+        self,
+        char,
+        chat_id=None,
+        preferred_model_type="MODEL_TYPE_BALANCED",
+        scene_id="",
+    ):
         if not self.me:
             self.me = await self.api_users.get_me()
 
         while True:
             if self.client.ws:
                 try:
-                    response, new_chat_id = await self.client.create_new_chat(char, self.me.get('user', {}).get('id', ''),
-                                                                              preferred_model_type, scene_id)
+                    response, new_chat_id = await self.client.create_new_chat(
+                        char,
+                        self.me.get("user", {}).get("id", ""),
+                        preferred_model_type,
+                        scene_id,
+                    )
                     if new_chat_id and new_chat_id in self.chat_histories:
                         del self.chat_histories[new_chat_id]
                     self.new_chat_created_signal.emit(response)
@@ -330,8 +431,11 @@ class ChatThread(QThread):
     async def turn_remove(self, chat_id, turn_ids):
         res = await self.api_chats.remove_turns(chat_id, turn_ids)
         self.turn_remove_signal.emit(res)
-        self.chat_histories[chat_id] = [t for t in self.chat_histories.get(chat_id, []) if
-                                        t.get('turn_key', {}).get('turn_id') not in turn_ids]
+        self.chat_histories[chat_id] = [
+            t
+            for t in self.chat_histories.get(chat_id, [])
+            if t.get("turn_key", {}).get("turn_id") not in turn_ids
+        ]
 
     @asyncSlot
     async def get_history(self, chat_id, next_token=None):
@@ -339,21 +443,26 @@ class ChatThread(QThread):
             data = await self.api_chats.get_history(chat_id, next_token)
 
             if next_token:
-                self.chat_histories[chat_id] = data['turns'] + self.chat_histories.get(chat_id, [])
+                self.chat_histories[chat_id] = data["turns"] + self.chat_histories.get(
+                    chat_id, []
+                )
             else:
-                self.chat_histories[chat_id] = data['turns']
+                self.chat_histories[chat_id] = data["turns"]
 
-            self.chat_next_tokens[chat_id] = {"token": data['next_token']}
+            self.chat_next_tokens[chat_id] = {"token": data["next_token"]}
 
-        self.get_history_signal.emit(self.chat_histories[chat_id], self.chat_next_tokens.get(chat_id, {}).get('token'))
+        self.get_history_signal.emit(
+            self.chat_histories[chat_id],
+            self.chat_next_tokens.get(chat_id, {}).get("token"),
+        )
 
     @asyncSlot
     async def get_character(self, character_id=None, path=None):
         if character_id not in self.characters:
             data = await self.api_chars.get_character(character_id, path)
             if data:
-                self.characters[data['character_id']] = data
-                character_id = data['character_id']
+                self.characters[data["character_id"]] = data
+                character_id = data["character_id"]
         self.get_char_signal.emit(self.characters.get(character_id, {}))
 
     @asyncSlot
@@ -361,8 +470,8 @@ class ChatThread(QThread):
         res = await self.api_chars.vote_character(character_id, vote)
         self.character_vote_signal.emit(res)
         if character_id in self.characters:
-            self.characters[character_id]['voted']['vote'] = vote
-            self.characters[character_id]['voted']['voted'] = vote is not None
+            self.characters[character_id]["voted"]["vote"] = vote
+            self.characters[character_id]["voted"]["voted"] = vote is not None
 
     @asyncSlot
     async def get_me(self):
@@ -373,22 +482,28 @@ class ChatThread(QThread):
     async def update_character(self, data):
         res = await self.api_chars.update_character(data)
         self.update_character_signal.emit(res)
-        if data.get('status') == "OK" and res.get('character'):
-            char_id = res['character']['external_id']
+        if data.get("status") == "OK" and res.get("character"):
+            char_id = res["character"]["external_id"]
             if char_id in self.characters:
-                self.characters[char_id]['character'] = res['character']
+                self.characters[char_id]["character"] = res["character"]
 
     @asyncSlot
     async def get_update_servers(self):
         self.get_update_servers_signal.emit(await self.api_emilia.get_update_servers())
 
     @asyncSlot
-    async def get_themes(self, query: str = "", author: str = "", count: int = 0, offset: int = 0):
-        self.get_themes_signal.emit(await self.api_emilia.get_themes(query, author, count, offset))
+    async def get_themes(
+        self, query: str = "", author: str = "", count: int = 0, offset: int = 0
+    ):
+        self.get_themes_signal.emit(
+            await self.api_emilia.get_themes(query, author, count, offset)
+        )
 
     @asyncSlot
     async def get_user_themes(self, creator_id: int):
-        self.get_user_themes_signal.emit(await self.api_emilia.get_user_themes(creator_id))
+        self.get_user_themes_signal.emit(
+            await self.api_emilia.get_user_themes(creator_id)
+        )
 
     @asyncSlot
     async def get_theme(self, theme_id: str):
@@ -396,54 +511,62 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def download_theme(self, theme_name: str, theme_id: str):
-        self.download_theme_signal.emit(await self.api_emilia.download_theme(theme_name, theme_id))
+        self.download_theme_signal.emit(
+            await self.api_emilia.download_theme(theme_name, theme_id)
+        )
 
     @asyncSlot
     async def upload_theme(self, theme_name: str):
         if not self.me:
             self.me = await self.api_users.get_me()
-        user = self.me.get('user', {})
-        user_id = user.get('id')
+        user = self.me.get("user", {})
+        user_id = user.get("id")
         if not user_id:
             self.upload_theme_signal.emit({"error": "User not authenticated"})
             return
 
-        username = user.get('username')
-        avatar_file_name = user.get('account', {}).get('avatar_file_name')
+        username = user.get("username")
+        avatar_file_name = user.get("account", {}).get("avatar_file_name")
         token = self.client.token
 
-        res = await self.api_emilia.upload_theme(theme_name, user_id, username, avatar_file_name, token)
+        res = await self.api_emilia.upload_theme(
+            theme_name, user_id, username, avatar_file_name, token
+        )
         self.upload_theme_signal.emit(res)
 
     @asyncSlot
     async def update_theme(self, theme_name: str, theme_id: str):
         if not self.me:
             self.me = await self.api_users.get_me()
-        user = self.me.get('user', {})
-        user_id = user.get('id')
+        user = self.me.get("user", {})
+        user_id = user.get("id")
         if not user_id:
             self.update_theme_signal.emit({"error": "User not authenticated"})
             return
 
-        username = user.get('username')
-        avatar_file_name = user.get('account', {}).get('avatar_file_name')
+        username = user.get("username")
+        avatar_file_name = user.get("account", {}).get("avatar_file_name")
         token = self.client.token
 
-        res = await self.api_emilia.update_theme(theme_name, theme_id, user_id, username, avatar_file_name, token)
+        res = await self.api_emilia.update_theme(
+            theme_name, theme_id, user_id, username, avatar_file_name, token
+        )
         self.update_theme_signal.emit(res)
 
     @asyncSlot
     async def delete_theme(self, theme_id: str):
-        user = self.me.get('user', {})
-        user_id = user.get('id')
+        user = self.me.get("user", {})
+        user_id = user.get("id")
         if not user_id:
             self.update_theme_signal.emit({"error": "User not authenticated"})
             return
 
-        username = user.get('username')
-        avatar_file_name = user.get('account', {}).get('avatar_file_name')
+        username = user.get("username")
+        avatar_file_name = user.get("account", {}).get("avatar_file_name")
         token = self.client.token
-        res = await self.api_emilia.delete_theme(theme_id, token, user_id, username, avatar_file_name)
+        res = await self.api_emilia.delete_theme(
+            theme_id, token, user_id, username, avatar_file_name
+        )
         self.delete_theme_signal.emit(res)
 
     @asyncSlot
@@ -452,11 +575,15 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def update_user_settings(self, data):
-        self.update_user_settings_signal.emit(await self.api_users.update_user_settings(data))
+        self.update_user_settings_signal.emit(
+            await self.api_users.update_user_settings(data)
+        )
 
     @asyncSlot
     async def update_user_settings_2(self, data):
-        self.update_user_settings_2_signal.emit(await self.api_users.update_user_settings_2(data))
+        self.update_user_settings_2_signal.emit(
+            await self.api_users.update_user_settings_2(data)
+        )
 
     @asyncSlot
     async def get_user(self, username):
@@ -468,7 +595,9 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_chat_by_id(self, chat_id, load_metadata=False):
-        self.get_chat_by_id_signal.emit(await self.api_chats.get_chat_by_id(chat_id, load_metadata))
+        self.get_chat_by_id_signal.emit(
+            await self.api_chats.get_chat_by_id(chat_id, load_metadata)
+        )
 
     @asyncSlot
     async def copy_chat(self, chat_id, end_turn_id):
@@ -481,13 +610,13 @@ class ChatThread(QThread):
     @asyncSlot
     async def get_voice_limit(self):
         response = await self.api_cai_limit.voice_call()
-        self.current_limits['voice_limit'] = response
+        self.current_limits["voice_limit"] = response
         self.get_voice_call_limit_signal.emit(response)
 
     @asyncSlot
     async def get_chat_image_attachment_limit(self):
         response = await self.api_cai_limit.chat_image_attachment()
-        self.current_limits['chat_image_attachment'] = response
+        self.current_limits["chat_image_attachment"] = response
         self.get_chat_image_attachment_limit_signal.emit(response)
 
     @asyncSlot
@@ -508,7 +637,9 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_scenes_by_user(self, username):
-        self.get_scenes_by_user_signal.emit(await self.api_scenes.get_user_scenes(username))
+        self.get_scenes_by_user_signal.emit(
+            await self.api_scenes.get_user_scenes(username)
+        )
 
     @asyncSlot
     async def get_trythis_chats(self):
@@ -524,19 +655,27 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def get_recommend_chars_by_id(self, char_id):
-        self.get_recommend_chars_by_id_signal.emit(await self.api_chars.get_similar_characters(char_id))
+        self.get_recommend_chars_by_id_signal.emit(
+            await self.api_chars.get_similar_characters(char_id)
+        )
 
     @asyncSlot
     async def query_autocomplete(self, query):
-        self.query_autocomplete_signal.emit(await self.api_chars.query_autocomplete(query))
+        self.query_autocomplete_signal.emit(
+            await self.api_chars.query_autocomplete(query)
+        )
 
     @asyncSlot
     async def get_user_following(self, page=1, username=""):
-        self.user_following_signal.emit(await self.api_users.get_user_following(page, username))
+        self.user_following_signal.emit(
+            await self.api_users.get_user_following(page, username)
+        )
 
     @asyncSlot
     async def get_user_followers(self, page=1, username=""):
-        self.user_followers_signal.emit(await self.api_users.get_user_followers(page, username))
+        self.user_followers_signal.emit(
+            await self.api_users.get_user_followers(page, username)
+        )
 
     @asyncSlot
     async def get_me_following(self):
@@ -564,11 +703,15 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def voices_search(self, query=None, char_name=None):
-        self.voices_search_signal.emit(await self.api_voices.search_voices(query, char_name))
+        self.voices_search_signal.emit(
+            await self.api_voices.search_voices(query, char_name)
+        )
 
     @asyncSlot
     async def voices_search_username(self, username):
-        self.voices_search_username_signal.emit(await self.api_voices.search_voices_by_username(username))
+        self.voices_search_username_signal.emit(
+            await self.api_voices.search_voices_by_username(username)
+        )
 
     @asyncSlot
     async def get_voice(self, voice_id):
@@ -576,19 +719,27 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def voice_override(self, char_id):
-        self.voice_override_signal.emit(await self.api_voices.get_voice_override(char_id))
+        self.voice_override_signal.emit(
+            await self.api_voices.get_voice_override(char_id)
+        )
 
     @asyncSlot
     async def voice_override_update(self, char_id, voice_id):
-        self.voice_override_update_signal.emit(await self.api_voices.update_voice_override(char_id, voice_id))
+        self.voice_override_update_signal.emit(
+            await self.api_voices.update_voice_override(char_id, voice_id)
+        )
 
     @asyncSlot
     async def voice_override_delete(self, char_id):
-        self.voice_override_delete_signal.emit(await self.api_voices.delete_voice_override(char_id))
+        self.voice_override_delete_signal.emit(
+            await self.api_voices.delete_voice_override(char_id)
+        )
 
     @asyncSlot
     async def get_upvoted_characters(self):
-        self.get_upvoted_characters_signal.emit(await self.api_chars.get_upvoted_characters())
+        self.get_upvoted_characters_signal.emit(
+            await self.api_chars.get_upvoted_characters()
+        )
 
     @asyncSlot
     async def create_character(self, data):
@@ -620,7 +771,9 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def update_scene(self, data, scene_id):
-        self.update_scene_signal.emit(await self.api_scenes.update_scene(scene_id, data))
+        self.update_scene_signal.emit(
+            await self.api_scenes.update_scene(scene_id, data)
+        )
 
     @asyncSlot
     async def remove_scene(self, scene_id):
@@ -640,24 +793,31 @@ class ChatThread(QThread):
 
     @asyncSlot
     async def join_or_create_session(self, r, u, n=None, vq=None, v=None):
-        self.join_or_create_session_signal.emit(await self.api_voices.join_or_create_session(r, u, n, vq, v))
+        self.join_or_create_session_signal.emit(
+            await self.api_voices.join_or_create_session(r, u, n, vq, v)
+        )
 
     @asyncSlot
     async def get_category_characters(self, cat):
-        self.category_characters_signal.emit(await self.api_chars.get_category_characters(cat))
+        self.category_characters_signal.emit(
+            await self.api_chars.get_category_characters(cat)
+        )
 
     @asyncSlot
     async def get_character_chats(self, char_id, pt=1):
-        self.character_chats_signal.emit(await self.api_chats.get_character_chats(char_id, pt))
+        self.character_chats_signal.emit(
+            await self.api_chats.get_character_chats(char_id, pt)
+        )
 
     @asyncSlot
     async def get_available_models(self):
         res = await self.client.request("get-available-models", domain="neo")
-        self.get_available_models_signal.emit(res.get('available_models', []))
+        self.get_available_models_signal.emit(res.get("available_models", []))
 
     @asyncSlot
     async def get_available_models_git(self):
         res = await self.client.custom_request(
             "https://raw.githubusercontent.com/Kajitsy/Emilia/refs/heads/emilia/data/CAI_Available_Models.json",
-            text=True)
+            text=True,
+        )
         self.get_available_models_git_signal.emit(res)

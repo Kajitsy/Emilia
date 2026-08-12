@@ -4,8 +4,11 @@ from PyQt6.QtWidgets import QHBoxLayout, QLabel
 from modules.ui.Elements import CardFrame
 from modules.Utils import color_avatar
 
+
 class MiniCard(CardFrame):
-    def __init__(self, main_window, character_name, character_id, avatar_url, chat_id=None):
+    def __init__(
+        self, main_window, character_name, character_id, avatar_url, chat_id=None
+    ):
         super().__init__()
         self.mw = main_window
         self.image_loader = main_window.image_loader
@@ -27,9 +30,13 @@ class MiniCard(CardFrame):
 
         if self.avatar_url:
             self.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", 54, 54, 4,
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0",
+                54,
+                54,
+                4,
                 label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, 54, 54, self.name))
+                error_cb=lambda _: color_avatar(self.avatar_label, 54, 54, self.name),
+            )
         else:
             color_avatar(self.avatar_label, 54, 54, self.name, 4)
 

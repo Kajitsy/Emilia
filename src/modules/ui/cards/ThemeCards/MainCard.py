@@ -2,10 +2,11 @@ import os
 import shutil
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QFrame
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
 
 from modules.ui import TM
-from modules.ui.Elements import CardFrame, PushButton
+from modules.ui.Elements import PushButton
+
 
 class MainCard(QFrame):
     def __init__(self, main_window, theme_id):
@@ -62,7 +63,7 @@ class MainCard(QFrame):
     def _getTheme(self, data):
         try:
             self.mw.chat_thread.get_theme_signal.disconnect(self._getTheme)
-        except:
+        except Exception:
             pass
         self.data = data
         self.name = self.data.get("name")
@@ -74,20 +75,32 @@ class MainCard(QFrame):
 
         is_author = False
         if self.mw.chat_thread.me:
-            is_author = self.mw.chat_thread.me.get('user', {}).get('username') == author
+            is_author = self.mw.chat_thread.me.get("user", {}).get("username") == author
 
         if TM.check_theme(self.theme_id):
-            self.button_layout.addWidget(self.sel_button, alignment=Qt.AlignmentFlag.AlignRight)
+            self.button_layout.addWidget(
+                self.sel_button, alignment=Qt.AlignmentFlag.AlignRight
+            )
             if self.name != "Dark" and self.name != "Light":
-                self.button_layout.addWidget(self.uninstall_button, alignment=Qt.AlignmentFlag.AlignRight)
+                self.button_layout.addWidget(
+                    self.uninstall_button, alignment=Qt.AlignmentFlag.AlignRight
+                )
                 if is_author:
-                    self.button_layout.addWidget(self.update_button, alignment=Qt.AlignmentFlag.AlignRight)
+                    self.button_layout.addWidget(
+                        self.update_button, alignment=Qt.AlignmentFlag.AlignRight
+                    )
         else:
-            self.button_layout.addWidget(self.install_button, alignment=Qt.AlignmentFlag.AlignRight)
-            self.button_layout.addWidget(self.install_sel_button, alignment=Qt.AlignmentFlag.AlignRight)
+            self.button_layout.addWidget(
+                self.install_button, alignment=Qt.AlignmentFlag.AlignRight
+            )
+            self.button_layout.addWidget(
+                self.install_sel_button, alignment=Qt.AlignmentFlag.AlignRight
+            )
 
         if is_author:
-            self.button_layout.addWidget(self.delete_server_button, alignment=Qt.AlignmentFlag.AlignRight)
+            self.button_layout.addWidget(
+                self.delete_server_button, alignment=Qt.AlignmentFlag.AlignRight
+            )
 
         self.mw.hide_overlay = True
 
@@ -99,8 +112,10 @@ class MainCard(QFrame):
     def _on_theme_updated(self, response):
         self.mw.chat_thread.update_theme_signal.disconnect(self._on_theme_updated)
         self.update_button.setEnabled(True)
-        if response.get('error'):
-            self.mw.showNotification(self.tr("Error updating theme: ") + str(response.get('error')))
+        if response.get("error"):
+            self.mw.showNotification(
+                self.tr("Error updating theme: ") + str(response.get("error"))
+            )
         else:
             self.mw.showNotification(self.tr("Theme updated successfully!"))
 
@@ -112,8 +127,10 @@ class MainCard(QFrame):
     def _on_theme_deleted(self, response):
         self.mw.chat_thread.delete_theme_signal.disconnect(self._on_theme_deleted)
         self.delete_server_button.setEnabled(True)
-        if response.get('error'):
-            self.mw.showNotification(self.tr("Error deleting theme: ") + str(response.get('error')))
+        if response.get("error"):
+            self.mw.showNotification(
+                self.tr("Error deleting theme: ") + str(response.get("error"))
+            )
         else:
             self.mw.showNotification(self.tr("Theme deleted successfully!"))
             self.mw.hideOverlay()

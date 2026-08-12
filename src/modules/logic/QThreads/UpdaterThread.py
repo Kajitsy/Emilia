@@ -1,6 +1,12 @@
-import os, hashlib, json, requests, sys, platform
+import hashlib
+import json
+import os
+import platform
+import sys
 
+import requests
 from PyQt6.QtCore import QThread, pyqtSignal
+
 
 class UpdaterThread(QThread):
     has_update_signal = pyqtSignal(bool)
@@ -8,7 +14,7 @@ class UpdaterThread(QThread):
 
     def __init__(self, remote_url="https://ru-emiupd.kajitsy.xyz/"):
         super().__init__()
-        
+
         system = platform.system()
         if system == "Windows":
             self.remote_url = remote_url.rstrip("/") + "/windows/"
@@ -28,7 +34,7 @@ class UpdaterThread(QThread):
         self.diff()
 
     def generate_local_manifest(self):
-        if not os.path.exists('./manifest.json'):
+        if not os.path.exists("./manifest.json"):
             base_path = os.path.dirname(sys.executable)
             INCLUDE_FILES = [
                 "emilia.exe",
@@ -40,7 +46,7 @@ class UpdaterThread(QThread):
                 "lang",
                 "themes/Light",
                 "themes/Dark",
-                "data/default_qss"
+                "data/default_qss",
             ]
 
             def get_hash(filepath):
@@ -52,7 +58,6 @@ class UpdaterThread(QThread):
                     return hasher.hexdigest()
                 except FileNotFoundError:
                     return None
-
 
             for filename in INCLUDE_FILES:
                 full_path = os.path.join(base_path, filename)
@@ -69,7 +74,9 @@ class UpdaterThread(QThread):
                 for root, _, files in os.walk(dir_full_path):
                     for filename in files:
                         full_path = os.path.join(root, filename)
-                        rel_path = os.path.relpath(full_path, base_path).replace("\\", "/")
+                        rel_path = os.path.relpath(full_path, base_path).replace(
+                            "\\", "/"
+                        )
 
                         file_hash = get_hash(full_path)
                         if file_hash:
@@ -86,7 +93,7 @@ class UpdaterThread(QThread):
             response = requests.get(f"{self.remote_url}manifest.json", timeout=5)
             response.raise_for_status()
             self.remote_manifest = response.json()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.error_signal.emit(str(e))
             return
 

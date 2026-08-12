@@ -1,11 +1,14 @@
-import logging, sounddevice, asyncio, curl_cffi.curl
+import asyncio
+import logging
+
+import curl_cffi.curl
 import numpy as np
-
+import sounddevice
 from livekit import rtc
-
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from modules.logic.VTubeCore import EEC
+
 
 class VoiceModeThreadV2(QThread):
     connected_signal = pyqtSignal(bool)
@@ -13,7 +16,9 @@ class VoiceModeThreadV2(QThread):
     error_signal = pyqtSignal(str)
     volume_signal = pyqtSignal(float)
 
-    def __init__(self, parent, token, char, chat_id, username, char_name=None, voice_id=None):
+    def __init__(
+        self, parent, token, char, chat_id, username, char_name=None, voice_id=None
+    ):
         super().__init__()
         self.parent = parent
         self.mw = self.parent.mw
@@ -24,16 +29,28 @@ class VoiceModeThreadV2(QThread):
         self.char_name = char_name
         self.voice_id = voice_id
 
-        input_dev = self.mw.settings.value('input_device', False)
-        self.input_index = 0 if input_dev is False else self.mw.settings.value('input_device', 0, type=int) + 1
-        output_dev = self.mw.settings.value('output_device', False)
-        self.output_index = 0 if output_dev is False else self.mw.settings.value('output_device', 0, type=int)
+        input_dev = self.mw.settings.value("input_device", False)
+        self.input_index = (
+            0
+            if input_dev is False
+            else self.mw.settings.value("input_device", 0, type=int) + 1
+        )
+        output_dev = self.mw.settings.value("output_device", False)
+        self.output_index = (
+            0
+            if output_dev is False
+            else self.mw.settings.value("output_device", 0, type=int)
+        )
 
         self.room = None
         self.output_stream = None
         self.is_bot_speaking = False
         self.vtube_studio = self.mw.settings.value("vtube/use", False, type=bool)
-        self.eec = EEC(self.mw, self.mw.settings.value("vtube/address", "127.0.0.1"), self.mw.settings.value("vtube/port", 8001))
+        self.eec = EEC(
+            self.mw,
+            self.mw.settings.value("vtube/address", "127.0.0.1"),
+            self.mw.settings.value("vtube/port", 8001),
+        )
 
     def run(self):
         self.loop = asyncio.new_event_loop()
@@ -42,15 +59,17 @@ class VoiceModeThreadV2(QThread):
 
         try:
             self.loop.run_until_complete(self.start_call())
-        except Exception as e:
-            logging.error(f"Critical Error in run: {e}")
+        except Exception as e:  # noqa: BLE001
+            logging.getLogger(__name__).error(f"Critical Error in run: {e}")
             self.error_signal.emit(str(e))
         finally:
             pending = asyncio.all_tasks(self.loop)
             for task in pending:
                 task.cancel()
             if pending:
-                self.loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                self.loop.run_until_complete(
+                    asyncio.gather(*pending, return_exceptions=True)
+                )
             self.loop.close()
 
     async def start_call(self):
@@ -62,7 +81,7 @@ class VoiceModeThreadV2(QThread):
         headers = {
             "Authorization": f"Token {self.token}",
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
         }
 
         if self.voice_id:
@@ -74,9 +93,7 @@ class VoiceModeThreadV2(QThread):
                 "userAuthToken": self.token,
                 "username": self.username,
                 "voiceQueries": {},
-                "voices": {
-                    self.char: self.voice_id
-                }
+                "voices": {self.char: self.voice_id},
             }
         else:
             payload = {
@@ -86,17 +103,17 @@ class VoiceModeThreadV2(QThread):
                 "rtcBackend": "lk",
                 "userAuthToken": self.token,
                 "username": self.username,
-                "voiceQueries": {
-                    self.char: self.char_name
-                },
-                "voices": {}
+                "voiceQueries": {self.char: self.char_name},
+                "voices": {},
             }
 
         async with curl_cffi.AsyncSession() as session:
-            request = await session.post(url, headers=headers, json=payload, timeout=100)
+            request = await session.post(
+                url, headers=headers, json=payload, timeout=100
+            )
             data = request.json()
-            call_token = data['lkToken']
-            ws_url = data['lkUrl']
+            call_token = data["lkToken"]
+            ws_url = data["lkUrl"]
 
             await self.connect_livekit(ws_url, call_token)
 
@@ -115,10 +132,7 @@ class VoiceModeThreadV2(QThread):
 
         try:
             self.output_stream = sounddevice.OutputStream(
-                channels=1,
-                samplerate=48000,
-                dtype='int16',
-                device=self.output_index
+                channels=1, samplerate=48000, dtype="int16", device=self.output_index
             )
             self.output_stream.start()
             await self.room.connect(url, token)
@@ -126,7 +140,7 @@ class VoiceModeThreadV2(QThread):
             await self._enable_microphone()
             await self.stop_event.wait()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             await self.room.disconnect()
             self.error_signal.emit(f"LiveKit error: {e}")
         finally:
@@ -147,7 +161,8 @@ class VoiceModeThreadV2(QThread):
                 break
 
             frame = event.frame
-            if not frame: continue
+            if not frame:
+                continue
             data_np = np.frombuffer(frame.data, dtype=np.int16)
 
             self.output_stream.write(data_np)
@@ -164,7 +179,8 @@ class VoiceModeThreadV2(QThread):
             if rms > 500:
                 if not self.is_bot_speaking:
                     self.is_bot_speaking = True
-                    if self.vtube_studio: await self.eec.UseEmote("Says")
+                    if self.vtube_studio:
+                        await self.eec.UseEmote("Says")
                     self.speech_signal.emit(False)
                 silence_timer = 0
             else:
@@ -173,20 +189,25 @@ class VoiceModeThreadV2(QThread):
 
                     if silence_timer > silence_threshold:
                         self.is_bot_speaking = False
-                        if self.vtube_studio: await self.eec.UseEmote("Listening")
+                        if self.vtube_studio:
+                            await self.eec.UseEmote("Listening")
                         self.speech_signal.emit(True)
 
     async def _enable_microphone(self):
-        mic_device = self.audio_devices.open_input(input_device=self.input_index, enable_aec=True, noise_suppression=True)
-        self.mic_track = rtc.LocalAudioTrack.create_audio_track("microphone", mic_device.source)
+        mic_device = self.audio_devices.open_input(
+            input_device=self.input_index, enable_aec=True, noise_suppression=True
+        )
+        self.mic_track = rtc.LocalAudioTrack.create_audio_track(
+            "microphone", mic_device.source
+        )
 
         await self.room.local_participant.publish_track(self.mic_track)
         self.speech_signal.emit(True)
 
     def stop_call(self):
-        if hasattr(self, 'loop') and self.loop.is_running():
+        if hasattr(self, "loop") and self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self._safe_stop(), self.loop)
 
     async def _safe_stop(self):
-        if hasattr(self, 'stop_event'):
+        if hasattr(self, "stop_event"):
             self.stop_event.set()

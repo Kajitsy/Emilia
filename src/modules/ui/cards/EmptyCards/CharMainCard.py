@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QLabel
 
 from modules.ui.Elements import CardFrame
 
+
 class CharMainCard(CardFrame):
     def __init__(self):
         self.initUI()

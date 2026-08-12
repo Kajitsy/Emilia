@@ -6,20 +6,33 @@ Link: https://github.com/Akascape/py-window-styles
 """
 
 from __future__ import annotations
+
 from typing import Any
 
 try:
-    import winreg
-    from ctypes import (POINTER, Structure, byref, c_int, pointer, sizeof,
-                        windll, c_buffer, WINFUNCTYPE, c_uint64)
-    from ctypes.wintypes import DWORD, ULONG
     import platform
+    import winreg
+    from ctypes import (
+        POINTER,
+        WINFUNCTYPE,
+        Structure,
+        byref,
+        c_buffer,
+        c_int,
+        c_uint64,
+        pointer,
+        sizeof,
+        windll,
+    )
+    from ctypes.wintypes import DWORD, ULONG
 
 except ImportError:
     raise ImportError("WinDarkTheme import errror: No windows environment detected!")
 
+
 def ChangeDWMAttrib(hWnd: int, attrib: int, color) -> None:
     windll.dwmapi.DwmSetWindowAttribute(hWnd, attrib, byref(color), sizeof(c_int))
+
 
 def detect(window: Any):
     """detect the type of UI library and return HWND"""

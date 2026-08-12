@@ -1,10 +1,26 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-                            QPushButton, QFrame, QStackedWidget)
+from PyQt6.QtWidgets import (
+    QApplication,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
-from modules.ui.Elements import PushButton, TabButton, VerticalScrollPage, CardFrame
-from modules.Utils import format_number, color_avatar
-from modules.ui.cards import CharacterCards, EmptyCards, PersonaCards, SceneCards, VoiceCards, UserCards, ThemeCards
+from modules.ui.cards import (
+    CharacterCards,
+    EmptyCards,
+    PersonaCards,
+    SceneCards,
+    ThemeCards,
+    UserCards,
+    VoiceCards,
+)
+from modules.ui.Elements import CardFrame, PushButton, TabButton, VerticalScrollPage
+from modules.Utils import color_avatar, format_number
 
 
 class MainPage(QWidget):
@@ -16,7 +32,7 @@ class MainPage(QWidget):
         self.me_following = []
         self.mw = main_window
         self.chat_thread = self.mw.chat_thread
-        self.discord_thread  = self.mw.discord_thread
+        self.discord_thread = self.mw.discord_thread
         self.svg_icons = self.mw.svg_icons
 
         self.initUI()
@@ -51,15 +67,21 @@ class MainPage(QWidget):
 
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(80, 80)
-        main_info_layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        main_info_layout.addWidget(
+            self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter
+        )
 
         self.name_label = QLabel()
         self.name_label.setStyleSheet("font-size: 18px;")
-        main_info_layout.addWidget(self.name_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        main_info_layout.addWidget(
+            self.name_label, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         self.username_label = QLabel()
         self.username_label.setStyleSheet("color: #a2a2ac; font-size: 12px;")
-        main_info_layout.addWidget(self.username_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        main_info_layout.addWidget(
+            self.username_label, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         sub_frame = QFrame(self)
         sub_layout = QHBoxLayout()
@@ -68,7 +90,9 @@ class MainPage(QWidget):
         layout.addWidget(sub_frame)
 
         self.followers_label = QLabel(self.tr("0 followers"))
-        self.followers_label.mousePressEvent = lambda event: self.showFollowingFollowers("following")
+        self.followers_label.mousePressEvent = (
+            lambda event: self.showFollowingFollowers("following")
+        )
         self.followers_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.followers_label.setStyleSheet("color: #a2a2ac;")
         sub_layout.addWidget(self.followers_label)
@@ -78,7 +102,9 @@ class MainPage(QWidget):
         sub_layout.addWidget(span_label)
 
         self.following_label = QLabel(self.tr("0 following"))
-        self.following_label.mousePressEvent = lambda event: self.showFollowingFollowers("followers")
+        self.following_label.mousePressEvent = (
+            lambda event: self.showFollowingFollowers("followers")
+        )
         self.following_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.following_label.setStyleSheet("color: #a2a2ac;")
         sub_layout.addWidget(self.following_label)
@@ -125,54 +151,128 @@ class MainPage(QWidget):
 
         self.characters_button = TabButton(self.tr("Characters"))
         self.characters_button.setChecked(True)
-        self.characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.character_list))
-        self.characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.characters_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-        self.characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
-        self.characters_button.clicked.connect(lambda event: self.themes_button.setChecked(False))
+        self.characters_button.clicked.connect(
+            lambda event: self.lists_widget.setCurrentWidget(self.character_list)
+        )
+        self.characters_button.clicked.connect(
+            lambda event: self.voices_button.setChecked(False)
+        )
+        self.characters_button.clicked.connect(
+            lambda event: self.up_characters_button.setChecked(False)
+        )
+        self.characters_button.clicked.connect(
+            lambda event: self.personas_button.setChecked(False)
+        )
+        self.characters_button.clicked.connect(
+            lambda event: self.scenes_button.setChecked(False)
+        )
+        self.characters_button.clicked.connect(
+            lambda event: self.themes_button.setChecked(False)
+        )
 
         self.voices_button = TabButton(self.tr("Voices"))
-        self.voices_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.voice_list))
-        self.voices_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.voices_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.voices_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-        self.voices_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
-        self.voices_button.clicked.connect(lambda event: self.themes_button.setChecked(False))
+        self.voices_button.clicked.connect(
+            lambda event: self.lists_widget.setCurrentWidget(self.voice_list)
+        )
+        self.voices_button.clicked.connect(
+            lambda event: self.characters_button.setChecked(False)
+        )
+        self.voices_button.clicked.connect(
+            lambda event: self.up_characters_button.setChecked(False)
+        )
+        self.voices_button.clicked.connect(
+            lambda event: self.personas_button.setChecked(False)
+        )
+        self.voices_button.clicked.connect(
+            lambda event: self.scenes_button.setChecked(False)
+        )
+        self.voices_button.clicked.connect(
+            lambda event: self.themes_button.setChecked(False)
+        )
 
         self.scenes_button = TabButton(self.tr("Scenes"))
-        self.scenes_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.scenes_list))
-        self.scenes_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.scenes_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.scenes_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-        self.scenes_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.scenes_button.clicked.connect(lambda event: self.themes_button.setChecked(False))
+        self.scenes_button.clicked.connect(
+            lambda event: self.lists_widget.setCurrentWidget(self.scenes_list)
+        )
+        self.scenes_button.clicked.connect(
+            lambda event: self.characters_button.setChecked(False)
+        )
+        self.scenes_button.clicked.connect(
+            lambda event: self.up_characters_button.setChecked(False)
+        )
+        self.scenes_button.clicked.connect(
+            lambda event: self.personas_button.setChecked(False)
+        )
+        self.scenes_button.clicked.connect(
+            lambda event: self.voices_button.setChecked(False)
+        )
+        self.scenes_button.clicked.connect(
+            lambda event: self.themes_button.setChecked(False)
+        )
 
         self.up_characters_button = TabButton(self.tr("Liked"))
-        self.up_characters_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.upvoted_characters_list))
-        self.up_characters_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.up_characters_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.up_characters_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
-        self.up_characters_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
-        self.up_characters_button.clicked.connect(lambda event: self.themes_button.setChecked(False))
+        self.up_characters_button.clicked.connect(
+            lambda event: self.lists_widget.setCurrentWidget(
+                self.upvoted_characters_list
+            )
+        )
+        self.up_characters_button.clicked.connect(
+            lambda event: self.characters_button.setChecked(False)
+        )
+        self.up_characters_button.clicked.connect(
+            lambda event: self.voices_button.setChecked(False)
+        )
+        self.up_characters_button.clicked.connect(
+            lambda event: self.personas_button.setChecked(False)
+        )
+        self.up_characters_button.clicked.connect(
+            lambda event: self.scenes_button.setChecked(False)
+        )
+        self.up_characters_button.clicked.connect(
+            lambda event: self.themes_button.setChecked(False)
+        )
         self.up_characters_button.setVisible(False)
 
         self.personas_button = TabButton(self.tr("Personas"))
-        self.personas_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.personas_list))
-        self.personas_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.personas_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.personas_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.personas_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
-        self.personas_button.clicked.connect(lambda event: self.themes_button.setChecked(False))
+        self.personas_button.clicked.connect(
+            lambda event: self.lists_widget.setCurrentWidget(self.personas_list)
+        )
+        self.personas_button.clicked.connect(
+            lambda event: self.characters_button.setChecked(False)
+        )
+        self.personas_button.clicked.connect(
+            lambda event: self.up_characters_button.setChecked(False)
+        )
+        self.personas_button.clicked.connect(
+            lambda event: self.voices_button.setChecked(False)
+        )
+        self.personas_button.clicked.connect(
+            lambda event: self.scenes_button.setChecked(False)
+        )
+        self.personas_button.clicked.connect(
+            lambda event: self.themes_button.setChecked(False)
+        )
         self.personas_button.setVisible(False)
 
         self.themes_button = TabButton(self.tr("Themes"))
-        self.themes_button.clicked.connect(lambda event: self.lists_widget.setCurrentWidget(self.theme_list))
-        self.themes_button.clicked.connect(lambda event: self.characters_button.setChecked(False))
-        self.themes_button.clicked.connect(lambda event: self.up_characters_button.setChecked(False))
-        self.themes_button.clicked.connect(lambda event: self.voices_button.setChecked(False))
-        self.themes_button.clicked.connect(lambda event: self.scenes_button.setChecked(False))
-        self.themes_button.clicked.connect(lambda event: self.personas_button.setChecked(False))
+        self.themes_button.clicked.connect(
+            lambda event: self.lists_widget.setCurrentWidget(self.theme_list)
+        )
+        self.themes_button.clicked.connect(
+            lambda event: self.characters_button.setChecked(False)
+        )
+        self.themes_button.clicked.connect(
+            lambda event: self.up_characters_button.setChecked(False)
+        )
+        self.themes_button.clicked.connect(
+            lambda event: self.voices_button.setChecked(False)
+        )
+        self.themes_button.clicked.connect(
+            lambda event: self.scenes_button.setChecked(False)
+        )
+        self.themes_button.clicked.connect(
+            lambda event: self.personas_button.setChecked(False)
+        )
 
         buttons_layout.addWidget(self.characters_button)
         buttons_layout.addWidget(self.up_characters_button)
@@ -183,7 +283,9 @@ class MainPage(QWidget):
 
         self.character_list, self.character_list_layout = self.scroll_page()
         self.scenes_list, self.scenes_list_layout = self.scroll_page()
-        self.upvoted_characters_list, self.upvoted_characters_layout = self.scroll_page()
+        self.upvoted_characters_list, self.upvoted_characters_layout = (
+            self.scroll_page()
+        )
         self.personas_list, self.personas_layout = self.scroll_page()
         self.voice_list, self.voice_list_layout = self.scroll_page()
         self.theme_list, self.theme_list_layout = self.scroll_page()
@@ -197,7 +299,9 @@ class MainPage(QWidget):
         self.lists_widget.addWidget(self.theme_list)
         self.lists_widget.setFixedWidth(600)
         self.lists_widget.setCurrentWidget(self.character_list)
-        content_layout.addWidget(self.lists_widget, alignment=Qt.AlignmentFlag.AlignHCenter)
+        content_layout.addWidget(
+            self.lists_widget, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         layout.addLayout(content_layout)
 
@@ -209,7 +313,7 @@ class MainPage(QWidget):
 
     def _getFollowing(self, data):
         self.chat_thread.me_following_signal.disconnect()
-        self.me_following = data.get('following', [])
+        self.me_following = data.get("following", [])
 
         if self.is_me:
             self.follow_button.setVisible(False)
@@ -250,9 +354,18 @@ class MainPage(QWidget):
 
         if self.upvoted_characters:
             for character in self.upvoted_characters:
-                card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'),
-                                               character.get('title'), character.get('user__username'), character['external_id'],
-                                               character["participant__num_interactions"], character["upvotes"], 70, 70)
+                card = CharacterCards.MainCard(
+                    self.mw,
+                    character["participant__name"],
+                    character.get("avatar_file_name"),
+                    character.get("title"),
+                    character.get("user__username"),
+                    character["external_id"],
+                    character["participant__num_interactions"],
+                    character["upvotes"],
+                    70,
+                    70,
+                )
                 card.setFixedHeight(87)
                 self.upvoted_characters_layout.addWidget(card)
         else:
@@ -295,61 +408,93 @@ class MainPage(QWidget):
                 self.personas_layout.addWidget(card)
 
         button = PushButton(self.tr("New"))
-        button.clicked.connect(lambda _: self.mw.showOverlay(PersonaCards.EditCard(self.mw)))
+        button.clicked.connect(
+            lambda _: self.mw.showOverlay(PersonaCards.EditCard(self.mw))
+        )
         self.personas_layout.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     def _getUser(self, data):
         self.chat_thread.get_user_signal.disconnect()
         self.getFollowing()
         self.data = data
-        self.username = self.data.get('username')
+        self.username = self.data.get("username")
 
-        if self.data.get('avatar_file_name'):
+        if self.data.get("avatar_file_name"):
             self.mw.image_loader.load(
                 f"https://characterai.io/i/80/static/avatars/{self.data.get('avatar_file_name')}?webp=true&anim=0",
-                80, 80, 100, label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, 80, 80, self.data.get('name')))
+                80,
+                80,
+                100,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(
+                    self.avatar_label, 80, 80, self.data.get("name")
+                ),
+            )
         else:
-            color_avatar(self.avatar_label, 80, 80, self.data.get('name'))
+            color_avatar(self.avatar_label, 80, 80, self.data.get("name"))
 
-        if self.data.get('bio'):
-            self.bio_label.setText(self.data.get('bio'))
+        if self.data.get("bio"):
+            self.bio_label.setText(self.data.get("bio"))
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
-            if self.data.get('avatar_file_name') and self.mw.drpc_show_username:
+            if self.data.get("avatar_file_name") and self.mw.drpc_show_username:
                 self.discord_thread.update(
-                    details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
-                    large_image="https://characterai.io/i/80/static/avatars/" + self.data.get(
-                        'avatar_file_name') + '?webp=true&anim=0',
-                    buttons=[{
-                        "label": "Open profile",
-                        "url": f"https://character.ai/profile/{self.username}"
-                    }]
+                    details=self.tr("Looks at ")
+                    + self.username
+                    + self.tr("'s profile "),
+                    large_image="https://characterai.io/i/80/static/avatars/"
+                    + self.data.get("avatar_file_name")
+                    + "?webp=true&anim=0",
+                    buttons=[
+                        {
+                            "label": "Open profile",
+                            "url": f"https://character.ai/profile/{self.username}",
+                        }
+                    ],
                 )
             elif self.mw.drpc_show_username:
                 self.discord_thread.update(
-                    details=self.tr("Looks at ") + self.username + self.tr("'s profile "),
-                    buttons=[{
-                        "label": "Open profile",
-                        "url": f"https://character.ai/profile/{self.username}"
-                    }]
+                    details=self.tr("Looks at ")
+                    + self.username
+                    + self.tr("'s profile "),
+                    buttons=[
+                        {
+                            "label": "Open profile",
+                            "url": f"https://character.ai/profile/{self.username}",
+                        }
+                    ],
                 )
             else:
                 self.discord_thread.update(details=self.tr("Looks at user profile"))
 
         chats_count = 0
-        for character in self.data.get('characters', []):
-            chats_count += character.get('participant__num_interactions', 0)
+        for character in self.data.get("characters", []):
+            chats_count += character.get("participant__num_interactions", 0)
         chats_count = format_number(chats_count)
 
         self.name_label.setText(f"{self.data.get('name')}")
         self.username_label.setText(f"@{self.username}")
-        self.followers_label.setText(format_number(self.data.get('num_followers')) + " " + self.tr("followers"))
-        self.following_label.setText(format_number(self.data.get('num_following')) + " " + self.tr("following"))
+        self.followers_label.setText(
+            format_number(self.data.get("num_followers")) + " " + self.tr("followers")
+        )
+        self.following_label.setText(
+            format_number(self.data.get("num_following")) + " " + self.tr("following")
+        )
         self.chats_label.setText(chats_count + " " + self.tr("chats"))
-        if self.data.get('characters', []):
-            for character in self.data.get('characters', []):
-                card = CharacterCards.MainCard(self.mw, character['participant__name'], character.get('avatar_file_name'), character.get('title'), self.profile_id, character['external_id'], character["participant__num_interactions"], character["upvotes"], 70, 70)
+        if self.data.get("characters", []):
+            for character in self.data.get("characters", []):
+                card = CharacterCards.MainCard(
+                    self.mw,
+                    character["participant__name"],
+                    character.get("avatar_file_name"),
+                    character.get("title"),
+                    self.profile_id,
+                    character["external_id"],
+                    character["participant__num_interactions"],
+                    character["upvotes"],
+                    70,
+                    70,
+                )
                 card.setFixedHeight(87)
                 self.character_list_layout.addWidget(card)
         else:
@@ -358,7 +503,9 @@ class MainPage(QWidget):
             self.character_list_layout.addWidget(ecard)
 
     def share(self):
-        QApplication.clipboard().setText(f'https://character.ai/profile/{self.username}')
+        QApplication.clipboard().setText(
+            f"https://character.ai/profile/{self.username}"
+        )
         self.mw.showNotification(self.tr("Link copied to clipboard"))
 
     def scroll_page(self):
@@ -368,7 +515,9 @@ class MainPage(QWidget):
         f_page.setLayout(f_page_layout)
 
         scroll_page = VerticalScrollPage()
-        scroll_page.viewport.setStyleSheet("background-color: transparent; border: none;")
+        scroll_page.viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         scroll_layout = scroll_page.layout
 
         f_page_layout.addWidget(scroll_page)
@@ -379,6 +528,7 @@ class MainPage(QWidget):
             self.follow_button.setText(self.tr("Follow"))
             self.follow_button.clicked.disconnect()
             self.follow_button.clicked.connect(self.follow)
+
         self.chat_thread.user_unfollow_signal.connect(lambda data: unfollow(self, data))
         self.chat_thread.user_unfollow(self.username)
 
@@ -387,6 +537,7 @@ class MainPage(QWidget):
             self.follow_button.setText(self.tr("Unfollow"))
             self.follow_button.clicked.disconnect()
             self.follow_button.clicked.connect(self.unfollow)
+
         self.chat_thread.user_follow_signal.connect(lambda data: follow(self, data))
         self.chat_thread.user_follow(self.username)
 
@@ -415,14 +566,14 @@ class MainPage(QWidget):
 
         def _followers(data):
             self.chat_thread.user_followers_signal.disconnect()
-            for user in data.get('users', {}):
+            for user in data.get("users", {}):
                 card = createCard(user)
                 card.setFixedWidth(435)
                 followers_users_layout.addWidget(card)
 
         def _following(data):
             self.chat_thread.user_following_signal.disconnect()
-            for user in data.get('users', {}):
+            for user in data.get("users", {}):
                 card = createCard(user)
                 card.setFixedWidth(435)
                 following_users_layout.addWidget(card)
@@ -437,11 +588,15 @@ class MainPage(QWidget):
 
             avatar_label = QLabel()
             avatar_label.setFixedSize(40, 40)
-            if data.get('account__avatar_file_name'):
+            if data.get("account__avatar_file_name"):
                 self.mw.image_loader.load(
                     f"https://characterai.io/i/80/static/avatars/{data.get('account__avatar_file_name')}?webp=true&anim=0",
-                    40, 40, 4, label=avatar_label,
-                    error_cb=lambda _: color_avatar(avatar_label, 40, 40, username, 4))
+                    40,
+                    40,
+                    4,
+                    label=avatar_label,
+                    error_cb=lambda _: color_avatar(avatar_label, 40, 40, username, 4),
+                )
             else:
                 color_avatar(avatar_label, 40, 40, username, 4)
             u_layout.addWidget(avatar_label)
@@ -450,17 +605,21 @@ class MainPage(QWidget):
             u_layout.addLayout(info_layout)
             name_label = QLabel(username)
             info_layout.addWidget(name_label, alignment=Qt.AlignmentFlag.AlignLeft)
-            if data.get('account__bio'):
-                bio = data.get('account__bio')
+            if data.get("account__bio"):
+                bio = data.get("account__bio")
                 if len(bio) > 45:
-                    bio = data.get('account__bio')[:45] + "..."
+                    bio = data.get("account__bio")[:45] + "..."
                 bio_label = QLabel(bio)
                 bio_label.setStyleSheet("color: #a2a2ac;")
                 info_layout.addWidget(bio_label, alignment=Qt.AlignmentFlag.AlignLeft)
 
             sub_button = PushButton()
             if not self.is_me:
-                u_layout.addWidget(sub_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                u_layout.addWidget(
+                    sub_button,
+                    alignment=Qt.AlignmentFlag.AlignRight
+                    | Qt.AlignmentFlag.AlignVCenter,
+                )
                 if username in self.me_following:
                     sub_button.setText(self.tr("Unfollow"))
                     sub_button.clicked.connect(lambda: unfollow(username, sub_button))
@@ -480,12 +639,16 @@ class MainPage(QWidget):
         buttons_frame.setLayout(buttons_layout)
 
         followers_button = TabButton(self.tr("Followers"))
-        followers_button.clicked.connect(lambda: pages_widget.setCurrentWidget(followers_page))
+        followers_button.clicked.connect(
+            lambda: pages_widget.setCurrentWidget(followers_page)
+        )
         followers_button.clicked.connect(lambda: following_button.setChecked(False))
         buttons_layout.addWidget(followers_button)
 
         following_button = TabButton(self.tr("Following"))
-        following_button.clicked.connect(lambda: pages_widget.setCurrentWidget(following_page))
+        following_button.clicked.connect(
+            lambda: pages_widget.setCurrentWidget(following_page)
+        )
         following_button.clicked.connect(lambda: followers_button.setChecked(False))
         buttons_layout.addWidget(following_button)
 

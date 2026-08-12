@@ -4,9 +4,11 @@ class CAILimitAPI:
         self.client = client  # BaseClient or WSClient
 
     async def voice_call(self):
-        response = await self.client.request(f"feature_limits/voice_call", domain="neo")
+        response = await self.client.request("feature_limits/voice_call", domain="neo")
         return response
 
     async def chat_image_attachment(self):
-        response = await self.client.request(f"feature_limits/chat_image_attachment", domain="neo")
+        response = await self.client.request(
+            "feature_limits/chat_image_attachment", domain="neo"
+        )
         return response

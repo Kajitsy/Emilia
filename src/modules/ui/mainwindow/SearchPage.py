@@ -1,15 +1,16 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QStackedWidget
-from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QStackedWidget, QVBoxLayout, QWidget
 
-from modules import Svg, ChatThread
-from modules.ui import TM
-from modules.ui.Elements import VerticalScrollPage, TabButton, SearchLineEdit
+from modules import ChatThread, Svg
 from modules.logic.QThreads import DiscordRPCThread
-from modules.ui.cards import CharacterCards, UserCards, SceneCards
+from modules.ui import TM
+from modules.ui.cards import CharacterCards, SceneCards, UserCards
+from modules.ui.Elements import SearchLineEdit, TabButton, VerticalScrollPage
+
 
 class SearchPage(QWidget):
-    def __init__(self, main_window, search='character'):
+    def __init__(self, main_window, search="character"):
         super().__init__(main_window)
         self.mw = main_window
         self.search = search
@@ -23,18 +24,26 @@ class SearchPage(QWidget):
             self.discord_thread.update(details=self.tr("Search characters..."))
 
     def initUI(self):
-        self.layout = QVBoxLayout(self.mw)
+        self.layout = QVBoxLayout(self)
 
-        self.stacked_widget = QStackedWidget(self.mw)
+        self.stacked_widget = QStackedWidget(self)
         self.stacked_widget.setContentsMargins(0, 0, 0, 0)
-        self.chars_scroll_area, cards_viewport, self.chars_cards_layout = self.createScrollPage()
+        self.chars_scroll_area, cards_viewport, self.chars_cards_layout = (
+            self.createScrollPage()
+        )
         self.stacked_widget.addWidget(self.chars_scroll_area)
-        self.scenes_scroll_area, cards_viewport, self.scenes_cards_layout = self.createScrollPage()
+        self.scenes_scroll_area, cards_viewport, self.scenes_cards_layout = (
+            self.createScrollPage()
+        )
         self.stacked_widget.addWidget(self.scenes_scroll_area)
-        self.users_scroll_area, cards_viewport, self.users_cards_layout = self.createScrollPage()
+        self.users_scroll_area, cards_viewport, self.users_cards_layout = (
+            self.createScrollPage()
+        )
         self.stacked_widget.addWidget(self.users_scroll_area)
 
-        self.layout.addWidget(self.stacked_widget, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(
+            self.stacked_widget, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         self.setLayout(self.layout)
 
@@ -45,17 +54,17 @@ class SearchPage(QWidget):
 
     def changeSearch(self, search):
         self.search = search
-        if search == 'character':
+        if search == "character":
             self.stacked_widget.setCurrentWidget(self.chars_scroll_area)
             self.search_bar.returnPressed.disconnect()
             self.search_bar.returnPressed.connect(self.showCharSearchResults)
             self.showCharSearchResults()
-        elif search == 'scene':
+        elif search == "scene":
             self.stacked_widget.setCurrentWidget(self.scenes_scroll_area)
             self.search_bar.returnPressed.disconnect()
             self.search_bar.returnPressed.connect(self.showSceneSearchResults)
             self.showSceneSearchResults()
-        elif search == 'user':
+        elif search == "user":
             self.stacked_widget.setCurrentWidget(self.users_scroll_area)
             self.search_bar.returnPressed.disconnect()
             self.search_bar.returnPressed.connect(self.showUserSearchResults)
@@ -76,7 +85,9 @@ class SearchPage(QWidget):
             return
 
         self.chars_scroll_area.deleteLater()
-        self.chars_scroll_area, cards_viewport, self.chars_cards_layout = self.createScrollPage()
+        self.chars_scroll_area, cards_viewport, self.chars_cards_layout = (
+            self.createScrollPage()
+        )
         self.stacked_widget.addWidget(self.chars_scroll_area)
         self.stacked_widget.setCurrentWidget(self.chars_scroll_area)
 
@@ -88,10 +99,18 @@ class SearchPage(QWidget):
         self.data = data
         if self.data:
             for character in self.data:
-                card = CharacterCards.MainCard(self.mw, character.get('participant__name'), character.get('avatar_file_name'),
-                                               character.get('title').replace('\n', ''), character.get('user__username'),
-                                               character.get('external_id'), character.get('participant__num_interactions', 0),
-                                               0, 70, 70)
+                card = CharacterCards.MainCard(
+                    self.mw,
+                    character.get("participant__name"),
+                    character.get("avatar_file_name"),
+                    character.get("title").replace("\n", ""),
+                    character.get("user__username"),
+                    character.get("external_id"),
+                    character.get("participant__num_interactions", 0),
+                    0,
+                    70,
+                    70,
+                )
                 card.setFixedHeight(87)
                 self.chars_cards_layout.addWidget(card)
         else:
@@ -100,7 +119,9 @@ class SearchPage(QWidget):
             font.setBold(True)
             font.setPointSize(20)
             no_results_label.setFont(font)
-            self.chars_cards_layout.addWidget(no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.chars_cards_layout.addWidget(
+                no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter
+            )
 
     def showSceneSearchResults(self):
         search_query = self.search_bar.text().strip()
@@ -108,7 +129,9 @@ class SearchPage(QWidget):
             return
 
         self.scenes_scroll_area.deleteLater()
-        self.scenes_scroll_area, cards_viewport, self.scenes_cards_layout = self.createScrollPage()
+        self.scenes_scroll_area, cards_viewport, self.scenes_cards_layout = (
+            self.createScrollPage()
+        )
         self.stacked_widget.addWidget(self.scenes_scroll_area)
         self.stacked_widget.setCurrentWidget(self.scenes_scroll_area)
 
@@ -129,7 +152,9 @@ class SearchPage(QWidget):
             font.setBold(True)
             font.setPointSize(20)
             no_results_label.setFont(font)
-            self.scenes_cards_layout.addWidget(no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.scenes_cards_layout.addWidget(
+                no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter
+            )
 
     def showUserSearchResults(self):
         search_query = self.search_bar.text().strip()
@@ -137,7 +162,9 @@ class SearchPage(QWidget):
             return
 
         self.users_scroll_area.deleteLater()
-        self.users_scroll_area, cards_viewport, self.users_cards_layout = self.createScrollPage()
+        self.users_scroll_area, cards_viewport, self.users_cards_layout = (
+            self.createScrollPage()
+        )
         self.stacked_widget.addWidget(self.users_scroll_area)
         self.stacked_widget.setCurrentWidget(self.users_scroll_area)
 
@@ -158,7 +185,9 @@ class SearchPage(QWidget):
             font.setBold(True)
             font.setPointSize(20)
             no_results_label.setFont(font)
-            self.users_cards_layout.addWidget(no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+            self.users_cards_layout.addWidget(
+                no_results_label, alignment=Qt.AlignmentFlag.AlignHCenter
+            )
 
     def createTopBar(self):
         top_bar = QWidget()
@@ -181,28 +210,42 @@ class SearchPage(QWidget):
         self.tab_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         self.character_tab_button = TabButton(self.tr("Characters"))
-        self.character_tab_button.clicked.connect(lambda: self.scene_tab_button.setChecked(False))
-        self.character_tab_button.clicked.connect(lambda: self.user_tab_button.setChecked(False))
-        self.character_tab_button.clicked.connect(lambda: self.changeSearch("character"))
+        self.character_tab_button.clicked.connect(
+            lambda: self.scene_tab_button.setChecked(False)
+        )
+        self.character_tab_button.clicked.connect(
+            lambda: self.user_tab_button.setChecked(False)
+        )
+        self.character_tab_button.clicked.connect(
+            lambda: self.changeSearch("character")
+        )
         self.tab_layout.addWidget(self.character_tab_button)
         self.user_tab_button = TabButton(self.tr("Users"))
-        self.user_tab_button.clicked.connect(lambda: self.character_tab_button.setChecked(False))
-        self.user_tab_button.clicked.connect(lambda: self.scene_tab_button.setChecked(False))
+        self.user_tab_button.clicked.connect(
+            lambda: self.character_tab_button.setChecked(False)
+        )
+        self.user_tab_button.clicked.connect(
+            lambda: self.scene_tab_button.setChecked(False)
+        )
         self.user_tab_button.clicked.connect(lambda: self.changeSearch("user"))
         self.tab_layout.addWidget(self.user_tab_button)
         self.scene_tab_button = TabButton(self.tr("Scenes"))
-        self.scene_tab_button.clicked.connect(lambda: self.character_tab_button.setChecked(False))
-        self.scene_tab_button.clicked.connect(lambda: self.user_tab_button.setChecked(False))
+        self.scene_tab_button.clicked.connect(
+            lambda: self.character_tab_button.setChecked(False)
+        )
+        self.scene_tab_button.clicked.connect(
+            lambda: self.user_tab_button.setChecked(False)
+        )
         self.scene_tab_button.clicked.connect(lambda: self.changeSearch("scene"))
         self.tab_layout.addWidget(self.scene_tab_button)
 
-        if self.search == 'character':
+        if self.search == "character":
             self.character_tab_button.setChecked(True)
             self.stacked_widget.setCurrentWidget(self.chars_scroll_area)
-        elif self.search == 'scene':
+        elif self.search == "scene":
             self.character_tab_button.setChecked(True)
             self.stacked_widget.setCurrentWidget(self.scenes_scroll_area)
-        elif self.search == 'user':
+        elif self.search == "user":
             self.user_tab_button.setChecked(True)
             self.stacked_widget.setCurrentWidget(self.users_scroll_area)
 

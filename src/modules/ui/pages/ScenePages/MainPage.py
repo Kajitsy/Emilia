@@ -1,13 +1,15 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QHBoxLayout, QLabel, QSpacerItem,
-                             QSizePolicy, QWidget)
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QWidget
 
 from modules.ui.cards.CharacterCards import ClickableMiniCard
 from modules.ui.Elements import PushButton, VerticalScrollPage
 from modules.Utils import format_text
 
+
 class MainPage(QWidget):
-    def __init__(self, main_window, data={}, scene_id=None):
+    def __init__(self, main_window, data=None, scene_id=None):
+        if data is None:
+            data = {}
         super().__init__()
         self.setStyleSheet("background-color: transparent; border: none;")
         self.mw = main_window
@@ -15,7 +17,7 @@ class MainPage(QWidget):
         self.data = data
         self.scene_id = scene_id
         if self.data:
-            self.scene_id = self.data['scene_id']
+            self.scene_id = self.data["scene_id"]
         else:
             self.chat_thread.get_scene_by_id_signal.connect(self._getScene)
             self.chat_thread.get_scene_by_id(self.scene_id)
@@ -66,7 +68,9 @@ class MainPage(QWidget):
         self.description_label.setWordWrap(True)
         fhs_layout.addWidget(self.description_label)
 
-        fhs_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
+        fhs_layout.addSpacerItem(
+            QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
+        )
 
         self.simchars_label = QLabel(self.tr("Select character"))
         self.simchars_label.setFont(hg_font)
@@ -86,20 +90,34 @@ class MainPage(QWidget):
 
     def loadUI(self):
         self.mw.image_loader.load(
-            self.data.get("background_image_url"), 290, 260, 4,
-            label=self.image_label, cache_dir="cache/scenes")
+            self.data.get("background_image_url"),
+            290,
+            260,
+            4,
+            label=self.image_label,
+            cache_dir="cache/scenes",
+        )
         self.title_label.setText(self.data.get("title"))
-        self.author_label.setText(self.tr("Author: @") + self.data.get("creator_username"))
-        self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.data.get("creator_username"))
+        self.author_label.setText(
+            self.tr("Author: @") + self.data.get("creator_username")
+        )
+        self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(
+            self.data.get("creator_username")
+        )
         self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.description_label.setText(format_text(self.data.get('description')))
+        self.description_label.setText(format_text(self.data.get("description")))
         self.description_label.adjustSize()
 
         for char in self.mw.recent_chats:
-            card = ClickableMiniCard(self.mw, char.get('character_name'), char.get('character_id'), char.get('character_avatar_uri'))
+            card = ClickableMiniCard(
+                self.mw,
+                char.get("character_name"),
+                char.get("character_id"),
+                char.get("character_avatar_uri"),
+            )
             card.setFixedHeight(80)
             card.mousePress = lambda _, c=card: self._selCharacter(c)
-            card.chat_id = char['chat_id']
+            card.chat_id = char["chat_id"]
             self.selchar_layout.addWidget(card)
             self.character_cards.append(card)
 
@@ -128,11 +146,18 @@ class MainPage(QWidget):
 
     def startScene(self):
         self.chat_thread.new_chat_created_signal.connect(self._createNewChat)
-        self.chat_thread.new_chat(self.current_character, self.current_card.chat_id, scene_id=self.scene_id)
+        self.chat_thread.new_chat(
+            self.current_character, self.current_card.chat_id, scene_id=self.scene_id
+        )
 
     def _createNewChat(self, botanswer):
         self.chat_thread.new_chat_created_signal.disconnect()
-        self.mw.openChat(self.current_character, self.current_card.name, botanswer['chat']['chat_id'], scene_id=self.scene_id)
+        self.mw.openChat(
+            self.current_character,
+            self.current_card.name,
+            botanswer["chat"]["chat_id"],
+            scene_id=self.scene_id,
+        )
 
     def showEvent(self, event):
         super().showEvent(event)

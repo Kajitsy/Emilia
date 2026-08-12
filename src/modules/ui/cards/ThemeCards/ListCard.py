@@ -1,15 +1,16 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout
 
 from modules.ui import TM
 from modules.ui.Elements import CardFrame
+
 
 class ListCard(CardFrame):
     def __init__(self, main_window, data):
         self.mw = main_window
         self.data = data
-        self.title = self.data.get('name')
-        self.author = self.data.get('author')
+        self.title = self.data.get("name")
+        self.author = self.data.get("author")
 
         self.initUI()
 
@@ -32,7 +33,7 @@ class ListCard(CardFrame):
         self.author_label.setWordWrap(True)
         font = self.author_label.font()
         font.setPointSize(8)
-        #self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.author)
+        # self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.author)
         self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.author_label.setFont(font)
         text_layout.addWidget(self.author_label)
@@ -47,4 +48,4 @@ class ListCard(CardFrame):
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)
         self.mw.hideOverlay()
-        self.mw.openThemeOverlay(self.data.get('theme_id'))
+        self.mw.openThemeOverlay(self.data.get("theme_id"))

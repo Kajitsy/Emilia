@@ -1,11 +1,12 @@
 import sounddevice
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QPushButton
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
+from modules.ui import TM
+from modules.ui.cards.VoiceCards import MainCard, _preview_controller
 from modules.ui.Elements import CardFrame
 from modules.ui.Icons import Svg
-from modules.ui.cards.VoiceCards import _preview_controller, MainCard
-from modules.ui import TM
+
 
 class HorizontalMiniCard(CardFrame):
     def __init__(self, main_window, data):
@@ -19,7 +20,11 @@ class HorizontalMiniCard(CardFrame):
         card_layout = QHBoxLayout()
         self.play_button = QPushButton()
         self.play_button.setFixedWidth(40)
-        self.play_button.clicked.connect(lambda _=False: _preview_controller(self.mw).toggle(self.data.get('previewAudioURI'), self.play_button))
+        self.play_button.clicked.connect(
+            lambda _=False: _preview_controller(self.mw).toggle(
+                self.data.get("previewAudioURI"), self.play_button
+            )
+        )
         card_layout.addWidget(self.play_button)
 
         text_layout = QVBoxLayout()
@@ -46,7 +51,9 @@ class HorizontalMiniCard(CardFrame):
     def update_theme(self):
         super().update_theme()
         self.play_button.setIcon(self.svg_icons.play(TM.c("icon")))
-        self.play_button.setStyleSheet(f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;")
+        self.play_button.setStyleSheet(
+            f"background-color: transparent; color: {TM.c('mw_color')}; border: none; font-size: 32px;"
+        )
 
     def mousePressEvent(self, a0):
         super().mousePressEvent(a0)

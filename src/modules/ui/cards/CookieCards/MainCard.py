@@ -1,13 +1,14 @@
-from PyQt6.QtWidgets import QVBoxLayout, QWidget, QLabel, QHBoxLayout
-from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineNewWindowRequest
-from PyQt6.QtCore import QUrl, QDateTime, pyqtSignal, Qt
+from PyQt6.QtCore import QDateTime, Qt, QUrl, pyqtSignal
 from PyQt6.QtNetwork import QNetworkCookie
+from PyQt6.QtWebEngineCore import QWebEngineNewWindowRequest, QWebEngineProfile
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
-from modules.ui.Elements import PushButton, LineEdit
-from modules.ui.Icons import Svg
 from modules.logic import RequestInterceptor
 from modules.ui import TM
+from modules.ui.Elements import LineEdit, PushButton
+from modules.ui.Icons import Svg
+
 
 class MainCard(QWidget):
     auth_cookie_signal = pyqtSignal(str, QDateTime)
@@ -18,7 +19,9 @@ class MainCard(QWidget):
         super().__init__()
         self.browser = QWebEngineView()
         self.profile = QWebEngineProfile.defaultProfile()
-        self.profile.setHttpUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0")
+        self.profile.setHttpUserAgent(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
+        )
         self.interceptor = RequestInterceptor()
         self.svg_icons = Svg()
 
@@ -42,10 +45,18 @@ class MainCard(QWidget):
         link_layout.addWidget(self.link_button)
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel(self.tr("Please log in to your account")),
-                         alignment=Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignHCenter)
-        layout.addWidget(QLabel(self.tr("(To log in via Apple/Google, specify the email address of your Apple/Google account.)")),
-                         alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(
+            QLabel(self.tr("Please log in to your account")),
+            alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
+        )
+        layout.addWidget(
+            QLabel(
+                self.tr(
+                    "(To log in via Apple/Google, specify the email address of your Apple/Google account.)"
+                )
+            ),
+            alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
+        )
         layout.addWidget(self.browser)
         layout.addStretch()
         layout.addWidget(self.link_label, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -61,12 +72,15 @@ class MainCard(QWidget):
         name = cookie.name().data().decode()
         if name == "web-next-auth":
             value = cookie.value().data().decode()
-            expirationDate = cookie.expirationDate()
-            expirationDate: QDateTime = expirationDate
+            expirationDate: QDateTime = cookie.expirationDate()
             self.auth_cookie_signal.emit(value, expirationDate)
 
     def on_authorization_received(self, token: str):
         self.authorization_signal.emit(token)
 
     def on_new_window_requested(self, data: QWebEngineNewWindowRequest):
-        self.notification_signal.emit(self.tr("(To log in via Apple/Google, specify the email address of your Apple/Google account.)"))
+        self.notification_signal.emit(
+            self.tr(
+                "(To log in via Apple/Google, specify the email address of your Apple/Google account.)"
+            )
+        )

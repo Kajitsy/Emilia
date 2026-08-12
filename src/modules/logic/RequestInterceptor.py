@@ -1,7 +1,8 @@
 import logging
 
-from PyQt6.QtWebEngineCore import QWebEngineUrlRequestInterceptor
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWebEngineCore import QWebEngineUrlRequestInterceptor
+
 
 class RequestInterceptor(QWebEngineUrlRequestInterceptor):
     authorization_signal = pyqtSignal(str)
