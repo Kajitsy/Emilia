@@ -1,9 +1,13 @@
-import os, shutil, requests, subprocess
+import os
+import shutil
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from platformdirs import user_data_dir
 
+import requests
+from platformdirs import user_data_dir
 from PyQt6.QtCore import QThread, pyqtSignal
+
 
 class UpdateThread(QThread):
     finished_signal = pyqtSignal(bool)
@@ -42,32 +46,39 @@ class UpdateThread(QThread):
                 r = requests.get(url, stream=True, timeout=10)
                 if r.status_code == 200:
                     with open(local_temp_path, "wb") as f:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
+                        f.writelines(r.iter_content(chunk_size=8192))
                     return True
                 else:
                     self.error_signal.emit(f"HTTP error {r.status_code}: {rel_path}")
                     return False
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.error_signal.emit(f"Download error {e}: {rel_path}")
                 return False
 
         with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [executor.submit(download_worker, f) for f in self.files_to_download]
+            futures = [
+                executor.submit(download_worker, f) for f in self.files_to_download
+            ]
 
             for future in as_completed(futures):
                 success = future.result()
                 if success:
                     self.downloaded_files_count += 1
-                    self.progress_signal.emit(self.downloaded_files_count, self.total_files_count)
+                    self.progress_signal.emit(
+                        self.downloaded_files_count, self.total_files_count
+                    )
                 else:
-                    self.error_signal.emit(self.tr("File upload error. Check the internet."))
+                    self.error_signal.emit(
+                        self.tr("File upload error. Check the internet.")
+                    )
                     return
 
         if all(futures):
             self.apply_update(self.update_cache_dir)
         else:
-            self.error_signal.emit(self.tr("Some files could not be downloaded. Cancel the update."))
+            self.error_signal.emit(
+                self.tr("Some files could not be downloaded. Cancel the update.")
+            )
 
     def apply_update(self, update_dir):
         deletion_commands = ""
@@ -111,7 +122,8 @@ class UpdateThread(QThread):
         with open(script_name, "w", encoding="utf-8") as f:
             f.write(bat_script)
 
-        subprocess.Popen(["cmd", "/c", script_name],
-                         creationflags=subprocess.CREATE_NEW_CONSOLE)
+        subprocess.Popen(
+            ["cmd", "/c", script_name], creationflags=subprocess.CREATE_NEW_CONSOLE
+        )
 
         os._exit(0)

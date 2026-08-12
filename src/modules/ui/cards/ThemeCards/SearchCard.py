@@ -1,11 +1,13 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QMenu
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QMenu, QVBoxLayout, QWidget
 
-from modules.ui.Elements import VerticalScrollPage, SearchLineEdit, PushButton
-from modules.ui.Icons import Svg
 from modules.ui import TM
+from modules.ui.Elements import PushButton, SearchLineEdit, VerticalScrollPage
+from modules.ui.Icons import Svg
+
 from . import ListCard
+
 
 class SearchCard(QWidget):
     def __init__(self, main_window):
@@ -34,7 +36,7 @@ class SearchCard(QWidget):
 
         self.search_input = SearchLineEdit(self.mw)
         self.search_input.returnPressed.connect(self.showSearchResults)
-        self.search_input.setPlaceholderText(self.tr('Search'))
+        self.search_input.setPlaceholderText(self.tr("Search"))
         search_input_layout.addWidget(self.search_input)
 
         self.upload_button = PushButton()
@@ -44,15 +46,17 @@ class SearchCard(QWidget):
 
         self.search_scroll_page = VerticalScrollPage()
         self.search_scroll_viewport = self.search_scroll_page.viewport
-        self.search_scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
+        self.search_scroll_viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         self.search_scroll_layout = self.search_scroll_page.layout
         search_layout.addWidget(self.search_scroll_page)
 
         self.setLayout(layout)
 
     def updateTheme(self):
-        self.search_input.setIcon(QIcon(self.svg_icons.search(TM.c('icon'))))
-        self.upload_button.setIcon(self.svg_icons.share(TM.c('icon')))
+        self.search_input.setIcon(QIcon(self.svg_icons.search(TM.c("icon"))))
+        self.upload_button.setIcon(self.svg_icons.share(TM.c("icon")))
 
     def uploadTheme(self):
         menu = QMenu(self)
@@ -67,7 +71,9 @@ class SearchCard(QWidget):
             no_themes_action = menu.addAction(self.tr("No custom themes found"))
             no_themes_action.setEnabled(False)
 
-        menu.exec(self.upload_button.mapToGlobal(self.upload_button.rect().bottomLeft()))
+        menu.exec(
+            self.upload_button.mapToGlobal(self.upload_button.rect().bottomLeft())
+        )
 
     def _startUpload(self, theme_name):
         self.mw.chat_thread.upload_theme_signal.connect(self._on_theme_uploaded)
@@ -76,11 +82,11 @@ class SearchCard(QWidget):
     def _on_theme_uploaded(self, response):
         try:
             self.mw.chat_thread.upload_theme_signal.disconnect()
-        except:
+        except Exception:
             pass
 
-        if response.get('error'):
-            error_msg = response.get('text', str(response.get('error')))
+        if response.get("error"):
+            error_msg = response.get("text", str(response.get("error")))
             self.mw.showNotification(self.tr("Error uploading theme: ") + error_msg)
         else:
             self.mw.showNotification(self.tr("Theme uploaded successfully!"))
@@ -95,7 +101,9 @@ class SearchCard(QWidget):
                 self.search_scroll_layout.addWidget(card)
         else:
             no_results_label = QLabel(self.tr("Themes not found"))
-            self.search_scroll_layout.addWidget(no_results_label, 0, Qt.AlignmentFlag.AlignVCenter)
+            self.search_scroll_layout.addWidget(
+                no_results_label, 0, Qt.AlignmentFlag.AlignVCenter
+            )
 
     def showSearchResults(self):
         search_query = self.search_input.text().strip()

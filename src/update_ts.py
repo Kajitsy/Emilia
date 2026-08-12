@@ -1,5 +1,5 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 py_files = [str(p.resolve()) for p in Path("modules").rglob("*.py")]
 py_files.append(str(Path("main.py").resolve()))
@@ -16,4 +16,4 @@ cmd = ["pylupdate6", "--verbose"] + py_files
 for ts in ts_files:
     cmd += ["-ts", ts]
 
-subprocess.run(cmd)
+subprocess.run(cmd, check=False)

@@ -1,5 +1,6 @@
+from modules.logic.QThreads import FileLoaderThread, PlayerThread
 from modules.ui.Icons import Svg
-from modules.logic.QThreads import PlayerThread, FileLoaderThread
+
 
 class _VoicePreviewController:
     def __init__(self, main_window):
@@ -47,7 +48,9 @@ class _VoicePreviewController:
         loader = FileLoaderThread(url)
         self.active_loader = loader
         self.mw.threads.append(loader)
-        loader.file.connect(lambda data, loader_ref=loader: self._start_player(loader_ref, data))
+        loader.file.connect(
+            lambda data, loader_ref=loader: self._start_player(loader_ref, data)
+        )
         loader.start()
 
     def _start_player(self, loader, data):
@@ -72,6 +75,7 @@ class _VoicePreviewController:
             return
         self._set_button_play(self.active_button)
         self._reset_state()
+
 
 def _preview_controller(main_window):
     if not hasattr(main_window, "_voice_preview_controller"):

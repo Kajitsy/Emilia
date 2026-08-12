@@ -1,28 +1,70 @@
+import ctypes
 import hashlib
-import os, math
-import ctypes, platform
+import math
+import os
+import platform
+from datetime import datetime
 
 from curl_cffi import CurlMime
-from PyQt6.QtWidgets import (QApplication, QColorDialog, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton,
-                             QFrame, QSizePolicy, QSpacerItem, QStackedWidget, QFileDialog, QGraphicsDropShadowEffect, QGraphicsOpacityEffect)
-from PyQt6.QtGui import QMouseEvent, QAction, QPixmap, QColor
-from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect, QSettings, QTimer, Qt, pyqtSignal
-from PyQt6.sip import isdeleted
-from datetime import datetime
 from PIL import Image
+from PyQt6.QtCore import (
+    QEasingCurve,
+    QPropertyAnimation,
+    QRect,
+    QSettings,
+    Qt,
+    QTimer,
+    pyqtSignal,
+)
+from PyQt6.QtGui import QAction, QColor, QMouseEvent, QPixmap
+from PyQt6.QtWidgets import (
+    QApplication,
+    QColorDialog,
+    QFileDialog,
+    QFrame,
+    QGraphicsDropShadowEffect,
+    QGraphicsOpacityEffect,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
+from PyQt6.sip import isdeleted
 
-from modules.ui.cards import PersonaCards
-from modules.ui.Elements import CustomTextEdit, ClickableFrame, PushButton, Menu, VerticalScrollPage, CardFrame
-from modules.logic.QThreads import PlayerThread, FileLoaderThread, ChatThread, DiscordRPCThread
-from modules.ui.Icons import Svg
-from modules.Utils import format_text, format_number, color_avatar
-from modules.ui.cards.VoiceCards import SearchCard, ModeCard
-from modules.ui.cards.VModelCards import ViewerCard
+from modules.logic.QThreads import (
+    ChatThread,
+    DiscordRPCThread,
+    FileLoaderThread,
+    PlayerThread,
+)
 from modules.ui import TM
+from modules.ui.cards import PersonaCards
+from modules.ui.cards.VModelCards import ViewerCard
+from modules.ui.cards.VoiceCards import ModeCard, SearchCard
+from modules.ui.Elements import (
+    CardFrame,
+    ClickableFrame,
+    CustomTextEdit,
+    Menu,
+    PushButton,
+    VerticalScrollPage,
+)
+from modules.ui.Icons import Svg
+from modules.Utils import color_avatar, format_number, format_text
+
 
 class MessageBubble(QFrame):
-    def __init__(self, main_window, parent, text, avatar_url, name, is_user=False, attachments=[]):
+    def __init__(
+        self, main_window, parent, text, avatar_url, name, is_user=False, attachments=None
+    ):
         super().__init__()
+        if attachments is None:
+            attachments = []
         self.mw = main_window
         self.parent = parent
         self.text = text
@@ -31,7 +73,7 @@ class MessageBubble(QFrame):
         self.is_user = is_user
         self.turn_id = None
         self.attachments = attachments
-        self.setObjectName('user_message' if self.is_user else 'char_message')
+        self.setObjectName("user_message" if self.is_user else "char_message")
 
         self.initUI()
 
@@ -47,26 +89,38 @@ class MessageBubble(QFrame):
         self.attach_image_label = QLabel()
         layout.addWidget(self.attach_image_label)
         layout.addWidget(lw2)
-        if self.attachments and self.attachments[0]['type'] == "TYPE_IMAGE":
+        if self.attachments and self.attachments[0]["type"] == "TYPE_IMAGE":
+
             def z(v):
                 if not isdeleted(self.attach_image_label):
                     self.attach_image_label.setPixmap(v)
                     self.setMinimumHeight(0)
                     self.adjustSize()
                     self.setMinimumHeight(self.height())
+
             self.attach_image_label.setMinimumSize(100, 100)
             self.mw.image_loader.load(
-                self.attachments[0]['url'], 100, 100, 25,
+                self.attachments[0]["url"],
+                100,
+                100,
+                25,
                 callback=z,
-                error_cb=lambda _: self.attach_image_label.setMinimumSize(0, 0))
+                error_cb=lambda _: self.attach_image_label.setMinimumSize(0, 0),
+            )
 
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(24, 24)
         if self.url:
             self.mw.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{self.url}?webp=true&anim=0", 24, 24, 4,
+                f"https://characterai.io/i/80/static/avatars/{self.url}?webp=true&anim=0",
+                24,
+                24,
+                4,
                 label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, 24, 24, self.name, 4))
+                error_cb=lambda _: color_avatar(
+                    self.avatar_label, 24, 24, self.name, 4
+                ),
+            )
         else:
             color_avatar(self.avatar_label, 24, 24, self.name, 4)
 
@@ -88,12 +142,20 @@ class MessageBubble(QFrame):
 
         if self.is_user:
             self.message_label.setStyleSheet(f"color: {self.parent.user_text_message};")
-            self.m_frame.setStyleSheet(TM.get_style("MessageBubbleFrame").replace("%%color%%", self.parent.user_back_message))
+            self.m_frame.setStyleSheet(
+                TM.get_style("MessageBubbleFrame").replace(
+                    "%%color%%", self.parent.user_back_message
+                )
+            )
             layout_2.addWidget(self.m_frame)
             layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
         else:
             self.message_label.setStyleSheet(f"color: {self.parent.char_text_message};")
-            self.m_frame.setStyleSheet(TM.get_style("MessageBubbleFrame").replace("%%color%%", self.parent.char_back_message))
+            self.m_frame.setStyleSheet(
+                TM.get_style("MessageBubbleFrame").replace(
+                    "%%color%%", self.parent.char_back_message
+                )
+            )
             layout_2.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignTop)
             layout_2.addWidget(self.m_frame)
 
@@ -120,10 +182,19 @@ class MessageBubble(QFrame):
     def remove_opacity_effect(self):
         self.setGraphicsEffect(None)
 
+
 class ChatInterface(QWidget):
     attach_signal = pyqtSignal(object)
     detach_signal = pyqtSignal(object)
-    def __init__(self, main_window, character_name, character_id, chat_id: str | None = None, scene_id: str | None = None):
+
+    def __init__(
+        self,
+        main_window,
+        character_name,
+        character_id,
+        chat_id: str | None = None,
+        scene_id: str | None = None,
+    ):
         super().__init__()
         self.mw = main_window
         self.chat_thread: ChatThread | None = self.mw.chat_thread
@@ -146,13 +217,28 @@ class ChatInterface(QWidget):
 
         self.voice_enabled = False
 
-        self.show_format_buttons = self.mw.settings.value("show_format_buttons", False, type=bool)
-        self.chat_settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", self.character_id)
-        self.char_back_message = self.chat_settings.value('colors/char_back_message', TM.c('char_back_message'))
-        self.char_text_message = self.chat_settings.value('colors/char_text_message', TM.c('char_text_message'))
-        self.user_back_message = self.chat_settings.value('colors/user_back_message', TM.c('user_back_message'))
-        self.user_text_message = self.chat_settings.value('colors/user_text_message', TM.c('user_text_message'))
-        self.background_image = self.chat_settings.value('background_image', '')
+        self.show_format_buttons = self.mw.settings.value(
+            "show_format_buttons", False, type=bool
+        )
+        self.chat_settings = QSettings(
+            QSettings.Format.IniFormat,
+            QSettings.Scope.UserScope,
+            "Emilia",
+            self.character_id,
+        )
+        self.char_back_message = self.chat_settings.value(
+            "colors/char_back_message", TM.c("char_back_message")
+        )
+        self.char_text_message = self.chat_settings.value(
+            "colors/char_text_message", TM.c("char_text_message")
+        )
+        self.user_back_message = self.chat_settings.value(
+            "colors/user_back_message", TM.c("user_back_message")
+        )
+        self.user_text_message = self.chat_settings.value(
+            "colors/user_text_message", TM.c("user_text_message")
+        )
+        self.background_image = self.chat_settings.value("background_image", "")
 
         self.initUI()
         self.applyBackground(self.background_image)
@@ -169,7 +255,7 @@ class ChatInterface(QWidget):
     def initUI(self):
         self.layout = QHBoxLayout(self)
 
-        chat_container_layout = QVBoxLayout()
+        self.chat_container_layout = QVBoxLayout()
 
         self.top_bar_frame, self.top_bar_layout = self.createTopBar()
         self.mw.top_bar_stacked_widget.setFixedHeight(75)
@@ -181,7 +267,9 @@ class ChatInterface(QWidget):
         self.messages_area.setObjectName("chatScrollArea")
         self.messages_area.viewport.setAutoFillBackground(False)
         self.messages_area.setFrameShape(QFrame.Shape.NoFrame)
-        self.messages_area.verticalScrollBar().rangeChanged.connect(self.scrollToBottomIfNeeded)
+        self.messages_area.verticalScrollBar().rangeChanged.connect(
+            self.scrollToBottomIfNeeded
+        )
         self.messages_content = self.messages_area.viewport
         self.messages_content.setObjectName("chatContent")
         self.messages_layout = self.messages_area.layout
@@ -192,25 +280,33 @@ class ChatInterface(QWidget):
 
         self.messages_overlay_layout.addWidget(self.messages_area, 0, 0)
 
-        chat_container_layout.addWidget(self.messages_overlay_container)
+        self.chat_container_layout.addWidget(self.messages_overlay_container)
 
         input_layout = QVBoxLayout()
         self.attach_image_label = QLabel()
         self.attach_image_label.link = ""
-        input_layout.addWidget(self.attach_image_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        input_layout.addWidget(
+            self.attach_image_label, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
         format_toolbar = QHBoxLayout()
         format_widget = QFrame()
         format_widget.setLayout(format_toolbar)
 
         bold_button = PushButton(self.tr("Bold"))
-        bold_button.clicked.connect(lambda: self.message_input.formatSelectedText("**", "**"))
+        bold_button.clicked.connect(
+            lambda: self.message_input.formatSelectedText("**", "**")
+        )
         format_toolbar.addWidget(bold_button)
         italic_button = PushButton(self.tr("Italic"))
-        italic_button.clicked.connect(lambda: self.message_input.formatSelectedText("*", "*"))
+        italic_button.clicked.connect(
+            lambda: self.message_input.formatSelectedText("*", "*")
+        )
         format_toolbar.addWidget(italic_button)
         code_button = PushButton(self.tr("Code"))
-        code_button.clicked.connect(lambda: self.message_input.formatSelectedText("`", "`"))
+        code_button.clicked.connect(
+            lambda: self.message_input.formatSelectedText("`", "`")
+        )
         format_toolbar.addWidget(code_button)
         format_toolbar.addStretch()
 
@@ -229,30 +325,45 @@ class ChatInterface(QWidget):
         self.message_input.verticalScrollBar().setVisible(False)
         self.message_input.keyPress = lambda: self.sendMessage()
 
-        send_layout.addWidget(self.message_input, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(
+            self.message_input, alignment=Qt.AlignmentFlag.AlignBottom
+        )
 
         self.send_message_button = PushButton()
         self.send_message_button.clicked.connect(self.sendMessage)
-        send_layout.addWidget(self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(
+            self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom
+        )
 
         self.call_char_button = PushButton()
         self.call_char_button.clicked.connect(self.callCharacter)
-        if self.chat_thread.current_limits.get('voice_limit', {}).get('count_remaining', 0) == 0 and not self.mw.settings.value('use_old_voice_chat', False, type=bool):
+        if self.chat_thread.current_limits.get("voice_limit", {}).get(
+            "count_remaining", 0
+        ) == 0 and not self.mw.settings.value("use_old_voice_chat", False, type=bool):
             self.call_char_button.setEnabled(False)
             self.call_char_button.setToolTip(self.tr("Call limit exceeded"))
-        send_layout.addWidget(self.call_char_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(
+            self.call_char_button, alignment=Qt.AlignmentFlag.AlignBottom
+        )
 
         self.add_image_button = PushButton()
         self.add_image_button.clicked.connect(self.selectImage)
-        if self.chat_thread.current_limits.get('chat_image_attachment', {}).get('count_remaining', 0) == 0:
+        if (
+            self.chat_thread.current_limits.get("chat_image_attachment", {}).get(
+                "count_remaining", 0
+            )
+            == 0
+        ):
             self.add_image_button.setEnabled(False)
             self.add_image_button.setToolTip(self.tr("Attached message limit exceeded"))
-        send_layout.addWidget(self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom)
+        send_layout.addWidget(
+            self.send_message_button, alignment=Qt.AlignmentFlag.AlignBottom
+        )
 
         input_layout.addWidget(send_widget)
-        chat_container_layout.addLayout(input_layout)
+        self.chat_container_layout.addLayout(input_layout)
 
-        self.layout.addLayout(chat_container_layout)
+        self.layout.addLayout(self.chat_container_layout)
 
         self.setLayout(self.layout)
         self.chat_thread.get_char_signal.connect(self.initData)
@@ -279,8 +390,53 @@ class ChatInterface(QWidget):
         self.choose_persona_button.setIcon(self.svg_icons.persona(TM.c("icon")))
         self.chat_style_button.setIcon(self.svg_icons.style(TM.c("icon")))
 
+        if hasattr(self, "character_info_sidebar") and self.character_info_sidebar:
+            self.character_info_sidebar.setStyleSheet(f"""
+                QFrame {{
+                    background-color: {TM.c('element_bg')};
+                    color: {TM.c('text')};
+                    border-radius: 4px;
+                }}
+                QLabel {{
+                    color: {TM.c('text')};
+                }}
+            """)
+        if hasattr(self, "top_bar_frame") and self.top_bar_frame:
+            bg_color = TM.c('mw_back') if self._detach else "transparent"
+            self.top_bar_frame.setStyleSheet(f"""
+                QWidget {{
+                    background-color: {bg_color};
+                    color: {TM.c('text')};
+                }}
+                QLabel {{
+                    color: {TM.c('text')};
+                }}
+            """)
+        if hasattr(self, "header_name_label"):
+            self.header_name_label.setStyleSheet(f"color: {TM.c('text')};")
+            self.header_author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            self.header_scene_title_label.setStyleSheet(f"color: {TM.c('text')};")
+            self.name_label.setStyleSheet(f"color: {TM.c('text')};")
+            self.author_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            self.chats_label.setStyleSheet(f"color: {TM.c('disabled_text')};")
+            self.title_label.setStyleSheet(f"color: {TM.c('text')};")
+        if hasattr(self, "overlay_content") and self.overlay_content:
+            self.overlay_content.setStyleSheet(f"""
+                QWidget {{
+                    background-color: {TM.c('mw_back')};
+                    color: {TM.c('text')};
+                    border-radius: 6px;
+                }}
+                QLabel {{
+                    color: {TM.c('text')};
+                }}
+            """)
+
     def on_scroll(self, value):
-        if value == self.messages_area.verticalScrollBar().minimum() and self.chat_next_token:
+        if (
+            value == self.messages_area.verticalScrollBar().minimum()
+            and self.chat_next_token
+        ):
             self.handle_infinite_scroll()
 
     def mouseDoubleClickEvent(self, event):
@@ -288,7 +444,9 @@ class ChatInterface(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             if hasattr(self, "vmodel_widget"):
                 if not self.vmodel_widget.translucent:
-                    self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
+                    self.vmodel_widget.setAttribute(
+                        Qt.WidgetAttribute.WA_TransparentForMouseEvents, False
+                    )
 
     def handle_infinite_scroll(self):
         old_height = self.messages_content.height()
@@ -311,7 +469,7 @@ class ChatInterface(QWidget):
 
     def applyBackground(self, path):
         if path and os.path.exists(path):
-            path = path.replace('\\', '/')
+            path = path.replace("\\", "/")
             self.messages_area.setStyleSheet(f"""
                 #chatScrollArea {{
                     background-image: url("{path}");
@@ -320,7 +478,9 @@ class ChatInterface(QWidget):
                     background-attachment: fixed;
                 }}
             """)
-            self.messages_content.setStyleSheet("#chatContent { background: transparent; }")
+            self.messages_content.setStyleSheet(
+                "#chatContent { background: transparent; }"
+            )
 
         else:
             self.messages_area.setStyleSheet("#chatScrollArea {}")
@@ -339,7 +499,7 @@ class ChatInterface(QWidget):
                 colors.append(rgb)
 
             def rgb_to_hex(rgb):
-                return '#{:02x}{:02x}{:02x}'.format(rgb[0], rgb[1], rgb[2])
+                return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
 
             def get_brightness(rgb):
                 return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
@@ -370,7 +530,7 @@ class ChatInterface(QWidget):
                 "char_back": char_hex,
                 "char_text": char_text,
                 "user_back": user_hex,
-                "user_text": user_text
+                "user_text": user_text,
             }
 
         except Exception as e:
@@ -381,10 +541,21 @@ class ChatInterface(QWidget):
         if url:
             self.mw.showNotification(self.tr("Downloading background..."))
             self.mw.image_loader.load(
-                url, 1280, 720, 0,
-                callback=lambda _: self._onBackgroundDownloaded(os.path.join("cache/background", hashlib.md5(url.encode()).hexdigest() + ".png")),
-                error_cb=lambda _: self.mw.showNotification(self.tr("Error downloading image")),
-                cache_dir="cache/background")
+                url,
+                1280,
+                720,
+                0,
+                callback=lambda _: self._onBackgroundDownloaded(
+                    os.path.join(
+                        "cache/background",
+                        hashlib.md5(url.encode()).hexdigest() + ".png",
+                    )
+                ),
+                error_cb=lambda _: self.mw.showNotification(
+                    self.tr("Error downloading image")
+                ),
+                cache_dir="cache/background",
+            )
 
     def _onBackgroundDownloaded(self, file_path):
         self.background_image = file_path
@@ -393,15 +564,23 @@ class ChatInterface(QWidget):
 
         theme = self.extract_theme_colors(file_path)
         if theme:
-            self.char_back_message = theme['char_back']
-            self.char_text_message = theme['char_text']
-            self.user_back_message = theme['user_back']
-            self.user_text_message = theme['user_text']
+            self.char_back_message = theme["char_back"]
+            self.char_text_message = theme["char_text"]
+            self.user_back_message = theme["user_back"]
+            self.user_text_message = theme["user_text"]
 
-            self.chat_settings.setValue("colors/char_back_message", self.char_back_message)
-            self.chat_settings.setValue("colors/char_text_message", self.char_text_message)
-            self.chat_settings.setValue("colors/user_back_message", self.user_back_message)
-            self.chat_settings.setValue("colors/user_text_message", self.user_text_message)
+            self.chat_settings.setValue(
+                "colors/char_back_message", self.char_back_message
+            )
+            self.chat_settings.setValue(
+                "colors/char_text_message", self.char_text_message
+            )
+            self.chat_settings.setValue(
+                "colors/user_back_message", self.user_back_message
+            )
+            self.chat_settings.setValue(
+                "colors/user_text_message", self.user_text_message
+            )
 
             self._update_current_chat_colors()
 
@@ -410,16 +589,18 @@ class ChatInterface(QWidget):
             item = self.messages_layout.itemAt(i)
             if item.widget():
                 bubble = item.widget().currentWidget()
-                if bubble.objectName() == 'user_message':
+                if bubble.objectName() == "user_message":
                     self.setBackMessageColor(bubble, self.user_back_message)
                     self.setTextMessageColor(bubble, self.user_text_message)
-                elif bubble.objectName() == 'char_message':
+                elif bubble.objectName() == "char_message":
                     self.setBackMessageColor(bubble, self.char_back_message)
                     self.setTextMessageColor(bubble, self.char_text_message)
 
     def createTopBar(self):
         header_frame = QWidget()
-        header_frame.hideEvent = lambda event: self.mw.top_bar_stacked_widget.setStyleSheet(None)
+        header_frame.hideEvent = (
+            lambda event: self.mw.top_bar_stacked_widget.setStyleSheet(None)
+        )
         header_frame.setFixedHeight(75)
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(0, 0, 0, 0)
@@ -466,11 +647,19 @@ class ChatInterface(QWidget):
     def createRightSidebar(self):
         self.character_info_sidebar = QFrame(self)
         self.character_info_sidebar.setFixedWidth(230)
-        self.character_info_sidebar.setFixedHeight(self.mw.height() - 230)
-        self.char_info_layout = QVBoxLayout()
-        self.character_info_sidebar.setLayout(self.char_info_layout)
-        self.char_info_layout.setContentsMargins(10, 10, 10, 10)
         self.character_info_sidebar.setVisible(False)
+
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        self.character_info_sidebar.setLayout(sidebar_layout)
+
+        scroll_page = VerticalScrollPage()
+        scroll_page.viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
+        self.char_info_layout = scroll_page.layout
+        self.char_info_layout.setContentsMargins(10, 10, 10, 10)
+        sidebar_layout.addWidget(scroll_page)
 
         main_info_about_char_frame = QFrame()
         self.char_info_layout.addWidget(main_info_about_char_frame)
@@ -481,7 +670,9 @@ class ChatInterface(QWidget):
         text_info_about_char = QVBoxLayout()
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(70, 70)
-        main_info_about_char_layout.addWidget(self.avatar_label, 0, Qt.AlignmentFlag.AlignLeft)
+        main_info_about_char_layout.addWidget(
+            self.avatar_label, 0, Qt.AlignmentFlag.AlignLeft
+        )
 
         main_info_about_char_layout.addLayout(text_info_about_char)
         self.name_label = QLabel()
@@ -501,11 +692,15 @@ class ChatInterface(QWidget):
 
         self.share_char_button = PushButton()
         self.share_char_button.clicked.connect(self.shareCharacter)
-        social_buttons_layout.addWidget(self.share_char_button, 1, Qt.AlignmentFlag.AlignLeft)
+        social_buttons_layout.addWidget(
+            self.share_char_button, 1, Qt.AlignmentFlag.AlignLeft
+        )
 
         self.edit_char_button = PushButton()
         self.edit_char_button.clicked.connect(self.editCharacter)
-        social_buttons_layout.addWidget(self.edit_char_button, 1, Qt.AlignmentFlag.AlignLeft)
+        social_buttons_layout.addWidget(
+            self.edit_char_button, 1, Qt.AlignmentFlag.AlignLeft
+        )
         self.edit_char_button.setVisible(False)
 
         self.like_button = PushButton()
@@ -513,7 +708,9 @@ class ChatInterface(QWidget):
         social_buttons_layout.addWidget(self.like_button, 0, Qt.AlignmentFlag.AlignLeft)
         self.dislike_button = PushButton()
         self.dislike_button.clicked.connect(self.dislikeCharacter)
-        social_buttons_layout.addWidget(self.dislike_button, 0, Qt.AlignmentFlag.AlignLeft)
+        social_buttons_layout.addWidget(
+            self.dislike_button, 0, Qt.AlignmentFlag.AlignLeft
+        )
 
         self.title_label = QLabel()
         self.title_label.setWordWrap(True)
@@ -521,7 +718,9 @@ class ChatInterface(QWidget):
 
         self.create_new_chat_button = PushButton(self.tr("New Chat"))
         self.create_new_chat_button.clicked.connect(self.createNewChat)
-        self.char_info_layout.addWidget(self.create_new_chat_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.char_info_layout.addWidget(
+            self.create_new_chat_button, alignment=Qt.AlignmentFlag.AlignLeft
+        )
 
         character_voice_button_layout = QHBoxLayout()
         character_voice_button_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -535,76 +734,103 @@ class ChatInterface(QWidget):
         character_voice_button_layout.addWidget(self.select_char_voice_button)
 
         self.select_char_voice_label = QLabel()
-        character_voice_button_layout.addWidget(self.select_char_voice_label, alignment=Qt.AlignmentFlag.AlignRight)
+        character_voice_button_layout.addWidget(
+            self.select_char_voice_label, alignment=Qt.AlignmentFlag.AlignRight
+        )
 
         self.history_button = PushButton(self.tr("History"))
         self.history_button.clicked.connect(self.showChats)
-        self.char_info_layout.addWidget(self.history_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.char_info_layout.addWidget(
+            self.history_button, alignment=Qt.AlignmentFlag.AlignLeft
+        )
 
         self.chat_theme_button = PushButton(self.tr("Chat Theme"))
         self.chat_theme_button.clicked.connect(self.openColorPickerOverlay)
-        self.char_info_layout.addWidget(self.chat_theme_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.char_info_layout.addWidget(
+            self.chat_theme_button, alignment=Qt.AlignmentFlag.AlignLeft
+        )
 
         self.choose_persona_button = PushButton(self.tr("Persona"))
         self.choose_persona_button.clicked.connect(self.openPersonaOverlay)
-        self.char_info_layout.addWidget(self.choose_persona_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.char_info_layout.addWidget(
+            self.choose_persona_button, alignment=Qt.AlignmentFlag.AlignLeft
+        )
 
         self.chat_style_button = PushButton(self.tr("Chat Style"))
         self.chat_style_button.clicked.connect(self.openModelOverlay)
-        self.char_info_layout.addWidget(self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.char_info_layout.addWidget(
+            self.chat_style_button, alignment=Qt.AlignmentFlag.AlignLeft
+        )
 
         self.vmodel_button = PushButton(self.tr("Show VModel"))
         self.vmodel_button.clicked.connect(self.openVModelOverlay)
         if self.mw.settings.value("vmodel/use", False, type=bool):
-            self.char_info_layout.addWidget(self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft)
+            self.char_info_layout.addWidget(
+                self.vmodel_button, alignment=Qt.AlignmentFlag.AlignLeft
+            )
 
         self.detach_chat_button = PushButton(self.tr("Detach Chat"))
-        self.detach_chat_button.clicked.connect(self.detachChat)
-        self.char_info_layout.addWidget(self.detach_chat_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.detach_chat_button.clicked.connect(self.toggleDetachChat)
+        self.char_info_layout.addWidget(
+            self.detach_chat_button, alignment=Qt.AlignmentFlag.AlignLeft
+        )
 
-        self.character_info_sidebar.setGeometry(self.width(), 0, 230, self.height() - 230)
+        self.character_info_sidebar.setGeometry(
+            self.width(), 0, 230, self.height() - 230
+        )
 
     def getScene(self, data):
         self.chat_thread.get_scene_by_id_signal.disconnect()
         self.scene = data
         self.header_scene_title_label.setText(self.scene["title"])
         self.header_scene_title_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.header_scene_title_label.mousePressEvent = lambda _: self.mw.openScene(self.scene, self.scene_id)
-        if self.scene.get('background_image_url'):
-            self.setBackgroundFromUrl(self.scene.get('background_image_url'))
+        self.header_scene_title_label.mousePressEvent = lambda _: self.mw.openScene(
+            self.scene, self.scene_id
+        )
+        if self.scene.get("background_image_url"):
+            self.setBackgroundFromUrl(self.scene.get("background_image_url"))
 
     def getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()
         self.user_personas = data
 
     def userMessageSignal(self, response):
-        command = response['command']
-        if command == 'add_turn':
+        command = response["command"]
+        if command == "add_turn":
             for i in reversed(range(self.messages_layout.count())):
                 item = self.messages_layout.itemAt(i)
                 widget = item.widget()
-                if hasattr(widget, 'is_user') and widget.is_user:
+                if hasattr(widget, "is_user") and widget.is_user:
                     message_stacked = widget
                     message = message_stacked.currentWidget()
-                    message.turn_id = response['turn']['turn_key']['turn_id']
-                    message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
+                    message.turn_id = response["turn"]["turn_key"]["turn_id"]
+                    message.customContextMenuRequested.connect(
+                        lambda pos, mb=message: self.showContextMenu(pos, mb)
+                    )
                     message.customContextMenuRequested.disconnect()
-                    message.customContextMenuRequested.connect(lambda pos, mb=message: self.showContextMenu(pos, mb))
-        elif command == 'update_turn':
+                    message.customContextMenuRequested.connect(
+                        lambda pos, mb=message: self.showContextMenu(pos, mb)
+                    )
+        elif command == "update_turn":
             for i in reversed(range(self.messages_layout.count())):
                 item = self.messages_layout.itemAt(i)
                 widget = item.widget()
-                if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                if (
+                    hasattr(widget, "turn_id")
+                    and widget.turn_id == response["turn"]["turn_key"]["turn_id"]
+                ):
                     message_stacked = widget
                     break
 
             message = message_stacked.currentWidget()
 
             older = []
-            pci = response.get("turn", {}).get('primary_candidate_id')
-            for candidate in response.get("turn", {}).get('candidates', []):
-                if candidate.get('candidate_id', pci) == pci:
-                    new_text = format_text(candidate.get('raw_content', ''), self.mw.username)
+            pci = response.get("turn", {}).get("primary_candidate_id")
+            for candidate in response.get("turn", {}).get("candidates", []):
+                if candidate.get("candidate_id", pci) == pci:
+                    new_text = format_text(
+                        candidate.get("raw_content", ""), self.mw.username
+                    )
                     message.text = new_text
                     message.message_label.setText(new_text)
                 else:
@@ -614,28 +840,38 @@ class ChatInterface(QWidget):
             message.adjustSize()
 
     def charMessageSignal(self, response):
-        command = response['command']
-        if command == 'add_turn':
+        command = response["command"]
+        if command == "add_turn":
             message_widget = self.addMessage(
-                format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username),
-                response['turn']['turn_key']['turn_id'],
-                is_user=False
+                format_text(
+                    response["turn"]["candidates"][0]["raw_content"], self.mw.username
+                ),
+                response["turn"]["turn_key"]["turn_id"],
+                is_user=False,
             )
-            self.startTextAnimation(message_widget.currentWidget(), response['turn']['candidates'][0]['raw_content'])
+            self.startTextAnimation(
+                message_widget.currentWidget(),
+                response["turn"]["candidates"][0]["raw_content"],
+            )
 
-        elif command == 'update_turn':
+        elif command == "update_turn":
             for i in reversed(range(self.messages_layout.count())):
                 item = self.messages_layout.itemAt(i)
                 widget = item.widget()
-                if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                if (
+                    hasattr(widget, "turn_id")
+                    and widget.turn_id == response["turn"]["turn_key"]["turn_id"]
+                ):
                     message_stacked = widget
                     break
 
             message = message_stacked.currentWidget()
-            if getattr(message.message_label, 'animation_queue'):
+            if message.message_label.animation_queue:
                 self.setupAnimation(message.message_label)
 
-            new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+            new_text = format_text(
+                response["turn"]["candidates"][0]["raw_content"], self.mw.username
+            )
             message.text = new_text
             self.addTextToAnimation(message.message_label, new_text)
 
@@ -649,7 +885,7 @@ class ChatInterface(QWidget):
         label.is_animating = False
         label.target_text = ""
 
-        label.animation_timer = QTimer()
+        label.animation_timer = QTimer(label)
         label.animation_timer.timeout.connect(lambda: self.animateNextChar(label))
 
     def startTextAnimation(self, message_widget, full_text):
@@ -664,23 +900,24 @@ class ChatInterface(QWidget):
         label.current_index = 0
         label.is_animating = True
 
-        label.animation_timer.start(30)
+        speed = self.mw.settings.value("text_animation_speed", 30, type=int)
+        label.animation_timer.start(speed)
 
     def addTextToAnimation(self, label, new_full_text):
         label.target_text = new_full_text
 
         if label.is_animating:
-            current_length = len(label.current_text)
             label.current_text = label.target_text
         else:
             label.current_text = label.target_text
             label.current_index = len(label.text())
             label.is_animating = True
-            label.animation_timer.start(30)
+            speed = self.mw.settings.value("text_animation_speed", 30, type=int)
+            label.animation_timer.start(speed)
 
     def animateNextChar(self, label):
         if label.current_index < len(label.current_text):
-            display_text = label.current_text[:label.current_index + 1]
+            display_text = label.current_text[: label.current_index + 1]
             label.setText(display_text)
             label.current_index += 1
 
@@ -698,23 +935,52 @@ class ChatInterface(QWidget):
 
     def showEvent(self, a0):
         super().showEvent(a0)
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
 
             ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
             ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
 
+    def toggleDetachChat(self):
+        if self._detach:
+            self.attach_chat()
+        else:
+            self.detachChat()
+
     def detachChat(self):
         self._detach = True
         self.detach_signal.emit(True)
-        self.toggle_info_button.setEnabled(False)
+        self.toggle_info_button.setEnabled(True)
+
+        if hasattr(self, "top_bar_frame") and self.top_bar_frame:
+            self.mw.top_bar_stacked_widget.removeWidget(self.top_bar_frame)
+            self.top_bar_frame.setParent(self)
+            self.chat_container_layout.insertWidget(0, self.top_bar_frame)
+            self.top_bar_frame.setVisible(True)
+
+        if hasattr(self.mw, "top_widget"):
+            self.mw.top_bar_stacked_widget.setFixedHeight(50)
+            self.mw.top_bar_stacked_widget.setCurrentWidget(self.mw.top_widget)
+
+        if hasattr(self, "detach_chat_button"):
+            self.detach_chat_button.setText(self.tr("Attach Chat"))
+
         self.setParent(None)
-        self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
+        self.setWindowTitle(
+            self.tr("Chat with %%char%%").replace("%%char%%", self.character_name)
+        )
         self.show()
+        self.hideOverlay()
+        if hasattr(self.mw, "hideOverlay"):
+            self.mw.hideOverlay()
         self.hideCharacterInfoSidebar()
+        self.updateTheme()
         self.setStyleSheet(f"""
             #ChatInterface {{
                 background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+            }}
+            QLabel {{
                 color: {TM.c('text')};
             }}
             {TM.get_style('VerticalScrollArea')}
@@ -722,43 +988,107 @@ class ChatInterface(QWidget):
 
     def attach_chat(self):
         self._detach = False
+
+        if hasattr(self, "top_bar_frame") and self.top_bar_frame:
+            self.chat_container_layout.removeWidget(self.top_bar_frame)
+            self.mw.top_bar_stacked_widget.setFixedHeight(75)
+            self.mw.top_bar_stacked_widget.addWidget(self.top_bar_frame)
+            self.mw.top_bar_stacked_widget.setCurrentWidget(self.top_bar_frame)
+            self.top_bar_frame.setVisible(True)
+
+        if hasattr(self, "detach_chat_button"):
+            self.detach_chat_button.setText(self.tr("Detach Chat"))
+
         self.attach_signal.emit(True)
         self.toggle_info_button.setEnabled(True)
-        self.setParent(None)
-        self.setWindowTitle(self.tr("Chat with %%char%%").replace("%%char%%", self.character_name))
-        self.show()
+        self.hideOverlay()
+        if hasattr(self.mw, "hideOverlay"):
+            self.mw.hideOverlay()
         self.hideCharacterInfoSidebar()
+        self.updateTheme()
         self.setStyleSheet(f"""
             #ChatInterface {{
                 background-color: {TM.c('mw_back')};
                 color: {TM.c('text')};
             }}
+            QLabel {{
+                color: {TM.c('text')};
+            }}
             {TM.get_style('VerticalScrollArea')}
         """)
+
+    def createOverlay(self):
+        self.overlay = QFrame(self)
+        self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 150);")
+        self.overlay_layout = QVBoxLayout(self.overlay)
+        self.overlay_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.overlay_content = QWidget(self.overlay)
+        self.overlay_content.setStyleSheet(f"""
+            QWidget {{
+                background-color: {TM.c('mw_back')};
+                color: {TM.c('text')};
+                border-radius: 6px;
+            }}
+            QLabel {{
+                color: {TM.c('text')};
+            }}
+        """)
+        self.overlay_content_layout = QVBoxLayout(self.overlay_content)
+
+        self.overlay_layout.addWidget(self.overlay_content)
+
+        self.overlay.setGeometry(self.rect())
+        self.overlay.hide()
+
+    def showOverlay(self, widget):
+        if self._detach:
+            if not hasattr(self, "overlay") or self.overlay is None:
+                self.createOverlay()
+            self.overlay_content_layout.addWidget(widget)
+            widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+            self.overlay.setGeometry(self.rect())
+            self.overlay.show()
+            self.overlay.raise_()
+        else:
+            self.mw.showOverlay(widget)
+
+    def hideOverlay(self):
+        if self._detach:
+            if hasattr(self, "overlay") and self.overlay is not None:
+                self.overlay.hide()
+                for i in range(self.overlay_content_layout.count()):
+                    item = self.overlay_content_layout.itemAt(i)
+                    if item and item.widget():
+                        item.widget().deleteLater()
+        else:
+            self.mw.hideOverlay()
 
     def openVModelOverlay(self):
         if self.vmodel_show:
             self.vmodel_button.setText(self.tr("Show VModel"))
-            if hasattr(self, 'vmodel_widget') and self.vmodel_widget:
+            if hasattr(self, "vmodel_widget") and self.vmodel_widget:
                 self.messages_overlay_layout.removeWidget(self.vmodel_widget)
                 self.vmodel_widget.hide()
                 self.vmodel_widget.deleteLater()
                 self.vmodel_widget = None
         else:
             self.vmodel_button.setText(self.tr("Hide VModel"))
+
             def setWidget(widget):
-                self.mw.hideOverlay()
+                self.hideOverlay()
                 self.vmodel_widget = widget
-                self.vmodel_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+                self.vmodel_widget.setAttribute(
+                    Qt.WidgetAttribute.WA_TranslucentBackground
+                )
                 self.vmodel_widget.setStyleSheet("background: transparent;")
                 self.messages_overlay_layout.addWidget(self.vmodel_widget, 0, 0)
-
 
             overlay_widget = ViewerCard(self.mw)
             overlay_widget.vmodel_widget.connect(setWidget)
             overlay_widget.setFixedWidth(350)
             overlay_widget.setStyleSheet("background: transparent;")
-            self.mw.showOverlay(overlay_widget)
+            self.showOverlay(overlay_widget)
         self.vmodel_show = not self.vmodel_show
 
     def openPersonaOverlay(self):
@@ -778,7 +1108,9 @@ class ChatInterface(QWidget):
         overlay_layout.addWidget(f_page)
 
         scroll_page = VerticalScrollPage()
-        scroll_page.viewport.setStyleSheet("background-color: transparent; border: none;")
+        scroll_page.viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         scroll_layout = scroll_page.layout
         f_page_layout.addWidget(scroll_page)
 
@@ -786,27 +1118,29 @@ class ChatInterface(QWidget):
 
         def updateSettings(data):
             self.chat_thread.update_user_settings_signal.disconnect()
-            if data.get('success', False):
-                self.mw.user_settings = data['settings']
-                self.mw.showNotification(self.tr('Successfully updated your persona'))
-            self.mw.hideOverlay()
+            if data.get("success", False):
+                self.mw.user_settings = data["settings"]
+                self.mw.showNotification(self.tr("Successfully updated your persona"))
+            self.hideOverlay()
             self.toggleCharacterInfoSidebar()
 
         def onCardClicked(clicked_card):
             if clicked_card.active:
-                self.mw.user_settings['personaOverrides'][self.character_id]= ""
+                self.mw.user_settings["personaOverrides"][self.character_id] = ""
             else:
-                self.mw.user_settings['personaOverrides'][self.character_id] = clicked_card.data['external_id']
+                self.mw.user_settings["personaOverrides"][self.character_id] = (
+                    clicked_card.data["external_id"]
+                )
             self.chat_thread.update_user_settings_signal.connect(updateSettings)
             self.chat_thread.update_user_settings(self.mw.user_settings)
 
         for persona in self.user_personas:
             card = PersonaCards.MainCard(self.mw, persona, self.character_id)
-            card.mousePressEvent = lambda _: onCardClicked(card)
+            card.mousePressEvent = lambda _, c=card: onCardClicked(c)
             scroll_layout.addWidget(card)
             card_list.append(card)
 
-        self.mw.showOverlay(overlay_widget)
+        self.showOverlay(overlay_widget)
 
     def openModelOverlay(self):
         overlay_widget = QWidget()
@@ -815,7 +1149,9 @@ class ChatInterface(QWidget):
         overlay_layout = QVBoxLayout()
         overlay_widget.setLayout(overlay_layout)
 
-        choose_label = QLabel(self.tr("Choose a model to influence the style of your chat"))
+        choose_label = QLabel(
+            self.tr("Choose a model to influence the style of your chat")
+        )
         overlay_layout.addWidget(choose_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         f_page = QWidget()
@@ -825,12 +1161,15 @@ class ChatInterface(QWidget):
         overlay_layout.addWidget(f_page)
 
         scroll_page = VerticalScrollPage()
-        scroll_page.viewport.setStyleSheet("background-color: transparent; border: none;")
+        scroll_page.viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         scroll_layout = scroll_page.layout
         f_page_layout.addWidget(scroll_page)
 
         card_list = []
         self.overlay_selected_model_type = self.preferred_model_type
+
         def createCard(model_type, name, icon, description, plus, beta, limited):
             card = ClickableFrame()
             card.setObjectName(model_type)
@@ -865,7 +1204,11 @@ class ChatInterface(QWidget):
             description_label.setStyleSheet("color: #a2a2ac")
             text_layout.addWidget(description_label)
 
-            card_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum))
+            card_layout.addSpacerItem(
+                QSpacerItem(
+                    0, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum
+                )
+            )
 
             if plus:
                 plus_label = QLabel("C.AI+")
@@ -898,22 +1241,25 @@ class ChatInterface(QWidget):
 
         for model_type in self.mw.available_models_git:
             m_d = self.mw.available_models_git.get(model_type, {})
-            _ = m_d.get('description', {})
-            card = createCard(model_type,
-                              m_d.get('name'),
-                              self.svg_icons.model_type_icon(m_d.get('svg'), pixmap_ret=True),
-                              _.get(self.mw.current_language.split("_")[0],_.get("en", "")),
-                              m_d.get('plus', False),
-                              m_d.get('beta', False),
-                              m_d.get('limited', False))
-            if model_type == self.preferred_model_type: card.setCheckable(True)
+            _ = m_d.get("description", {})
+            card = createCard(
+                model_type,
+                m_d.get("name"),
+                self.svg_icons.model_type_icon(m_d.get("svg"), pixmap_ret=True),
+                _.get(self.mw.current_language.split("_")[0], _.get("en", "")),
+                m_d.get("plus", False),
+                m_d.get("beta", False),
+                m_d.get("limited", False),
+            )
+            if model_type == self.preferred_model_type:
+                card.setCheckable(True)
             scroll_layout.addWidget(card)
             card_list.append(card)
 
         def apply():
             if self.overlay_selected_model_type != self.preferred_model_type:
                 self.createNewChat(self.overlay_selected_model_type)
-            self.mw.hideOverlay()
+            self.hideOverlay()
             self.toggleCharacterInfoSidebar()
 
         buttons_layout = QHBoxLayout()
@@ -930,15 +1276,15 @@ class ChatInterface(QWidget):
         # ufac_layout.addWidget(ufac_button)
 
         overlay_layout.addLayout(buttons_layout)
-        self.mw.showOverlay(overlay_widget)
+        self.showOverlay(overlay_widget)
 
     def openColorPickerOverlay(self):
         def restoreDefaultColors():
             data = {
-                "char_back_message": TM.c('char_back_message'),
-                "char_text_message": TM.c('char_text_message'),
-                "user_back_message": TM.c('user_back_message'),
-                "user_text_message": TM.c('user_text_message')
+                "char_back_message": TM.c("char_back_message"),
+                "char_text_message": TM.c("char_text_message"),
+                "user_back_message": TM.c("user_back_message"),
+                "user_text_message": TM.c("user_text_message"),
             }
             self.chat_settings.setValue("background_image", "")
             self.applyBackground("")
@@ -950,13 +1296,21 @@ class ChatInterface(QWidget):
                 item = self.messages_layout.itemAt(i)
                 if item.widget():
                     item = item.widget()
-                    if item.currentWidget().objectName() == 'user_message':
-                        self.setBackMessageColor(item.currentWidget(), self.user_back_message)
-                        self.setTextMessageColor(item.currentWidget(), self.user_text_message)
-                    elif item.currentWidget().objectName() == 'char_message':
-                        self.setBackMessageColor(item.currentWidget(), self.char_back_message)
-                        self.setTextMessageColor(item.currentWidget(), self.char_text_message)
-            self.mw.hideOverlay()
+                    if item.currentWidget().objectName() == "user_message":
+                        self.setBackMessageColor(
+                            item.currentWidget(), self.user_back_message
+                        )
+                        self.setTextMessageColor(
+                            item.currentWidget(), self.user_text_message
+                        )
+                    elif item.currentWidget().objectName() == "char_message":
+                        self.setBackMessageColor(
+                            item.currentWidget(), self.char_back_message
+                        )
+                        self.setTextMessageColor(
+                            item.currentWidget(), self.char_text_message
+                        )
+            self.hideOverlay()
 
         def pickBackgroundImage():
             file_dialog = QFileDialog()
@@ -971,20 +1325,36 @@ class ChatInterface(QWidget):
 
                     theme = self.extract_theme_colors(path)
                     if theme:
-                        self.char_back_message = theme['char_back']
-                        self.char_text_message = theme['char_text']
-                        self.user_back_message = theme['user_back']
-                        self.user_text_message = theme['user_text']
+                        self.char_back_message = theme["char_back"]
+                        self.char_text_message = theme["char_text"]
+                        self.user_back_message = theme["user_back"]
+                        self.user_text_message = theme["user_text"]
 
-                        self.char_back_message_picker.setStyleSheet(f"background-color: {self.char_back_message};")
-                        self.char_text_message_picker.setStyleSheet(f"background-color: {self.char_text_message};")
-                        self.user_back_message_picker.setStyleSheet(f"background-color: {self.user_back_message};")
-                        self.user_text_message_picker.setStyleSheet(f"background-color: {self.user_text_message};")
+                        self.char_back_message_picker.setStyleSheet(
+                            f"background-color: {self.char_back_message};"
+                        )
+                        self.char_text_message_picker.setStyleSheet(
+                            f"background-color: {self.char_text_message};"
+                        )
+                        self.user_back_message_picker.setStyleSheet(
+                            f"background-color: {self.user_back_message};"
+                        )
+                        self.user_text_message_picker.setStyleSheet(
+                            f"background-color: {self.user_text_message};"
+                        )
 
-                        self.chat_settings.setValue("colors/char_back_message", self.char_back_message)
-                        self.chat_settings.setValue("colors/char_text_message", self.char_text_message)
-                        self.chat_settings.setValue("colors/user_back_message", self.user_back_message)
-                        self.chat_settings.setValue("colors/user_text_message", self.user_text_message)
+                        self.chat_settings.setValue(
+                            "colors/char_back_message", self.char_back_message
+                        )
+                        self.chat_settings.setValue(
+                            "colors/char_text_message", self.char_text_message
+                        )
+                        self.chat_settings.setValue(
+                            "colors/user_back_message", self.user_back_message
+                        )
+                        self.chat_settings.setValue(
+                            "colors/user_text_message", self.user_text_message
+                        )
 
                         for i in range(self.messages_layout.count()):
                             item = self.messages_layout.itemAt(i)
@@ -992,12 +1362,20 @@ class ChatInterface(QWidget):
                                 widget = item.widget()
                                 bubble = widget.currentWidget()
 
-                                if bubble.objectName() == 'user_message':
-                                    self.setBackMessageColor(bubble, self.user_back_message)
-                                    self.setTextMessageColor(bubble, self.user_text_message)
-                                elif bubble.objectName() == 'char_message':
-                                    self.setBackMessageColor(bubble, self.char_back_message)
-                                    self.setTextMessageColor(bubble, self.char_text_message)
+                                if bubble.objectName() == "user_message":
+                                    self.setBackMessageColor(
+                                        bubble, self.user_back_message
+                                    )
+                                    self.setTextMessageColor(
+                                        bubble, self.user_text_message
+                                    )
+                                elif bubble.objectName() == "char_message":
+                                    self.setBackMessageColor(
+                                        bubble, self.char_back_message
+                                    )
+                                    self.setTextMessageColor(
+                                        bubble, self.char_text_message
+                                    )
 
         def clearBackgroundImage():
             self.background_image = ""
@@ -1007,33 +1385,49 @@ class ChatInterface(QWidget):
         def pickCharBackMessageColor():
             color = QColorDialog.getColor()
             if color.isValid():
-                self.char_back_message_picker.setStyleSheet(f"background-color: {color.name()};")
+                self.char_back_message_picker.setStyleSheet(
+                    f"background-color: {color.name()};"
+                )
 
         def pickCharTextMessageColor():
             color = QColorDialog.getColor()
             if color.isValid():
-                self.char_text_message_picker.setStyleSheet(f"background-color: {color.name()};")
+                self.char_text_message_picker.setStyleSheet(
+                    f"background-color: {color.name()};"
+                )
 
         def pickUserBackMessageColor():
             color = QColorDialog.getColor()
             if color.isValid():
-                self.user_back_message_picker.setStyleSheet(f"background-color: {color.name()};")
+                self.user_back_message_picker.setStyleSheet(
+                    f"background-color: {color.name()};"
+                )
 
         def pickUserTextMessageColor():
             color = QColorDialog.getColor()
             if color.isValid():
-                self.user_text_message_picker.setStyleSheet(f"background-color: {color.name()};")
+                self.user_text_message_picker.setStyleSheet(
+                    f"background-color: {color.name()};"
+                )
 
         def applyColors():
-            self.char_back_message = self.char_back_message_picker.styleSheet().split(": ")[1][:-1]
-            self.char_text_message = self.char_text_message_picker.styleSheet().split(": ")[1][:-1]
-            self.user_back_message = self.user_back_message_picker.styleSheet().split(": ")[1][:-1]
-            self.user_text_message = self.user_text_message_picker.styleSheet().split(": ")[1][:-1]
+            self.char_back_message = self.char_back_message_picker.styleSheet().split(
+                ": "
+            )[1][:-1]
+            self.char_text_message = self.char_text_message_picker.styleSheet().split(
+                ": "
+            )[1][:-1]
+            self.user_back_message = self.user_back_message_picker.styleSheet().split(
+                ": "
+            )[1][:-1]
+            self.user_text_message = self.user_text_message_picker.styleSheet().split(
+                ": "
+            )[1][:-1]
             data = {
-                'char_back_message': self.char_back_message,
-                'char_text_message': self.char_text_message,
-                'user_back_message': self.user_back_message,
-                'user_text_message': self.user_text_message
+                "char_back_message": self.char_back_message,
+                "char_text_message": self.char_text_message,
+                "user_back_message": self.user_back_message,
+                "user_text_message": self.user_text_message,
             }
             for key, value in data.items():
                 self.chat_settings.setValue(f"colors/{key}", value)
@@ -1041,13 +1435,21 @@ class ChatInterface(QWidget):
                 item = self.messages_layout.itemAt(i)
                 if item.widget():
                     item = item.widget()
-                    if item.currentWidget().objectName() == 'user_message':
-                        self.setBackMessageColor(item.currentWidget(), self.user_back_message)
-                        self.setTextMessageColor(item.currentWidget(), self.user_text_message)
-                    elif item.currentWidget().objectName() == 'char_message':
-                        self.setBackMessageColor(item.currentWidget(), self.char_back_message)
-                        self.setTextMessageColor(item.currentWidget(), self.char_text_message)
-            self.mw.hideOverlay()
+                    if item.currentWidget().objectName() == "user_message":
+                        self.setBackMessageColor(
+                            item.currentWidget(), self.user_back_message
+                        )
+                        self.setTextMessageColor(
+                            item.currentWidget(), self.user_text_message
+                        )
+                    elif item.currentWidget().objectName() == "char_message":
+                        self.setBackMessageColor(
+                            item.currentWidget(), self.char_back_message
+                        )
+                        self.setTextMessageColor(
+                            item.currentWidget(), self.char_text_message
+                        )
+            self.hideOverlay()
 
         color_picker_widget = QWidget()
         color_picker_widget.setFixedHeight(300)
@@ -1061,39 +1463,65 @@ class ChatInterface(QWidget):
         char_text_message_layout = QHBoxLayout()
         char_text_message_label = QLabel(self.tr("Character Text Color:"))
         self.char_text_message_picker = QPushButton()
-        self.char_text_message_picker.setStyleSheet(f"background-color: {self.char_text_message};")
+        self.char_text_message_picker.setStyleSheet(
+            f"background-color: {self.char_text_message};"
+        )
         self.char_text_message_picker.clicked.connect(pickCharTextMessageColor)
-        char_text_message_layout.addWidget(char_text_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
-        char_text_message_layout.addWidget(self.char_text_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
+        char_text_message_layout.addWidget(
+            char_text_message_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        char_text_message_layout.addWidget(
+            self.char_text_message_picker, alignment=Qt.AlignmentFlag.AlignRight
+        )
         color_pickers_layout.addLayout(char_text_message_layout)
 
         char_back_message_layout = QHBoxLayout()
         char_back_message_label = QLabel(self.tr("Character Background Color:"))
         self.char_back_message_picker = QPushButton()
-        self.char_back_message_picker.setStyleSheet(f"background-color: {self.char_back_message};")
+        self.char_back_message_picker.setStyleSheet(
+            f"background-color: {self.char_back_message};"
+        )
         self.char_back_message_picker.clicked.connect(pickCharBackMessageColor)
-        char_back_message_layout.addWidget(char_back_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
-        char_back_message_layout.addWidget(self.char_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
+        char_back_message_layout.addWidget(
+            char_back_message_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        char_back_message_layout.addWidget(
+            self.char_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight
+        )
         color_pickers_layout.addLayout(char_back_message_layout)
 
         user_text_message_layout = QHBoxLayout()
         user_text_message_label = QLabel(self.tr("User Text Color:"))
         self.user_text_message_picker = QPushButton()
-        self.user_text_message_picker.setStyleSheet(f"background-color: {self.user_text_message};")
+        self.user_text_message_picker.setStyleSheet(
+            f"background-color: {self.user_text_message};"
+        )
         self.user_text_message_picker.clicked.connect(pickUserTextMessageColor)
-        user_text_message_layout.addWidget(user_text_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
-        user_text_message_layout.addWidget(self.user_text_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
+        user_text_message_layout.addWidget(
+            user_text_message_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        user_text_message_layout.addWidget(
+            self.user_text_message_picker, alignment=Qt.AlignmentFlag.AlignRight
+        )
         color_pickers_layout.addLayout(user_text_message_layout)
 
         user_back_message_layout = QHBoxLayout()
         user_back_message_label = QLabel(self.tr("User Background Color:"))
         self.user_back_message_picker = QPushButton()
-        self.user_back_message_picker.setStyleSheet(f"background-color: {self.user_back_message};")
+        self.user_back_message_picker.setStyleSheet(
+            f"background-color: {self.user_back_message};"
+        )
         self.user_back_message_picker.clicked.connect(pickUserBackMessageColor)
-        user_back_message_layout.addWidget(user_back_message_label, alignment=Qt.AlignmentFlag.AlignLeft)
-        user_back_message_layout.addWidget(self.user_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight)
+        user_back_message_layout.addWidget(
+            user_back_message_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        user_back_message_layout.addWidget(
+            self.user_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight
+        )
         color_pickers_layout.addLayout(user_back_message_layout)
-        color_picker_layout.addWidget(color_pickers_frame, alignment=Qt.AlignmentFlag.AlignTop)
+        color_picker_layout.addWidget(
+            color_pickers_frame, alignment=Qt.AlignmentFlag.AlignTop
+        )
 
         background_layout = QHBoxLayout()
         bg_label = QLabel(self.tr("Background Image:"))
@@ -1115,25 +1543,34 @@ class ChatInterface(QWidget):
         buttons_layout.addWidget(apply_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         restore_button = PushButton(self.tr("Restore"))
         restore_button.clicked.connect(restoreDefaultColors)
-        buttons_layout.addWidget(restore_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        buttons_layout.addWidget(
+            restore_button, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
         color_picker_layout.addLayout(buttons_layout)
 
-        self.mw.showOverlay(color_picker_widget)
+        self.showOverlay(color_picker_widget)
 
     def selectImage(self):
         def uploaded(response):
             if response.get("status") == "OK":
-                link = response['value']
+                link = response["value"]
                 self.mw.image_loader.load(
-                    link, 50, 50, 25,
-                    label=self.attach_image_label, cache_dir="cache/imgs_in_chats")
+                    link,
+                    50,
+                    50,
+                    25,
+                    label=self.attach_image_label,
+                    cache_dir="cache/imgs_in_chats",
+                )
                 self.attach_image_label.setMinimumSize(50, 50)
                 self.attach_image_label.link = link
             else:
                 self.mw.showNotification(response.get("error"))
 
         file_dialog = QFileDialog()
-        file_dialog.setNameFilter("Images (*.xbm *.tif *.jfif *.pjp *.apng *.svgz *.jpg *.heif *.ico *.tiff *.webp *.jpeg *.heic *.gif *.svg *.png *.bmp *.pjpeg *.avif)")
+        file_dialog.setNameFilter(
+            "Images (*.xbm *.tif *.jfif *.pjp *.apng *.svgz *.jpg *.heif *.ico *.tiff *.webp *.jpeg *.heic *.gif *.svg *.png *.bmp *.pjpeg *.avif)"
+        )
 
         if file_dialog.exec():
             file_path = file_dialog.selectedFiles()[0]
@@ -1141,24 +1578,24 @@ class ChatInterface(QWidget):
 
             ext = os.path.splitext(file_path)[1].lower()
             mime_types = {
-                '.png': 'image/png',
-                '.jpg': 'image/jpeg',
-                '.jpeg': 'image/jpeg',
-                '.gif': 'image/gif',
-                '.webp': 'image/webp',
-                '.bmp': 'image/bmp',
-                '.svg': 'image/svg+xml',
-                '.ico': 'image/x-icon',
-                '.tiff': 'image/tiff',
-                '.tif': 'image/tiff'
+                ".png": "image/png",
+                ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg",
+                ".gif": "image/gif",
+                ".webp": "image/webp",
+                ".bmp": "image/bmp",
+                ".svg": "image/svg+xml",
+                ".ico": "image/x-icon",
+                ".tiff": "image/tiff",
+                ".tif": "image/tiff",
             }
-            content_type = mime_types.get(ext, 'application/octet-stream')
+            content_type = mime_types.get(ext, "application/octet-stream")
 
             mp.addpart(
                 name="image",
                 content_type=content_type,
                 filename=os.path.basename(file_path),
-                local_path=file_path
+                local_path=file_path,
             )
 
             self.mw.chat_thread.upload_image_signal.connect(uploaded)
@@ -1168,37 +1605,56 @@ class ChatInterface(QWidget):
 
     def showChats(self):
         def updateTheme(card):
-            card.chat_text.setStyleSheet(f"color: {TM.c('disabled_text')}; font-size: 14px;")
+            card.chat_text.setStyleSheet(
+                f"color: {TM.c('disabled_text')}; font-size: 14px;"
+            )
 
         def openChat(self, character_id, character_name, chat_id):
-            self.mw.hideOverlay()
+            self.hideOverlay()
             self.mw.openChat(character_id, character_name, chat_id)
 
         def createCard(self, data):
             card = CardFrame()
-            card.mousePressEvent = lambda event: openChat(self, self.character_id, self.character_name, data.get('chat_id'))
+            card.mousePressEvent = lambda event: openChat(
+                self, self.character_id, self.character_name, data.get("chat_id")
+            )
             card.setCursor(Qt.CursorShape.PointingHandCursor)
 
             card_layout = QVBoxLayout()
 
             current_chat = QLabel(self.tr("Current Chat"))
             current_chat.setStyleSheet("color: #3a4671; font-size: .875rem;")
-            if self.chat_id == data.get('chat_id'):
-                card_layout.addWidget(current_chat, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+            if self.chat_id == data.get("chat_id"):
+                card_layout.addWidget(
+                    current_chat,
+                    alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
+                )
 
-            timestamp = data.get('preview_turns', [{}])[0].get('last_update_time')
-            if data.get('preview_turns', [{}])[0].get('last_update_time'):
-                formatted_time = datetime.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%Y.%m.%d %H:%M:%S')
+            timestamp = data.get("preview_turns", [{}])[0].get("last_update_time")
+            if data.get("preview_turns", [{}])[0].get("last_update_time"):
+                formatted_time = datetime.fromisoformat(
+                    timestamp.replace("Z", "+00:00")
+                ).strftime("%Y.%m.%d %H:%M:%S")
             else:
                 formatted_time = "Unavailable"
             chat_time = QLabel(formatted_time)
 
             chat_time.setStyleSheet("color: #dbdbdb; font-size: 12px;")
-            card_layout.addWidget(chat_time, alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+            card_layout.addWidget(
+                chat_time,
+                alignment=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
+            )
 
-            chat_text = QLabel(format_text(data.get('preview_turns', [{}])[0].get('candidates', [{}])[0].get('raw_content'), self.mw.username))
+            chat_text = QLabel(
+                format_text(
+                    data.get("preview_turns", [{}])[0]
+                    .get("candidates", [{}])[0]
+                    .get("raw_content"),
+                    self.mw.username,
+                )
+            )
             chat_text.setWordWrap(True)
-            setattr(card, "chat_text", chat_text)
+            card.chat_text = chat_text
             card_layout.addWidget(chat_text)
 
             card.setLayout(card_layout)
@@ -1218,40 +1674,83 @@ class ChatInterface(QWidget):
         chats_history_widget.setLayout(chats_history_layout)
 
         scroll_page = VerticalScrollPage()
-        scroll_page.viewport.setStyleSheet("background-color: transparent; border: none;")
+        scroll_page.viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         self.chats_cards_layout = scroll_page.layout
         chats_history_layout.addWidget(scroll_page)
 
-        self.mw.showOverlay(chats_history_widget)
+        self.showOverlay(chats_history_widget)
 
-        self.chat_thread.character_chats_signal.connect(lambda chats: showChats(self, chats))
+        self.chat_thread.character_chats_signal.connect(
+            lambda chats: showChats(self, chats)
+        )
         self.chat_thread.get_character_chats(self.character_id)
 
     def _getVoice(self, response):
-        voice_name = response.get('voice', {}).get('name', '')
+        voice_name = response.get("voice", {}).get("name", "")
         self.select_char_voice_label.setText(f"{voice_name}")
 
     def searchVoice(self):
-        search_widget = SearchCard(self.mw, self.character_name, self.voice_id, self.character_id)
-        self.mw.hideOverlay()
-        self.mw.showOverlay(search_widget)
+        search_widget = SearchCard(
+            self.mw, self.character_name, self.voice_id, self.character_id
+        )
+        self.hideOverlay()
+        self.showOverlay(search_widget)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        if hasattr(self, "overlay") and self.overlay is not None:
+            self.overlay.setGeometry(self.rect())
+        y_offset = (
+            75
+            if (
+                self._detach
+                and hasattr(self, "top_bar_frame")
+                and self.top_bar_frame.isVisible()
+            )
+            else 0
+        )
+        sidebar_height = max(100, self.height() - y_offset)
         if self.cis_visible:
-            self.character_info_sidebar.setGeometry(self.width() - self.character_info_sidebar.width(), 0, 200, self.height() - 200)
+            self.character_info_sidebar.setGeometry(
+                self.width() - 230,
+                y_offset,
+                230,
+                sidebar_height,
+            )
         else:
-            self.character_info_sidebar.setGeometry(self.width(), 0, 200, self.height() - 200)
-        self.character_info_sidebar.setFixedHeight(self.mw.height() - 200)
+            self.character_info_sidebar.setGeometry(
+                self.width(), y_offset, 230, sidebar_height
+            )
+        self.character_info_sidebar.setFixedHeight(sidebar_height)
 
     def showCharacterInfoSidebar(self):
+        y_offset = (
+            75
+            if (
+                self._detach
+                and hasattr(self, "top_bar_frame")
+                and self.top_bar_frame.isVisible()
+            )
+            else 0
+        )
+        sidebar_height = max(100, self.height() - y_offset)
+        self.character_info_sidebar.setFixedHeight(sidebar_height)
+        self.character_info_sidebar.setGeometry(
+            self.width(), y_offset, 230, sidebar_height
+        )
         self.character_info_sidebar.show()
-        geom = self.character_info_sidebar.geometry()
+
         self.animation = QPropertyAnimation(self.character_info_sidebar, b"geometry")
         self.animation.setDuration(250)
         self.animation.setEasingCurve(QEasingCurve.Type.OutQuad)
-        self.animation.setStartValue(geom)
-        self.animation.setEndValue(QRect(geom.x() - self.character_info_sidebar.width(), geom.y(), geom.width(), geom.height()))
+        self.animation.setStartValue(
+            QRect(self.width(), y_offset, 230, sidebar_height)
+        )
+        self.animation.setEndValue(
+            QRect(self.width() - 230, y_offset, 230, sidebar_height)
+        )
         self.animation.start()
 
     def toggleCharacterInfoSidebar(self):
@@ -1262,12 +1761,25 @@ class ChatInterface(QWidget):
             self.cis_visible = True
 
     def hideCharacterInfoSidebar(self):
-        geom = self.character_info_sidebar.geometry()
+        y_offset = (
+            75
+            if (
+                self._detach
+                and hasattr(self, "top_bar_frame")
+                and self.top_bar_frame.isVisible()
+            )
+            else 0
+        )
+        sidebar_height = max(100, self.height() - y_offset)
         self.animation = QPropertyAnimation(self.character_info_sidebar, b"geometry")
         self.animation.setDuration(250)
         self.animation.setEasingCurve(QEasingCurve.Type.OutQuad)
-        self.animation.setStartValue(geom)
-        self.animation.setEndValue(QRect(geom.x() + self.character_info_sidebar.width(), geom.y(), geom.width(), geom.height()))
+        self.animation.setStartValue(
+            QRect(self.width() - 230, y_offset, 230, sidebar_height)
+        )
+        self.animation.setEndValue(
+            QRect(self.width(), y_offset, 230, sidebar_height)
+        )
         self.animation.finished.connect(self.character_info_sidebar.hide)
         self.animation.start()
 
@@ -1277,17 +1789,31 @@ class ChatInterface(QWidget):
             self.cis_visible = False
 
     def callCharacter(self):
-        count = self.chat_thread.current_limits.get('voice_limit', {}).get('count_remaining', 0)
+        count = self.chat_thread.current_limits.get("voice_limit", {}).get(
+            "count_remaining", 0
+        )
         if count >> 0:
+
             def voicecalllimit(connected: bool):
                 if connected:
-                    self.chat_thread.current_limits['voice_limit']['count_remaining'] -= 1
+                    self.chat_thread.current_limits["voice_limit"][
+                        "count_remaining"
+                    ] -= 1
+
             self.hideCharacterInfoSidebar2()
             self.mw.hide_overlay = False
-            vsmode = ModeCard(self.mw, self, self.character.get('avatar_file_name'), self.chat_id, self.character_id, self.voice_id, self.character_name)
+            vsmode = ModeCard(
+                self.mw,
+                self,
+                self.character.get("avatar_file_name"),
+                self.chat_id,
+                self.character_id,
+                self.voice_id,
+                self.character_name,
+            )
             vsmode.thread.connected_signal.connect(voicecalllimit)
-            vsmode.closeEvent = lambda event: setattr(self.mw, 'hide_overlay', True)
-            self.mw.showOverlay(vsmode)
+            vsmode.closeEvent = lambda event: setattr(self.mw, "hide_overlay", True)
+            self.showOverlay(vsmode)
         elif count == 0:
             self.mw.showNotification(self.tr("Call limit exceeded"))
 
@@ -1297,7 +1823,7 @@ class ChatInterface(QWidget):
         thread.start()
 
     def _voiceProcess(self, response):
-        replayUrl = response['replayUrl']
+        replayUrl = response["replayUrl"]
         thread = FileLoaderThread(replayUrl)
         self.mw.threads.append(thread)
         thread.file.connect(self._playVoice)
@@ -1305,7 +1831,7 @@ class ChatInterface(QWidget):
 
     def enableVoice(self):
         self.voice_enabled = True
-        self.enable_char_voice_button.setIcon(self.svg_icons.with_voice('#7d9aff'))
+        self.enable_char_voice_button.setIcon(self.svg_icons.with_voice("#7d9aff"))
         self.enable_char_voice_button.disconnect()
         self.enable_char_voice_button.clicked.connect(self.disableVoice)
         self.chat_thread.replay_signal.connect(self._voiceProcess)
@@ -1319,7 +1845,7 @@ class ChatInterface(QWidget):
 
     def _voiceOverride(self, response):
         self.chat_thread.voice_override_signal.disconnect()
-        self.voice_id = response.get('voice_id')
+        self.voice_id = response.get("voice_id")
         if not self.voice_id:
             self.enable_char_voice_button.setVisible(False)
             self.select_char_voice_button.setText(self.tr("Search Voice"))
@@ -1332,14 +1858,20 @@ class ChatInterface(QWidget):
         if self.mw.recent_chats:
             for i in range(self.mw.recent_chat_scroll_layout.count()):
                 item = self.mw.recent_chat_scroll_layout.itemAt(i)
-                if item and item.widget() and item.widget().objectName() == self.chat_id:
+                if (
+                    item
+                    and item.widget()
+                    and item.widget().objectName() == self.chat_id
+                ):
                     recent_card = item.widget()
                     self.mw.recent_chat_scroll_layout.removeWidget(recent_card)
                     self.mw.recent_chat_scroll_layout.insertWidget(0, recent_card)
                     break
 
-        self.chat_id = botanswer['chat']['chat_id']
-        recent_card.mousePressEvent = lambda event: self.mw.openChat(self.character_id, self.character_name, self.chat_id)
+        self.chat_id = botanswer["chat"]["chat_id"]
+        recent_card.mousePressEvent = lambda event: self.mw.openChat(
+            self.character_id, self.character_name, self.chat_id
+        )
         recent_card.setObjectName(self.chat_id)
         self.chat_thread.new_chat_created_signal.disconnect()
         self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
@@ -1379,7 +1911,9 @@ class ChatInterface(QWidget):
         self.mw.openCreateCharacterPage(self.character_id)
 
     def shareCharacter(self):
-        QApplication.clipboard().setText(f'https://character.ai/chat/{self.character_id}')
+        QApplication.clipboard().setText(
+            f"https://character.ai/chat/{self.character_id}"
+        )
         self.mw.showNotification(self.tr("Link copied to clipboard"))
 
     def initData(self, character):
@@ -1395,42 +1929,75 @@ class ChatInterface(QWidget):
 
     def _getCharacter(self, character):
         self.chat_thread.get_char_signal.disconnect()
-        self.voted = character.get('voted', {}).get('voted', False)
-        self.vote = character.get('voted', {}).get('vote', None)
-        self.character = character.get('character', {})
-        self.character_name = self.character['name']
+        self.voted = character.get("voted", {}).get("voted", False)
+        self.vote = character.get("voted", {}).get("vote", None)
+        self.character = character.get("character", {})
+        self.character_name = self.character["name"]
 
-        if self.character.get('avatar_file_name'):
+        if self.character.get("avatar_file_name"):
             self.mw.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{self.character.get('avatar_file_name')}?webp=true&anim=0", 70, 70, 4,
+                f"https://characterai.io/i/80/static/avatars/{self.character.get('avatar_file_name')}?webp=true&anim=0",
+                70,
+                70,
+                4,
                 label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, 70, 70, self.character_name, 4))
+                error_cb=lambda _: color_avatar(
+                    self.avatar_label, 70, 70, self.character_name, 4
+                ),
+            )
         else:
             color_avatar(self.avatar_label, 70, 70, self.character_name, 4)
 
-        if self.character.get('avatar_file_name'):
+        if self.character.get("avatar_file_name"):
             self.mw.image_loader.load(
                 f"https://characterai.io/i/80/static/avatars/{self.character.get('avatar_file_name')}?webp=true&anim=0",
-                40, 40, 4, label=self.header_avatar_label,
-                error_cb=lambda _: color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4))
+                40,
+                40,
+                4,
+                label=self.header_avatar_label,
+                error_cb=lambda _: color_avatar(
+                    self.header_avatar_label, 40, 40, self.character_name, 4
+                ),
+            )
         else:
             color_avatar(self.header_avatar_label, 40, 40, self.character_name, 4)
 
         self.name_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.name_label.setText(f"<b>{self.character_name}</b>")
-        self.name_label.mousePressEvent = lambda x: self.mw.openCharacter(character.get('path'), self.character_id)
+        self.name_label.mousePressEvent = lambda x: self.mw.openCharacter(
+            character.get("path"), self.character_id
+        )
         self.header_name_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.header_name_label.setText(f"<b>{self.character_name}</b>")
-        self.header_name_label.mousePressEvent = lambda x: self.mw.openCharacter(character.get('path'), self.character_id)
+        self.header_name_label.mousePressEvent = lambda x: self.mw.openCharacter(
+            character.get("path"), self.character_id
+        )
 
         self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.author_label.setText("<i>"+self.tr("Author: @") + self.character.get('participant__user__username', self.tr('Unknown')) + "</i>")
-        self.author_label.mousePressEvent = lambda x: self.mw.openUserPage(self.character.get('participant__user__username', 'Unknown'))
+        self.author_label.setText(
+            "<i>"
+            + self.tr("Author: @")
+            + self.character.get("participant__user__username", self.tr("Unknown"))
+            + "</i>"
+        )
+        self.author_label.mousePressEvent = lambda x: self.mw.openUserPage(
+            self.character.get("participant__user__username", "Unknown")
+        )
         self.header_author_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.header_author_label.setText("<i>"+self.tr("Author: @") + self.character.get('participant__user__username', self.tr('Unknown')) + "</i>")
-        self.header_author_label.mousePressEvent = lambda x: self.mw.openUserPage(self.character.get('participant__user__username', 'Unknown'))
+        self.header_author_label.setText(
+            "<i>"
+            + self.tr("Author: @")
+            + self.character.get("participant__user__username", self.tr("Unknown"))
+            + "</i>"
+        )
+        self.header_author_label.mousePressEvent = lambda x: self.mw.openUserPage(
+            self.character.get("participant__user__username", "Unknown")
+        )
 
-        self.chats_label.setText(str(format_number(self.character.get('participant__num_interactions', 0))) + self.tr(" chats"))
+        self.chats_label.setText(
+            str(format_number(self.character.get("participant__num_interactions", 0)))
+            + self.tr(" chats")
+        )
 
         if self.voted:
             if self.vote == True:
@@ -1438,33 +2005,45 @@ class ChatInterface(QWidget):
             elif self.vote == False:
                 self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("icon")))
 
-        self.title_label.setText(self.character.get('title'))
+        self.title_label.setText(self.character.get("title"))
         self.toggle_info_button.setEnabled(True)
         self.header_character_frame.setVisible(True)
 
-        if self.character.get('participant__user__username', self.tr('Unknown')) == self.mw.username:
+        if (
+            self.character.get("participant__user__username", self.tr("Unknown"))
+            == self.mw.username
+        ):
             self.edit_char_button.setVisible(True)
 
         self.chat_thread.get_recommend_chars_by_id(self.character_id)
 
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
-            if self.character.get('visibility') == "PUBLIC" and self.mw.drpc_show_chat_name:
-                if self.character.get('avatar_file_name'):
+            if (
+                self.character.get("visibility") == "PUBLIC"
+                and self.mw.drpc_show_chat_name
+            ):
+                if self.character.get("avatar_file_name"):
                     self.discord_thread.update(
                         details=self.tr("Chatting with ") + self.character_name,
-                        large_image="https://characterai.io/i/80/static/avatars/" + self.character.get('avatar_file_name') + '?webp=true&anim=0',
-                        buttons=[{
-                            "label": self.tr("Open character"),
-                            "url": f"https://character.ai/character/{self.character['short_hash']}"
-                        }]
+                        large_image="https://characterai.io/i/80/static/avatars/"
+                        + self.character.get("avatar_file_name")
+                        + "?webp=true&anim=0",
+                        buttons=[
+                            {
+                                "label": self.tr("Open character"),
+                                "url": f"https://character.ai/character/{self.character['short_hash']}",
+                            }
+                        ],
                     )
                 else:
                     self.discord_thread.update(
                         details=self.tr("Chatting with ") + self.character_name,
-                        buttons=[{
-                            "label": self.tr("Open character"),
-                            "url": f"https://character.ai/character/{self.character['short_hash']}"
-                        }]
+                        buttons=[
+                            {
+                                "label": self.tr("Open character"),
+                                "url": f"https://character.ai/character/{self.character['short_hash']}",
+                            }
+                        ],
                     )
             else:
                 self.discord_thread.update(details=self.tr("Chatting"))
@@ -1475,10 +2054,15 @@ class ChatInterface(QWidget):
         self.chat_thread.get_history_signal.disconnect()
         for turn in turns:
             older = []
-            pci = turn.get('primary_candidate_id')
-            for candidate in turn.get('candidates', []):
-                if candidate.get('candidate_id', pci) == pci:
-                    self.addMessage(candidate.get('raw_content', ''), turn.get('turn_key', {}).get('turn_id', ''), turn.get('author', {}).get('is_human', False), candidate.get('attachments', []))
+            pci = turn.get("primary_candidate_id")
+            for candidate in turn.get("candidates", []):
+                if candidate.get("candidate_id", pci) == pci:
+                    self.addMessage(
+                        candidate.get("raw_content", ""),
+                        turn.get("turn_key", {}).get("turn_id", ""),
+                        turn.get("author", {}).get("is_human", False),
+                        candidate.get("attachments", []),
+                    )
                 else:
                     older.append(candidate)
 
@@ -1486,7 +2070,7 @@ class ChatInterface(QWidget):
         self.chat_thread.chat_signal.disconnect()
         if chat:
             for chats in chat:
-                self.chat_id = chats.get('chat_id')
+                self.chat_id = chats.get("chat_id")
             self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
             self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
             self.chat_thread.get_history(self.chat_id)
@@ -1497,7 +2081,7 @@ class ChatInterface(QWidget):
                     if item and item.widget():
                         card = item.widget()
                         if card.objectName() == self.chat_id:
-                            setattr(self, 'recent_card', card)
+                            self.recent_card = card
                             card.setCheckable(True)
                         break
         else:
@@ -1506,13 +2090,15 @@ class ChatInterface(QWidget):
 
     def _getChatById(self, data):
         self.chat_thread.get_chat_by_id_signal.disconnect()
-        self.chat_data = data.get('chat', {})
-        self.preferred_model_type = self.chat_data.get('preferred_model_type', 'MODEL_TYPE_BALANCED')
+        self.chat_data = data.get("chat", {})
+        self.preferred_model_type = self.chat_data.get(
+            "preferred_model_type", "MODEL_TYPE_BALANCED"
+        )
 
     def _newChatCreated(self, botanswer):
         self.clearMessages()
         self.chat_thread.new_chat_created_signal.disconnect()
-        self.chat_id = botanswer['chat']['chat_id']
+        self.chat_id = botanswer["chat"]["chat_id"]
         self.chat_thread.get_char_signal.connect(self._getCharacter)
         self.chat_thread.get_history_signal.connect(self._addMessagesFromHistory)
         self.chat_thread.get_chat_by_id_signal.connect(self._getChatById)
@@ -1533,30 +2119,57 @@ class ChatInterface(QWidget):
         self.messages_content.update()
         self.messages_area.verticalScrollBar().setValue(0)
 
-    def addMessage(self, text, turn_id, is_user=False, attachments=[]):
+    def addMessage(self, text, turn_id, is_user=False, attachments=None):
+        if attachments is None:
+            attachments = []
         message_widget = QStackedWidget()
         message_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         message_widget.setStyleSheet("background: transparent;")
-        message_widget.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        message_widget.setSizePolicy(
+            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
+        )
         message_widget.turn_id = turn_id
         message_widget.is_user = is_user
         message_bubble = self.createMessage(text, turn_id, is_user, attachments)
 
-        self.messages_layout.addWidget(message_widget, 1,
-                                       Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft)
+        self.messages_layout.addWidget(
+            message_widget,
+            1,
+            Qt.AlignmentFlag.AlignRight if is_user else Qt.AlignmentFlag.AlignLeft,
+        )
         message_widget.addWidget(message_bubble)
         message_widget.setCurrentWidget(message_bubble)
         return message_widget
 
-    def createMessage(self, text, turn_id, is_user=False, attachments=[]):
+    def createMessage(self, text, turn_id, is_user=False, attachments=None):
+        if attachments is None:
+            attachments = []
         if is_user:
-            message_bubble = MessageBubble(self.mw, self, format_text(text), self.mw.me_avatar, self.mw.name,True, attachments)
+            message_bubble = MessageBubble(
+                self.mw,
+                self,
+                format_text(text),
+                self.mw.me_avatar,
+                self.mw.name,
+                True,
+                attachments,
+            )
         else:
-            message_bubble = MessageBubble(self.mw, self, format_text(text), self.character.get('avatar_file_name'), self.character_name, False, attachments)
+            message_bubble = MessageBubble(
+                self.mw,
+                self,
+                format_text(text),
+                self.character.get("avatar_file_name"),
+                self.character_name,
+                False,
+                attachments,
+            )
         message_bubble.turn_id = turn_id
 
         message_bubble.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        message_bubble.customContextMenuRequested.connect(lambda pos, mb=message_bubble: self.showContextMenu(pos, mb))
+        message_bubble.customContextMenuRequested.connect(
+            lambda pos, mb=message_bubble: self.showContextMenu(pos, mb)
+        )
         return message_bubble
 
     def setBackMessageColor(self, message, color):
@@ -1574,19 +2187,38 @@ class ChatInterface(QWidget):
         if text:
             self.message_input.setHtml('<span style="color: white;"></span>')
             if self.attach_image_label.link:
-                attachments = [{"type": "TYPE_IMAGE", "url": self.attach_image_label.link}]
+                attachments = [
+                    {"type": "TYPE_IMAGE", "url": self.attach_image_label.link}
+                ]
                 self.addMessage(text, "", is_user=True, attachments=attachments)
-                self.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id), attachments)
+                self.chat_thread.send_message(
+                    self.character_id,
+                    self.chat_id,
+                    text,
+                    self.voice_enabled,
+                    str(self.voice_id),
+                    attachments,
+                )
                 self.attach_image_label.link = ""
-                self.attach_image_label.setMinimumSize(0,0)
+                self.attach_image_label.setMinimumSize(0, 0)
                 self.attach_image_label.setPixmap(QPixmap())
             else:
                 self.addMessage(text, "", is_user=True)
-                self.chat_thread.send_message(self.character_id, self.chat_id, text, self.voice_enabled, str(self.voice_id))
+                self.chat_thread.send_message(
+                    self.character_id,
+                    self.chat_id,
+                    text,
+                    self.voice_enabled,
+                    str(self.voice_id),
+                )
             if self.mw.recent_chats:
                 for i in range(self.mw.recent_chat_scroll_layout.count()):
                     item = self.mw.recent_chat_scroll_layout.itemAt(i)
-                    if item and item.widget() and item.widget().objectName() == self.chat_id:
+                    if (
+                        item
+                        and item.widget()
+                        and item.widget().objectName() == self.chat_id
+                    ):
                         recent_card = item.widget()
                         self.mw.recent_chat_scroll_layout.removeWidget(recent_card)
                         self.mw.recent_chat_scroll_layout.insertWidget(0, recent_card)
@@ -1594,7 +2226,9 @@ class ChatInterface(QWidget):
 
     def _copyChat(self, data):
         self.chat_thread.copy_chat_signal.disconnect()
-        self.mw.openChat(self.character_id, self.character_name, data.get('new_chat_id'))
+        self.mw.openChat(
+            self.character_id, self.character_name, data.get("new_chat_id")
+        )
         self.mw.showNotification(self.tr("New chat started"))
 
     def copyChat(self, turn_id):
@@ -1609,7 +2243,11 @@ class ChatInterface(QWidget):
         turn_ids = [turn_id]
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)
-            if item and item.widget() and item.widget().currentWidget().turn_id == turn_id:
+            if (
+                item
+                and item.widget()
+                and item.widget().currentWidget().turn_id == turn_id
+            ):
                 self.chat_thread.turn_remove_signal.connect(self._turnRemove)
                 self.chat_thread.turn_remove(self.chat_id, turn_ids)
                 item.widget().deleteLater()
@@ -1619,51 +2257,76 @@ class ChatInterface(QWidget):
         self.chat_thread.turn_remove_signal.disconnect()
 
     def rewind(self, turn_id):
-        index = next((i for i, turn in enumerate(self.chat_thread.chat_histories.get(self.chat_id, [])) if turn.get('turn_key', {}).get('turn_id') == turn_id), None)
+        index = next(
+            (
+                i
+                for i, turn in enumerate(
+                    self.chat_thread.chat_histories.get(self.chat_id, [])
+                )
+                if turn.get("turn_key", {}).get("turn_id") == turn_id
+            ),
+            None,
+        )
         turn_ids_for_remove = []
 
         if index is not None:
-            for turn in self.chat_thread.chat_histories[self.chat_id][index + 1:]:
-                turn_ids_for_remove.append(turn.get('turn_key', {}).get('turn_id'))
-            self.chat_thread.chat_histories[self.chat_id] = self.chat_thread.chat_histories[self.chat_id][:index + 1]
+            for turn in self.chat_thread.chat_histories[self.chat_id][index + 1 :]:
+                turn_ids_for_remove.append(turn.get("turn_key", {}).get("turn_id"))
+            self.chat_thread.chat_histories[self.chat_id] = (
+                self.chat_thread.chat_histories[self.chat_id][: index + 1]
+            )
 
         for i in range(self.messages_layout.count()):
             item = self.messages_layout.itemAt(i)
-            if item and item.widget() and item.widget().currentWidget().turn_id in turn_ids_for_remove:
+            if (
+                item
+                and item.widget()
+                and item.widget().currentWidget().turn_id in turn_ids_for_remove
+            ):
                 self.chat_thread.turn_remove_signal.connect(self._rewind)
                 self.chat_thread.turn_remove(self.chat_id, turn_ids_for_remove)
                 item.widget().deleteLater()
 
     def _turnRegenerate(self, response, turn_id, message_bubble_added):
-        command = response['command']
-        if command == 'update_turn':
+        command = response["command"]
+        if command == "update_turn":
             for i in reversed(range(self.messages_layout.count())):
                 item = self.messages_layout.itemAt(i)
                 widget = item.widget()
-                if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+                if (
+                    hasattr(widget, "turn_id")
+                    and widget.turn_id == response["turn"]["turn_key"]["turn_id"]
+                ):
                     message_stacked = widget
                     break
 
-            message_stacked.turn_id = response['turn']['turn_key']['turn_id']
+            message_stacked.turn_id = response["turn"]["turn_key"]["turn_id"]
 
             if not message_bubble_added:
                 message = self.createMessage(
-                    format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username),
-                    response['turn']['turn_key']['turn_id'],
-                    False
+                    format_text(
+                        response["turn"]["candidates"][0]["raw_content"],
+                        self.mw.username,
+                    ),
+                    response["turn"]["turn_key"]["turn_id"],
+                    False,
                 )
-                self.startTextAnimation(message, response['turn']['candidates'][0]['raw_content'])
+                self.startTextAnimation(
+                    message, response["turn"]["candidates"][0]["raw_content"]
+                )
             else:
                 message = message_stacked.currentWidget()
                 label = message.message_label
 
-                if hasattr(label, 'animation_timer'):
+                if hasattr(label, "animation_timer"):
                     label.animation_timer.stop()
                     label.is_animating = False
 
-                new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+                new_text = format_text(
+                    response["turn"]["candidates"][0]["raw_content"], self.mw.username
+                )
 
-                if not hasattr(label, 'is_animating'):
+                if not hasattr(label, "is_animating"):
                     self.setupAnimation(label)
                     label.setText("")
                     label.target_text = new_text
@@ -1671,13 +2334,15 @@ class ChatInterface(QWidget):
                     label.current_index = 0
                     label.is_animating = True
 
-                new_text = format_text(response['turn']['candidates'][0]['raw_content'], self.mw.username)
+                new_text = format_text(
+                    response["turn"]["candidates"][0]["raw_content"], self.mw.username
+                )
                 message.text = new_text
                 self.addTextToAnimation(message.message_label, new_text)
 
                 label.animation_timer.start(30)
 
-            message.turn_id = response['turn']['turn_key']['turn_id']
+            message.turn_id = response["turn"]["turn_key"]["turn_id"]
             message.setMinimumHeight(0)
             message.adjustSize()
 
@@ -1686,19 +2351,26 @@ class ChatInterface(QWidget):
             item = self.messages_layout.itemAt(i)
             if item and item.widget() and item.widget().turn_id == turn_id:
                 self.chat_thread.turn_regenerate_signal.connect(self._turnRegenerate)
-                self.chat_thread.turn_regenerate(self.character_id, self.chat_id, turn_id, tts_enabled=self.voice_enabled)
+                self.chat_thread.turn_regenerate(
+                    self.character_id,
+                    self.chat_id,
+                    turn_id,
+                    tts_enabled=self.voice_enabled,
+                )
             elif item and item.spacerItem():
                 pass
 
     def _editMessage(self, turn_id):
         self.chat_thread.edit_message_signal.connect(self.__editMessage)
-        self.chat_thread.edit_message(self.chat_id, turn_id, self.message_input.toPlainText())
+        self.chat_thread.edit_message(
+            self.chat_id, turn_id, self.message_input.toPlainText()
+        )
 
     def editMessage(self, turn_id):
         for i in reversed(range(self.messages_layout.count())):
             item = self.messages_layout.itemAt(i)
             widget = item.widget()
-            if hasattr(widget, 'turn_id') and widget.turn_id == turn_id:
+            if hasattr(widget, "turn_id") and widget.turn_id == turn_id:
                 message_stacked = widget
                 break
 
@@ -1713,16 +2385,21 @@ class ChatInterface(QWidget):
         for i in reversed(range(self.messages_layout.count())):
             item = self.messages_layout.itemAt(i)
             widget = item.widget()
-            if hasattr(widget, 'turn_id') and widget.turn_id == response['turn']['turn_key']['turn_id']:
+            if (
+                hasattr(widget, "turn_id")
+                and widget.turn_id == response["turn"]["turn_key"]["turn_id"]
+            ):
                 message_stacked = widget
                 break
 
         message = message_stacked.currentWidget()
 
-        pci = response.get("turn", {}).get('primary_candidate_id')
-        for candidate in response.get("turn", {}).get('candidates', []):
-            if candidate.get('candidate_id', pci) == pci:
-                new_text = format_text(candidate.get('raw_content', ''), self.mw.username)
+        pci = response.get("turn", {}).get("primary_candidate_id")
+        for candidate in response.get("turn", {}).get("candidates", []):
+            if candidate.get("candidate_id", pci) == pci:
+                new_text = format_text(
+                    candidate.get("raw_content", ""), self.mw.username
+                )
                 message.text = new_text
                 message.message_label.setText(new_text)
 
@@ -1737,51 +2414,80 @@ class ChatInterface(QWidget):
         context_menu = Menu(self)
 
         copy_action = QAction(self.tr("Copy Message"), self)
-        copy_action.triggered.connect(lambda event: copy(message_bubble.message_label.text()))
+        copy_action.triggered.connect(
+            lambda event: copy(message_bubble.message_label.text())
+        )
         context_menu.addAction(copy_action)
 
         if message_bubble.turn_id:
             delete_action = QAction(self.tr("Delete Message"), self)
-            delete_action.triggered.connect(lambda event: self.turnRemove(message_bubble.turn_id))
+            delete_action.triggered.connect(
+                lambda event: self.turnRemove(message_bubble.turn_id)
+            )
             context_menu.addAction(delete_action)
 
             rewind_action = QAction(self.tr("Rewind to here"), self)
-            rewind_action.triggered.connect(lambda event: self.rewind(message_bubble.turn_id))
+            rewind_action.triggered.connect(
+                lambda event: self.rewind(message_bubble.turn_id)
+            )
             context_menu.addAction(rewind_action)
 
             new_chat_here_action = QAction(self.tr("New chat from here"), self)
-            new_chat_here_action.triggered.connect(lambda event: self.copyChat(message_bubble.turn_id))
+            new_chat_here_action.triggered.connect(
+                lambda event: self.copyChat(message_bubble.turn_id)
+            )
             context_menu.addAction(new_chat_here_action)
 
             regenerate_action = QAction(self.tr("Regenerate"), self)
-            regenerate_action.triggered.connect(lambda event: self.turnRegenerate(message_bubble.turn_id))
-            if not message_bubble.is_user: context_menu.addAction(regenerate_action)
+            regenerate_action.triggered.connect(
+                lambda event: self.turnRegenerate(message_bubble.turn_id)
+            )
+            if not message_bubble.is_user:
+                context_menu.addAction(regenerate_action)
 
             edit_message_action = QAction(self.tr("Edit message"), self)
-            edit_message_action.triggered.connect(lambda event: self.editMessage(message_bubble.turn_id))
+            edit_message_action.triggered.connect(
+                lambda event: self.editMessage(message_bubble.turn_id)
+            )
             context_menu.addAction(edit_message_action)
 
         context_menu.exec(message_bubble.mapToGlobal(pos))
 
     def mousePressEvent(self, event: QMouseEvent):
+        if (
+            hasattr(self, "overlay")
+            and self.overlay is not None
+            and self.overlay.isVisible()
+            and self._detach
+        ):
+            global_click_pos = event.globalPosition().toPoint()
+            content_global_pos = self.overlay_content.mapToGlobal(
+                self.overlay_content.rect().topLeft()
+            )
+            content_rect = QRect(content_global_pos, self.overlay_content.size())
+            if not content_rect.contains(global_click_pos):
+                self.hideOverlay()
+
         super().mousePressEvent(event)
         if self.cis_visible:
             global_click_pos = event.globalPosition().toPoint()
-            sidebar_global_pos = self.character_info_sidebar.mapToGlobal(self.character_info_sidebar.rect().topLeft())
+            sidebar_global_pos = self.character_info_sidebar.mapToGlobal(
+                self.character_info_sidebar.rect().topLeft()
+            )
             sidebar_rect = QRect(sidebar_global_pos, self.character_info_sidebar.size())
             if not sidebar_rect.contains(global_click_pos):
                 self.hideCharacterInfoSidebar2()
 
     def hideEvent(self, a0):
         super().hideEvent(a0)
-        if hasattr(self, 'recent_card') and not self.scene_id:
+        if hasattr(self, "recent_card") and not self.scene_id:
             self.recent_card.setCheckable(False)
 
     def closeEvent(self, a0):
         if self._detach:
             a0.ignore()
-            self._detach = False
-            self.attach_signal.emit(True)
+            self.hideOverlay()
+            self.attach_chat()
         else:
             super().closeEvent(a0)
             self.deleteLater()

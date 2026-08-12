@@ -1,8 +1,9 @@
-from PyQt6.QtCore import  Qt
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout
 
 from modules.ui.Elements import CardFrame
 from modules.Utils import color_avatar
+
 
 class ListCard(CardFrame):
     def __init__(self, main_window, icon_path, name):
@@ -26,11 +27,27 @@ class ListCard(CardFrame):
         card_layout.addWidget(self.avatar_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         if self.icon_path:
-            self.image_loader.load(self.icon_path, self.avatar_label_w, self.avatar_label_h, 4,
+            self.image_loader.load(
+                self.icon_path,
+                self.avatar_label_w,
+                self.avatar_label_h,
+                4,
                 label=self.avatar_label,
-                error_cb=lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name))
+                error_cb=lambda _: color_avatar(
+                    self.avatar_label,
+                    self.avatar_label_w,
+                    self.avatar_label_h,
+                    self.name,
+                ),
+            )
         else:
-            color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4)
+            color_avatar(
+                self.avatar_label,
+                self.avatar_label_w,
+                self.avatar_label_h,
+                self.name,
+                4,
+            )
 
         text_layout = QVBoxLayout()
         text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)

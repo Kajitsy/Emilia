@@ -1,14 +1,25 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFontMetrics
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout
 
 from modules.ui import TM
-from modules.ui.Elements import PushButton, CardFrame
-from modules.Utils import format_text, format_number, color_avatar
+from modules.ui.Elements import CardFrame, PushButton
+from modules.Utils import color_avatar, format_number, format_text
+
 
 class MainCard(CardFrame):
-    def __init__(self, main_window, name="", avatar_url="", description="", author="", character_id="", chats=0,
-                 voted=0, avatar_label_w=90, avatar_label_h=114):
+    def __init__(
+        self,
+        main_window,
+        name="",
+        avatar_url="",
+        description="",
+        author="",
+        character_id="",
+        chats=0,
+        voted=0,
+        avatar_label_w=90,
+        avatar_label_h=114,
+    ):
         self.mw = main_window
         self.image_loader = self.mw.image_loader
         self.name = name
@@ -33,10 +44,26 @@ class MainCard(CardFrame):
 
         if self.avatar_url:
             self.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0", self.avatar_label_w, self.avatar_label_h, 4,
-                label=self.avatar_label, error_cb=lambda _: color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name))
+                f"https://characterai.io/i/80/static/avatars/{self.avatar_url}?webp=true&anim=0",
+                self.avatar_label_w,
+                self.avatar_label_h,
+                4,
+                label=self.avatar_label,
+                error_cb=lambda _: color_avatar(
+                    self.avatar_label,
+                    self.avatar_label_w,
+                    self.avatar_label_h,
+                    self.name,
+                ),
+            )
         else:
-            color_avatar(self.avatar_label, self.avatar_label_w, self.avatar_label_h, self.name, 4)
+            color_avatar(
+                self.avatar_label,
+                self.avatar_label_w,
+                self.avatar_label_h,
+                self.name,
+                4,
+            )
 
         text_layout = QVBoxLayout()
         text_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -58,16 +85,20 @@ class MainCard(CardFrame):
             text_layout.addWidget(self.author_label)
 
         if self.description:
-            description_label = QLabel(format_text(self.description, self.name))
-            description_label.setWordWrap(True)
+            clean_desc = str(self.description).replace("\n", " ").strip()
+            description_label = QLabel(format_text(clean_desc, self.name))
+            description_label.setWordWrap(False)
+            description_label.setSizePolicy(
+                QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred
+            )
             font = description_label.font()
-            font.setPointSize(10)
+            font.setPointSize(9)
             description_label.setFont(font)
-            fm = QFontMetrics(font)
-            description_label.setMaximumHeight(fm.lineSpacing() * 4)
             text_layout.addWidget(description_label)
 
-        spacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        spacer = QSpacerItem(
+            20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+        )
         text_layout.addItem(spacer)
 
         self.add_info = QLabel()
@@ -75,18 +106,31 @@ class MainCard(CardFrame):
         font.setPointSize(10)
         self.add_info.setFont(font)
         if self.chats:
-            self.add_info.setText(self.add_info.text() + str(format_number(self.chats)) + self.tr(" chats"))
+            self.add_info.setText(
+                self.add_info.text()
+                + str(format_number(self.chats))
+                + self.tr(" chats")
+            )
         if self.voted:
-            self.add_info.setText(self.add_info.text() + " • " + str(format_number(self.voted)) + self.tr(" likes"))
+            self.add_info.setText(
+                self.add_info.text()
+                + " • "
+                + str(format_number(self.voted))
+                + self.tr(" likes")
+            )
 
         if self.add_info.text():
             text_layout.addWidget(self.add_info)
 
         self.edit_button = PushButton(self.tr("Edit"))
-        self.edit_button.clicked.connect(lambda: self.mw.openCreateCharacterPage(self.character_id))
+        self.edit_button.clicked.connect(
+            lambda: self.mw.openCreateCharacterPage(self.character_id)
+        )
 
         if self.author == self.mw.username:
-            card_layout.addWidget(self.edit_button, alignment=Qt.AlignmentFlag.AlignRight)
+            card_layout.addWidget(
+                self.edit_button, alignment=Qt.AlignmentFlag.AlignRight
+            )
 
         super().__init__()
         self.setLayout(card_layout)

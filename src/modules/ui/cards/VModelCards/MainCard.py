@@ -1,15 +1,30 @@
 import logging
-import os, time
-
-import OpenGL.GL as gl
-from PyQt6.QtCore import QTimerEvent, Qt, QPropertyAnimation, pyqtProperty, QObject, pyqtSignal, QTimer
-from PyQt6.QtGui import QMouseEvent, QCursor, QWheelEvent, QGuiApplication, QSurfaceFormat
-from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+import os
+import time
 
 import live2d.v3 as live2d
-from live2d.v3 import StandardParams, MotionPriority
+import OpenGL.GL as gl
 from live2d.utils import log
 from live2d.utils.lipsync import WavHandler
+from live2d.v3 import MotionPriority, StandardParams
+from PyQt6.QtCore import (
+    QObject,
+    QPropertyAnimation,
+    Qt,
+    QTimer,
+    QTimerEvent,
+    pyqtProperty,
+    pyqtSignal,
+)
+from PyQt6.QtGui import (
+    QCursor,
+    QGuiApplication,
+    QMouseEvent,
+    QSurfaceFormat,
+    QWheelEvent,
+)
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+
 
 class MainCard(QOpenGLWidget):
     class AnimatedParameter(QObject):
@@ -89,7 +104,9 @@ class MainCard(QOpenGLWidget):
         self.setMouseTracking(True)
 
     def set_stream_volume(self, volume: float):
-        self.stream_volume = (self.stream_volume * self.volume_smoothing) + (volume * (1.0 - self.volume_smoothing))
+        self.stream_volume = (self.stream_volume * self.volume_smoothing) + (
+            volume * (1.0 - self.volume_smoothing)
+        )
 
     def set_window_stay_on_top(self, stay_on_top):
         flags = self.windowFlags()
@@ -110,11 +127,14 @@ class MainCard(QOpenGLWidget):
     def animate_parameter(self, parameter_id, target_value, duration=200):
         if parameter_id not in self._animated_parameters:
             initial_value = self._get_parameter_value_from_model(parameter_id)
-            self._animated_parameters[parameter_id] = self.AnimatedParameter(initial_value)
+            self._animated_parameters[parameter_id] = self.AnimatedParameter(
+                initial_value
+            )
 
         if parameter_id not in self.animations:
-            self.animations[parameter_id] = self.SpeedSegmentAnimation(self._animated_parameters[parameter_id],
-                                                                       b"value")
+            self.animations[parameter_id] = self.SpeedSegmentAnimation(
+                self._animated_parameters[parameter_id], b"value"
+            )
 
         animation = self.animations[parameter_id]
         animation.stop()
@@ -122,7 +142,7 @@ class MainCard(QOpenGLWidget):
         animation.setStartValue(self._animated_parameters[parameter_id].value)
         animation.setEndValue(target_value)
         animation.start()
-        log.Debug('start animation', parameter_id, 'to', target_value)
+        log.Debug("start animation", parameter_id, "to", target_value)
 
     def load_idle_animation(self, motion_path: str):
         if not os.path.exists(motion_path):
@@ -133,14 +153,15 @@ class MainCard(QOpenGLWidget):
 
         if self.model:
             self.idle_motion_no = self.model.LoadExtraMotion(
-                self.idle_motion_group,
-                self.idle_animation_path
+                self.idle_motion_group, self.idle_animation_path
             )
 
             if self.idle_motion_no != -1:
                 self._play_idle_motion()
             else:
-                logging.error("Error: The file was found, but Live2D was unable to load it. The file may be corrupted.")
+                logging.error(
+                    "Error: The file was found, but Live2D was unable to load it. The file may be corrupted."
+                )
 
     def _play_idle_motion(self, z=0, v=0):
         if self.model and self.idle_motion_no != -1:
@@ -149,7 +170,7 @@ class MainCard(QOpenGLWidget):
                 self.idle_motion_no,
                 MotionPriority.FORCE,
                 None,
-                self._on_motion_finished
+                self._on_motion_finished,
             )
 
     def _on_motion_finished(self, z=None, v=None):
@@ -222,15 +243,29 @@ class MainCard(QOpenGLWidget):
             face_angle_y = max(-30.0, min(-relative_mouse_y / (center_y / 2), 30.0))
 
             if not self.talking:
-                self.model.SetParameterValueById(StandardParams.ParamEyeBallX, look_x, 1)
-                self.model.SetParameterValueById(StandardParams.ParamEyeBallY, look_y, 1)
+                self.model.SetParameterValueById(
+                    StandardParams.ParamEyeBallX, look_x, 1
+                )
+                self.model.SetParameterValueById(
+                    StandardParams.ParamEyeBallY, look_y, 1
+                )
 
-            self.model.SetParameterValueById(StandardParams.ParamBodyAngleX, body_angle_x, 1)
-            self.model.SetParameterValueById(StandardParams.ParamBodyAngleZ, body_angle_y, 1)
+            self.model.SetParameterValueById(
+                StandardParams.ParamBodyAngleX, body_angle_x, 1
+            )
+            self.model.SetParameterValueById(
+                StandardParams.ParamBodyAngleZ, body_angle_y, 1
+            )
 
-            self.model.SetParameterValueById(StandardParams.ParamAngleX, face_angle_x, 1)
-            self.model.SetParameterValueById(StandardParams.ParamAngleY, face_angle_y, 1)
-            self.model.SetParameterValueById(StandardParams.ParamAngleZ, face_angle_x, 1)
+            self.model.SetParameterValueById(
+                StandardParams.ParamAngleX, face_angle_x, 1
+            )
+            self.model.SetParameterValueById(
+                StandardParams.ParamAngleY, face_angle_y, 1
+            )
+            self.model.SetParameterValueById(
+                StandardParams.ParamAngleZ, face_angle_x, 1
+            )
 
         for param_id, animated_param in self._animated_parameters.items():
             self.model.SetParameterValueById(param_id, animated_param.value, 1)
@@ -268,9 +303,14 @@ class MainCard(QOpenGLWidget):
     def isInL2DArea(self, click_x, click_y):
         h = self.height()
         if 0 <= click_x < self.width() and 0 <= click_y < self.height():
-            alpha = \
-            gl.glReadPixels(int(click_x * self.systemScale), int((h - click_y) * self.systemScale), 1, 1, gl.GL_RGBA,
-                            gl.GL_UNSIGNED_BYTE)[3]
+            alpha = gl.glReadPixels(
+                int(click_x * self.systemScale),
+                int((h - click_y) * self.systemScale),
+                1,
+                1,
+                gl.GL_RGBA,
+                gl.GL_UNSIGNED_BYTE,
+            )[3]
             return alpha > 0
         return False
 
@@ -296,7 +336,9 @@ class MainCard(QOpenGLWidget):
 
             aspect_ratio = self.width() / self.height() if self.height() != 0 else 1.0
 
-            new_model_x = self.drag_start_model_x + (delta_x / self.width()) * 2.0 * aspect_ratio
+            new_model_x = (
+                self.drag_start_model_x + (delta_x / self.width()) * 2.0 * aspect_ratio
+            )
             new_model_y = self.drag_start_model_y - (delta_y / self.height()) * 2
 
             self.model_x = new_model_x
@@ -320,6 +362,8 @@ class MainCard(QOpenGLWidget):
             if self.translucent:
                 self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
             else:
-                self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, False)
+                self.setAttribute(
+                    Qt.WidgetAttribute.WA_TransparentForMouseEvents, False
+                )
             self.translucent = not self.translucent
             live2d.clearBuffer(0.0, 0.0, 0.0, 0.0)

@@ -1,5 +1,8 @@
+#define VersionFile FileOpen("VERSION")
+#define MyAppVersion Trim(FileRead(VersionFile))
+#expr FileClose(VersionFile)
+
 #define MyAppName "Emilia"
-#define MyAppVersion "3.3.3"
 #define MyAppPublisher "Kajitsy"
 #define MyAppURL "https://github.com/Kajitsy/Emilia"
 #define MyAppExeName "emilia.exe"

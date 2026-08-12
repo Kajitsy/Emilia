@@ -1,9 +1,10 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QWidget, QApplication
+from PyQt6.QtWidgets import QApplication, QHBoxLayout, QLabel, QWidget
 
-from modules.ui.Elements import PushButton, VerticalScrollPage
-from modules.Utils import format_number, color_avatar
 from modules.ui.cards.CharacterCards import ListCard
+from modules.ui.Elements import PushButton, VerticalScrollPage
+from modules.Utils import color_avatar, format_number
+
 
 class MainPage(QWidget):
     def __init__(self, main_window, short_id=None, character_id=None):
@@ -58,7 +59,9 @@ class MainPage(QWidget):
         fhs_layout.addLayout(but_layout)
 
         self.chat_button = PushButton(self.tr("Chat"))
-        self.chat_button.clicked.connect(lambda: self.mw.openChat(self.character_id, self.character_name))
+        self.chat_button.clicked.connect(
+            lambda: self.mw.openChat(self.character_id, self.character_name)
+        )
         but_layout.addWidget(self.chat_button, 1)
 
         self.like_button = PushButton()
@@ -95,7 +98,9 @@ class MainPage(QWidget):
         self.description_label.setStyleSheet("color: #a2a2ac;")
         self.description_label.setFont(hg_font)
         self.description_label.setWordWrap(True)
-        fhs_layout.addWidget(self.description_label, 1, alignment=Qt.AlignmentFlag.AlignTop)
+        fhs_layout.addWidget(
+            self.description_label, 1, alignment=Qt.AlignmentFlag.AlignTop
+        )
 
         shs_page = VerticalScrollPage()
         shs_page.setStyleSheet("background-color: transparent; border: none;")
@@ -127,40 +132,55 @@ class MainPage(QWidget):
         self.chat_thread.get_recommend_chars_by_id_signal.disconnect()
         for char in data:
             card = ListCard(self.mw, char)
-            card.setFixedHeight(80)
+            card.setFixedHeight(88)
             self.simchars_layout.addWidget(card)
 
     def _getCharacter(self, data):
         self.chat_thread.get_char_signal.disconnect()
-        self.data = data['character']
-        self.character_id = self.data.get('external_id')
-        self.short_id = self.data.get('short_hash')
-        self.character_name = self.data['name']
+        self.data = data["character"]
+        self.character_id = self.data.get("external_id")
+        self.short_id = self.data.get("short_hash")
+        self.character_name = self.data["name"]
         self.chat_thread.get_recommend_chars_by_id_signal.connect(self._getSimChars)
         self.chat_thread.get_recommend_chars_by_id(self.character_id)
-        self.voted = data.get('voted', {}).get('voted', False)
-        self.vote = data.get('voted', {}).get('vote', None)
+        self.voted = data.get("voted", {}).get("voted", False)
+        self.vote = data.get("voted", {}).get("vote", None)
         self.character_name_label.setText(self.character_name)
-        if self.data.get('avatar_file_name'):
+        if self.data.get("avatar_file_name"):
             self.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{self.data.get('avatar_file_name')}?webp=true&anim=0", 120, 120, 100,
+                f"https://characterai.io/i/80/static/avatars/{self.data.get('avatar_file_name')}?webp=true&anim=0",
+                120,
+                120,
+                100,
                 label=self.display_avatar,
-                error_cb=lambda _: color_avatar(self.display_avatar, 120, 120, self.mw.name))
+                error_cb=lambda _: color_avatar(
+                    self.display_avatar, 120, 120, self.mw.name
+                ),
+            )
         else:
             color_avatar(self.display_avatar, 120, 120, self.character_name)
-        if self.data.get('user__username'):
-            self.author_label.setText(self.tr("Author: @") + self.data.get('user__username'))
+        if self.data.get("user__username"):
+            self.author_label.setText(
+                self.tr("Author: @") + self.data.get("user__username")
+            )
             self.author_label.setVisible(True)
-            self.author_label.mousePressEvent = lambda x: self.mw.openUserPage(self.data.get('user__username'))
+            self.author_label.mousePressEvent = lambda x: self.mw.openUserPage(
+                self.data.get("user__username")
+            )
             self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        if self.data.get('participant__num_interactions'):
-            self.chats_label.setText(format_number(self.data.get('participant__num_interactions', 0)) + self.tr(" chats"))
+        if self.data.get("participant__num_interactions"):
+            self.chats_label.setText(
+                format_number(self.data.get("participant__num_interactions", 0))
+                + self.tr(" chats")
+            )
             self.chats_label.setVisible(True)
-        if self.data.get('upvotes'):
-            self.likes_label.setText(format_number(self.data.get('upvotes', '0')) + self.tr(" likes"))
+        if self.data.get("upvotes"):
+            self.likes_label.setText(
+                format_number(self.data.get("upvotes", "0")) + self.tr(" likes")
+            )
             self.likes_label.setVisible(True)
-        if self.data.get('description'):
-            self.description_label.setText(self.data.get('description'))
+        if self.data.get("description"):
+            self.description_label.setText(self.data.get("description"))
         if self.voted:
             if self.vote == True:
                 self.like_button.setIcon(self.mw.svg_icons.liked())
@@ -168,7 +188,9 @@ class MainPage(QWidget):
                 self.dislike_button.setIcon(self.mw.svg_icons.disliked())
 
     def shareCharacter(self):
-        QApplication.clipboard().setText(f'https://character.ai/character/{self.short_id}')
+        QApplication.clipboard().setText(
+            f"https://character.ai/character/{self.short_id}"
+        )
         self.mw.showNotification(self.tr("Link copied to clipboard"))
 
     def dislikeCharacter(self):

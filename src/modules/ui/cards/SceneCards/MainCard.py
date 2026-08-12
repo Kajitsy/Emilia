@@ -1,15 +1,16 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QLabel, QVBoxLayout
 
 from modules.ui import TM
 from modules.ui.Elements import CardFrame
+
 
 class MainCard(CardFrame):
     def __init__(self, main_window, data):
         self.mw = main_window
         self.data = data
-        self.title = self.data.get('title')
-        self.author = self.data.get('creator_username')
+        self.title = self.data.get("title")
+        self.author = self.data.get("creator_username")
 
         self.initUI()
 
@@ -21,8 +22,14 @@ class MainCard(CardFrame):
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignTop)
         card_layout.addWidget(self.image_label)
 
-        self.mw.image_loader.load(self.data.get("background_image_url"), 150, 200, 4,
-                                  label=self.image_label, cache_dir="cache/scenes")
+        self.mw.image_loader.load(
+            self.data.get("background_image_url"),
+            150,
+            200,
+            4,
+            label=self.image_label,
+            cache_dir="cache/scenes",
+        )
 
         title_label = QLabel(self.title)
         title_label.setWordWrap(True)
@@ -36,7 +43,9 @@ class MainCard(CardFrame):
             self.author_label = QLabel(self.tr("Author: @") + self.author)
             font = self.author_label.font()
             font.setPointSize(8)
-            self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(self.author)
+            self.author_label.mousePressEvent = lambda _: self.mw.openUserPage(
+                self.author
+            )
             self.author_label.setCursor(Qt.CursorShape.PointingHandCursor)
             self.author_label.setFont(font)
             card_layout.addWidget(self.author_label)

@@ -1,31 +1,67 @@
 import ctypes
+import datetime
 import platform
-import sys, datetime, sounddevice
+import sys
 
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel,
-                             QPushButton, QFrame, QSizePolicy, QStackedWidget, QProgressBar)
-from PyQt6.QtGui import QMouseEvent, QAction, QGuiApplication
-from PyQt6.QtCore import (QEvent, QSettings, QRect, QDateTime, QPropertyAnimation,
-                          QEasingCurve, QTimer, QParallelAnimationGroup,
-                          QPoint, Qt, QLocale, pyqtSignal)
-from PyQt6.QtMultimedia import QMediaDevices
-from PyQt6.sip import isdeleted
+import sounddevice
 from packaging import version
+from PyQt6.QtCore import (
+    QDateTime,
+    QEasingCurve,
+    QEvent,
+    QLocale,
+    QParallelAnimationGroup,
+    QPoint,
+    QPropertyAnimation,
+    QRect,
+    QSettings,
+    Qt,
+    QTimer,
+    pyqtSignal,
+)
+from PyQt6.QtGui import QAction, QGuiApplication, QMouseEvent
+from PyQt6.QtMultimedia import QMediaDevices
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QProgressBar,
+    QPushButton,
+    QSizePolicy,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
+from PyQt6.sip import isdeleted
 
-from modules import (ImageLoader, Svg,
-                     UpdaterThread, UpdateThread, ChatThread)
-from modules.ui.Elements import (PushButton, HorizontalScrollArea, ClickableFrame, LeftSidebar,
-                                 Menu, VerticalScrollPage, HorizontalScrollPage, TabButton, SearchLineEdit)
-from modules.Utils import color_avatar
+from modules import ChatThread, ImageLoader, Svg, UpdaterThread, UpdateThread
 from modules.logic.QThreads import DiscordRPCThread
-from modules.ui.cards import CharacterCards, SceneCards, VoiceCards, ThemeCards
-from modules.ui.pages import UserPages, ScenePages, CharacterPages
-from modules.ui.mainwindow import SettingsPage, SearchPage, ChatInterface
 from modules.ui import TM
+from modules.ui.cards import CharacterCards, SceneCards, ThemeCards, VoiceCards
+from modules.ui.Elements import (
+    ClickableFrame,
+    HorizontalScrollArea,
+    HorizontalScrollPage,
+    LeftSidebar,
+    Menu,
+    PushButton,
+    SearchLineEdit,
+    TabButton,
+    VerticalScrollPage,
+)
+from modules.ui.mainwindow.ChatInterface import ChatInterface
+from modules.ui.mainwindow.SearchPage import SearchPage
+from modules.ui.mainwindow.SettingsPage import SettingsPage
+from modules.ui.pages import CharacterPages, ScenePages, UserPages
+from modules.Utils import color_avatar
+from version import __version__
+
 
 class MainPage(QMainWindow):
     mw_show_signal = pyqtSignal()
     mw_hide_signal = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         today = datetime.datetime.now().date()
@@ -35,15 +71,19 @@ class MainPage(QMainWindow):
             (7, 11): self.tr("Emilia | Happy birthday Kajitsy!"),
             (9, 16): self.tr("Emilia | Happy birthday CAI!"),
             (10, 31): "Spoooky | Trick or treat",
-            (12, 31): self.tr("Emilia | Happy New Year")
+            (12, 31): self.tr("Emilia | Happy New Year"),
         }
         date_key = (today.month, today.day)
         if date_key in special_titles:
             self.setWindowTitle(special_titles[date_key])
         else:
             self.setWindowTitle("Emilia")
-        self.settings = QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings")
-        self.current_language = self.settings.value("emilia_language", QLocale.system().name())
+        self.settings = QSettings(
+            QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings"
+        )
+        self.current_language = self.settings.value(
+            "emilia_language", QLocale.system().name()
+        )
         self.theme = self.settings.value("app_theme", "Dark", type=str)
 
         if self.settings.value("app_theme_system_sync", False, type=bool):
@@ -56,11 +96,17 @@ class MainPage(QMainWindow):
         TM.set_theme(self.theme)
         self._is_updating = False
         self.drpc_enable = self.settings.value("discord_rpc/enable", False, type=bool)
-        self.drpc_show_chat_name = self.settings.value("discord_rpc/show_chat_name", False, type=bool)
-        self.drpc_show_username = self.settings.value("discord_rpc/show_username", False, type=bool)
-        self.drpc_show_current_page = self.settings.value("discord_rpc/show_current_page", True, type=bool)
+        self.drpc_show_chat_name = self.settings.value(
+            "discord_rpc/show_chat_name", False, type=bool
+        )
+        self.drpc_show_username = self.settings.value(
+            "discord_rpc/show_username", False, type=bool
+        )
+        self.drpc_show_current_page = self.settings.value(
+            "discord_rpc/show_current_page", True, type=bool
+        )
         self.svg_icons = Svg()
-        self.version = "3.3.3"
+        self.version = __version__
         self.beta = version.parse(self.version).is_prerelease
 
         geometry = self.settings.value("main_window/geometry")
@@ -98,22 +144,26 @@ class MainPage(QMainWindow):
             self.input_devices[str(index)] = device.description()
 
         for index, device in enumerate(sounddevice.query_devices()):
-            if device['max_output_channels'] > 0:
-                self.output_devices[str(index)] = device['name']
+            if device["max_output_channels"] > 0:
+                self.output_devices[str(index)] = device["name"]
 
         self.chat_thread = ChatThread(self)
         self.threads.append(self.chat_thread)
         self.discord_thread = DiscordRPCThread(self)
         self.threads.append(self.discord_thread)
-        self.updater_thread = UpdaterThread(self.settings.value("update_server", "https://germany.emiupd.ateez.ru/", type=str))
+        self.updater_thread = UpdaterThread(
+            self.settings.value(
+                "update_server", "https://germany.emiupd.ateez.ru/", type=str
+            )
+        )
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
         self.updater_thread.error_signal.connect(self.checkForUpdatesError)
         self.threads.append(self.updater_thread)
 
         self.image_loader = ImageLoader()
 
-        self.setOutputDevice(self.settings.value('output_device', 0, type=int))
-        if getattr(sys, 'frozen', False) and platform.system() == 'Windows':
+        self.setOutputDevice(self.settings.value("output_device", 0, type=int))
+        if getattr(sys, "frozen", False) and platform.system() == "Windows":
             self.updater_thread.start()
 
         self.initUI()
@@ -139,7 +189,7 @@ class MainPage(QMainWindow):
                 width: 8px;
                 margin: 0px 0 0px 0;
                 border-top-right-radius: 4px;
-                border-bottom-right-radius: 4px; 
+                border-bottom-right-radius: 4px;
             }}
             QScrollBar::sub-control:vertical {{
                 background: {TM.c('scroll_sub')};
@@ -196,10 +246,11 @@ class MainPage(QMainWindow):
         self.main_page = self.createMainContentPage()
         self.search_results_page = QWidget()
         self.search_results_layout = QVBoxLayout(self.search_results_page)
-        self.settings_page = SettingsPage.SettingsPage(self)
+        self.settings_page = SettingsPage(self)
 
-
-        self.main_content_area_animation = QPropertyAnimation(self.main_content_area, b"geometry")
+        self.main_content_area_animation = QPropertyAnimation(
+            self.main_content_area, b"geometry"
+        )
         self.main_content_area_animation.setDuration(500)
         self.main_content_area_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
@@ -229,14 +280,20 @@ class MainPage(QMainWindow):
         self.chat_thread.get_me_signal.connect(self.getMe)
         self.chat_thread.get_user_settings_signal.connect(self.getUserSettings)
         self.chat_thread.get_available_models_signal.connect(self.getAvailableModels)
-        self.chat_thread.get_available_models_git_signal.connect(self.getAvailableModelsGit)
+        self.chat_thread.get_available_models_git_signal.connect(
+            self.getAvailableModelsGit
+        )
         self.chat_thread.get_update_servers_signal.connect(self.getUpdateServers)
 
         self.chat_thread.start()
         self.discord_thread.start()
-        if self.drpc_enable: self.discord_thread.connect()
+        if self.drpc_enable:
+            self.discord_thread.connect()
 
-        if QDateTime.fromString(self.settings.value("cai_auth/expiration_date")) < QDateTime.currentDateTime():
+        if (
+            QDateTime.fromString(self.settings.value("cai_auth/expiration_date"))
+            < QDateTime.currentDateTime()
+        ):
             if self.token:
                 self.chat_thread.set_token(self.token)
                 self.chat_thread.create_connect()
@@ -264,7 +321,9 @@ class MainPage(QMainWindow):
         else:
             self.openSettings()
             self.settings_page.getCookies()
-            self.showNotification(self.tr("Please re-enter (the login data has expired)"))
+            self.showNotification(
+                self.tr("Please re-enter (the login data has expired)")
+            )
         self.chat_thread.get_update_servers()
 
     def createLeftSidebar(self):
@@ -273,21 +332,33 @@ class MainPage(QMainWindow):
         self.recent_chat_scroll_layout = left_sidebar.recent_chat_scroll_layout
         return left_sidebar
 
-    def addRecentChatCard(self, character_id, character_name, chat_id, character_avatar_url, scene_id=None, scene_name=""):
+    def addRecentChatCard(
+        self,
+        character_id,
+        character_name,
+        chat_id,
+        character_avatar_url,
+        scene_id=None,
+        scene_name="",
+    ):
         def openChat(event):
             if event.button() == Qt.MouseButton.LeftButton:
                 self.openChat(character_id, character_name, chat_id, card, scene_id)
             elif event.button() == Qt.MouseButton.RightButton:
-                showContextMenu(QPoint(avatar_label.pos().x() + 45 , avatar_label.pos().y() + 22), card)
+                showContextMenu(
+                    QPoint(avatar_label.pos().x() + 45, avatar_label.pos().y() + 22),
+                    card,
+                )
 
         card = ClickableFrame()
         card.setObjectName(chat_id)
         card.setFixedWidth(self.settings.value("left_sidebar_width", 255, type=int))
         card.mousePress = openChat
-        card.enterEvent = lambda event: menu_button.setVisible(True) if menu_button.visibility else None
+        card.enterEvent = lambda event: (
+            menu_button.setVisible(True) if menu_button.visibility else None
+        )
         card.leaveEvent = lambda event: menu_button.setVisible(False)
         card.setCursor(Qt.CursorShape.PointingHandCursor)
-
 
         def showContextMenu(pos, card):
             def deleteCard():
@@ -305,7 +376,9 @@ class MainPage(QMainWindow):
             context_menu.exec(card.mapToGlobal(pos))
 
         def updateTheme(card):
-            card.name_label.setStyleSheet(f"background-color: transparent; border: none; color: {TM.c('text')};")
+            card.name_label.setStyleSheet(
+                f"background-color: transparent; border: none; color: {TM.c('text')};"
+            )
             card.menu_button.setStyleSheet(f"""
                 QPushButton {{
                     background-color: transparent;
@@ -330,12 +403,17 @@ class MainPage(QMainWindow):
         avatar_label.setFixedSize(50, 50)
         avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         chat_layout.addWidget(avatar_label)
-        setattr(card, 'avatar_label', avatar_label)
+        card.avatar_label = avatar_label
 
         if character_avatar_url:
-            self.image_loader.load(f"https://characterai.io/i/80/static/avatars/{character_avatar_url}?webp=true&anim=0",
-                                   45, 45, 100, label=avatar_label,
-                                   error_cb=lambda _: color_avatar(avatar_label, 45, 45, character_name))
+            self.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{character_avatar_url}?webp=true&anim=0",
+                45,
+                45,
+                100,
+                label=avatar_label,
+                error_cb=lambda _: color_avatar(avatar_label, 45, 45, character_name),
+            )
         else:
             color_avatar(avatar_label, 45, 45, character_name)
 
@@ -343,12 +421,17 @@ class MainPage(QMainWindow):
         avatar_label_2.setFixedSize(60, 60)
         avatar_label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         chat_layout.addWidget(avatar_label_2)
-        setattr(card, 'avatar_label_2', avatar_label_2)
+        card.avatar_label_2 = avatar_label_2
 
         if character_avatar_url:
             self.image_loader.load(
-                f"https://characterai.io/i/80/static/avatars/{character_avatar_url}?webp=true&anim=0", 55, 55, 100,
-                label=avatar_label_2, error_cb=lambda _: color_avatar(avatar_label_2, 55, 55, character_name))
+                f"https://characterai.io/i/80/static/avatars/{character_avatar_url}?webp=true&anim=0",
+                55,
+                55,
+                100,
+                label=avatar_label_2,
+                error_cb=lambda _: color_avatar(avatar_label_2, 55, 55, character_name),
+            )
         else:
             color_avatar(avatar_label_2, 55, 55, character_name)
         avatar_label_2.setVisible(False)
@@ -358,20 +441,22 @@ class MainPage(QMainWindow):
 
         name_label = QLabel(character_name)
         text_layout.addWidget(name_label, 1)
-        setattr(card, 'name_label', name_label)
+        card.name_label = name_label
 
         scene_label = QLabel(scene_name)
-        scene_label.setStyleSheet("background-color: transparent; border: none; color: gray;")
+        scene_label.setStyleSheet(
+            "background-color: transparent; border: none; color: gray;"
+        )
         if scene_name:
             text_layout.addWidget(scene_label, 1)
-            setattr(card, 'scene_label', scene_label)
+            card.scene_label = scene_label
 
         menu_button = QPushButton()
         menu_button.visibility = True
         menu_button.setVisible(False)
         menu_button.clicked.connect(lambda: showContextMenu(menu_button.pos(), card))
         chat_layout.addWidget(menu_button, 1, Qt.AlignmentFlag.AlignRight)
-        setattr(card, 'menu_button', menu_button)
+        card.menu_button = menu_button
 
         chat_layout.addStretch()
         card.setLayout(chat_layout)
@@ -390,7 +475,12 @@ class MainPage(QMainWindow):
                 self.download_overlay_progress_label.setText(f"{x}/{y}")
 
             overlay = self.createDownloadOverlay()
-            thread = UpdateThread(self, self.updater_thread.remote_url, self.updater_thread.files_to_download, self.updater_thread.files_to_removed)
+            thread = UpdateThread(
+                self,
+                self.updater_thread.remote_url,
+                self.updater_thread.files_to_download,
+                self.updater_thread.files_to_removed,
+            )
             thread.progress_signal.connect(update_overlay)
             thread.error_signal.connect(self.checkForUpdatesError)
             self.threads.append(thread)
@@ -437,9 +527,12 @@ class MainPage(QMainWindow):
             self.top_bar_stacked_widget.setCurrentWidget(self.top_widget)
             if self.drpc_enable:
                 if self.drpc_show_current_page:
-                    self.discord_thread.update(details=self.tr("Looking at the main page"))
+                    self.discord_thread.update(
+                        details=self.tr("Looking at the main page")
+                    )
                 else:
                     self.discord_thread.update()
+
         main_content_area = QWidget()
         main_content_area.showEvent = show
         self.main_content_layout = QVBoxLayout()
@@ -455,7 +548,9 @@ class MainPage(QMainWindow):
         scenes_section.setFixedHeight(375)
         scroll_layout.addWidget(scenes_section)
 
-        recommended_section, self.recommended_layout = self.createSection(self.tr("Recommended"))
+        recommended_section, self.recommended_layout = self.createSection(
+            self.tr("Recommended")
+        )
         scroll_layout.addWidget(recommended_section)
 
         popular_section, self.popular_layout = self.createSection(self.tr("Popular"))
@@ -464,13 +559,17 @@ class MainPage(QMainWindow):
         trending_section, self.trending_layout = self.createSection(self.tr("Trending"))
         scroll_layout.addWidget(trending_section)
 
-        try_this_section, self.try_this_odd_layout, self.try_this_even_layout = self.createTryThisSection(self.tr("Try This"))
+        try_this_section, self.try_this_odd_layout, self.try_this_even_layout = (
+            self.createTryThisSection(self.tr("Try This"))
+        )
         scroll_layout.addWidget(try_this_section)
 
         featured_voices_section, self.featured_voices_layout = self.createVoiceSection()
         scroll_layout.addWidget(featured_voices_section)
 
-        category_section, self.category_layout, self.category_button_layout = self.createCategorySection()
+        category_section, self.category_layout, self.category_button_layout = (
+            self.createCategorySection()
+        )
         scroll_layout.addWidget(category_section)
 
         self.main_content_layout.addWidget(scroll_area)
@@ -534,7 +633,6 @@ class MainPage(QMainWindow):
         cards_viewport.setStyleSheet("background-color: transparent; border: none;")
         cards_layout = scroll_page.layout
 
-
         section_layout.addWidget(scroll_page)
         section_frame.setLayout(section_layout)
         return section_frame, cards_layout
@@ -565,7 +663,9 @@ class MainPage(QMainWindow):
         cards_layout_main.addLayout(cards_layout_even)
 
         cards_viewport.setLayout(cards_layout_main)
-        cards_viewport.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        cards_viewport.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         cards_viewport.setStyleSheet("background-color: transparent; border: none;")
 
         scroll_area.setWidget(cards_viewport)
@@ -608,7 +708,7 @@ class MainPage(QMainWindow):
             "Learning": self.tr("Learning"),
             "Lifestyle": self.tr("Lifestyle"),
             "Parody": self.tr("Parody"),
-            "RPG & Puzzles": self.tr("RPG and Puzzles")
+            "RPG & Puzzles": self.tr("RPG and Puzzles"),
         }
 
         section_frame = QFrame()
@@ -622,7 +722,9 @@ class MainPage(QMainWindow):
         button_scroll_area.horizontalScrollBar().setVisible(False)
 
         button_scroll_viewport = QWidget()
-        button_scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
+        button_scroll_viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         button_scroll_layout = QHBoxLayout()
         button_scroll_layout.setContentsMargins(0, 0, 0, 0)
         button_scroll_viewport.setLayout(button_scroll_layout)
@@ -633,13 +735,17 @@ class MainPage(QMainWindow):
         for key, value in categories.items():
             btn = TabButton(value)
             btn.setObjectName(key)
-            btn.clicked.connect(lambda checked, b=btn, cat=key: self.onCategoryClicked(b, cat))
+            btn.clicked.connect(
+                lambda checked, b=btn, cat=key: self.onCategoryClicked(b, cat)
+            )
             self.category_buttons.append(btn)
             button_scroll_layout.addWidget(btn)
             if key == "Assistants":
                 btn.setChecked(True)
                 self.onCategoryClicked(btn, key)
-        section_layout.addWidget(button_scroll_area, alignment=Qt.AlignmentFlag.AlignTop)
+        section_layout.addWidget(
+            button_scroll_area, alignment=Qt.AlignmentFlag.AlignTop
+        )
 
         scroll_page = HorizontalScrollPage()
         scroll_viewport = scroll_page.viewport
@@ -655,6 +761,13 @@ class MainPage(QMainWindow):
         for btn in self.category_buttons:
             if btn is not clicked_button:
                 btn.setChecked(False)
+
+        if hasattr(self, "category_layout") and self.category_layout:
+            for i in reversed(range(self.category_layout.count())):
+                item = self.category_layout.itemAt(i)
+                if item and item.widget():
+                    item.widget().deleteLater()
+
         self.chat_thread.get_category_characters(category)
 
     def createOverlay(self):
@@ -675,10 +788,19 @@ class MainPage(QMainWindow):
         self.notification_message_label.setWordWrap(True)
         self.notification_message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.notification_message_label.setFixedSize(300, 50)
-        self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), -50, 300, 50))
+        self.notification_message_label.setGeometry(
+            QRect(
+                int((self.width() - self.notification_message_label.width()) / 2),
+                -50,
+                300,
+                50,
+            )
+        )
         self.notification_message_label.hide()
 
-        self.notification_message_animation = QPropertyAnimation(self.notification_message_label, b"geometry")
+        self.notification_message_animation = QPropertyAnimation(
+            self.notification_message_label, b"geometry"
+        )
         self.notification_message_animation.setDuration(500)
         self.notification_message_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
@@ -691,25 +813,46 @@ class MainPage(QMainWindow):
         self.overlay.show()
         self.overlay.raise_()
 
-    def showNotification(self, text = "notification_message_label"):
+    def showNotification(self, text="notification_message_label"):
         self.notification_message_label.setText(text)
         self.notification_message_label.show()
         self.notification_message_label.raise_()
-        start_rect = QRect(int((self.width() - self.notification_message_label.width()) / 2), -70, 300, 50)
-        end_rect = QRect(int((self.width() - self.notification_message_label.width()) / 2), 10, 300, 50)
+        start_rect = QRect(
+            int((self.width() - self.notification_message_label.width()) / 2),
+            -70,
+            300,
+            50,
+        )
+        end_rect = QRect(
+            int((self.width() - self.notification_message_label.width()) / 2),
+            10,
+            300,
+            50,
+        )
         self.notification_message_animation.setStartValue(start_rect)
         self.notification_message_animation.setEndValue(end_rect)
         self.notification_message_animation.start()
         QTimer.singleShot(3000, self.hideNotification)
 
     def hideNotification(self):
-        start_rect = QRect(self.notification_message_label.x(), self.notification_message_label.y(), 300, 50)
+        start_rect = QRect(
+            self.notification_message_label.x(),
+            self.notification_message_label.y(),
+            300,
+            50,
+        )
         end_rect = QRect(self.notification_message_label.x(), -50, 300, 50)
         self.notification_message_animation.setStartValue(start_rect)
         self.notification_message_animation.setEndValue(end_rect)
         self.notification_message_animation.start()
 
     def hideOverlay(self):
+        if (
+            hasattr(self, "current_chat_interface")
+            and self.current_chat_interface
+            and getattr(self.current_chat_interface, "_detach", False)
+        ):
+            self.current_chat_interface.hideOverlay()
         self.overlay.hide()
         for i in range(self.overlay_content_layout.count()):
             item = self.overlay_content_layout.itemAt(i)
@@ -730,7 +873,8 @@ class MainPage(QMainWindow):
         self.search_bar.setText("")
 
     def showMainPage(self, widget: QWidget = None):
-        if widget: widget.setVisible(False)
+        if widget:
+            widget.setVisible(False)
         self.main_content_area.setCurrentWidget(self.main_page)
         self.current_chat_interface = None
         self.top_widget.setVisible(True)
@@ -740,12 +884,16 @@ class MainPage(QMainWindow):
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
-    def openScene(self, data={}, scene_id=None):
+    def openScene(self, data=None, scene_id=None):
+        if data is None:
+            data = {}
         widget = ScenePages.MainPage(self, data, scene_id)
         self.main_content_area.addWidget(widget)
         self.main_content_area.setCurrentWidget(widget)
 
-    def openChat(self, character_id, character_name, chat_id="", card=None, scene_id=""):
+    def openChat(
+        self, character_id, character_name, chat_id="", card=None, scene_id=""
+    ):
         if self.current_chat_interface:
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
@@ -766,17 +914,23 @@ class MainPage(QMainWindow):
             self.main_content_area.addWidget(label)
             self.main_content_area.setCurrentWidget(label)
 
-        self.current_chat_interface = ChatInterface(self, character_name, character_id, chat_id, scene_id)
+        self.current_chat_interface = ChatInterface(
+            self, character_name, character_id, chat_id, scene_id
+        )
         self.current_chat_interface.attach_signal.connect(attach)
         self.current_chat_interface.detach_signal.connect(detach)
         if card:
-            setattr(self.current_chat_interface, 'recent_card', card)
+            self.current_chat_interface.recent_card = card
         self.main_content_area.addWidget(self.current_chat_interface)
         self.main_content_area.setCurrentWidget(self.current_chat_interface)
 
     def openSettings(self):
-        if not hasattr(self, 'settings_page') or self.settings_page is None or isdeleted(self.settings_page):
-            self.settings_page = SettingsPage.SettingsPage(self)
+        if (
+            not hasattr(self, "settings_page")
+            or self.settings_page is None
+            or isdeleted(self.settings_page)
+        ):
+            self.settings_page = SettingsPage(self)
             self.main_content_area.addWidget(self.settings_page)
         self.main_content_area.setCurrentWidget(self.settings_page)
         if self.current_chat_interface:
@@ -806,9 +960,13 @@ class MainPage(QMainWindow):
     def _openEditScenePage(self, data):
         self.chat_thread.get_scene_by_id_signal.disconnect(self._openEditScenePage)
         if data.get("character_id"):
-            self.edit_scene_page = ScenePages.CreatePages.MainCharCreatePage(self, data, False, data['scene_id'])
+            self.edit_scene_page = ScenePages.CreatePages.MainCharCreatePage(
+                self, data, False, data["scene_id"]
+            )
         else:
-            self.edit_scene_page = ScenePages.CreatePages.AnyCharCreatePage(self, data, False, data['scene_id'])
+            self.edit_scene_page = ScenePages.CreatePages.AnyCharCreatePage(
+                self, data, False, data["scene_id"]
+            )
         self.main_content_area.addWidget(self.edit_scene_page)
         self.main_content_area.setCurrentWidget(self.edit_scene_page)
 
@@ -832,9 +990,15 @@ class MainPage(QMainWindow):
                 item.widget().deleteLater()
 
         for character in characters:
-            card = CharacterCards.MainCard(self, character.get('participant__name', "Unknown"), character.get('avatar_file_name'),
-                                           character.get('title'), character.get('user__username'),
-                                           character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(
+                self,
+                character.get("participant__name", "Unknown"),
+                character.get("avatar_file_name"),
+                character.get("title"),
+                character.get("user__username"),
+                character.get("external_id"),
+                character.get("participant__num_interactions"),
+            )
             card.setFixedSize(277, 134)
             self.category_layout.addWidget(card)
 
@@ -846,11 +1010,20 @@ class MainPage(QMainWindow):
 
         self.recent_chats = chats
         for chat in self.recent_chats:
-            card = self.addRecentChatCard(chat.get('character_id'), chat.get('character_name'), chat.get('chat_id'), chat.get('character_avatar_uri'), chat.get('scene_id'), chat.get('name', ''))
-            if self.current_chat_interface is not None:
-                if self.current_chat_interface.chat_id == chat.get('id'):
-                    setattr(self.current_chat_interface, 'recent_card', card)
-                    card.setCheckable(True)
+            card = self.addRecentChatCard(
+                chat.get("character_id"),
+                chat.get("character_name"),
+                chat.get("chat_id"),
+                chat.get("character_avatar_uri"),
+                chat.get("scene_id"),
+                chat.get("name", ""),
+            )
+            if (
+                self.current_chat_interface is not None
+                and self.current_chat_interface.chat_id == chat.get("id")
+            ):
+                self.current_chat_interface.recent_card = card
+                card.setCheckable(True)
 
     def addFeaturedVoices(self, voices):
         for i in reversed(range(self.featured_voices_layout.count())):
@@ -878,21 +1051,62 @@ class MainPage(QMainWindow):
             if item and item.widget():
                 item.widget().deleteLater()
 
-
-        self.recommended_chats = results[0].get('result', {}).get('data', {}).get('json', {}).get('characters', [])
-        self.popular_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_popular_characters_l30d_v1', [])
-        self.trending_chats = results[1].get('result', {}).get('data', {}).get('json', {}).get('cold_start_trending_characters_v1', [])
+        self.recommended_chats = (
+            results[0]
+            .get("result", {})
+            .get("data", {})
+            .get("json", {})
+            .get("characters", [])
+        )
+        self.popular_chats = (
+            results[1]
+            .get("result", {})
+            .get("data", {})
+            .get("json", {})
+            .get("cold_start_popular_characters_l30d_v1", [])
+        )
+        self.trending_chats = (
+            results[1]
+            .get("result", {})
+            .get("data", {})
+            .get("json", {})
+            .get("cold_start_trending_characters_v1", [])
+        )
 
         for character in self.recommended_chats:
-            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(
+                self,
+                character.get("name"),
+                character.get("avatar_file_name"),
+                character.get("title"),
+                character.get("user__username"),
+                character.get("external_id"),
+                character.get("participant__num_interactions"),
+            )
             card.setFixedSize(277, 134)
             self.recommended_layout.addWidget(card)
         for character in self.popular_chats:
-            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(
+                self,
+                character.get("name"),
+                character.get("avatar_file_name"),
+                character.get("title"),
+                character.get("user__username"),
+                character.get("external_id"),
+                character.get("participant__num_interactions"),
+            )
             card.setFixedSize(277, 134)
             self.popular_layout.addWidget(card)
         for character in self.trending_chats:
-            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            card = CharacterCards.MainCard(
+                self,
+                character.get("name"),
+                character.get("avatar_file_name"),
+                character.get("title"),
+                character.get("user__username"),
+                character.get("external_id"),
+                character.get("participant__num_interactions"),
+            )
             card.setFixedSize(277, 134)
             self.trending_layout.addWidget(card)
 
@@ -917,8 +1131,16 @@ class MainPage(QMainWindow):
         self.featured_chats = chats
 
         for character in self.featured_chats:
-            character = character.get('character_item', {})
-            card = CharacterCards.MainCard(self, character.get('name'), character.get('avatar_file_name'), character.get('title'), character.get('user__username'), character.get('external_id'), character.get('participant__num_interactions'))
+            character = character.get("character_item", {})
+            card = CharacterCards.MainCard(
+                self,
+                character.get("name"),
+                character.get("avatar_file_name"),
+                character.get("title"),
+                character.get("user__username"),
+                character.get("external_id"),
+                character.get("participant__num_interactions"),
+            )
             card.setFixedSize(277, 134)
             self.for_you_layout.addWidget(card)
 
@@ -933,9 +1155,9 @@ class MainPage(QMainWindow):
         for index, character in enumerate(self.try_this_chats):
             card = CharacterCards.MiniCard(
                 self,
-                character.get('name'),
-                character.get('external_id'),
-                character.get('avatar_file_name')
+                character.get("name"),
+                character.get("external_id"),
+                character.get("avatar_file_name"),
             )
             card.setFixedSize(277, 70)
             if (index + 1) % 2 == 0:
@@ -946,12 +1168,14 @@ class MainPage(QMainWindow):
     def getMe(self, data):
         self.me_full = data
         self.me = self.me_full.get("user", {})
-        self.author_id = self.me['id']
-        self.name = self.me['account']['name']
-        self.username = self.me['username']
-        self.me_has_avatar = True if self.me.get('account', {}).get('avatar_file_name') else False
-        self.me_has_plus = True if self.me.get('subscription', {}) else False
-        self.me_avatar = self.me.get('account', {}).get('avatar_file_name')
+        self.author_id = self.me["id"]
+        self.name = self.me["account"]["name"]
+        self.username = self.me["username"]
+        self.me_has_avatar = bool(
+            self.me.get("account", {}).get("avatar_file_name")
+        )
+        self.me_has_plus = bool(self.me.get("subscription", {}))
+        self.me_avatar = self.me.get("account", {}).get("avatar_file_name")
 
         if self.me_has_avatar:
             self.left_sidebar.avatarUpdate()
@@ -972,7 +1196,7 @@ class MainPage(QMainWindow):
     def getUpdateServers(self, data):
         self.update_servers = data
         for server in self.update_servers:
-            self.settings_page.update_servers[server.get('url')] = server.get('name')
+            self.settings_page.update_servers[server.get("url")] = server.get("name")
 
     def setOutputDevice(self, index):
         device_name = self.output_devices.get(index)
@@ -983,7 +1207,9 @@ class MainPage(QMainWindow):
                 break
 
     def event(self, event):
-        if event.type() == 210 and self.settings.value("app_theme_system_sync", False, type=bool):
+        if event.type() == 210 and self.settings.value(
+            "app_theme_system_sync", False, type=bool
+        ):
             if self._is_updating:
                 return super().event(event)
 
@@ -1008,7 +1234,9 @@ class MainPage(QMainWindow):
     def mousePressEvent(self, event: QMouseEvent):
         if self.overlay.isVisible() and self.hide_overlay:
             global_click_pos = event.globalPosition().toPoint()
-            sidebar_global_pos = self.overlay_content.mapToGlobal(self.overlay_content.rect().topLeft())
+            sidebar_global_pos = self.overlay_content.mapToGlobal(
+                self.overlay_content.rect().topLeft()
+            )
             sidebar_rect = QRect(sidebar_global_pos, self.overlay_content.size())
             if not sidebar_rect.contains(global_click_pos):
                 self.hideOverlay()
@@ -1017,10 +1245,17 @@ class MainPage(QMainWindow):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if hasattr(self, 'overlay'):
+        if hasattr(self, "overlay"):
             self.overlay.setGeometry(self.rect())
-        if hasattr(self, 'notification_message_label'):
-            self.notification_message_label.setGeometry(QRect(int((self.width() - self.notification_message_label.width()) / 2), self.notification_message_label.y(), 300, 50))
+        if hasattr(self, "notification_message_label"):
+            self.notification_message_label.setGeometry(
+                QRect(
+                    int((self.width() - self.notification_message_label.width()) / 2),
+                    self.notification_message_label.y(),
+                    300,
+                    50,
+                )
+            )
         self.settings.setValue("main_window/geometry", self.saveGeometry())
 
     def changeEvent(self, a0):
@@ -1036,12 +1271,13 @@ class MainPage(QMainWindow):
         super().showEvent(a0)
         self.mw_show_signal.emit()
         self.discord_thread.update_wlrpc()
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
-            if TM.get_theme(self.theme).get('titlebar', 'dark') == 'dark':
+
+            if TM.get_theme(self.theme).get("titlebar", "dark") == "dark":
                 ChangeDWMAttrib(detect(self), 19, ctypes.c_int(1))
                 ChangeDWMAttrib(detect(self), 20, ctypes.c_int(1))
-            elif TM.get_theme(self.theme).get('titlebar', 'dark') == 'light':
+            elif TM.get_theme(self.theme).get("titlebar", "dark") == "light":
                 ChangeDWMAttrib(detect(self), 19, ctypes.c_int(0))
                 ChangeDWMAttrib(detect(self), 20, ctypes.c_int(0))
 

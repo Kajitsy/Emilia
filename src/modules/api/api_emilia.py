@@ -1,4 +1,10 @@
-import asyncio, zipfile, io, os, requests
+import asyncio
+import io
+import os
+import zipfile
+
+import requests
+
 
 class EmiliaAPI:
     def __init__(self, client):
@@ -9,33 +15,46 @@ class EmiliaAPI:
         response = await self.client.custom_request(f"{self.url}servers/update")
         return response
 
-    async def get_themes(self, query: str = "", author: str = "", count: int = 0, offset: int = 0):
-        response = await self.client.custom_request(f"{self.url}themes/?author={author}&q={query}&offset={offset}")
+    async def get_themes(
+        self, query: str = "", author: str = "", count: int = 0, offset: int = 0
+    ):
+        response = await self.client.custom_request(
+            f"{self.url}themes/?author={author}&q={query}&offset={offset}"
+        )
         return response
 
     async def get_theme(self, theme_id: str):
         response = await self.client.custom_request(f"{self.url}themes/{theme_id}")
         return response
 
-    async def delete_theme(self, theme_id: str, token: str, user_id: int, username: str, avatar_file_name: str):
+    async def delete_theme(
+        self,
+        theme_id: str,
+        token: str,
+        user_id: int,
+        username: str,
+        avatar_file_name: str,
+    ):
         data = {
             "token": token,
             "id": user_id,
             "username": username,
             "avatar_file_name": avatar_file_name,
         }
-        response = await self.client.custom_request(f"{self.url}themes/{theme_id}/delete", data, method="DELETE")
+        response = await self.client.custom_request(
+            f"{self.url}themes/{theme_id}/delete", data, method="DELETE"
+        )
         return response
 
     async def get_user_themes(self, creator_id: int):
-        response = await self.client.custom_request(f"{self.url}user/{creator_id}/themes")
+        response = await self.client.custom_request(
+            f"{self.url}user/{creator_id}/themes"
+        )
         return response
 
     async def download_theme(self, theme_name: str, theme_id: str):
         response_data = await self.client.custom_request(
-            url=f"{self.url}themes/{theme_id}/download",
-            method="get",
-            is_bytes=True
+            url=f"{self.url}themes/{theme_id}/download", method="get", is_bytes=True
         )
 
         extract_path = os.path.join("themes", theme_name)
@@ -50,8 +69,15 @@ class EmiliaAPI:
         await loop.run_in_executor(None, extract)
 
         return extract_path
-    
-    async def upload_theme(self, theme_name: str, user_id: int, username: str, avatar_file_name: str, token: str):
+
+    async def upload_theme(
+        self,
+        theme_name: str,
+        user_id: int,
+        username: str,
+        avatar_file_name: str,
+        token: str,
+    ):
         theme_path = os.path.join("themes", theme_name)
         if not os.path.exists(theme_path):
             return {"error": "Theme path not found"}
@@ -73,12 +99,28 @@ class EmiliaAPI:
         }
 
         multipart = {
-            "file": (f"{username}_{theme_name}.zip", zip_buffer.getvalue(), "application/zip")
+            "file": (
+                f"{username}_{theme_name}.zip",
+                zip_buffer.getvalue(),
+                "application/zip",
+            )
         }
-        response = requests.post(f"{self.url}themes/upload",data=data, files=multipart)
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: requests.post(f"{self.url}themes/upload", data=data, files=multipart),
+        )
         return response.json()
 
-    async def update_theme(self, theme_name: str, theme_id: str, user_id: int, username: str, avatar_file_name: str, token: str):
+    async def update_theme(
+        self,
+        theme_name: str,
+        theme_id: str,
+        user_id: int,
+        username: str,
+        avatar_file_name: str,
+        token: str,
+    ):
         theme_path = os.path.join("themes", theme_name)
         if not os.path.exists(theme_path):
             return {"error": "Theme path not found"}
@@ -100,7 +142,17 @@ class EmiliaAPI:
         }
 
         multipart = {
-            "file": (f"{username}_{theme_name}.zip", zip_buffer.getvalue(), "application/zip")
+            "file": (
+                f"{username}_{theme_name}.zip",
+                zip_buffer.getvalue(),
+                "application/zip",
+            )
         }
-        response = requests.post(f"{self.url}themes/{theme_id}/update",data=data, files=multipart)
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: requests.post(
+                f"{self.url}themes/{theme_id}/update", data=data, files=multipart
+            ),
+        )
         return response.json()

@@ -1,2 +1,2 @@
-from .MainPage import MainPage
 from . import CreatePages
+from .MainPage import MainPage

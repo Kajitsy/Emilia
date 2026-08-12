@@ -1,5 +1,12 @@
-import logging, sounddevice, soundfile, io, time, scipy.signal
+import io
+import logging
+import time
+
+import scipy.signal
+import sounddevice
+import soundfile
 from PyQt6.QtCore import QThread, pyqtSignal
+
 
 class PlayerThread(QThread):
     play_signal = pyqtSignal(object)

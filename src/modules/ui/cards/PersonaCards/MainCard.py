@@ -1,11 +1,12 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout
 
 from modules.ui import TM
-from modules.ui.Elements import PushButton, Menu, CardFrame
-from modules.Utils import color_avatar
 from modules.ui.cards.PersonaCards import EditCard
+from modules.ui.Elements import CardFrame, Menu, PushButton
+from modules.Utils import color_avatar
+
 
 class MainCard(CardFrame):
     def __init__(self, main_window, data=None, character_id=None):
@@ -19,10 +20,13 @@ class MainCard(CardFrame):
             self.new = True
         else:
             if self.char_id:
-                if self.mw.user_settings.get('personaOverrides', {}).get(self.char_id) == self.data['external_id']:
+                if (
+                    self.mw.user_settings.get("personaOverrides", {}).get(self.char_id)
+                    == self.data["external_id"]
+                ):
                     self.active = True
 
-        self.data['name'] = self.data.get('participant__name')
+        self.data["name"] = self.data.get("participant__name")
         self.initUI()
 
     def initUI(self):
@@ -33,13 +37,25 @@ class MainCard(CardFrame):
         if self.data.get("avatar_file_name"):
             self.mw.image_loader.load(
                 f"https://characterai.io/i/80/static/avatars/{self.data.get("avatar_file_name")}?webp=true&anim=0",
-                60, 60, 100, label=self.display_avatar,
-                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
+                60,
+                60,
+                100,
+                label=self.display_avatar,
+                error_cb=lambda _: color_avatar(
+                    self.display_avatar, 60, 60, self.mw.name
+                ),
+            )
         elif self.mw.me_has_avatar:
             self.mw.image_loader.load(
                 f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
-                60, 60, 100, label=self.display_avatar,
-                error_cb=lambda _: color_avatar(self.display_avatar, 60, 60, self.mw.name))
+                60,
+                60,
+                100,
+                label=self.display_avatar,
+                error_cb=lambda _: color_avatar(
+                    self.display_avatar, 60, 60, self.mw.name
+                ),
+            )
         else:
             color_avatar(self.display_avatar, 60, 60, self.mw.name)
         layout.addWidget(self.display_avatar)
@@ -50,7 +66,7 @@ class MainCard(CardFrame):
 
         top_layout = QHBoxLayout()
         fh_layout.addLayout(top_layout)
-        self.display_name_label = QLabel(self.data.get('name'))
+        self.display_name_label = QLabel(self.data.get("name"))
         self.is_default_label = QLabel(self.tr("Default"))
         self.is_active_label = QLabel(self.tr("Active"))
         self.is_default_label.setStyleSheet("color: #536dc6;")
@@ -64,9 +80,11 @@ class MainCard(CardFrame):
             self.is_active_label.setVisible(True)
         if not self.char_id:
             self.is_default_label.setVisible(
-                self.data['external_id'] == self.mw.user_settings.get('default_persona_id'))
+                self.data["external_id"]
+                == self.mw.user_settings.get("default_persona_id")
+            )
 
-        self.background_label = QLabel(self.data.get('definition'))
+        self.background_label = QLabel(self.data.get("definition"))
         fh_layout.addWidget(self.background_label, alignment=Qt.AlignmentFlag.AlignTop)
 
         self.edit_button = PushButton(self.tr("Edit"))
@@ -78,31 +96,33 @@ class MainCard(CardFrame):
 
     def update_theme(self):
         super().update_theme()
-        self.background_label.setStyleSheet(f"color: {TM.c('disabled_text')}; font-size: 12px;")
+        self.background_label.setStyleSheet(
+            f"color: {TM.c('disabled_text')}; font-size: 12px;"
+        )
 
     def clearDefault(self):
         def clearedDefault(data):
-            if data.get('success', False):
-                self.mw.showNotification(self.tr('Successfully updated your persona'))
+            if data.get("success", False):
+                self.mw.showNotification(self.tr("Successfully updated your persona"))
                 self.is_default_label.setVisible(False)
                 self.make_default_action.setVisible(True)
                 self.clear_default_action.setVisible(False)
-                self.mw.user_settings = data['settings']
+                self.mw.user_settings = data["settings"]
 
-        self.mw.user_settings['default_persona_id'] = ""
+        self.mw.user_settings["default_persona_id"] = ""
         self.mw.chat_thread.update_user_settings(self.mw.user_settings)
         self.mw.chat_thread.update_user_settings_signal.connect(clearedDefault)
 
     def makeDefault(self):
         def makedDefault(data):
-            if data.get('success', False):
-                self.mw.showNotification(self.tr('Successfully updated your persona'))
+            if data.get("success", False):
+                self.mw.showNotification(self.tr("Successfully updated your persona"))
                 self.is_default_label.setVisible(True)
                 self.make_default_action.setVisible(False)
                 self.clear_default_action.setVisible(True)
-                self.mw.user_settings = data['settings']
+                self.mw.user_settings = data["settings"]
 
-        self.mw.user_settings['default_persona_id'] = self.data['external_id']
+        self.mw.user_settings["default_persona_id"] = self.data["external_id"]
         self.mw.chat_thread.update_user_settings(self.mw.user_settings)
         self.mw.chat_thread.update_user_settings_signal.connect(makedDefault)
 
@@ -139,7 +159,7 @@ class MainCard(CardFrame):
         remove_action.triggered.connect(self.removePerson)
         context_menu.addAction(remove_action)
 
-        if self.data['external_id'] == self.mw.user_settings.get('default_persona_id'):
+        if self.data["external_id"] == self.mw.user_settings.get("default_persona_id"):
             self.make_default_action.setVisible(False)
             self.clear_default_action.setVisible(True)
         else:

@@ -1,11 +1,25 @@
 import re
 
-from PyQt6.QtCore import Qt, QTimer, QPoint, QStringListModel
-from PyQt6.QtGui import QWheelEvent, QKeyEvent, QIcon, QAction
-from PyQt6.QtWidgets import (QPushButton, QLineEdit, QScrollArea, QTextEdit, QFrame, QVBoxLayout,
-                             QHBoxLayout, QWidget, QCheckBox, QKeySequenceEdit, QMenu, QComboBox, QCompleter)
+from PyQt6.QtCore import QPoint, QStringListModel, Qt, QTimer
+from PyQt6.QtGui import QAction, QIcon, QKeyEvent, QWheelEvent
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QCompleter,
+    QFrame,
+    QHBoxLayout,
+    QKeySequenceEdit,
+    QLineEdit,
+    QMenu,
+    QPushButton,
+    QScrollArea,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from . import TM
+
 
 class PushButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -27,6 +41,7 @@ class PushButton(QPushButton):
         super().setIcon(icon)
         self._icon = True
         self.update_theme()
+
 
 class TabButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -50,6 +65,7 @@ class TabButton(QPushButton):
         self._icon = True
         self.update_theme()
 
+
 class LineEdit(QLineEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,6 +78,7 @@ class LineEdit(QLineEdit):
     def setIcon(self, icon: QIcon):
         self.addAction(icon, QLineEdit.ActionPosition.LeadingPosition)
 
+
 class CheckBox(QCheckBox):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,6 +87,7 @@ class CheckBox(QCheckBox):
 
     def update_theme(self):
         self.setStyleSheet(TM.get_style("CheckBox"))
+
 
 class KeySequenceEdit(QKeySequenceEdit):
     def __init__(self, *args, **kwargs):
@@ -80,6 +98,7 @@ class KeySequenceEdit(QKeySequenceEdit):
     def update_theme(self):
         self.setStyleSheet(TM.get_style("KeySequenceEdit"))
 
+
 class Menu(QMenu):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -89,18 +108,17 @@ class Menu(QMenu):
     def update_theme(self):
         self.setStyleSheet(TM.get_style("Menu"))
 
+
 class PushButtonMenu(QMenu):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setWindowFlag(
-            self.windowFlags() |
-            Qt.WindowType.NoDropShadowWindowHint
-        )
+        self.setWindowFlag(self.windowFlags() | Qt.WindowType.NoDropShadowWindowHint)
         TM.theme_changed.connect(self.update_theme)
         self.update_theme()
 
     def update_theme(self):
         self.setStyleSheet(TM.get_style("PushButtonMenu"))
+
 
 class ComboBox(QComboBox):
     def __init__(self, *args, **kwargs):
@@ -110,6 +128,7 @@ class ComboBox(QComboBox):
 
     def update_theme(self):
         self.setStyleSheet(TM.get_style("ComboBox"))
+
 
 class CardFrame(QFrame):
     def __init__(self, *args, **kwargs):
@@ -121,6 +140,7 @@ class CardFrame(QFrame):
 
     def update_theme(self):
         self.setStyleSheet(TM.get_style("CardFrame"))
+
 
 class HorizontalScrollArea(QScrollArea):
     def __init__(self, parent=None):
@@ -141,6 +161,7 @@ class HorizontalScrollArea(QScrollArea):
         hbar.setValue(hbar.value() - delta)
         event.accept()
 
+
 class VerticalScrollArea(QScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -160,15 +181,19 @@ class VerticalScrollArea(QScrollArea):
         hbar.setValue(hbar.value() - delta)
         event.accept()
 
+
 class HorizontalScrollPage(HorizontalScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.viewport = QWidget()
         self.layout = QHBoxLayout(self.viewport)
         self.layout.setContentsMargins(10, 10, 10, 10)
-        self.layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        self.layout.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
         self.viewport.setLayout(self.layout)
         self.setWidget(self.viewport)
+
 
 class VerticalScrollPage(VerticalScrollArea):
     def __init__(self, parent=None):
@@ -179,6 +204,7 @@ class VerticalScrollPage(VerticalScrollArea):
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.viewport.setLayout(self.layout)
         self.setWidget(self.viewport)
+
 
 class CustomTextEdit(QTextEdit):
     def __init__(self, *args, **kwargs):
@@ -206,15 +232,27 @@ class CustomTextEdit(QTextEdit):
         """)
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() in {Qt.Key.Key_Return, Qt.Key.Key_Enter} and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+        if (
+            event.key() in {Qt.Key.Key_Return, Qt.Key.Key_Enter}
+            and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier
+        ):
             self.keyPress()
-        elif event.key() == Qt.Key.Key_B and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+        elif (
+            event.key() == Qt.Key.Key_B
+            and event.modifiers() == Qt.KeyboardModifier.ControlModifier
+        ):
             self.formatSelectedText("**", "**")
             return
-        elif event.key() == Qt.Key.Key_I and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+        elif (
+            event.key() == Qt.Key.Key_I
+            and event.modifiers() == Qt.KeyboardModifier.ControlModifier
+        ):
             self.formatSelectedText("*", "*")
             return
-        elif event.key() == Qt.Key.Key_E and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+        elif (
+            event.key() == Qt.Key.Key_E
+            and event.modifiers() == Qt.KeyboardModifier.ControlModifier
+        ):
             self.formatSelectedText("`", "`")
             return
         else:
@@ -229,31 +267,45 @@ class CustomTextEdit(QTextEdit):
         if not cursor.hasSelection():
             if block:
                 cursor.insertText(start_marker + end_marker)
-                cursor.movePosition(cursor.MoveOperation.Left, cursor.MoveMode.MoveAnchor, len(end_marker))
+                cursor.movePosition(
+                    cursor.MoveOperation.Left,
+                    cursor.MoveMode.MoveAnchor,
+                    len(end_marker),
+                )
             else:
                 cursor.insertText(start_marker + end_marker)
-                cursor.movePosition(cursor.MoveOperation.Left, cursor.MoveMode.MoveAnchor, len(end_marker))
+                cursor.movePosition(
+                    cursor.MoveOperation.Left,
+                    cursor.MoveMode.MoveAnchor,
+                    len(end_marker),
+                )
             self.setTextCursor(cursor)
             return
 
         selected_text = cursor.selectedText()
-        selected_text = selected_text.replace('\u2029', '\n')
+        selected_text = selected_text.replace("\u2029", "\n")
 
-        if selected_text.startswith(start_marker.strip()) and selected_text.endswith(end_marker.strip()):
-            new_text = selected_text[len(start_marker.strip()):-len(end_marker.strip())]
+        if selected_text.startswith(start_marker.strip()) and selected_text.endswith(
+            end_marker.strip()
+        ):
+            new_text = selected_text[
+                len(start_marker.strip()) : -len(end_marker.strip())
+            ]
         else:
             new_text = f"{start_marker}{selected_text}{end_marker}"
 
         cursor.insertText(new_text)
 
-        cursor.movePosition(cursor.MoveOperation.Left, cursor.MoveMode.KeepAnchor, len(new_text))
+        cursor.movePosition(
+            cursor.MoveOperation.Left, cursor.MoveMode.KeepAnchor, len(new_text)
+        )
         self.setTextCursor(cursor)
         self.format_timer.start(500)
 
     def startFormat(self):
         text = self.toPlainText()
-        line_count = text.count('\n')
-        line_count += text.count('<br>') + 1 if text else 1
+        line_count = text.count("\n")
+        line_count += text.count("<br>") + 1 if text else 1
         height = line_count * self.fontMetrics().lineSpacing() + 16
         self.setFixedHeight(height)
         self.format_timer.start(500)
@@ -265,22 +317,36 @@ class CustomTextEdit(QTextEdit):
         position = cursor.position()
 
         replacements = [
-            (r"^(#{1,6})\s*(.+)$", lambda
-                m: f'<span style="color: gray;">{m.group(1)}</span> <h{len(m.group(1))} style="display:inline; font-size: {20 - len(m.group(1)) * 2}px;">{m.group(2)}</h{len(m.group(1))}>',
-             re.MULTILINE),
+            (
+                r"^(#{1,6})\s*(.+)$",
+                lambda m: f'<span style="color: gray;">{m.group(1)}</span> <h{len(m.group(1))} style="display:inline; font-size: {20 - len(m.group(1)) * 2}px;">{m.group(2)}</h{len(m.group(1))}>',
+                re.MULTILINE,
+            ),
             (r"``````", r'<span style="color: gray;">``````</span>', re.DOTALL),
-            (r"`(.*?)`", r'<span style="color: gray;">`</span><code style="padding: 2px;">\1</code><span style="color: gray;">`</span>'),
-            (r"\*\*\*(.*?)\*\*\*", r'<span style="color: gray;">***</span><b><i>\1</i></b><span style="color: gray;">***</span>'),
-            (r"\*\*(.*?)\*\*", r'<span style="color: gray;">**</span><b>\1</b><span style="color: gray;">**</span>'),
-            (r"\*(.*?)\*", r'<span style="color: gray;">*</span><i>\1</i><span style="color: gray;">*</span>'),
+            (
+                r"`(.*?)`",
+                r'<span style="color: gray;">`</span><code style="padding: 2px;">\1</code><span style="color: gray;">`</span>',
+            ),
+            (
+                r"\*\*\*(.*?)\*\*\*",
+                r'<span style="color: gray;">***</span><b><i>\1</i></b><span style="color: gray;">***</span>',
+            ),
+            (
+                r"\*\*(.*?)\*\*",
+                r'<span style="color: gray;">**</span><b>\1</b><span style="color: gray;">**</span>',
+            ),
+            (
+                r"\*(.*?)\*",
+                r'<span style="color: gray;">*</span><i>\1</i><span style="color: gray;">*</span>',
+            ),
             ("\n", "<br>"),
         ]
 
         for pattern, replacement, *flags in replacements:
             text = re.sub(pattern, replacement, text, flags=flags[0] if flags else 0)
 
-        #line_count = text.count('<br>') + 1 if text else 1
-        #height = line_count * self.fontMetrics().lineSpacing() + 16
+        # line_count = text.count('<br>') + 1 if text else 1
+        # height = line_count * self.fontMetrics().lineSpacing() + 16
 
         if text != self.toHtml():
             self.setHtml(text)
@@ -288,7 +354,6 @@ class CustomTextEdit(QTextEdit):
             self.setTextCursor(cursor)
 
         self.blockSignals(False)
-
 
     def applyHeading(self, combo):
         heading_marker = combo.currentData()
@@ -304,7 +369,7 @@ class CustomTextEdit(QTextEdit):
 
         line_text = cursor.selectedText()
 
-        line_text = re.sub(r'^#{1,6}\s*', '', line_text)
+        line_text = re.sub(r"^#{1,6}\s*", "", line_text)
 
         new_text = f"{heading_marker} {line_text}"
 
@@ -331,14 +396,15 @@ class SearchLineEdit(QLineEdit):
         self.completer_model = QStringListModel()
         self.custom_completer = QCompleter()
         self.custom_completer.setModel(self.completer_model)
-        self.custom_completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
+        self.custom_completer.setCompletionMode(
+            QCompleter.CompletionMode.UnfilteredPopupCompletion
+        )
         self.custom_completer.activated.connect(self.simulateEnter)
         self.setCompleter(self.custom_completer)
 
         self.popup = self.custom_completer.popup()
         self.popup.setWindowFlag(
-            self.windowFlags() |
-            Qt.WindowType.NoDropShadowWindowHint
+            self.windowFlags() | Qt.WindowType.NoDropShadowWindowHint
         )
 
         TM.theme_changed.connect(self.update_theme)
@@ -441,8 +507,8 @@ class LeftSidebar(QFrame):
 
     def update_theme(self):
         self.setStyleSheet(TM.get_style("LeftSidebar"))
-        self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c('icon')))
-        self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c('icon')))
+        self.to_main_page_button_2.setIcon(self.mw.svg_icons.discover(TM.c("icon")))
+        self.create_button_2.setIcon(self.mw.svg_icons.create(TM.c("icon")))
 
     def initUI(self):
         self.left_sidebar_layout = QVBoxLayout()
@@ -461,19 +527,27 @@ class LeftSidebar(QFrame):
         self.buttons_layout.addWidget(self.to_main_page_button_2, 1)
         self.to_main_page_button_2.setVisible(False)
 
-        self.create_button = PushButton(self.tr('Create'))
-        self.create_button.clicked.connect(lambda: self.showCreateContextMenu(self.create_button))
+        self.create_button = PushButton(self.tr("Create"))
+        self.create_button.clicked.connect(
+            lambda: self.showCreateContextMenu(self.create_button)
+        )
         self.left_sidebar_layout.addWidget(self.create_button)
 
         self.create_button_2 = PushButton()
-        self.create_button_2.clicked.connect(lambda: self.showCreateContextMenu(self.create_button_2))
+        self.create_button_2.clicked.connect(
+            lambda: self.showCreateContextMenu(self.create_button_2)
+        )
         self.left_sidebar_layout.addWidget(self.create_button_2)
         self.create_button_2.setVisible(False)
 
         self.recent_chat_scroll_page = VerticalScrollPage()
-        self.recent_chat_scroll_page.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
+        self.recent_chat_scroll_page.setFixedWidth(
+            int(self.mw.settings.value("left_sidebar_width", 250)) - 20
+        )
         self.recent_chat_scroll_viewport = self.recent_chat_scroll_page.viewport
-        self.recent_chat_scroll_viewport.setStyleSheet("background-color: transparent; border: none;")
+        self.recent_chat_scroll_viewport.setStyleSheet(
+            "background-color: transparent; border: none;"
+        )
         self.recent_chat_scroll_layout = self.recent_chat_scroll_page.layout
         self.recent_chat_scroll_layout.setContentsMargins(0, 0, 0, 0)
         self.recent_chat_scroll_layout.setSpacing(5)
@@ -484,23 +558,36 @@ class LeftSidebar(QFrame):
         self.left_sidebar_layout.addLayout(self.bottom_button_layout)
 
         self.profile_button = PushButton(self.tr("Profile"))
-        self.profile_button.clicked.connect(lambda: self.showProfileContextMenu(self.profile_button))
+        self.profile_button.clicked.connect(
+            lambda: self.showProfileContextMenu(self.profile_button)
+        )
         self.bottom_button_layout.addWidget(self.profile_button, 1)
 
         self.profile_button_2 = PushButton()
         if self.mw.me_has_avatar:
-            self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
-                                      45, 45, 100, callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
-                                      error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon"))))
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                45,
+                45,
+                100,
+                callback=lambda pixmap: self.profile_button_2.setIcon(QIcon(pixmap)),
+                error_cb=lambda _: self.profile_button_2.setIcon(
+                    self.mw.svg_icons.profile(TM.c("icon"))
+                ),
+            )
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon")))
-        self.profile_button_2.clicked.connect(lambda: self.showProfileContextMenu(self.profile_button_2))
+        self.profile_button_2.clicked.connect(
+            lambda: self.showProfileContextMenu(self.profile_button_2)
+        )
         self.bottom_button_layout.addWidget(self.profile_button_2, 1)
         self.profile_button_2.setVisible(False)
 
     def showCreateContextMenu(self, button: PushButton):
         context_menu = PushButtonMenu(self)
-        context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
+        context_menu.setFixedWidth(
+            int(self.mw.settings.value("left_sidebar_width", 250)) - 20
+        )
 
         character_action = QAction(self.tr("Character"))
         character_action.triggered.connect(self.mw.openCreateCharacterPage)
@@ -510,16 +597,18 @@ class LeftSidebar(QFrame):
         scene_action.triggered.connect(self.mw.openCreateScenePage)
         context_menu.addAction(scene_action)
 
-        #voice_action = QAction(self.tr("Voice"))
-        #settings_action.triggered.connect(self.mw.openSettings)
-        #voice_action.setEnabled(False)
-        #context_menu.addAction(voice_action)
+        # voice_action = QAction(self.tr("Voice"))
+        # settings_action.triggered.connect(self.mw.openSettings)
+        # voice_action.setEnabled(False)
+        # context_menu.addAction(voice_action)
 
         context_menu.exec(button.mapToGlobal(QPoint(0, context_menu.height())))
 
     def showProfileContextMenu(self, button: PushButton):
         context_menu = PushButtonMenu(self)
-        context_menu.setFixedWidth(int(self.mw.settings.value("left_sidebar_width", 250)) - 20)
+        context_menu.setFixedWidth(
+            int(self.mw.settings.value("left_sidebar_width", 250)) - 20
+        )
 
         profile_action = QAction(self.tr("Profile"))
         profile_action.triggered.connect(self.openUserPage)
@@ -529,14 +618,20 @@ class LeftSidebar(QFrame):
         settings_action.triggered.connect(self.mw.openSettings)
         context_menu.addAction(settings_action)
 
-        context_menu.exec(button.mapToGlobal(QPoint(0, -2*context_menu.height())))
+        context_menu.exec(button.mapToGlobal(QPoint(0, -2 * context_menu.height())))
 
     def avatarUpdate(self):
         if self.mw.me_has_avatar:
-            self.mw.image_loader.load(f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
-                                      45, 45, 100,
-                                      callback=lambda pixmap:self.profile_button_2.setIcon(QIcon(pixmap)),
-                                      error_cb=lambda _: self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon"))))
+            self.mw.image_loader.load(
+                f"https://characterai.io/i/80/static/avatars/{self.mw.me_avatar}?webp=true&anim=0",
+                45,
+                45,
+                100,
+                callback=lambda pixmap: self.profile_button_2.setIcon(QIcon(pixmap)),
+                error_cb=lambda _: self.profile_button_2.setIcon(
+                    self.mw.svg_icons.profile(TM.c("icon"))
+                ),
+            )
         else:
             self.profile_button_2.setIcon(self.mw.svg_icons.profile(TM.c("icon")))
 
@@ -563,10 +658,12 @@ class LeftSidebar(QFrame):
             card_widget.avatar_label_2.setVisible(False)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            if self.cursor().shape() == Qt.CursorShape.SizeHorCursor:
-                self.resizing = True
-                self.startPos = event.globalPosition().toPoint()
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            and self.cursor().shape() == Qt.CursorShape.SizeHorCursor
+        ):
+            self.resizing = True
+            self.startPos = event.globalPosition().toPoint()
 
     def mouseMoveEvent(self, event):
         edge_size = 5
