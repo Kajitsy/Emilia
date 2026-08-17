@@ -2422,6 +2422,11 @@ Ej. Desenmascara al extraño antes de que termine el vals.
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
+        <source>Use system accent color</source>
+        <translation>Usar el color de énfasis del sistema</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
         <source>Text animation speed (ms)</source>
         <translation>Velocidad de animación del texto (ms)</translation>
     </message>

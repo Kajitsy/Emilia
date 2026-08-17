@@ -2422,6 +2422,11 @@ E.g. Unmask the stranger before the final waltz ends.
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
+        <source>Use system accent color</source>
+        <translation>Використовувати акцентний колір системи</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
         <source>Text animation speed (ms)</source>
         <translation>Швидкість анімації тексту (мс)</translation>
     </message>

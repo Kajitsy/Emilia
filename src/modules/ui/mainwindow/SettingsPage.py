@@ -434,6 +434,12 @@ class SettingsPage(QWidget):
                         "key": "app_theme_system_sync",
                     },
                     {
+                        "type": "checkbox",
+                        "label": self.tr("Use system accent color"),
+                        "key": "app_use_system_accent",
+                        "def_value": False,
+                    },
+                    {
                         "type": "lineedit",
                         "label": self.tr("Text animation speed (ms)"),
                         "key": "text_animation_speed",
@@ -1217,6 +1223,10 @@ class SettingsPage(QWidget):
                 self.mw.settings.setValue(
                     key, "true" if widget.isChecked() else "false"
                 )
+                if key == "app_use_system_accent":
+                    use_accent = widget.isChecked()
+                    TM.set_use_system_accent(use_accent)
+                    self.mw.update_theme()
                 if key == "discord_rpc/enable":
                     self.mw.drpc_enable = widget.isChecked()
                     if self.mw.drpc_enable:

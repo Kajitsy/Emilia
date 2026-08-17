@@ -2421,6 +2421,11 @@ Z.B. Entlarven Sie den Fremden vor Ende des Walzers.
         <translation>Design mit Systemdesign synchronisieren</translation>
     </message>
     <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="436" />
+        <source>Use system accent color</source>
+        <translation>System-Akzentfarbe verwenden</translation>
+    </message>
+    <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
         <source>Text animation speed (ms)</source>
         <translation>Textanimationsgeschwindigkeit (ms)</translation>

@@ -2422,6 +2422,11 @@ Ex. Desmascare o estranho antes do baile terminar.
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
+        <source>Use system accent color</source>
+        <translation>Usar a cor de destaque do sistema</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
         <source>Text animation speed (ms)</source>
         <translation>Velocidade da animação do texto (ms)</translation>
     </message>
