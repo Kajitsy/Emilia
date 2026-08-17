@@ -3,6 +3,9 @@ QScrollArea {
     border: none;
     border-radius: 4px;
 }
+QScrollArea > QWidget > QWidget {
+    background-color: transparent;
+}
 QScrollBar:horizontal {
     border: none;
     background: @primary_bg;
@@ -33,6 +36,6 @@ QScrollBar::sub-line:horizontal {
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
-QScrollBar::handle:horizontl:hover {
+QScrollBar::handle:horizontal:hover {
     background: @scroll_hover;
 }

@@ -15,6 +15,6 @@ QPushButton:hover {
 }
 QPushButton:pressed, QPushButton:checked {
     background-color: @pressed_bg;
-    border-bottom: 5px solid #555;
+    border-bottom: 5px solid @accent;
     padding-bottom: 3px;
 }

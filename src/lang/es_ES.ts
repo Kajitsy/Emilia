@@ -1,72 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="es_ES">
 <context>
     <name>AnyCharCreatePage</name>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="76"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="91" />
         <source>Scene genre</source>
-        <translation type="unfinished"></translation>
+        <translation>Género de la escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="81"/>
-        <source>Select the genre. This guides the Character&apos;s style and tone.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="97" />
+        <source>Select the genre. This guides the Character's style and tone.</source>
+        <translation>Selecciona el género. Esto guía el estilo y tono del personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="86"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="105" />
         <source>Select the genre. This guides the Character’s style and tone.</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecciona el género. Esto guía el estilo y tono del personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="90"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="110" />
         <source>When is this Scene set?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿En qué época se desarrolla esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="99"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="93"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="124" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="113" />
         <source>Set the time. This guides the Character contextually when the Scene is taking place.</source>
-        <translation type="unfinished"></translation>
+        <translation>Establece la época. Esto orienta al personaje sobre cuándo ocurre la escena.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="102"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="130" />
         <source>Where does this Scene happen?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Dónde ocurre esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="111"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="105"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="144" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="133" />
         <source>Set the location. This grounds the Character where the Scene is taking place.</source>
-        <translation type="unfinished"></translation>
+        <translation>Establece la ubicación. Esto ubica al personaje en el lugar de la escena.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="114"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="150" />
         <source>Tone of this Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Tono de esta escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="116"/>
-        <source>What&apos;s the mood of the Scene? The defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="153" />
+        <source>What's the mood of the Scene? The defines the atmosphere and emotional tone to help your audience immerse.</source>
+        <translation>¿Cuál es el ambiente de la escena? Esto define la atmósfera y el tono emocional.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="122"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="164" />
         <source>What’s the mood of the Scene? This defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Cuál es el ambiente de la escena? Esto define la atmósfera y el tono emocional.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="126"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="170" />
         <source>What’s the backstory of this Scene?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Cuál es la historia previa de esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="128"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="173" />
         <source>Describe what is happening in this Scene. Include relevant details about the situation and backstory. This will help shape how the Scene unfolds and how the Character responds. Use {{user}} for the user. Use {{char}} for the Character. If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.</source>
-        <translation type="unfinished"></translation>
+        <translation>Describe lo que sucede en esta escena. Incluye detalles relevantes sobre la situación. Usa {{user}} para el usuario y {{char}} para el personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="134"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="184" />
         <source>Describe what is happening in this Scene. Include relevant details about the situation and backstory. This will help shape how the Scene unfolds and how the Character responds.
 
 Use {{user}} for the user.
@@ -74,1462 +73,1222 @@ Use {{char}} for the Character.
 
 If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Describe lo que sucede en esta escena. Incluye detalles relevantes.
+
+Usa {{user}} para el usuario.
+Usa {{char}} para el personaje.
+
+Evita pronombres de género para escenas universales.
+</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="143"/>
-        <source>What&apos;s the player&apos;s goal in this Scene?</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="197" />
+        <source>What's the player's goal in this Scene?</source>
+        <translation>¿Cuál es el objetivo del jugador en esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="145"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="201" />
         <source>Define a goal that is the next logical story beat, tells the player what to try, and make the goal achievable with a clear, detectable moment of success.Keep it specific and concrete. A good goal = verb that implies effort + challenges or constraints. E.g. Unmask the stranger before the final waltz ends.</source>
-        <translation type="unfinished"></translation>
+        <translation>Define un objetivo claro que el jugador pueda alcanzar. Un buen objetivo = verbo + desafío o restricción.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="151"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="212" />
         <source>Define a goal that is the next logical story beat, tells the player what to try, and make the goal achievable with a clear, detectable moment of success.Keep it specific and concrete.
 
 A good goal = verb that implies effort + challenges or constraints
 E.g. Unmask the stranger before the final waltz ends.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Define un objetivo claro para el jugador.
+
+Un buen objetivo = verbo de esfuerzo + restricciones
+Ej. Desenmascara al extraño antes de que termine el vals.
+</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="158"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="223" />
         <source>Introduce this Scene to your audience</source>
-        <translation type="unfinished"></translation>
+        <translation>Presenta esta escena a tu audiencia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="166"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="160"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="238" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="227" />
         <source>This is the starting screen of your Scene. Your audience will see this intro before entering the Scene. Help them understand what’s happening and get excited to start playing the Scene. Use {{user}} for the user. Use {{char}} for the Character.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta es la pantalla inicial de tu escena. Usa {{user}} para el usuario y {{char}} para el personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="172"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="246" />
         <source>Character greeting</source>
-        <translation type="unfinished"></translation>
+        <translation>Saludo del personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="177"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="253" />
         <source>Plain text</source>
         <translation>Texto sin formato</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="178"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="254" />
         <source># Title 1</source>
         <translation># Título 1</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="179"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="255" />
         <source>## Title 2</source>
         <translation># Título 2</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="180"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="256" />
         <source>### Title 3</source>
         <translation># Título 3</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="181"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="257" />
         <source>#### Title 4</source>
         <translation># Título 4</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="182"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="258" />
         <source>##### Title 5</source>
         <translation># Título 5</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="183"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="259" />
         <source>###### Title 6</source>
         <translation># Título 6</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="186"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="264" />
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation>Negrita</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="189"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="269" />
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Cursiva</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="192"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="274" />
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="197"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="282" />
         <source>This is the first Character message your audience will see after entering the Scene. Make it your hook with what they will see, hear, and feel.</source>
-        <translation type="unfinished"></translation>
+        <translation>Este es el primer mensaje del personaje que verá tu audiencia al entrar en la escena.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="205"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="294" />
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="212"/>
-        <source>Give your Scene a memorable name. e.g. &quot;Her Last Secret&quot;</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="303" />
+        <source>Give your Scene a memorable name. e.g. "Her Last Secret"</source>
+        <translation>Dale a tu escena un nombre memorable, ej. "Su último secreto"</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="215"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="307" />
         <source>Cover Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Imagen de portada</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="225"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="319" />
         <source>Upload</source>
-        <translation type="unfinished"></translation>
+        <translation>Subir</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="232"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="328" />
         <source>Visibility</source>
         <translation>Visibilidad</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="367"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="338"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="237"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="514" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="469" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="336" />
         <source>Public</source>
         <translation>Public</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="369"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="340"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="237"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="516" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="471" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="336" />
         <source>Unlisted</source>
         <translation>No numerado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="371"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="342"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="237"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="518" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="473" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="336" />
         <source>Private</source>
         <translation>Privado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="243"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="345" />
         <source>Create Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Crear escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="247"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="351" />
         <source>Save Changes</source>
         <translation>Guardar Cambios</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="251"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="357" />
         <source>Save and Chat</source>
         <translation>Guardar y comunicar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="326"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="294"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="274"/>
-        <source>You haven&apos;t filled out everything.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="457" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="416" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="389" />
+        <source>You haven't filled out everything.</source>
+        <translation>No has rellenado todo.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="303"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="283"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="425" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="398" />
         <source>The scene has been saved successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡La escena se ha guardado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="315"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="438" />
         <source>The scene has been successfully created!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡La escena se ha creado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="405"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="354"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="560" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="493" />
         <source>Error downloading image</source>
-        <translation type="unfinished"></translation>
+        <translation>Error al descargar la imagen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="445"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="603" />
         <source>Uploading...</source>
         <translation>Exportación...</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>AnyCharFirstPage</name>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="28"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="30" />
         <source>Create my own</source>
-        <translation type="unfinished"></translation>
+        <translation>Crear la mía</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="29"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="31" />
         <source>You write the story, your audience pick the Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Tú escribes la historia, tu audiencia elige el personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="194"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="171"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="148"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="125"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="102"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="79"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="56"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="33"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="202" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="179" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="156" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="131" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="108" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="85" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="60" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="37" />
         <source>Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Plantilla</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="34"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="38" />
         <source>The Mysteriously Vanishing Fortune</source>
-        <translation type="unfinished"></translation>
+        <translation>La fortuna misteriosamente desaparecida</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="35"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="39" />
         <source>Mystery</source>
-        <translation type="unfinished"></translation>
+        <translation>Misterio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="57"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="61" />
         <source>The Shapeshifter’s Genome: A Sci-Fi Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>El genoma del cambiaformas: Escena de ciencia ficción</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="58"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="62" />
         <source>Sci-Fi</source>
-        <translation type="unfinished"></translation>
+        <translation>Ciencia ficción</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="80"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="86" />
         <source>Ride the Dragon</source>
-        <translation type="unfinished"></translation>
+        <translation>Montar el dragón</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="81"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="87" />
         <source>Fantasy</source>
-        <translation type="unfinished"></translation>
+        <translation>Fantasía</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="103"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="109" />
         <source>The Romantic Ball: Ask Them To Dance</source>
-        <translation type="unfinished"></translation>
+        <translation>El baile romántico: Pídeles un baile</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="104"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="110" />
         <source>Romance</source>
-        <translation type="unfinished"></translation>
+        <translation>Romance</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="126"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="132" />
         <source>They Cheated on Me</source>
-        <translation type="unfinished"></translation>
+        <translation>Me engañaron</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="127"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="133" />
         <source>Drama</source>
-        <translation type="unfinished"></translation>
+        <translation>Drama</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="149"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="157" />
         <source>Plane Crashed: Stranded on an Island</source>
-        <translation type="unfinished"></translation>
+        <translation>Avión estrellado: Varado en una isla</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="150"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="158" />
         <source>Survival/Adventure</source>
-        <translation type="unfinished"></translation>
+        <translation>Supervivencia/Aventura</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="172"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="180" />
         <source>The Freshman College Party</source>
-        <translation type="unfinished"></translation>
+        <translation>La fiesta universitaria de primer año</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="173"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="181" />
         <source>Coming-of-age</source>
-        <translation type="unfinished"></translation>
+        <translation>Crecimiento personal</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="195"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="203" />
         <source>Coffee Shop AU: Latte Hearts</source>
-        <translation type="unfinished"></translation>
+        <translation>Cafetería AU: Corazones de latte</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="196"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="204" />
         <source>Slice-of-life</source>
-        <translation type="unfinished"></translation>
+        <translation>Recuentos de la vida</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="252"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="261" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation type="unfinished"></translation>
+        <translation>Bienvenido a Escenas. ¿Listo para crear?</translation>
     </message>
-</context>
-<context>
-    <name>CharacterCards.MainCard</name>
+</context><context>
+    <name>CharMainCard</name>
     <message>
-        <source>Author: @</source>
-        <translation type="vanished">Autor: @</translation>
+        <location filename="../modules/ui/cards/EmptyCards/CharMainCard.py" line="14" />
+        <source>And it's empty here...</source>
+        <translation>Y aquí está vacío...</translation>
     </message>
-    <message>
-        <source> chats</source>
-        <translation type="vanished"> charlar</translation>
-    </message>
-    <message>
-        <source> likes</source>
-        <translation type="vanished"> gustos</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>ChatInterface</name>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="203"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="612" />
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation>Negrita</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="206"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="617" />
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Cursiva</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="209"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="622" />
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="370"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2243" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="660" />
+        <source>Call limit exceeded</source>
+        <translation>Se excedió el límite de llamadas</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="674" />
+        <source>Attached message limit exceeded</source>
+        <translation>Se excedió el límite de mensajes adjuntos</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="873" />
         <source>Downloading background...</source>
-        <translation type="unfinished"></translation>
+        <translation>Descargando fondo...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="374"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="886" />
         <source>Error downloading image</source>
-        <translation type="unfinished"></translation>
+        <translation>Error al descargar la imagen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="510"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1050" />
         <source>New Chat</source>
         <translation>Nuevo chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="521"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1063" />
         <source>Voice</source>
         <translation>Voz</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="528"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1072" />
         <source>History</source>
         <translation>Historia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="532"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1078" />
         <source>Chat Theme</source>
         <translation>Melodía</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="536"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1084" />
         <source>Persona</source>
         <translation>Persona</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="540"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1090" />
         <source>Chat Style</source>
         <translation>Estilo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="710"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="544"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1400" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1096" />
         <source>Show VModel</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar VModel</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="549"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1331" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1103" />
         <source>Detach Chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Separar chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="697"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1297" />
+        <source>Attach Chat</source>
+        <translation>Adjuntar chat</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1301" />
         <source>Chat with %%char%%</source>
-        <translation type="unfinished"></translation>
+        <translation>Chatear con %%char%%</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="717"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1407" />
         <source>Hide VModel</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar VModel</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="740"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1432" />
         <source>Choose a persona</source>
         <translation>Elige una persona</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="760"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1454" />
         <source>Successfully updated your persona</source>
-        <translation>Actualizó con éxito su persona</translation>
+        <translation>Persona actualizada con éxito</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="787"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1484" />
         <source>Choose a model to influence the style of your chat</source>
         <translation>Elija un modelo para influir en su estilo de chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="889"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="863"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1598" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1569" />
         <source>Continue chat</source>
         <translation>Continuar con el chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="865"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1571" />
         <source>Start new chat</source>
         <translation>Empiece una nueva chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1030"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1656" />
+        <source>Media (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.mp4 *.webm *.mov *.mkv *.avi);;Images (*.png *.jpg *.jpeg *.webp *.bmp);;Videos (*.mp4 *.webm *.mov *.mkv *.avi);;GIF (*.gif)</source>
+        <translation>Archivos multimedia (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.mp4 *.webm *.mov *.mkv *.avi);;Imágenes (*.png *.jpg *.jpeg *.webp *.bmp);;Vídeos (*.mp4 *.webm *.mov *.mkv *.avi);;GIF (*.gif)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1833" />
         <source>Character Text Color:</source>
         <translation>El color del texto del personaje:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1039"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1848" />
         <source>Character Background Color:</source>
         <translation>El color del fondo del personaje:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1048"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1863" />
         <source>User Text Color:</source>
         <translation>El color del texto del usuario:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1057"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1878" />
         <source>User Background Color:</source>
         <translation>Color de fondo del usuario:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1067"/>
-        <source>Background Image:</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1893" />
+        <source>Stretching:</source>
+        <translation>Ajuste:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1070"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1895" />
+        <source>Cover</source>
+        <translation>Cubrir</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1896" />
+        <source>Contain</source>
+        <translation>Contener</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1897" />
+        <source>Stretch</source>
+        <translation>Estirar</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1898" />
+        <source>Center</source>
+        <translation>Centrado</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1911" />
+        <source>FPS:</source>
+        <translation>FPS:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1913" />
+        <source>Auto</source>
+        <translation>Auto</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1926" />
+        <source>Quality:</source>
+        <translation>Calidad:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1928" />
+        <source>Original</source>
+        <translation>Original</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1948" />
+        <source>Background Image:</source>
+        <translation>Imagen de fondo:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1951" />
         <source>Select</source>
         <translation>Elegir</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1074"/>
-        <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1955" />
+        <source>Auto-tune Colors</source>
+        <translation>Ajustar colores automáticamente</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1081"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1959" />
+        <source>Clear</source>
+        <translation>Limpiar</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1966" />
         <source>Apply</source>
         <translation>Aplicar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1084"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1969" />
         <source>Restore</source>
         <translation>Restaurar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1135"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2029" />
         <source>Uploading...</source>
         <translation>Exportación...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1152"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2050" />
         <source>Current Chat</source>
         <translation>Chat actual</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1285"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2276" />
         <source>Search Voice</source>
         <translation>Buscar una voz</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1343"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2342" />
         <source>Link copied to clipboard</source>
         <translation>El enlace se copia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1390"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1387"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2414" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2404" />
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1405"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1390"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1387"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2438" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2415" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2405" />
         <source>Unknown</source>
         <translation>Desconocido</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1393"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2424" />
         <source> chats</source>
         <translation> charlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1423"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1414"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2465" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2452" />
         <source>Chatting with </source>
         <translation>Chatear con </translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1425"/>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1417"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2468" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2458" />
         <source>Open character</source>
         <translation>Desbloquear el personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1430"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2474" />
         <source>Chatting</source>
         <translation>Chatear</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1558"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2659" />
         <source>New chat started</source>
         <translation>Ha comenzado una nueva charla</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1565"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2666" />
         <source>The message was deleted</source>
         <translation>El mensaje se elimina</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1578"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2683" />
         <source>Rewind successfully</source>
         <translation>Rebobinado con éxito</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1695"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2832" />
         <source>Message copied to clipboard</source>
         <translation>El mensaje se copia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1699"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2836" />
         <source>Copy Message</source>
         <translation>Copiar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1704"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2843" />
         <source>Delete Message</source>
         <translation>Borrar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1708"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2849" />
         <source>Rewind to here</source>
         <translation>Rebobinar aquí</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1712"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2855" />
         <source>New chat from here</source>
         <translation>Nuevo chat desde aquí</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1716"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2861" />
         <source>Regenerate</source>
         <translation>Regenerar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1720"/>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2868" />
         <source>Edit message</source>
         <translation>Editar mensaje</translation>
     </message>
-    <message>
-        <source>Meow</source>
-        <translation type="vanished">Meow</translation>
-    </message>
-    <message>
-        <source>Quick wits, faster words</source>
-        <translation type="vanished">Mente afilada, palabras rápidas</translation>
-    </message>
-    <message>
-        <source>Roar</source>
-        <translation type="vanished">Roar</translation>
-    </message>
-    <message>
-        <source>Mix of speed &amp; smarts</source>
-        <translation type="vanished">Combinación de velocidad e inteligencia</translation>
-    </message>
-    <message>
-        <source>Nyan</source>
-        <translation type="vanished">Nyan</translation>
-    </message>
-    <message>
-        <source>Smart and more thoughtful</source>
-        <translation type="vanished">Intelectual y más reflexivo</translation>
-    </message>
-    <message>
-        <source>Goro</source>
-        <translation type="vanished">Goro</translation>
-    </message>
-    <message>
-        <source>Less spicy</source>
-        <translation type="vanished">Menos picante</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>ChatThread</name>
     <message>
-        <location filename="../modules/logic/QThreads/ChatThread.py" line="145"/>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="171" />
         <source>Successful connection!</source>
         <translation>Conexión exitosa!</translation>
     </message>
     <message>
-        <location filename="../modules/logic/QThreads/ChatThread.py" line="148"/>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="174" />
         <source>Connection error: </source>
         <translation>Error de conexión: </translation>
     </message>
-</context>
-<context>
+    <message>
+        <location filename="../modules/logic/QThreads/ChatThread.py" line="198" />
+        <source>Attached message limit exceeded</source>
+        <translation>Se excedió el límite de mensajes adjuntos</translation>
+    </message>
+</context><context>
     <name>ChoiceStep</name>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="28"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="30" />
         <source>Scenes are instant roleplay setups you create, where anyone can drop into a specific setting with their favorite Character. They are like side stories branching from the core chat, perfect for anyone to start roleplaying right away. Create a Scene to bring your story to life.</source>
-        <translation type="unfinished"></translation>
+        <translation>Las escenas son configuraciones de juego de rol instantáneas donde cualquiera puede entrar con su personaje favorito. Crea una escena para dar vida a tu historia.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="36"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="41" />
         <source>Tips and best practices</source>
-        <translation type="unfinished"></translation>
+        <translation>Consejos y mejores prácticas</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="48"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="59" />
         <source>Any Character Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Escena para cualquier personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="54"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="66" />
         <source>A Scene that works with any Character. Perfect for general scenarios where any Character can jump in and interact.</source>
-        <translation type="unfinished"></translation>
+        <translation>Una escena que funciona con cualquier personaje. Perfecta para escenarios generales.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="66"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="83" />
         <source>Main Character Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Escena con personaje principal</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="72"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="90" />
         <source>A Scene designed for a specific Character you have in mind, tailored to their personality and backstory.</source>
-        <translation type="unfinished"></translation>
+        <translation>Una escena diseñada para un personaje específico adaptada a su personalidad.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="92"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="115" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation type="unfinished"></translation>
+        <translation>Bienvenido a Escenas. ¿Listo para crear?</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>EditCard</name>
     <message>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="56"/>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="53"/>
-        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="35"/>
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="69" />
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="66" />
+        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="38" />
         <source>Display Name</source>
         <translation>Nombre para Mostrar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="72"/>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="69"/>
-        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="59"/>
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="85" />
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="82" />
+        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="76" />
         <source>Background</source>
         <translation>Fondo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="75"/>
+        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="92" />
         <source>Make default for new chats</source>
         <translation>Establecer como predeterminado para nuevos chats</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="82"/>
+        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="99" />
         <source>Remove</source>
         <translation>Borrar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="88"/>
-        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="86"/>
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="101" />
+        <location filename="../modules/ui/cards/PersonaCards/EditCard.py" line="103" />
         <source>Save</source>
         <translation>Ahorrar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="64"/>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="61"/>
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="77" />
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="74" />
         <source>Username</source>
         <translation>Nombre de Usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="84"/>
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="97" />
         <source>Cancel</source>
         <translation>Cancelación</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="151"/>
+        <location filename="../modules/ui/cards/UserCards/EditCard.py" line="170" />
         <source>Welcome back, </source>
         <translation>Con un regreso, </translation>
     </message>
-</context>
-<context>
-    <name>EditOverlay</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Nombre para Mostrar</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Fondo</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Establecer como predeterminado para nuevos chats</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Ahorrar</translation>
-    </message>
-    <message>
-        <source>Username</source>
-        <translation type="vanished">Nombre de Usuario</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="vanished">Cancelación</translation>
-    </message>
-    <message>
-        <source>Welcome back, </source>
-        <translation type="vanished">Con un regreso, </translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>EditPage</name>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="48"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="70" />
         <source>Character Name</source>
         <translation>Nombre del personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="56"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="80" />
         <source>e.g. Albert Einstein</source>
-        <translation></translation>
+        <translation>ej. Albert Einstein</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="60"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="84" />
         <source>Tagline</source>
         <translation>Lema</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="66"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="93" />
         <source>Add a short tagline of your Character</source>
         <translation>Añade el eslogan de tu personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="73"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="103" />
         <source>Description</source>
         <translation>Description</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="158"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="114"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="78"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="224" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="162" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="110" />
         <source>Plain text</source>
         <translation>Texto sin formato</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="159"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="115"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="79"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="225" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="163" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="111" />
         <source># Title 1</source>
         <translation># Título 1</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="160"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="116"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="80"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="226" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="164" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="112" />
         <source>## Title 2</source>
         <translation># Título 2</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="161"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="117"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="81"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="227" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="165" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="113" />
         <source>### Title 3</source>
         <translation># Título 3</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="162"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="118"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="82"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="228" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="166" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="114" />
         <source>#### Title 4</source>
         <translation># Título 4</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="163"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="119"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="83"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="229" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="167" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="115" />
         <source>##### Title 5</source>
         <translation># Título 5</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="164"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="120"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="84"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="230" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="168" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="116" />
         <source>###### Title 6</source>
         <translation># Título 6</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="167"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="123"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="87"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="235" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="173" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="121" />
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation>Negrita</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="170"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="126"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="90"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="240" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="178" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="126" />
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Cursiva</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="173"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="129"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="93"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="245" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="183" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="131" />
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="98"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="139" />
         <source>How would your Character describe themselves?</source>
         <translation>¿Cómo se describiría a sí mismo tu Personaje?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="109"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="155" />
         <source>Greeting</source>
         <translation>Saludo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="134"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="191" />
         <source>e.g. Hello, I am Albert. Ask me anything about my scientific contributions.</source>
         <translation>Hola, soy Albert. Pregúntame cualquier cosa sobre mis contribuciones científicas.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="145"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="207" />
         <source>Allow dynamic greetings</source>
         <translation>Permitir saludos dinámicos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="153"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="217" />
         <source>Definition</source>
         <translation>Definición</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="178"/>
-        <source>What&apos;s your Character&apos;s backstory? How do you want it to talk or act?</source>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="253" />
+        <source>What's your Character's backstory? How do you want it to talk or act?</source>
         <translation>¿Cuál es la historia de fondo de tu Personaje? ¿Cómo quieres que hable o actúe?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="187"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="267" />
         <source>User message</source>
         <translation>Mensaje de usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="190"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="272" />
         <source>Character message</source>
         <translation>Mensaje del personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="193"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="277" />
         <source>End of dialog</source>
         <translation>Fin del diálogo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="203"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="287" />
         <source>Keep Character definition private</source>
         <translation>Mantener la definición del personaje en secreto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="207"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="291" />
         <source>Visibility</source>
         <translation>Visibilidad</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="323"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="293"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="212"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="439" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="401" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="299" />
         <source>Public</source>
         <translation>Public</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="325"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="295"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="212"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="441" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="403" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="299" />
         <source>Unlisted</source>
         <translation>No numerado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="327"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="297"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="212"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="443" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="405" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="299" />
         <source>Private</source>
         <translation>Privado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="218"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="308" />
         <source>Create Character</source>
         <translation>Crear un personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="222"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="314" />
         <source>Save Changes</source>
         <translation>Guardar Cambios</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="226"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="320" />
         <source>Save and Chat</source>
         <translation>Guardar y comunicar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="260"/>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="246"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="359" />
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="343" />
         <source>The character has been saved successfully!</source>
         <translation>¡El personaje se ha guardado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="272"/>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="373" />
         <source>The character has been successfully created!</source>
         <translation>¡El personaje ha sido creado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="280"/>
-        <source>The character&apos;s name must be longer than three characters.</source>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="383" />
+        <source>The character's name must be longer than three characters.</source>
         <translation>El nombre del personaje no puede ser inferior a 3 caracteres.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="283"/>
-        <source>The character&apos;s greeting must be longer than three characters.</source>
+        <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="388" />
+        <source>The character's greeting must be longer than three characters.</source>
         <translation>El saludo de un personaje no puede ser inferior a 3 caracteres.</translation>
     </message>
-</context>
-<context>
-    <name>EmiliaNext</name>
-    <message>
-        <source>Emilia | Happy New Year</source>
-        <translation type="vanished">Emilia | feliz Año</translation>
-    </message>
-    <message>
-        <source>Happy birthday Emilia!</source>
-        <translation type="vanished">Feliz Cumpleaños Emilia!</translation>
-    </message>
-    <message>
-        <source>Emilia | Happy birthday Kajitsy!</source>
-        <translation type="vanished">Emilia | Feliz Cumpleaños Kajitsy!</translation>
-    </message>
-    <message>
-        <source>Emilia | Happy birthday CAI!</source>
-        <translation type="vanished">Emilia | ¡Feliz cumpleaños CAI!</translation>
-    </message>
-    <message>
-        <source>User</source>
-        <translation type="vanished">Usuario</translation>
-    </message>
-    <message>
-        <source>Please re-enter (the login data has expired)</source>
-        <translation type="vanished">Inicie sesión (expiró el período de datos)</translation>
-    </message>
-    <message>
-        <source>Remove from Recent Chats</source>
-        <translation type="vanished">Eliminar de la reciente</translation>
-    </message>
-    <message>
-        <source>Downloading...</source>
-        <translation type="vanished">Descargar...</translation>
-    </message>
-    <message>
-        <source>Looking at the main page</source>
-        <translation type="vanished">Mira la página principal</translation>
-    </message>
-    <message>
-        <source>For You</source>
-        <translation type="vanished">Para ti</translation>
-    </message>
-    <message>
-        <source>Scenes</source>
-        <translation type="vanished">Escenas﻿</translation>
-    </message>
-    <message>
-        <source>Recommended</source>
-        <translation type="vanished">Recomendado</translation>
-    </message>
-    <message>
-        <source>Popular</source>
-        <translation type="vanished">Popular</translation>
-    </message>
-    <message>
-        <source>Trending</source>
-        <translation type="vanished">En Tendencia</translation>
-    </message>
-    <message>
-        <source>Try This</source>
-        <translation type="vanished">Probar estos</translation>
-    </message>
-    <message>
-        <source>Welcome back, User</source>
-        <translation type="vanished">Con la devolución, usuario</translation>
-    </message>
-    <message>
-        <source>Update</source>
-        <translation type="vanished">Actualizar</translation>
-    </message>
-    <message>
-        <source>Voices</source>
-        <translation type="vanished">Votar</translation>
-    </message>
-    <message>
-        <source>Assistants</source>
-        <translation type="vanished">Asistentes</translation>
-    </message>
-    <message>
-        <source>Anime</source>
-        <translation type="vanished">Anime</translation>
-    </message>
-    <message>
-        <source>Creativity and Writing</source>
-        <translation type="vanished">Creatividad y escritura</translation>
-    </message>
-    <message>
-        <source>Entertainment and Gaming</source>
-        <translation type="vanished">Entretenimiento y juegos</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation type="vanished">Historia</translation>
-    </message>
-    <message>
-        <source>Humor</source>
-        <translation type="vanished">Humor</translation>
-    </message>
-    <message>
-        <source>Learning</source>
-        <translation type="vanished">Educación</translation>
-    </message>
-    <message>
-        <source>Lifestyle</source>
-        <translation type="vanished">Estilo de vida</translation>
-    </message>
-    <message>
-        <source>Parody</source>
-        <translation type="vanished">Parodia</translation>
-    </message>
-    <message>
-        <source>RPG and Puzzles</source>
-        <translation type="vanished">Juegos y rompecabezas de rol</translation>
-    </message>
-    <message>
-        <source>Welcome back, </source>
-        <translation type="vanished">Con un regreso, </translation>
-    </message>
-    <message>
-        <source>Character Search</source>
-        <translation type="vanished">Buscar personajes</translation>
-    </message>
-    <message>
-        <source>A new version is available: </source>
-        <translation type="vanished">La nueva versión está disponible: </translation>
-    </message>
-    <message>
-        <source>Download complete. Running installer...</source>
-        <translation type="vanished">La descarga se completa. Lanzamiento del instalador ...</translation>
-    </message>
-    <message>
-        <source>Download failed.</source>
-        <translation type="vanished">Descargar error.</translation>
-    </message>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Autor: @</translation>
-    </message>
-    <message>
-        <source> chats</source>
-        <translation type="vanished"> charlar</translation>
-    </message>
-    <message>
-        <source> likes</source>
-        <translation type="vanished"> gustos</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation type="vanished">Ajustes</translation>
-    </message>
-    <message>
-        <source>My Profile</source>
-        <translation type="vanished">Perfil</translation>
-    </message>
-    <message>
-        <source>To Main Page</source>
-        <translation type="vanished">En el principal</translation>
-    </message>
-    <message>
-        <source>Recent Chats</source>
-        <translation type="vanished">Chats recientes</translation>
-    </message>
-    <message>
-        <source>Profile</source>
-        <translation type="vanished">Perfil</translation>
-    </message>
-    <message>
-        <source>The token has been updated</source>
-        <translation type="vanished">El token se actualiza</translation>
-    </message>
-    <message>
-        <source>The token has been successfully updated. You may need to restart for full application.</source>
-        <translation type="vanished">El token se actualiza con éxito. Es posible que se necesite la reestimación.</translation>
-    </message>
-    <message>
-        <source>Token error</source>
-        <translation type="vanished">Error</translation>
-    </message>
-    <message>
-        <source>Failed to update token: </source>
-        <translation type="vanished">Error de actualización del token:</translation>
-    </message>
-    <message>
-        <source>The token is missing</source>
-        <translation type="vanished">No se encontró el token</translation>
-    </message>
-    <message>
-        <source>The token is not installed.</source>
-        <translation type="vanished">El token no está configurado.</translation>
-    </message>
-    <message>
-        <source>English</source>
-        <translation type="vanished">Inglés</translation>
-    </message>
-    <message>
-        <source>Russian</source>
-        <translation type="vanished">ruso</translation>
-    </message>
-</context>
-<context>
-    <name>GetCookies</name>
-    <message>
-        <source>You can also insert a link from the email</source>
-        <translation type="vanished">También puede pegar el enlace de la carta</translation>
-    </message>
-    <message>
-        <source>Please log in to your account</source>
-        <translation type="vanished">Por favor vaya a su cuenta</translation>
-    </message>
-    <message>
-        <source>(To log in via Apple/Google, specify the email address of your Apple/Google account.)</source>
-        <translation type="vanished">Para iniciar sesión a través de Apple/Google, especifique el correo de la cuenta de Apple/Google</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>LeftSidebar</name>
     <message>
-        <location filename="../modules/ui/Elements.py" line="442"/>
+        <location filename="../modules/ui/Elements.py" line="521" />
         <source>To Main Page</source>
         <translation>En el principal</translation>
     </message>
     <message>
-        <location filename="../modules/ui/Elements.py" line="456"/>
+        <location filename="../modules/ui/Elements.py" line="530" />
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Crear</translation>
     </message>
     <message>
-        <location filename="../modules/ui/Elements.py" line="516"/>
-        <location filename="../modules/ui/Elements.py" line="478"/>
+        <location filename="../modules/ui/Elements.py" line="613" />
+        <location filename="../modules/ui/Elements.py" line="560" />
         <source>Profile</source>
         <translation>Perfil</translation>
     </message>
     <message>
-        <location filename="../modules/ui/Elements.py" line="497"/>
+        <location filename="../modules/ui/Elements.py" line="592" />
         <source>Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/Elements.py" line="501"/>
+        <location filename="../modules/ui/Elements.py" line="596" />
         <source>Scene</source>
-        <translation type="unfinished"></translation>
+        <translation>Escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/Elements.py" line="520"/>
+        <location filename="../modules/ui/Elements.py" line="617" />
         <source>Settings</source>
         <translation>Ajustes</translation>
     </message>
-    <message>
-        <source>Create Character</source>
-        <translation type="vanished">Crear un personaje</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>ListCard</name>
     <message>
-        <location filename="../modules/ui/cards/CharacterCards/ListCard.py" line="64"/>
+        <location filename="../modules/ui/cards/CharacterCards/ListCard.py" line="90" />
         <source> chats</source>
         <translation> charlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/CharacterCards/ListCard.py" line="69"/>
+        <location filename="../modules/ui/cards/CharacterCards/ListCard.py" line="96" />
         <source>Chat</source>
         <translation>Chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/SceneCards/ListCard.py" line="50"/>
+        <location filename="../modules/ui/cards/SceneCards/ListCard.py" line="55" />
         <source>Edit</source>
         <translation>Cambiar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/ListCard.py" line="31"/>
+        <location filename="../modules/ui/cards/ThemeCards/ListCard.py" line="32" />
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/ListCard.py" line="47"/>
+        <location filename="../modules/ui/cards/UserCards/ListCard.py" line="59" />
         <source> Chats</source>
-        <translation type="unfinished"></translation>
+        <translation> Chats</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/UserCards/ListCard.py" line="61"/>
+        <location filename="../modules/ui/cards/UserCards/ListCard.py" line="80" />
         <source> Characters</source>
-        <translation type="unfinished"></translation>
+        <translation> Personajes</translation>
     </message>
-    <message>
-        <source>Default</source>
-        <translation type="vanished">Por defecto</translation>
-    </message>
-    <message>
-        <source>Active</source>
-        <translation type="vanished">Activo</translation>
-    </message>
-    <message>
-        <source>Successfully updated your persona</source>
-        <translation type="vanished">Actualizó con éxito su persona</translation>
-    </message>
-    <message>
-        <source>Clear default</source>
-        <translation type="vanished">Borrar por defecto</translation>
-    </message>
-    <message>
-        <source>Make default</source>
-        <translation type="vanished">Usar por defecto</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>MainCard</name>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="71"/>
-        <location filename="../modules/ui/cards/SceneCards/MainCard.py" line="36"/>
-        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="54"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="72" />
+        <location filename="../modules/ui/cards/SceneCards/MainCard.py" line="43" />
+        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="81" />
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="78"/>
+        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="112" />
         <source> chats</source>
         <translation> charlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="80"/>
+        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="119" />
         <source> likes</source>
         <translation> gustos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="126"/>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="72"/>
-        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="85"/>
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="146" />
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="90" />
+        <location filename="../modules/ui/cards/CharacterCards/MainCard.py" line="125" />
         <source>Edit</source>
         <translation>Cambiar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="33"/>
+        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="36" />
         <source>You can also insert a link from the email</source>
         <translation>También puede pegar el enlace de la carta</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="45"/>
+        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="49" />
         <source>Please log in to your account</source>
         <translation>Por favor vaya a su cuenta</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="72"/>
-        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="47"/>
+        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="83" />
+        <location filename="../modules/ui/cards/CookieCards/MainCard.py" line="54" />
         <source>(To log in via Apple/Google, specify the email address of your Apple/Google account.)</source>
         <translation>Para iniciar sesión a través de Apple/Google, especifique el correo de la cuenta de Apple/Google</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="54"/>
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="70" />
         <source>Default</source>
         <translation>Por defecto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="55"/>
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="71" />
         <source>Active</source>
         <translation>Activo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="99"/>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="86"/>
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="119" />
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="106" />
         <source>Successfully updated your persona</source>
-        <translation>Actualizó con éxito su persona</translation>
+        <translation>Persona actualizada con éxito</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="130"/>
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="150" />
         <source>Clear default</source>
         <translation>Borrar por defecto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="134"/>
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="154" />
         <source>Make default</source>
-        <translation>Usar por defecto</translation>
+        <translation>Establecer por defecto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="69"/>
-        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="138"/>
+        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="86" />
+        <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="158" />
         <source>Remove</source>
         <translation>Borrar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="39"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="40" />
         <source>Install and Select</source>
-        <translation type="unfinished"></translation>
+        <translation>Instalar y seleccionar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="42"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="43" />
         <source>Install</source>
-        <translation type="unfinished"></translation>
+        <translation>Instalar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="66"/>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="45"/>
+        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="83" />
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="46" />
         <source>Select</source>
         <translation>Elegir</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="48"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="49" />
         <source>Uninstall</source>
-        <translation type="unfinished"></translation>
+        <translation>Desinstalar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="51"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="52" />
         <source>Update on server</source>
-        <translation type="unfinished"></translation>
+        <translation>Actualizar en el servidor</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="54"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="55" />
         <source>Delete from server</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminar del servidor</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="103"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="117" />
         <source>Error updating theme: </source>
-        <translation type="unfinished"></translation>
+        <translation>Error al actualizar el tema: </translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="105"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="120" />
         <source>Theme updated successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡Tema actualizado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="116"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="132" />
         <source>Error deleting theme: </source>
-        <translation type="unfinished"></translation>
+        <translation>Error al eliminar el tema: </translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="118"/>
+        <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="135" />
         <source>Theme deleted successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡Tema eliminado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="78"/>
+        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="97" />
         <source>Try with latest chat</source>
         <translation>Prueba con chats recientes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="113"/>
+        <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="143" />
         <source>Link copied to clipboard</source>
         <translation>El enlace se copia</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>MainCharCreatePage</name>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="81"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="99" />
         <source>Main Character of the Scenes</source>
-        <translation type="unfinished"></translation>
+        <translation>Personaje principal de la escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="97"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="117" />
         <source>Scenes genre</source>
-        <translation type="unfinished"></translation>
+        <translation>Género de la escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="99"/>
-        <source>Select the genre. This guides the Character&apos;s style and tone.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="120" />
+        <source>Select the genre. This guides the Character's style and tone.</source>
+        <translation>Selecciona el género. Esto guía el estilo y tono del personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="103"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="128" />
         <source>Select the genre. This guides the Character’s style and tone.</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecciona el género. Esto guía el estilo y tono del personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="107"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="133" />
         <source>When is this Scenes set?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿En qué época se desarrolla esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="114"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="109"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="147" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="136" />
         <source>Set the time. This guides the Character contextually when the Scenes is taking place.</source>
-        <translation type="unfinished"></translation>
+        <translation>Establece la época. Esto orienta al personaje sobre cuándo ocurre la escena.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="117"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="153" />
         <source>Where does this Scenes happen?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Dónde ocurre esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="124"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="119"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="167" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="156" />
         <source>Set the location. This grounds the Character where the Scenes is taking place.</source>
-        <translation type="unfinished"></translation>
+        <translation>Establece la ubicación. Esto ubica al personaje en el lugar de la escena.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="127"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="173" />
         <source>Tone of this Scenes</source>
-        <translation type="unfinished"></translation>
+        <translation>Tono de esta escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="129"/>
-        <source>What&apos;s the mood of the Scenes? The defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="176" />
+        <source>What's the mood of the Scenes? The defines the atmosphere and emotional tone to help your audience immerse.</source>
+        <translation>¿Cuál es el ambiente de la escena? Esto define la atmósfera y el tono emocional.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="134"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="187" />
         <source>What’s the mood of the Scenes? This defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Cuál es el ambiente de la escena? Esto define la atmósfera y el tono emocional.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="137"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="193" />
         <source>What’s the backstory of this Scenes?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Cuál es la historia previa de esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="139"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="196" />
         <source>Describe what is happening in this Scenes. Include relevant details about the situation and backstory. This will help shape how the Scenes unfolds and how the Character responds. Use {{user}} for the user. Use {{char}} for the Character. If you are building an Any-Character Scenes we recommend that you avoid the following pronouns: he, she, his, her, so your Scenes can work for any character.</source>
-        <translation type="unfinished"></translation>
+        <translation>Describe lo que sucede en esta escena. Incluye detalles relevantes sobre la situación. Usa {{user}} para el usuario y {{char}} para el personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="144"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="207" />
         <source>Describe what is happening in this Scenes. Include relevant details about the situation and backstory. This will help shape how the Scenes unfolds and how the Character responds.
 
 Use {{user}} for the user.
@@ -1537,1666 +1296,1544 @@ Use {{char}} for the Character.
 
 If you are building an Any-Character Scenes we recommend that you avoid the following pronouns: he, she, his, her, so your Scenes can work for any character.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Describe lo que sucede en esta escena. Incluye detalles relevantes.
+
+Usa {{user}} para el usuario.
+Usa {{char}} para el personaje.
+
+Evita pronombres de género para escenas universales.
+</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="153"/>
-        <source>What&apos;s the player&apos;s goal in this Scenes?</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="220" />
+        <source>What's the player's goal in this Scenes?</source>
+        <translation>¿Cuál es el objetivo del jugador en esta escena?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="155"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="224" />
         <source>Define a goal that is the next logical story beat, tells the player what to try, and make the goal achievable with a clear, detectable moment of success.Keep it specific and concrete. A good goal = verb that implies effort + challenges or constraints. E.g. Unmask the stranger before the final waltz ends.</source>
-        <translation type="unfinished"></translation>
+        <translation>Define un objetivo claro que el jugador pueda alcanzar. Un buen objetivo = verbo + desafío o restricción.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="160"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="235" />
         <source>Define a goal that is the next logical story beat, tells the player what to try, and make the goal achievable with a clear, detectable moment of success.Keep it specific and concrete.
 
 A good goal = verb that implies effort + challenges or constraints
 E.g. Unmask the stranger before the final waltz ends.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Define un objetivo claro para el jugador.
+
+Un buen objetivo = verbo de esfuerzo + restricciones
+Ej. Desenmascara al extraño antes de que termine el vals.
+</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="167"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="246" />
         <source>Introduce this Scenes to your audience</source>
-        <translation type="unfinished"></translation>
+        <translation>Presenta esta escena a tu audiencia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="174"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="169"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="261" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="250" />
         <source>This is the starting screen of your Scenes. Your audience will see this intro before entering the Scenes. Help them understand what’s happening and get excited to start playing the Scenes. Use {{user}} for the user. Use {{char}} for the Character.</source>
-        <translation type="unfinished"></translation>
+        <translation>Esta es la pantalla inicial de tu escena. Usa {{user}} para el usuario y {{char}} para el personaje.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="179"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="269" />
         <source>Character greeting</source>
-        <translation type="unfinished"></translation>
+        <translation>Saludo del personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="184"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="276" />
         <source>Plain text</source>
         <translation>Texto sin formato</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="185"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="277" />
         <source># Title 1</source>
         <translation># Título 1</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="186"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="278" />
         <source>## Title 2</source>
         <translation># Título 2</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="187"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="279" />
         <source>### Title 3</source>
         <translation># Título 3</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="188"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="280" />
         <source>#### Title 4</source>
         <translation># Título 4</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="189"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="281" />
         <source>##### Title 5</source>
         <translation># Título 5</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="190"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="282" />
         <source>###### Title 6</source>
         <translation># Título 6</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="193"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="287" />
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation>Negrita</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="196"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="292" />
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation>Cursiva</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="199"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="297" />
         <source>Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Código</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="204"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="305" />
         <source>This is the first Character message your audience will see after entering the Scenes. Make it your hook with what they will see, hear, and feel.</source>
-        <translation type="unfinished"></translation>
+        <translation>Este es el primer mensaje del personaje que verá tu audiencia al entrar en la escena.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="211"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="317" />
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="217"/>
-        <source>Give your Scenes a memorable name. e.g. &quot;Her Last Secret&quot;</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="326" />
+        <source>Give your Scenes a memorable name. e.g. "Her Last Secret"</source>
+        <translation>Dale a tu escena un nombre memorable, ej. "Su último secreto"</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="220"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="330" />
         <source>Cover Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Imagen de portada</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="230"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="342" />
         <source>Upload</source>
-        <translation type="unfinished"></translation>
+        <translation>Subir</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="237"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="351" />
         <source>Visibility</source>
         <translation>Visibilidad</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="468"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="439"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="242"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="640" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="595" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="359" />
         <source>Public</source>
         <translation>Public</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="470"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="441"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="242"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="642" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="597" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="359" />
         <source>Unlisted</source>
         <translation>No numerado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="472"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="443"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="242"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="644" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="599" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="359" />
         <source>Private</source>
         <translation>Privado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="248"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="368" />
         <source>Create Scenes</source>
-        <translation type="unfinished"></translation>
+        <translation>Crear escena</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="252"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="374" />
         <source>Save Changes</source>
         <translation>Guardar Cambios</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="256"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="380" />
         <source>Save and Chat</source>
         <translation>Guardar y comunicar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="426"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="394"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="279"/>
-        <source>You haven&apos;t filled out everything.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="582" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="540" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="413" />
+        <source>You haven't filled out everything.</source>
+        <translation>No has rellenado todo.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="317"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="451" />
         <source>Your Characters</source>
-        <translation type="unfinished"></translation>
+        <translation>Tus personajes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="322"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="456" />
         <source>Recent</source>
-        <translation type="unfinished"></translation>
+        <translation>Recientes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="403"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="383"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="549" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="521" />
         <source>The scene has been saved successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡La escena se ha guardado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="415"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="562" />
         <source>The scene has been successfully created!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡La escena se ha creado con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="506"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="455"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="686" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="619" />
         <source>Error downloading image</source>
-        <translation type="unfinished"></translation>
+        <translation>Error al descargar la imagen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="546"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="729" />
         <source>Uploading...</source>
         <translation>Exportación...</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>MainCharFirstPage</name>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="28"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="30" />
         <source>Create my own</source>
-        <translation type="unfinished"></translation>
+        <translation>Crear la mía</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="29"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="31" />
         <source>You write the story, your audience pick the Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Tú escribes la historia, tu audiencia elige el personaje</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="194"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="171"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="148"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="125"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="102"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="79"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="56"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="33"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="202" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="179" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="156" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="131" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="108" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="85" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="60" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="37" />
         <source>Template</source>
-        <translation type="unfinished"></translation>
+        <translation>Plantilla</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="34"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="38" />
         <source>The Vanishing Headstone</source>
-        <translation type="unfinished"></translation>
+        <translation>La lápida que desaparece</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="35"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="39" />
         <source>Mystery</source>
-        <translation type="unfinished"></translation>
+        <translation>Misterio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="57"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="61" />
         <source>The Jungle on Pluto</source>
-        <translation type="unfinished"></translation>
+        <translation>La jungla de Plutón</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="58"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="62" />
         <source>Sci-Fi</source>
-        <translation type="unfinished"></translation>
+        <translation>Ciencia ficción</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="80"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="86" />
         <source>Zixie’s Path to the Elven Village</source>
-        <translation type="unfinished"></translation>
+        <translation>El camino de Zixie a la aldea élfica</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="81"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="87" />
         <source>Fantasy</source>
-        <translation type="unfinished"></translation>
+        <translation>Fantasía</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="103"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="109" />
         <source>A Date at the Garlic Coffee Shop</source>
-        <translation type="unfinished"></translation>
+        <translation>Una cita en la cafetería del ajo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="104"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="110" />
         <source>Romance</source>
-        <translation type="unfinished"></translation>
+        <translation>Romance</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="126"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="132" />
         <source>They Cheated on Me</source>
-        <translation type="unfinished"></translation>
+        <translation>Me engañaron</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="127"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="133" />
         <source>Drama</source>
-        <translation type="unfinished"></translation>
+        <translation>Drama</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="149"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="157" />
         <source>Brown Butter Cookies Vlog</source>
-        <translation type="unfinished"></translation>
+        <translation>Vlog de galletas de mantequilla tostada</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="196"/>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="150"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="204" />
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="158" />
         <source>Slice-of-life</source>
-        <translation type="unfinished"></translation>
+        <translation>Recuentos de la vida</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="172"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="180" />
         <source>The Secrets of the Moonveil Sea</source>
-        <translation type="unfinished"></translation>
+        <translation>Los secretos del mar del Velo Lunar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="173"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="181" />
         <source>Adventure</source>
-        <translation type="unfinished"></translation>
+        <translation>Aventura</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="195"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="203" />
         <source>Candlelight and Silverware</source>
-        <translation type="unfinished"></translation>
+        <translation>Luz de velas y platería</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="252"/>
+        <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="261" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation type="unfinished"></translation>
+        <translation>Bienvenido a Escenas. ¿Listo para crear?</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>MainPage</name>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="38"/>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="33"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="74" />
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="69" />
         <source>Emilia | Happy New Year</source>
         <translation>Emilia | feliz Año</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="34"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="70" />
         <source>Happy birthday Emilia!</source>
         <translation>Feliz Cumpleaños Emilia!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="35"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="71" />
         <source>Emilia | Happy birthday Kajitsy!</source>
         <translation>Emilia | Feliz Cumpleaños Kajitsy!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="36"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="72" />
         <source>Emilia | Happy birthday CAI!</source>
         <translation>Emilia | ¡Feliz cumpleaños CAI!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="93"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="139" />
         <source>User</source>
         <translation>Usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="267"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="325" />
         <source>Please re-enter (the login data has expired)</source>
         <translation>Inicie sesión (expiró el período de datos)</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="307"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="372" />
         <source>Remove from Recent Chats</source>
         <translation>Eliminar de la reciente</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="468"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="493" />
         <source>An update is available</source>
-        <translation type="unfinished"></translation>
+        <translation>Hay una actualización disponible</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="483"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="508" />
         <source>Downloading...</source>
         <translation>Descargar...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="505"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="531" />
         <source>Looking at the main page</source>
         <translation>Mira la página principal</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="516"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="544" />
         <source>For You</source>
         <translation>Para ti</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="143"/>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="519"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="193" />
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="547" />
         <source>Scenes</source>
         <translation>Escenas﻿</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="523"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="552" />
         <source>Recommended</source>
         <translation>Recomendado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="526"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="556" />
         <source>Popular</source>
         <translation>Popular</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="529"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="559" />
         <source>Trending</source>
         <translation>En Tendencia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="532"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="563" />
         <source>Try This</source>
         <translation>Probar estos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="575"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="599" />
         <source>Welcome back, User</source>
         <translation>Con la devolución, usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="583"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="607" />
         <source>Update</source>
         <translation>Actualizar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="135"/>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="662"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="173" />
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="684" />
         <source>Voices</source>
         <translation>Votar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="680"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="702" />
         <source>Assistants</source>
         <translation>Asistentes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="681"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="703" />
         <source>Anime</source>
         <translation>Anime</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="682"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="704" />
         <source>Creativity and Writing</source>
         <translation>Creatividad y escritura</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="683"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="705" />
         <source>Entertainment and Gaming</source>
         <translation>Entretenimiento y juegos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="684"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="706" />
         <source>History</source>
         <translation>Historia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="685"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="707" />
         <source>Humor</source>
         <translation>Humor</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="686"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="708" />
         <source>Learning</source>
         <translation>Educación</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="687"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="709" />
         <source>Lifestyle</source>
         <translation>Estilo de vida</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="688"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="710" />
         <source>Parody</source>
         <translation>Parodia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="689"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="711" />
         <source>RPG and Puzzles</source>
         <translation>Juegos y rompecabezas de rol</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/MainPage.py" line="1025"/>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="912" />
+        <source>There should be a chat here...</source>
+        <translation>Aquí debería haber un chat...</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/MainPage.py" line="1183" />
         <source>Welcome back, </source>
         <translation>Con un regreso, </translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="60"/>
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="61" />
         <source>Chat</source>
         <translation>Chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="90"/>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="81"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="116" />
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="84" />
         <source>0 chats</source>
         <translation>0 chats</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="90"/>
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="93" />
         <source>0 likes</source>
         <translation>0 gustos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="105"/>
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="110" />
         <source>Similar characters</source>
         <translation>Personajes similares</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/MainPage.py" line="92"/>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="152"/>
+        <location filename="../modules/ui/pages/ScenePages/MainPage.py" line="102" />
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="164" />
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="157"/>
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="174" />
         <source> chats</source>
         <translation> charlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="160"/>
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="179" />
         <source> likes</source>
         <translation> gustos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="360"/>
-        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="172"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="509" />
+        <location filename="../modules/ui/pages/CharacterPages/MainPage.py" line="194" />
         <source>Link copied to clipboard</source>
         <translation>El enlace se copia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/MainPage.py" line="71"/>
+        <location filename="../modules/ui/pages/ScenePages/MainPage.py" line="75" />
         <source>Select character</source>
         <translation>Seleccionar personaje﻿</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/ScenePages/MainPage.py" line="79"/>
+        <location filename="../modules/ui/pages/ScenePages/MainPage.py" line="83" />
         <source>Start the scene</source>
         <translation>Iniciar escena﻿</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="70"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="92" />
         <source>0 followers</source>
         <translation>0 suscriptores</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="80"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="104" />
         <source>0 following</source>
         <translation>0 suscripciones</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="466"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="407"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="377"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="103"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="627" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="560" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="528" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="129" />
         <source>Follow</source>
         <translation>Suscribir</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="126"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="152" />
         <source>Characters</source>
         <translation>Personajes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="151"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="213" />
         <source>Liked</source>
         <translation>Me gusta</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="160"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="236" />
         <source>Personas</source>
         <translation>Personas</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="169"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="257" />
         <source>Themes</source>
-        <translation type="unfinished"></translation>
+        <translation>Temas</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="463"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="398"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="385"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="226"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="624" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="551" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="537" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="330" />
         <source>Unfollow</source>
         <translation>Cancelar la suscripción</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="355"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="283"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="271"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="259"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="244"/>
-        <source>And it&apos;s empty here...</source>
-        <translation>Aquí está vacío ...</translation>
-    </message>
-    <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="296"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="410" />
         <source>New</source>
         <translation>Nuevo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="330"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="320"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="457" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="442" />
         <source>Looks at </source>
         <translation>Mira el perfil de </translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="330"/>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="320"/>
-        <source>&apos;s profile </source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="459" />
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="444" />
+        <source>'s profile </source>
+        <translation>Perfil de </translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="337"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="468" />
         <source>Looks at user profile</source>
         <translation>Mira el perfil del usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="346"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="478" />
         <source>followers</source>
         <translation>suscriptores</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="347"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="481" />
         <source>following</source>
         <translation>suscripciones</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="348"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="483" />
         <source>chats</source>
         <translation>Charlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="480"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="641" />
         <source>Followers</source>
         <translation>Suscriptores</translation>
     </message>
     <message>
-        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="485"/>
+        <location filename="../modules/ui/pages/UserPages/MainPage.py" line="648" />
         <source>Following</source>
         <translation>Suscripciones</translation>
     </message>
-</context>
-<context>
-    <name>OverlayCard</name>
+</context><context>
+    <name>MessageBubble</name>
     <message>
-        <source>Display Name</source>
-        <translation type="vanished">Nombre para Mostrar</translation>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="417" />
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
     </message>
     <message>
-        <source>Background</source>
-        <translation type="vanished">Fondo</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Establecer como predeterminado para nuevos chats</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
-    </message>
-    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="421" />
         <source>Save</source>
-        <translation type="vanished">Ahorrar</translation>
+        <translation>Guardar</translation>
     </message>
-</context>
-<context>
-    <name>PersonaCards.ListCard</name>
+</context><context>
+    <name>SceneListCard</name>
     <message>
-        <source>Default</source>
-        <translation type="vanished">Por defecto</translation>
+        <location filename="../modules/ui/cards/EmptyCards/SceneListCard.py" line="14" />
+        <source>And it's empty here...</source>
+        <translation>Y aquí está vacío...</translation>
     </message>
-    <message>
-        <source>Active</source>
-        <translation type="vanished">Activo</translation>
-    </message>
-    <message>
-        <source>Edit</source>
-        <translation type="vanished">Cambiar</translation>
-    </message>
-    <message>
-        <source>Successfully updated your persona</source>
-        <translation type="vanished">Actualizó con éxito su persona</translation>
-    </message>
-    <message>
-        <source>Clear default</source>
-        <translation type="vanished">Borrar por defecto</translation>
-    </message>
-    <message>
-        <source>Make default</source>
-        <translation type="vanished">Usar por defecto</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
-    </message>
-</context>
-<context>
-    <name>PersonaCards.OverlayCard</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Nombre para Mostrar</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Fondo</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Establecer como predeterminado para nuevos chats</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Ahorrar</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>SearchCard</name>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="38"/>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="37"/>
+        <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="45" />
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="39" />
         <source>Search</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="41"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="43" />
         <source>Upload Theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Subir tema</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="67"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="71" />
         <source>No custom themes found</source>
-        <translation type="unfinished"></translation>
+        <translation>No se encontraron temas personalizados</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="84"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="90" />
         <source>Error uploading theme: </source>
-        <translation type="unfinished"></translation>
+        <translation>Error al subir el tema: </translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="86"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="92" />
         <source>Theme uploaded successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>¡Tema subido con éxito!</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="97"/>
+        <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="103" />
         <source>Themes not found</source>
-        <translation type="unfinished"></translation>
+        <translation>Temas no encontrados</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="79"/>
+        <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="97" />
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="109"/>
+        <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="135" />
         <source>Voices not found</source>
         <translation>No se encuentran voces</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>SearchLineEdit</name>
     <message>
-        <location filename="../modules/ui/Elements.py" line="323"/>
+        <location filename="../modules/ui/Elements.py" line="394" />
         <source>Character Search</source>
         <translation>Buscar personajes</translation>
     </message>
-</context>
-<context>
+</context><context>
     <name>SearchPage</name>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="23"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="24" />
         <source>Search characters...</source>
         <translation>Buscando personajes...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="98"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="117" />
         <source>Characters not found</source>
         <translation>Los personajes no fueron encontrados</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="127"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="150" />
         <source>Scenes not found</source>
-        <translation type="unfinished"></translation>
+        <translation>Escenas no encontradas</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="156"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="183" />
         <source>Users not found</source>
-        <translation type="unfinished"></translation>
+        <translation>Usuarios no encontrados</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="174"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="203" />
         <source>Search</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="183"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="212" />
         <source>Characters</source>
         <translation>Personajes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="188"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="223" />
         <source>Users</source>
-        <translation type="unfinished"></translation>
+        <translation>Usuarios</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SearchPage.py" line="193"/>
+        <location filename="../modules/ui/mainwindow/SearchPage.py" line="232" />
         <source>Scenes</source>
         <translation>Escenas﻿</translation>
     </message>
-    <message>
-        <source>Character Search</source>
-        <translation type="vanished">Buscar personajes</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="600"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="592"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="30"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1180" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1163" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="53" />
         <source>English</source>
         <translation>Inglés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="31"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="58" />
         <source>Russian</source>
         <translation>ruso</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="32"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="63" />
         <source>French</source>
         <translation>Francés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="33"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="68" />
         <source>Spanish</source>
         <translation>Español</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="34"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="73" />
         <source>Afrikaans</source>
         <translation>africaans</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="35"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="78" />
         <source>Albanian</source>
         <translation>albanés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="36"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="83" />
         <source>Amharic</source>
         <translation>Amárico</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="37"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="88" />
         <source>Arabic</source>
         <translation>árabe</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="38"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="93" />
         <source>Armenian</source>
         <translation>armenio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="39"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="98" />
         <source>Azerbaijani</source>
         <translation>Azerbaiyano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="40"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="103" />
         <source>Basque</source>
         <translation>vasco</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="41"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="108" />
         <source>Bengali</source>
         <translation>Bengala</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="42"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="113" />
         <source>Bulgarian</source>
         <translation>búlgaro</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="43"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="118" />
         <source>Catalan</source>
         <translation>catalán</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="44"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="123" />
         <source>Croatian</source>
         <translation>croata</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="45"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="128" />
         <source>Czech</source>
         <translation>checo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="46"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="133" />
         <source>Danish</source>
         <translation>danés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="47"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="138" />
         <source>Dutch</source>
         <translation>Holandés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="48"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="143" />
         <source>Estonian</source>
         <translation>Estonio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="49"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="148" />
         <source>Filipino</source>
         <translation>filipino</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="50"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="153" />
         <source>Finnish</source>
         <translation>finlandés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="51"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="158" />
         <source>Georgian</source>
         <translation>georgiano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="52"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="163" />
         <source>German</source>
         <translation>Alemán</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="53"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="168" />
         <source>Greek</source>
         <translation>Griego</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="54"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="173" />
         <source>Gujarati</source>
         <translation>Gujarat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="55"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="178" />
         <source>Hebrew</source>
         <translation>judío</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="56"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="183" />
         <source>Hindi</source>
         <translation>hindi</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="57"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="188" />
         <source>Hungarian</source>
         <translation>húngaro</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="58"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="193" />
         <source>Icelandic</source>
         <translation>islandés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="59"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="198" />
         <source>Indonesian</source>
         <translation>indonesio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="60"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="203" />
         <source>Irish</source>
         <translation>irlandés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="61"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="208" />
         <source>Italian</source>
         <translation>italiano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="62"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="213" />
         <source>Japanese</source>
         <translation>japonés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="63"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="218" />
         <source>Kannada</source>
         <translation>Canada</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="64"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="223" />
         <source>Kazakh</source>
         <translation>Kazáceo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="65"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="228" />
         <source>Korean</source>
         <translation>coreano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="66"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="233" />
         <source>Lao</source>
         <translation>Laosta</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="67"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="238" />
         <source>Latvian</source>
         <translation>letón</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="68"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="243" />
         <source>Lithuanian</source>
         <translation>lituano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="69"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="248" />
         <source>Macedonian</source>
         <translation>macedónio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="70"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="253" />
         <source>Malay</source>
         <translation>malayo</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="71"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="258" />
         <source>Malayalam</source>
         <translation>Malayalam</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="72"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="263" />
         <source>Maltese</source>
         <translation>maltés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="73"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="268" />
         <source>Mongolian</source>
         <translation>mongol</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="74"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="273" />
         <source>Nepali</source>
         <translation>Nepalí</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="75"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="278" />
         <source>Norwegian</source>
         <translation>noruego</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="76"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="283" />
         <source>Persian</source>
         <translation>persa</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="77"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="288" />
         <source>Polish</source>
         <translation>Polaco</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="78"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="293" />
         <source>Portuguese</source>
         <translation>portugués</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="79"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="298" />
         <source>Punjabi</source>
         <translation>punjabi</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="80"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="303" />
         <source>Romanian</source>
         <translation>rumano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="81"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="308" />
         <source>Serbian</source>
         <translation>serbio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="82"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="313" />
         <source>Slovak</source>
         <translation>eslovaco</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="83"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="318" />
         <source>Slovenian</source>
         <translation>esloveno</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="84"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="323" />
         <source>Swahili</source>
         <translation>swahili</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="85"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="328" />
         <source>Swedish</source>
         <translation>sueco</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="86"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="333" />
         <source>Tamil</source>
         <translation>Tamil</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="87"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="338" />
         <source>Telugu</source>
         <translation>Telugu</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="88"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="343" />
         <source>Thai</source>
         <translation>tailandés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="89"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="348" />
         <source>Turkish</source>
         <translation>turco</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="90"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="353" />
         <source>Ukrainian</source>
         <translation>ucranio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="91"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="358" />
         <source>Urdu</source>
         <translation>Urdu</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="92"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="363" />
         <source>Vietnamese</source>
         <translation>vietnamita</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="93"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="368" />
         <source>Welsh</source>
         <translation>galés</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="94"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="373" />
         <source>Xhosa</source>
         <translation>Kosa</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="100"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1168" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="379" />
+        <source>Main</source>
+        <translation>Principal</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="380" />
+        <source>Backup</source>
+        <translation>Respaldo</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="386" />
         <source>Character.AI Settings</source>
         <translation>Configuración de Character.AI</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="102"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="102"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="396" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="391" />
         <source>Character.AI Login</source>
         <translation>Personaje.Ai Iniciar sesión</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="102"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="393" />
         <source>Valid until: </source>
         <translation>Actúa antes: </translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="103"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="399" />
         <source>Re-Auth with Character.AI</source>
         <translation>Volver a autenticar con Character.AI</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="103"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="401" />
         <source>Auth with Character.AI</source>
         <translation>Autenticación con Character.AI</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="105"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="408" />
         <source>User Settings</source>
         <translation>Configuración del usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="176"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="172"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="131"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="112"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="105"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="670" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="661" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="521" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="427" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="409" />
         <source>Open</source>
         <translation>Abierto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="108"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="416" />
         <source>Emilia Settings</source>
         <translation>Configuración de Emilia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="110"/>
-        <source>Automatically hide the sidebar when the window is narrow</source>
-        <translation>Ocultación automática del panel lateral en una ventana estrecha</translation>
-    </message>
-    <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="111"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="420" />
         <source>App theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Tema de la aplicación</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="112"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="426" />
         <source>Theme Catalog</source>
-        <translation type="unfinished"></translation>
+        <translation>Catálogo de temas</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="113"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="433" />
         <source>Sync theme with system theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Sincronizar tema con el tema del sistema</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="114"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
+        <source>Use system accent color</source>
+        <translation>Usar el color de énfasis del sistema</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
+        <source>Text animation speed (ms)</source>
+        <translation>Velocidad de animación del texto (ms)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="445" />
         <source>Working in the background</source>
         <translation>Trabajar en segundo plano</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="115"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="451" />
         <source>Display text formatting buttons</source>
         <translation>Mostrar botones de formato de texto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="116"/>
-        <source>Update Server</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="457" />
+        <source>API Server</source>
+        <translation>Servidor API</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="117"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="464" />
+        <source>Update Server</source>
+        <translation>Servidor de actualizaciones</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="471" />
         <source>Input Device</source>
         <translation>Dispositivo de entrada</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="118"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="477" />
         <source>Output Device</source>
         <translation>Dispositivo de conclusión</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="119"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="483" />
         <source>Microphone mute key</source>
         <translation>Tecla de silencio del micrófono</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="120"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="489" />
         <source>Use the old implementation of voice chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar la implementación antigua del chat de voz</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="123"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="495" />
         <source>VTube Studio Plugin</source>
         <translation>VTube Studio Plugin</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="125"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="499" />
         <source>Use VTube Studio</source>
         <translation>Use VTube Studio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="126"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="505" />
         <source>VTube Studio Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Dirección de VTube Studio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="128"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="512" />
         <source>VTube Studio Port</source>
         <translation>Puerto de VTube Studio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="130"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="520" />
         <source>VTube Emotes Editor</source>
         <translation>Configuración VTube Emotes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="132"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="527" />
         <source>Check the connection to VTube Studio</source>
         <translation>Verificación de conexión a VTube Studio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="132"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="528" />
         <source>Check</source>
         <translation>Controlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="136"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="535" />
         <source>Virtual Model Plugin (VModel)</source>
-        <translation type="unfinished"></translation>
+        <translation>Complemento de modelo virtual (VModel)</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="138"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="539" />
         <source>Use VModel</source>
-        <translation type="unfinished"></translation>
+        <translation>Usar VModel</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="139"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="545" />
         <source>Models folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Carpeta de modelos</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="140"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="546" />
         <source>Change</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="141"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="552" />
         <source>FPS</source>
-        <translation type="unfinished"></translation>
+        <translation>FPS</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="143"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="559" />
         <source>Cursor Tracking</source>
-        <translation type="unfinished"></translation>
+        <translation>Seguimiento del cursor</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="144"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="565" />
         <source>Auto Blink</source>
-        <translation type="unfinished"></translation>
+        <translation>Parpadeo automático</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="145"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="571" />
         <source>Volume Smoothing</source>
-        <translation type="unfinished"></translation>
+        <translation>Suavizado de volumen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="149"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="579" />
         <source>Discord Rich Presence</source>
         <translatorcomment>I do not know how to translate this without losing its meaning.</translatorcomment>
-        <translation></translation>
+        <translation>Discord Rich Presence</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="151"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="583" />
         <source>Enable DiscordRPC</source>
         <translation>Incluir DiscordRPC</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="152"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="589" />
         <source>Display the current page</source>
         <translation>Mostrar la página actual</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="153"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="595" />
         <source>Displaying the chat name</source>
         <translation>Mostrar el nombre del chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="154"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="601" />
         <source>Displaying the nickname of the profile being viewed</source>
         <translation>Mostrar el apodo del perfil visto</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="157"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="610" />
         <source>Languages of Emilia</source>
         <translation>Idiomas Emilia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="159"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="614" />
         <source>Emilia Language</source>
         <translation>Lenguaje de programa</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="160"/>
-        <source>Translate user&apos;s messages</source>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="624" />
+        <source>Translate user's messages</source>
         <translation>Traducir mensajes de usuario</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="161"/>
-        <source>Translate user&apos;s messages to</source>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="629" />
+        <source>Translate user's messages to</source>
         <translation>Traducir al usuario a</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="162"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="635" />
         <source>Translate character messages</source>
         <translation>Traducir los mensajes de los personajes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="163"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="640" />
         <source>Translate character messages to</source>
         <translation>Traducir los mensajes de los personajes a</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="166"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="647" />
         <source>Other</source>
         <translation>Demás</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="168"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="651" />
         <source>Did you find a problem?</source>
         <translation>¿Has encontrado el problema?</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="169"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="652" />
         <source>Report a Problem</source>
         <translation>Informar el problema</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="171"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="660" />
         <source>Settings Folder</source>
         <translation>Carpeta de preferencias</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="175"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="669" />
         <source>Logs Folder</source>
         <translation>Pasta Logs</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="181"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="679" />
         <source>About Emilia</source>
         <translation>Acerca De Emilia</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="184"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="682" />
         <source>Emilia is a desktop version of Character.AI with several improvements and additional features.</source>
         <translation>Emilia es un cliente de Escritorio Character.AI con varias mejoras y características adicionales.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="185"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="686" />
         <source>The program is distributed free of charge under the MIT License.</source>
         <translation>El programa se distribuye de forma gratuita bajo la licencia MIT.</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="188"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="692" />
         <source>By using Emilia, you accept the Terms of Use Character.AI and confirm that you have read the Privacy Policy Character.AI</source>
         <translation>Al utilizar Emilia, acepta los Términos de uso Character.AI usted acepta y reconoce que ha leído la Política de privacidad Character.AI</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="224"/>
-        <source>(mc) models found</source>
-        <translation type="unfinished"></translation>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="746" />
+        <source>$mc models found</source>
+        <translation>$mc modelos encontrados</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="286"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="817" />
         <source>Parameter Name</source>
         <translation>El nombre del parámetro</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="303"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="834" />
         <source>Use Random Value</source>
         <translation>Usar valor aleatorio</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="309"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="840" />
         <source>From</source>
         <translation>De</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="318"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="849" />
         <source>To</source>
         <translation>A</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="327"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="858" />
         <source>Value</source>
         <translation>Significado</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="343"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="874" />
         <source>The values for emotions are saved</source>
         <translation>Los valores para las emociones se guardan</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="368"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="899" />
         <source> | Test</source>
         <translation> | Controlar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="383"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="923" />
         <source>Add parameter</source>
         <translation>Agregar el parámetro</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="505"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="398"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1059" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="942" />
         <source>Save</source>
         <translation>Ahorrar</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="402"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="946" />
         <source>Close</source>
         <translation>Cerca</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="439"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="984" />
         <source>(Beta)</source>
         <translation>(Beta)</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="507"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1061" />
         <source>Cancel</source>
         <translation>Cancelación</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="528"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1083" />
         <source>The token is being updated...</source>
         <translation>El token se actualiza ...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="643"/>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="580"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1236" />
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1143" />
         <source>Looking at the settings...</source>
         <translation>Mira la configuración...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="598"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1176" />
         <source>Germany</source>
-        <translation type="unfinished"></translation>
+        <translation>Alemania</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="619"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1208" />
         <source> cannot be empty</source>
         <translation> no puede estar vacío</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="686"/>
+        <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1321" />
         <source>Settings saved successfully</source>
         <translation>La configuración se actualiza correctamente</translation>
     </message>
+</context><context>
+    <name>ThemeListCard</name>
     <message>
-        <source>The settings are saved</source>
-        <translation type="vanished">La configuración se guardan</translation>
+        <location filename="../modules/ui/cards/EmptyCards/ThemeListCard.py" line="14" />
+        <source>And it's empty here...</source>
+        <translation>Y aquí está vacío...</translation>
     </message>
-    <message>
-        <source>Language</source>
-        <translation type="vanished">Idioma</translation>
-    </message>
-    <message>
-        <source>Settings Page</source>
-        <translation type="vanished">La página de configuración</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>UpdateThread</name>
     <message>
-        <location filename="../modules/logic/QThreads/UpdateThread.py" line="64"/>
+        <location filename="../modules/logic/QThreads/UpdateThread.py" line="72" />
         <source>File upload error. Check the internet.</source>
-        <translation type="unfinished"></translation>
+        <translation>Error al cargar el archivo. Compruebe internet.</translation>
     </message>
     <message>
-        <location filename="../modules/logic/QThreads/UpdateThread.py" line="70"/>
+        <location filename="../modules/logic/QThreads/UpdateThread.py" line="80" />
         <source>Some files could not be downloaded. Cancel the update.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudieron descargar algunos archivos. Cancelando actualización.</translation>
     </message>
-</context>
-<context>
-    <name>UserProfile</name>
-    <message>
-        <source>0 followers</source>
-        <translation type="vanished">0 suscriptores</translation>
-    </message>
-    <message>
-        <source>0 following</source>
-        <translation type="vanished">0 suscripciones</translation>
-    </message>
-    <message>
-        <source>0 chats</source>
-        <translation type="vanished">0 chats</translation>
-    </message>
-    <message>
-        <source>Follow</source>
-        <translation type="vanished">Suscribir</translation>
-    </message>
-    <message>
-        <source>Characters</source>
-        <translation type="vanished">Personajes</translation>
-    </message>
-    <message>
-        <source>Voices</source>
-        <translation type="vanished">Votar</translation>
-    </message>
-    <message>
-        <source>Scenes</source>
-        <translation type="vanished">Escenas﻿</translation>
-    </message>
-    <message>
-        <source>Liked</source>
-        <translation type="vanished">Me gusta</translation>
-    </message>
-    <message>
-        <source>Personas</source>
-        <translation type="vanished">Personas</translation>
-    </message>
-    <message>
-        <source>Unfollow</source>
-        <translation type="vanished">Cancelar la suscripción</translation>
-    </message>
-    <message>
-        <source>And it&apos;s empty here...</source>
-        <translation type="vanished">Aquí está vacío ...</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="vanished">Nuevo</translation>
-    </message>
-    <message>
-        <source>Looks at </source>
-        <translation type="vanished">Mira el perfil de </translation>
-    </message>
-    <message>
-        <source>Looks at user profile</source>
-        <translation type="vanished">Mira el perfil del usuario</translation>
-    </message>
-    <message>
-        <source>followers</source>
-        <translation type="vanished">suscriptores</translation>
-    </message>
-    <message>
-        <source>following</source>
-        <translation type="vanished">suscripciones</translation>
-    </message>
-    <message>
-        <source>chats</source>
-        <translation type="vanished">Charlar</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">El enlace se copia</translation>
-    </message>
-    <message>
-        <source>Followers</source>
-        <translation type="vanished">Suscriptores</translation>
-    </message>
-    <message>
-        <source>Following</source>
-        <translation type="vanished">Suscripciones</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Nombre</translation>
-    </message>
-</context>
-<context>
+</context><context>
     <name>ViewerCard</name>
     <message>
-        <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="64"/>
-        <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="21"/>
+        <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="82" />
+        <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="26" />
         <source>Select folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccionar carpeta</translation>
     </message>
-</context>
-<context>
-    <name>VoiceCard</name>
+</context><context>
+    <name>VoiceHorizontalMiniCard</name>
     <message>
-        <source>Select</source>
-        <translation type="vanished">Elegir</translation>
+        <location filename="../modules/ui/cards/EmptyCards/VoiceHorizontalMiniCard.py" line="14" />
+        <source>And it's empty here...</source>
+        <translation>Y aquí está vacío...</translation>
     </message>
+</context><context>
+    <name>SortComboBox</name>
     <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
-    </message>
-    <message>
-        <source>Try with latest chat</source>
-        <translation type="vanished">Prueba con chats recientes</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">El enlace se copia</translation>
+        <location filename="../modules/ui/elements/Inputs.py" line="69" />
+        <source>Default</source>
+        <translation>Por defecto</translation>
     </message>
     <message>
-        <source>Share</source>
-        <translation type="vanished">Compartir</translation>
-    </message>
-</context>
-<context>
-    <name>VoiceCards.VoiceCard</name>
-    <message>
-        <source>Select</source>
-        <translation type="vanished">Elegir</translation>
+        <location filename="../modules/ui/elements/Inputs.py" line="70" />
+        <source>Chats (High to Low)</source>
+        <translation>Chats (de mayor a menor)</translation>
     </message>
     <message>
-        <source>Remove</source>
-        <translation type="vanished">Borrar</translation>
+        <location filename="../modules/ui/elements/Inputs.py" line="71" />
+        <source>Chats (Low to High)</source>
+        <translation>Chats (de menor a mayor)</translation>
     </message>
     <message>
-        <source>Try with latest chat</source>
-        <translation type="vanished">Prueba con chats recientes</translation>
+        <location filename="../modules/ui/elements/Inputs.py" line="72" />
+        <source>Name (A-Z)</source>
+        <translation>Nombre (A-Z)</translation>
     </message>
     <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">El enlace se copia</translation>
-    </message>
-</context>
-<context>
-    <name>VoiceSearch</name>
-    <message>
-        <source>Search</source>
-        <translation type="vanished">Buscar</translation>
+        <location filename="../modules/ui/elements/Inputs.py" line="73" />
+        <source>Name (Z-A)</source>
+        <translation>Nombre (Z-A)</translation>
     </message>
     <message>
-        <source>Author: @</source>
-        <translation type="vanished">Autor: @</translation>
+        <location filename="../modules/ui/elements/Inputs.py" line="75" />
+        <source>Likes (High to Low)</source>
+        <translation>Me gusta (de mayor a menor)</translation>
+    </message>
+</context><context>
+    <name>SortTabButton</name>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="81" />
+        <source>Default</source>
+        <translation>Por defecto</translation>
     </message>
     <message>
-        <source>Voices not found</source>
-        <translation type="vanished">No se encuentran voces</translation>
+        <location filename="../modules/ui/elements/Buttons.py" line="82" />
+        <source>Chats (High to Low)</source>
+        <translation>Chats (de mayor a menor)</translation>
     </message>
-</context>
-</TS>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="83" />
+        <source>Chats (Low to High)</source>
+        <translation>Chats (de menor a mayor)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="84" />
+        <source>Name (A-Z)</source>
+        <translation>Nombre (A-Z)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="85" />
+        <source>Name (Z-A)</source>
+        <translation>Nombre (Z-A)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="88" />
+        <source>Likes (High to Low)</source>
+        <translation>Me gusta (de mayor a menor)</translation>
+    </message>
+</context></TS>

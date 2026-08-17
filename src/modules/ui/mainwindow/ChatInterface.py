@@ -1,12 +1,10 @@
 import ctypes
 import hashlib
-import math
 import os
 import platform
 from datetime import datetime
 
 from curl_cffi import CurlMime
-from PIL import Image
 from PyQt6.QtCore import (
     QEasingCurve,
     QPropertyAnimation,
@@ -16,7 +14,13 @@ from PyQt6.QtCore import (
     QTimer,
     pyqtSignal,
 )
-from PyQt6.QtGui import QAction, QColor, QMouseEvent, QPixmap
+from PyQt6.QtGui import (
+    QAction,
+    QColor,
+    QKeyEvent,
+    QMouseEvent,
+    QPixmap,
+)
 from PyQt6.QtWidgets import (
     QApplication,
     QColorDialog,
@@ -31,6 +35,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QSpacerItem,
     QStackedWidget,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -46,13 +51,16 @@ from modules.ui import TM
 from modules.ui.cards import PersonaCards
 from modules.ui.cards.VModelCards import ViewerCard
 from modules.ui.cards.VoiceCards import ModeCard, SearchCard
-from modules.ui.Elements import (
+from modules.ui.elements import (
     CardFrame,
+    ChatBackgroundWidget,
     ClickableFrame,
+    ComboBox,
     CustomTextEdit,
     Menu,
     PushButton,
     VerticalScrollPage,
+    extract_media_palette,
 )
 from modules.ui.Icons import Svg
 from modules.Utils import color_avatar, format_number, format_text
@@ -60,7 +68,15 @@ from modules.Utils import color_avatar, format_number, format_text
 
 class MessageBubble(QFrame):
     def __init__(
-        self, main_window, parent, text, avatar_url, name, is_user=False, attachments=None
+        self,
+        main_window,
+        parent,
+        text,
+        avatar_url,
+        name,
+        is_user=False,
+        attachments=None,
+        raw_text=None,
     ):
         super().__init__()
         if attachments is None:
@@ -68,11 +84,14 @@ class MessageBubble(QFrame):
         self.mw = main_window
         self.parent = parent
         self.text = text
+        self.raw_text = raw_text if raw_text is not None else text
         self.url = avatar_url
         self.name = name
         self.is_user = is_user
         self.turn_id = None
         self.attachments = attachments
+        self.is_editing = False
+        self.edit_container = None
         self.setObjectName("user_message" if self.is_user else "char_message")
 
         self.initUI()
@@ -131,14 +150,14 @@ class MessageBubble(QFrame):
         shadow.setOffset(0, 4)
         shadow.setColor(QColor(0, 0, 0, 60))
         self.m_frame.setGraphicsEffect(shadow)
-        m_layout = QVBoxLayout()
-        self.m_frame.setLayout(m_layout)
+        self.m_layout = QVBoxLayout()
+        self.m_frame.setLayout(self.m_layout)
 
         self.message_label = QLabel(self.text)
         self.message_label.setWordWrap(True)
         self.message_label.setMaximumWidth(int(self.parent.width() / 2.25))
         self.message_label.setContentsMargins(0, 2, 0, 2)
-        m_layout.addWidget(self.message_label)
+        self.m_layout.addWidget(self.message_label)
 
         if self.is_user:
             self.message_label.setStyleSheet(f"color: {self.parent.user_text_message};")
@@ -164,6 +183,107 @@ class MessageBubble(QFrame):
         self.setMinimumHeight(self.height())
 
         self.animate_entry()
+
+    def startEdit(self):
+        if self.is_editing:
+            return
+        self.is_editing = True
+        self.message_label.setVisible(False)
+
+        if self.edit_container is None:
+            self.edit_container = QWidget()
+            edit_layout = QVBoxLayout(self.edit_container)
+            edit_layout.setContentsMargins(0, 0, 0, 0)
+            edit_layout.setSpacing(6)
+
+            self.edit_input = QTextEdit()
+            self.edit_input.setStyleSheet(f"""
+                QTextEdit {{
+                    background-color: {TM.c('element_bg')};
+                    color: {TM.c('text')};
+                    border-radius: 4px;
+                    padding: 6px;
+                    font-size: 14px;
+                }}
+            """)
+            min_w = max(260, min(self.message_label.width() + 40, int(self.parent.width() / 1.8)))
+            self.edit_input.setMinimumWidth(min_w)
+            self.edit_input.setMaximumWidth(int(self.parent.width() / 1.8))
+
+            def key_press(event: QKeyEvent):
+                if (
+                    event.key() in {Qt.Key.Key_Return, Qt.Key.Key_Enter}
+                    and not (event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+                ):
+                    self.saveEdit()
+                elif event.key() == Qt.Key.Key_Escape:
+                    self.cancelEdit()
+                else:
+                    QTextEdit.keyPressEvent(self.edit_input, event)
+                    doc_h = int(self.edit_input.document().size().height())
+                    self.edit_input.setFixedHeight(max(60, min(300, doc_h + 20)))
+                    self.setMinimumHeight(0)
+                    self.adjustSize()
+
+            self.edit_input.keyPressEvent = key_press
+
+            buttons_layout = QHBoxLayout()
+            buttons_layout.setContentsMargins(0, 0, 0, 0)
+            buttons_layout.setSpacing(6)
+            buttons_layout.addStretch()
+
+            self.cancel_edit_button = PushButton(self.tr("Cancel"))
+            self.cancel_edit_button.setFixedHeight(28)
+            self.cancel_edit_button.clicked.connect(self.cancelEdit)
+
+            self.save_edit_button = PushButton(self.tr("Save"))
+            self.save_edit_button.setFixedHeight(28)
+            self.save_edit_button.clicked.connect(self.saveEdit)
+
+            buttons_layout.addWidget(self.cancel_edit_button)
+            buttons_layout.addWidget(self.save_edit_button)
+
+            edit_layout.addWidget(self.edit_input)
+            edit_layout.addLayout(buttons_layout)
+
+            self.m_layout.addWidget(self.edit_container)
+
+        raw = self.raw_text if self.raw_text is not None else self.text
+        self.edit_input.setPlainText(raw)
+        doc_h = int(self.edit_input.document().size().height())
+        self.edit_input.setFixedHeight(max(60, min(300, doc_h + 20)))
+
+        self.edit_container.setVisible(True)
+        if hasattr(self, "save_edit_button"):
+            self.save_edit_button.setEnabled(True)
+            self.cancel_edit_button.setEnabled(True)
+
+        self.edit_input.setFocus()
+        cursor = self.edit_input.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.edit_input.setTextCursor(cursor)
+
+        self.setMinimumHeight(0)
+        self.adjustSize()
+
+    def cancelEdit(self):
+        self.is_editing = False
+        if self.edit_container is not None:
+            self.edit_container.setVisible(False)
+        self.message_label.setVisible(True)
+        self.setMinimumHeight(0)
+        self.adjustSize()
+        self.setMinimumHeight(self.height())
+
+    def saveEdit(self):
+        if not hasattr(self, "edit_input"):
+            return
+        new_text = self.edit_input.toPlainText().strip()
+        if not new_text:
+            return
+        self.save_edit_button.setEnabled(False)
+        self.cancel_edit_button.setEnabled(False)
+        self.parent.saveEditedMessage(self, new_text)
 
     def animate_entry(self):
         self.opacity_effect = QGraphicsOpacityEffect(self)
@@ -239,9 +359,21 @@ class ChatInterface(QWidget):
             "colors/user_text_message", TM.c("user_text_message")
         )
         self.background_image = self.chat_settings.value("background_image", "")
+        self.background_scale_mode = self.chat_settings.value(
+            "background_scale_mode", "cover"
+        )
+        self.background_fps = self.chat_settings.value("background_fps", "auto")
+        self.background_quality = self.chat_settings.value(
+            "background_quality", "original"
+        )
 
         self.initUI()
-        self.applyBackground(self.background_image)
+        self.applyBackground(
+            self.background_image,
+            self.background_scale_mode,
+            self.background_fps,
+            self.background_quality,
+        )
         self.createRightSidebar()
 
         TM.theme_changed.connect(self.updateTheme)
@@ -278,6 +410,8 @@ class ChatInterface(QWidget):
         self.messages_overlay_layout = QGridLayout(self.messages_overlay_container)
         self.messages_overlay_layout.setContentsMargins(0, 0, 0, 0)
 
+        self.background_widget = ChatBackgroundWidget(self)
+        self.messages_overlay_layout.addWidget(self.background_widget, 0, 0)
         self.messages_overlay_layout.addWidget(self.messages_area, 0, 0)
 
         self.chat_container_layout.addWidget(self.messages_overlay_container)
@@ -467,75 +601,39 @@ class ChatInterface(QWidget):
         scrollbar.valueChanged.connect(self.on_scroll)
         scrollbar.rangeChanged.connect(self.scrollToBottomIfNeeded)
 
-    def applyBackground(self, path):
+    def applyBackground(self, path, scale_mode=None, fps=None, quality=None):
+        if scale_mode is None:
+            scale_mode = self.background_scale_mode
+        if fps is None:
+            fps = self.background_fps
+        if quality is None:
+            quality = self.background_quality
+
         if path and os.path.exists(path):
-            path = path.replace("\\", "/")
-            self.messages_area.setStyleSheet(f"""
-                #chatScrollArea {{
-                    background-image: url("{path}");
-                    background-repeat: no-repeat;
-                    background-position: center;
-                    background-attachment: fixed;
-                }}
-            """)
+            self.background_widget.set_media(path, scale_mode, fps, quality)
+            self.messages_area.setStyleSheet(
+                "#chatScrollArea { background: transparent; }"
+            )
             self.messages_content.setStyleSheet(
                 "#chatContent { background: transparent; }"
             )
-
         else:
+            self.background_widget.clear()
             self.messages_area.setStyleSheet("#chatScrollArea {}")
             self.messages_content.setStyleSheet("#chatContent {}")
 
-    def extract_theme_colors(self, image_path):
-        try:
-            img = Image.open(image_path)
-            img = img.resize((150, 150))
-            result = img.quantize(colors=5)
-            palette = result.getpalette()
+    def cleanup(self):
+        if hasattr(self, "background_widget") and self.background_widget:
+            self.background_widget.clear()
+        if hasattr(self, "player_thread") and self.player_thread:
+            self.player_thread.stop()
 
-            colors = []
-            for i in range(0, 15, 3):
-                rgb = (palette[i], palette[i + 1], palette[i + 2])
-                colors.append(rgb)
+    def closeEvent(self, event):
+        self.cleanup()
+        super().closeEvent(event)
 
-            def rgb_to_hex(rgb):
-                return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
-
-            def get_brightness(rgb):
-                return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
-
-            valid_colors = [c for c in colors]
-
-            if len(valid_colors) < 2:
-                valid_colors.append(valid_colors[0])
-
-            char_rgb = valid_colors[0]
-
-            user_rgb = valid_colors[1]
-
-            for i in range(1, len(valid_colors)):
-                c = valid_colors[i]
-                dist = math.sqrt(sum([(a - b) ** 2 for a, b in zip(char_rgb, c)]))
-                if dist > 30:
-                    user_rgb = c
-                    break
-
-            char_hex = rgb_to_hex(char_rgb)
-            user_hex = rgb_to_hex(user_rgb)
-
-            char_text = "#ffffff" if get_brightness(char_rgb) < 130 else "#000000"
-            user_text = "#ffffff" if get_brightness(user_rgb) < 130 else "#000000"
-
-            return {
-                "char_back": char_hex,
-                "char_text": char_text,
-                "user_back": user_hex,
-                "user_text": user_text,
-            }
-
-        except Exception as e:
-            print(f"Error extracting colors: {e}")
-            return None
+    def extract_theme_colors(self, media_path):
+        return extract_media_palette(media_path)
 
     def setBackgroundFromUrl(self, url):
         if url:
@@ -1286,7 +1384,14 @@ class ChatInterface(QWidget):
                 "user_back_message": TM.c("user_back_message"),
                 "user_text_message": TM.c("user_text_message"),
             }
+            self.background_image = ""
+            self.background_scale_mode = "cover"
+            self.background_fps = "auto"
+            self.background_quality = "original"
             self.chat_settings.setValue("background_image", "")
+            self.chat_settings.setValue("background_scale_mode", "cover")
+            self.chat_settings.setValue("background_fps", "auto")
+            self.chat_settings.setValue("background_quality", "original")
             self.applyBackground("")
 
             for key, value in data.items():
@@ -1314,68 +1419,80 @@ class ChatInterface(QWidget):
 
         def pickBackgroundImage():
             file_dialog = QFileDialog()
-            file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.webp *.gif *.bmp)")
+            file_dialog.setNameFilter(
+                self.tr(
+                    "Media (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.mp4 *.webm *.mov *.mkv *.avi);;Images (*.png *.jpg *.jpeg *.webp *.bmp);;Videos (*.mp4 *.webm *.mov *.mkv *.avi);;GIF (*.gif)"
+                )
+            )
             if file_dialog.exec():
                 selected_files = file_dialog.selectedFiles()
                 if selected_files:
                     path = selected_files[0]
                     self.background_image = path
                     self.chat_settings.setValue("background_image", path)
-                    self.applyBackground(path)
+                    self.applyBackground(
+                        path,
+                        self.scale_mode_combo.currentData(),
+                        self.fps_combo.currentData(),
+                        self.quality_combo.currentData(),
+                    )
 
-                    theme = self.extract_theme_colors(path)
-                    if theme:
-                        self.char_back_message = theme["char_back"]
-                        self.char_text_message = theme["char_text"]
-                        self.user_back_message = theme["user_back"]
-                        self.user_text_message = theme["user_text"]
+        def autoTuneColors():
+            if not self.background_image or not os.path.exists(self.background_image):
+                return
+            theme = self.extract_theme_colors(self.background_image)
+            if theme:
+                self.char_back_message = theme["char_back"]
+                self.char_text_message = theme["char_text"]
+                self.user_back_message = theme["user_back"]
+                self.user_text_message = theme["user_text"]
 
-                        self.char_back_message_picker.setStyleSheet(
-                            f"background-color: {self.char_back_message};"
-                        )
-                        self.char_text_message_picker.setStyleSheet(
-                            f"background-color: {self.char_text_message};"
-                        )
-                        self.user_back_message_picker.setStyleSheet(
-                            f"background-color: {self.user_back_message};"
-                        )
-                        self.user_text_message_picker.setStyleSheet(
-                            f"background-color: {self.user_text_message};"
-                        )
+                self.char_back_message_picker.setStyleSheet(
+                    f"background-color: {self.char_back_message};"
+                )
+                self.char_text_message_picker.setStyleSheet(
+                    f"background-color: {self.char_text_message};"
+                )
+                self.user_back_message_picker.setStyleSheet(
+                    f"background-color: {self.user_back_message};"
+                )
+                self.user_text_message_picker.setStyleSheet(
+                    f"background-color: {self.user_text_message};"
+                )
 
-                        self.chat_settings.setValue(
-                            "colors/char_back_message", self.char_back_message
-                        )
-                        self.chat_settings.setValue(
-                            "colors/char_text_message", self.char_text_message
-                        )
-                        self.chat_settings.setValue(
-                            "colors/user_back_message", self.user_back_message
-                        )
-                        self.chat_settings.setValue(
-                            "colors/user_text_message", self.user_text_message
-                        )
+                self.chat_settings.setValue(
+                    "colors/char_back_message", self.char_back_message
+                )
+                self.chat_settings.setValue(
+                    "colors/char_text_message", self.char_text_message
+                )
+                self.chat_settings.setValue(
+                    "colors/user_back_message", self.user_back_message
+                )
+                self.chat_settings.setValue(
+                    "colors/user_text_message", self.user_text_message
+                )
 
-                        for i in range(self.messages_layout.count()):
-                            item = self.messages_layout.itemAt(i)
-                            if item.widget():
-                                widget = item.widget()
-                                bubble = widget.currentWidget()
+                for i in range(self.messages_layout.count()):
+                    item = self.messages_layout.itemAt(i)
+                    if item.widget():
+                        widget = item.widget()
+                        bubble = widget.currentWidget()
 
-                                if bubble.objectName() == "user_message":
-                                    self.setBackMessageColor(
-                                        bubble, self.user_back_message
-                                    )
-                                    self.setTextMessageColor(
-                                        bubble, self.user_text_message
-                                    )
-                                elif bubble.objectName() == "char_message":
-                                    self.setBackMessageColor(
-                                        bubble, self.char_back_message
-                                    )
-                                    self.setTextMessageColor(
-                                        bubble, self.char_text_message
-                                    )
+                        if bubble.objectName() == "user_message":
+                            self.setBackMessageColor(
+                                bubble, self.user_back_message
+                            )
+                            self.setTextMessageColor(
+                                bubble, self.user_text_message
+                            )
+                        elif bubble.objectName() == "char_message":
+                            self.setBackMessageColor(
+                                bubble, self.char_back_message
+                            )
+                            self.setTextMessageColor(
+                                bubble, self.char_text_message
+                            )
 
         def clearBackgroundImage():
             self.background_image = ""
@@ -1431,6 +1548,26 @@ class ChatInterface(QWidget):
             }
             for key, value in data.items():
                 self.chat_settings.setValue(f"colors/{key}", value)
+
+            self.background_scale_mode = self.scale_mode_combo.currentData()
+            self.background_fps = self.fps_combo.currentData()
+            self.background_quality = self.quality_combo.currentData()
+
+            self.chat_settings.setValue(
+                "background_scale_mode", self.background_scale_mode
+            )
+            self.chat_settings.setValue("background_fps", self.background_fps)
+            self.chat_settings.setValue(
+                "background_quality", self.background_quality
+            )
+
+            self.applyBackground(
+                self.background_image,
+                self.background_scale_mode,
+                self.background_fps,
+                self.background_quality,
+            )
+
             for i in range(self.messages_layout.count()):
                 item = self.messages_layout.itemAt(i)
                 if item.widget():
@@ -1452,7 +1589,6 @@ class ChatInterface(QWidget):
             self.hideOverlay()
 
         color_picker_widget = QWidget()
-        color_picker_widget.setFixedHeight(300)
         color_picker_layout = QVBoxLayout()
         color_picker_widget.setLayout(color_picker_layout)
 
@@ -1519,6 +1655,58 @@ class ChatInterface(QWidget):
             self.user_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight
         )
         color_pickers_layout.addLayout(user_back_message_layout)
+
+        scale_mode_layout = QHBoxLayout()
+        scale_mode_label = QLabel(self.tr("Stretching:"))
+        self.scale_mode_combo = ComboBox()
+        self.scale_mode_combo.addItem(self.tr("Cover"), "cover")
+        self.scale_mode_combo.addItem(self.tr("Contain"), "contain")
+        self.scale_mode_combo.addItem(self.tr("Stretch"), "stretch")
+        self.scale_mode_combo.addItem(self.tr("Center"), "center")
+        idx_scale = self.scale_mode_combo.findData(self.background_scale_mode)
+        if idx_scale >= 0:
+            self.scale_mode_combo.setCurrentIndex(idx_scale)
+        scale_mode_layout.addWidget(
+            scale_mode_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        scale_mode_layout.addWidget(
+            self.scale_mode_combo, alignment=Qt.AlignmentFlag.AlignRight
+        )
+        color_pickers_layout.addLayout(scale_mode_layout)
+
+        fps_layout = QHBoxLayout()
+        fps_label = QLabel(self.tr("FPS:"))
+        self.fps_combo = ComboBox()
+        self.fps_combo.addItem(self.tr("Auto"), "auto")
+        self.fps_combo.addItem("15 FPS", "15")
+        self.fps_combo.addItem("24 FPS", "24")
+        self.fps_combo.addItem("30 FPS", "30")
+        self.fps_combo.addItem("60 FPS", "60")
+        idx_fps = self.fps_combo.findData(str(self.background_fps))
+        if idx_fps >= 0:
+            self.fps_combo.setCurrentIndex(idx_fps)
+        fps_layout.addWidget(fps_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        fps_layout.addWidget(self.fps_combo, alignment=Qt.AlignmentFlag.AlignRight)
+        color_pickers_layout.addLayout(fps_layout)
+
+        quality_layout = QHBoxLayout()
+        quality_label = QLabel(self.tr("Quality:"))
+        self.quality_combo = ComboBox()
+        self.quality_combo.addItem(self.tr("Original"), "original")
+        self.quality_combo.addItem("720p", "720p")
+        self.quality_combo.addItem("480p", "480p")
+        self.quality_combo.addItem("360p", "360p")
+        idx_quality = self.quality_combo.findData(self.background_quality)
+        if idx_quality >= 0:
+            self.quality_combo.setCurrentIndex(idx_quality)
+        quality_layout.addWidget(
+            quality_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        quality_layout.addWidget(
+            self.quality_combo, alignment=Qt.AlignmentFlag.AlignRight
+        )
+        color_pickers_layout.addLayout(quality_layout)
+
         color_picker_layout.addWidget(
             color_pickers_frame, alignment=Qt.AlignmentFlag.AlignTop
         )
@@ -1530,6 +1718,10 @@ class ChatInterface(QWidget):
         pick_bg_button = PushButton(self.tr("Select"))
         pick_bg_button.clicked.connect(pickBackgroundImage)
         background_layout.addWidget(pick_bg_button)
+
+        auto_tune_button = PushButton(self.tr("Auto-tune Colors"))
+        auto_tune_button.clicked.connect(autoTuneColors)
+        background_layout.addWidget(auto_tune_button)
 
         clear_bg_button = PushButton(self.tr("Clear"))
         clear_bg_button.clicked.connect(clearBackgroundImage)
@@ -2153,6 +2345,7 @@ class ChatInterface(QWidget):
                 self.mw.name,
                 True,
                 attachments,
+                raw_text=text,
             )
         else:
             message_bubble = MessageBubble(
@@ -2163,6 +2356,7 @@ class ChatInterface(QWidget):
                 self.character_name,
                 False,
                 attachments,
+                raw_text=text,
             )
         message_bubble.turn_id = turn_id
 
@@ -2360,10 +2554,33 @@ class ChatInterface(QWidget):
             elif item and item.spacerItem():
                 pass
 
-    def _editMessage(self, turn_id):
-        self.chat_thread.edit_message_signal.connect(self.__editMessage)
+    def saveEditedMessage(self, message_bubble, new_text):
+        if not message_bubble.turn_id:
+            message_bubble.cancelEdit()
+            return
+
+        def handle_edited(response):
+            try:
+                self.chat_thread.edit_message_signal.disconnect(handle_edited)
+            except (TypeError, RuntimeError):
+                pass
+
+            pci = response.get("turn", {}).get("primary_candidate_id")
+            candidate_text = new_text
+            for candidate in response.get("turn", {}).get("candidates", []):
+                if candidate.get("candidate_id", pci) == pci:
+                    candidate_text = candidate.get("raw_content", new_text)
+                    break
+
+            formatted = format_text(candidate_text, self.mw.username)
+            message_bubble.raw_text = candidate_text
+            message_bubble.text = formatted
+            message_bubble.message_label.setText(formatted)
+            message_bubble.cancelEdit()
+
+        self.chat_thread.edit_message_signal.connect(handle_edited)
         self.chat_thread.edit_message(
-            self.chat_id, turn_id, self.message_input.toPlainText()
+            self.chat_id, message_bubble.turn_id, new_text
         )
 
     def editMessage(self, turn_id):
@@ -2371,40 +2588,10 @@ class ChatInterface(QWidget):
             item = self.messages_layout.itemAt(i)
             widget = item.widget()
             if hasattr(widget, "turn_id") and widget.turn_id == turn_id:
-                message_stacked = widget
+                message = widget.currentWidget()
+                if hasattr(message, "startEdit"):
+                    message.startEdit()
                 break
-
-        message = message_stacked.currentWidget()
-        self.message_input.setText(message.text)
-        self.message_input.keyPress = lambda: self._editMessage(turn_id)
-
-    def __editMessage(self, response):
-        self.chat_thread.edit_message_signal.disconnect()
-        self.message_input.setText(None)
-        self.message_input.keyPress = lambda: self.sendMessage()
-        for i in reversed(range(self.messages_layout.count())):
-            item = self.messages_layout.itemAt(i)
-            widget = item.widget()
-            if (
-                hasattr(widget, "turn_id")
-                and widget.turn_id == response["turn"]["turn_key"]["turn_id"]
-            ):
-                message_stacked = widget
-                break
-
-        message = message_stacked.currentWidget()
-
-        pci = response.get("turn", {}).get("primary_candidate_id")
-        for candidate in response.get("turn", {}).get("candidates", []):
-            if candidate.get("candidate_id", pci) == pci:
-                new_text = format_text(
-                    candidate.get("raw_content", ""), self.mw.username
-                )
-                message.text = new_text
-                message.message_label.setText(new_text)
-
-        message.setMinimumHeight(0)
-        message.adjustSize()
 
     def showContextMenu(self, pos, message_bubble):
         def copy(text):
@@ -2447,7 +2634,7 @@ class ChatInterface(QWidget):
 
             edit_message_action = QAction(self.tr("Edit message"), self)
             edit_message_action.triggered.connect(
-                lambda event: self.editMessage(message_bubble.turn_id)
+                lambda event, mb=message_bubble: mb.startEdit()
             )
             context_menu.addAction(edit_message_action)
 

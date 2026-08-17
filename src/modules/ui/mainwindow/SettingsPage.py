@@ -375,6 +375,10 @@ class SettingsPage(QWidget):
                 "google_code": "xh",
             },
         }
+        self.api_servers = {
+            "https://apiemilia.kajitsy.xyz/": self.tr("Main"),
+            "https://apiemiliacf.kajitsy.xyz/": self.tr("Backup"),
+        }
         self.update_servers = {}
         self.ud_added = False
         self.settings_data = [
@@ -430,6 +434,12 @@ class SettingsPage(QWidget):
                         "key": "app_theme_system_sync",
                     },
                     {
+                        "type": "checkbox",
+                        "label": self.tr("Use system accent color"),
+                        "key": "app_use_system_accent",
+                        "def_value": False,
+                    },
+                    {
                         "type": "lineedit",
                         "label": self.tr("Text animation speed (ms)"),
                         "key": "text_animation_speed",
@@ -447,6 +457,13 @@ class SettingsPage(QWidget):
                         "label": self.tr("Display text formatting buttons"),
                         "key": "show_format_buttons",
                         "def_value": False,
+                    },
+                    {
+                        "type": "combobox",
+                        "label": self.tr("API Server"),
+                        "items": list(self.api_servers.values()),
+                        "key": "api_server",
+                        "def_value": "https://apiemilia.kajitsy.xyz/",
                     },
                     {
                         "type": "combobox",
@@ -1152,6 +1169,10 @@ class SettingsPage(QWidget):
                             "title", self.tr("English")
                         )
                     )
+                elif key == "api_server":
+                    widget.setCurrentText(
+                        self.api_servers.get(value, self.tr("Main"))
+                    )
                 elif key == "update_server":
                     if not self.ud_added:
                         for server in self.mw.update_servers:
@@ -1202,6 +1223,10 @@ class SettingsPage(QWidget):
                 self.mw.settings.setValue(
                     key, "true" if widget.isChecked() else "false"
                 )
+                if key == "app_use_system_accent":
+                    use_accent = widget.isChecked()
+                    TM.set_use_system_accent(use_accent)
+                    self.mw.update_theme()
                 if key == "discord_rpc/enable":
                     self.mw.drpc_enable = widget.isChecked()
                     if self.mw.drpc_enable:
@@ -1243,6 +1268,18 @@ class SettingsPage(QWidget):
                         self.mw.close()
                         main_window = MainPage.MainPage()
                         main_window.show()
+                elif key == "api_server":
+                    url = next(
+                        (
+                            k
+                            for k, v in self.api_servers.items()
+                            if v == widget.currentText()
+                        ),
+                        "https://apiemilia.kajitsy.xyz/",
+                    )
+                    self.mw.settings.setValue(key, url)
+                    if self.chat_thread and hasattr(self.chat_thread, "api_emilia"):
+                        self.chat_thread.api_emilia.url = url
                 elif key == "update_server":
                     url = next(
                         (

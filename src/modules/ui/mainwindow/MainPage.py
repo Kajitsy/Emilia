@@ -85,6 +85,9 @@ class MainPage(QMainWindow):
             "emilia_language", QLocale.system().name()
         )
         self.theme = self.settings.value("app_theme", "Dark", type=str)
+        TM.use_system_accent = self.settings.value(
+            "app_use_system_accent", False, type=bool
+        )
 
         if self.settings.value("app_theme_system_sync", False, type=bool):
             if QGuiApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark:
@@ -875,6 +878,8 @@ class MainPage(QMainWindow):
     def showMainPage(self, widget: QWidget = None):
         if widget:
             widget.setVisible(False)
+        if self.current_chat_interface and hasattr(self.current_chat_interface, "cleanup"):
+            self.current_chat_interface.cleanup()
         self.main_content_area.setCurrentWidget(self.main_page)
         self.current_chat_interface = None
         self.top_widget.setVisible(True)
@@ -895,6 +900,8 @@ class MainPage(QMainWindow):
         self, character_id, character_name, chat_id="", card=None, scene_id=""
     ):
         if self.current_chat_interface:
+            if hasattr(self.current_chat_interface, "cleanup"):
+                self.current_chat_interface.cleanup()
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
             self.chat_thread.message_signal.disconnect()
@@ -1207,24 +1214,30 @@ class MainPage(QMainWindow):
                 break
 
     def event(self, event):
-        if event.type() == 210 and self.settings.value(
-            "app_theme_system_sync", False, type=bool
-        ):
+        if event.type() == 210:
             if self._is_updating:
                 return super().event(event)
 
             self._is_updating = True
             try:
-                settings = QGuiApplication.styleHints()
+                updated = False
+                if self.settings.value("app_theme_system_sync", False, type=bool):
+                    settings = QGuiApplication.styleHints()
+                    if settings.colorScheme() == Qt.ColorScheme.Dark:
+                        new_theme = "Dark"
+                    else:
+                        new_theme = "Light"
 
-                if settings.colorScheme() == Qt.ColorScheme.Dark:
-                    new_theme = "Dark"
-                else:
-                    new_theme = "Light"
+                    if TM.current != new_theme:
+                        self.theme = new_theme
+                        TM.set_theme(self.theme)
+                        updated = True
 
-                if TM.current != new_theme:
-                    self.theme = new_theme
-                    TM.set_theme(self.theme)
+                if TM.use_system_accent:
+                    TM.reload_theme()
+                    updated = True
+
+                if updated:
                     self.update_theme()
             finally:
                 self._is_updating = False

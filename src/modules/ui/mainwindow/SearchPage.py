@@ -6,7 +6,12 @@ from modules import ChatThread, Svg
 from modules.logic.QThreads import DiscordRPCThread
 from modules.ui import TM
 from modules.ui.cards import CharacterCards, SceneCards, UserCards
-from modules.ui.Elements import SearchLineEdit, TabButton, VerticalScrollPage
+from modules.ui.elements import (
+    SearchLineEdit,
+    SortTabButton,
+    VerticalScrollPage,
+)
+from modules.Utils import sort_items
 
 
 class SearchPage(QWidget):
@@ -18,6 +23,9 @@ class SearchPage(QWidget):
         self.discord_thread: DiscordRPCThread | None = self.mw.discord_thread
         self.svg_icons = Svg()
         self.setStyleSheet("background-color: transparent; border: none;")
+        self.raw_char_data = []
+        self.raw_scene_data = []
+        self.raw_user_data = []
 
         self.initUI()
         if self.mw.drpc_enable and self.mw.drpc_show_current_page:
@@ -79,6 +87,14 @@ class SearchPage(QWidget):
 
         return scroll_page, scroll_viewport, scroll_layout
 
+    def on_sort_changed(self):
+        if self.search == "character" and self.raw_char_data:
+            self.renderCharacters(self.raw_char_data)
+        elif self.search == "scene" and self.raw_scene_data:
+            self.renderScenes(self.raw_scene_data)
+        elif self.search == "user" and self.raw_user_data:
+            self.renderUsers(self.raw_user_data)
+
     def showCharSearchResults(self):
         search_query = self.search_bar.text().strip()
         if not search_query:
@@ -96,14 +112,25 @@ class SearchPage(QWidget):
 
     def characterPopulate(self, data):
         self.chat_thread.character_search_signal.disconnect()
-        self.data = data
-        if self.data:
-            for character in self.data:
+        self.raw_char_data = data or []
+        self.renderCharacters(self.raw_char_data)
+
+    def renderCharacters(self, data):
+        while self.chars_cards_layout.count():
+            item = self.chars_cards_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        sort_mode = self.character_tab_button.get_sort_mode()
+        sorted_data = sort_items(data, sort_mode)
+
+        if sorted_data:
+            for character in sorted_data:
                 card = CharacterCards.MainCard(
                     self.mw,
                     character.get("participant__name"),
                     character.get("avatar_file_name"),
-                    character.get("title").replace("\n", ""),
+                    character.get("title", "").replace("\n", ""),
                     character.get("user__username"),
                     character.get("external_id"),
                     character.get("participant__num_interactions", 0),
@@ -140,9 +167,20 @@ class SearchPage(QWidget):
 
     def scenePopulate(self, data):
         self.chat_thread.scene_search_signal.disconnect()
-        self.data = data
-        if self.data:
-            for scene in self.data:
+        self.raw_scene_data = data or []
+        self.renderScenes(self.raw_scene_data)
+
+    def renderScenes(self, data):
+        while self.scenes_cards_layout.count():
+            item = self.scenes_cards_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        sort_mode = self.scene_tab_button.get_sort_mode()
+        sorted_data = sort_items(data, sort_mode)
+
+        if sorted_data:
+            for scene in sorted_data:
                 card = SceneCards.ListCard(self.mw, scene)
                 card.setFixedHeight(140)
                 self.scenes_cards_layout.addWidget(card)
@@ -173,9 +211,20 @@ class SearchPage(QWidget):
 
     def userPopulate(self, data):
         self.chat_thread.user_search_signal.disconnect()
-        self.data = data
-        if self.data:
-            for user in self.data:
+        self.raw_user_data = data or []
+        self.renderUsers(self.raw_user_data)
+
+    def renderUsers(self, data):
+        while self.users_cards_layout.count():
+            item = self.users_cards_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        sort_mode = self.user_tab_button.get_sort_mode()
+        sorted_data = sort_items(data, sort_mode)
+
+        if sorted_data:
+            for user in sorted_data:
                 card = UserCards.ListCard(self.mw, user)
                 card.setFixedHeight(87)
                 self.users_cards_layout.addWidget(card)
@@ -209,7 +258,9 @@ class SearchPage(QWidget):
         self.tab_layout.setContentsMargins(0, 0, 0, 0)
         self.tab_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        self.character_tab_button = TabButton(self.tr("Characters"))
+        self.character_tab_button = SortTabButton(
+            self.tr("Characters"), include_likes=False
+        )
         self.character_tab_button.clicked.connect(
             lambda: self.scene_tab_button.setChecked(False)
         )
@@ -219,8 +270,12 @@ class SearchPage(QWidget):
         self.character_tab_button.clicked.connect(
             lambda: self.changeSearch("character")
         )
+        self.character_tab_button.sort_changed.connect(
+            lambda _: self.renderCharacters(self.raw_char_data)
+        )
         self.tab_layout.addWidget(self.character_tab_button)
-        self.user_tab_button = TabButton(self.tr("Users"))
+
+        self.user_tab_button = SortTabButton(self.tr("Users"), include_likes=False)
         self.user_tab_button.clicked.connect(
             lambda: self.character_tab_button.setChecked(False)
         )
@@ -228,8 +283,14 @@ class SearchPage(QWidget):
             lambda: self.scene_tab_button.setChecked(False)
         )
         self.user_tab_button.clicked.connect(lambda: self.changeSearch("user"))
+        self.user_tab_button.sort_changed.connect(
+            lambda _: self.renderUsers(self.raw_user_data)
+        )
         self.tab_layout.addWidget(self.user_tab_button)
-        self.scene_tab_button = TabButton(self.tr("Scenes"))
+
+        self.scene_tab_button = SortTabButton(
+            self.tr("Scenes"), include_likes=False
+        )
         self.scene_tab_button.clicked.connect(
             lambda: self.character_tab_button.setChecked(False)
         )
@@ -237,6 +298,9 @@ class SearchPage(QWidget):
             lambda: self.user_tab_button.setChecked(False)
         )
         self.scene_tab_button.clicked.connect(lambda: self.changeSearch("scene"))
+        self.scene_tab_button.sort_changed.connect(
+            lambda _: self.renderScenes(self.raw_scene_data)
+        )
         self.tab_layout.addWidget(self.scene_tab_button)
 
         if self.search == "character":
