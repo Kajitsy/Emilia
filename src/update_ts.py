@@ -11,7 +11,7 @@ ts_files = [
     "lang/ru_RU.ts",
     "lang/uk_UA.ts",
 ]
-cmd = ["pylupdate6", "--verbose"] + py_files
+cmd = ["pylupdate6", "--verbose", "--no-obsolete"] + py_files
 
 for ts in ts_files:
     cmd += ["-ts", ts]

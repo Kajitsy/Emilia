@@ -1,69 +1,68 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="de_DE">
 <context>
     <name>AnyCharCreatePage</name>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="91" />
         <source>Scene genre</source>
-        <translation type="unfinished" />
+        <translation>Szenen-Genre</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="97" />
         <source>Select the genre. This guides the Character's style and tone.</source>
-        <translation type="unfinished" />
+        <translation>Wählen Sie das Genre. Dies bestimmt Stil und Ton des Charakters.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="105" />
         <source>Select the genre. This guides the Character’s style and tone.</source>
-        <translation type="unfinished" />
+        <translation>Wählen Sie das Genre. Dies bestimmt Stil und Ton des Charakters.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="110" />
         <source>When is this Scene set?</source>
-        <translation type="unfinished" />
+        <translation>Wann spielt diese Szene?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="124" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="113" />
         <source>Set the time. This guides the Character contextually when the Scene is taking place.</source>
-        <translation type="unfinished" />
+        <translation>Legen Sie die Zeit fest. Dies gibt dem Charakter zeitlichen Kontext.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="130" />
         <source>Where does this Scene happen?</source>
-        <translation type="unfinished" />
+        <translation>Wo findet diese Szene statt?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="144" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="133" />
         <source>Set the location. This grounds the Character where the Scene is taking place.</source>
-        <translation type="unfinished" />
+        <translation>Legen Sie den Ort fest. Dies verankert den Charakter am Ort des Geschehens.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="150" />
         <source>Tone of this Scene</source>
-        <translation type="unfinished" />
+        <translation>Ton dieser Szene</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="153" />
         <source>What's the mood of the Scene? The defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished" />
+        <translation>Wie ist die Stimmung der Szene? Dies definiert die Atmosphäre und den emotionalen Ton.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="164" />
         <source>What’s the mood of the Scene? This defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished" />
+        <translation>Wie ist die Stimmung der Szene? Dies definiert die Atmosphäre und den emotionalen Ton.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="170" />
         <source>What’s the backstory of this Scene?</source>
-        <translation type="unfinished" />
+        <translation>Was ist die Hintergrundgeschichte dieser Szene?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="173" />
         <source>Describe what is happening in this Scene. Include relevant details about the situation and backstory. This will help shape how the Scene unfolds and how the Character responds. Use {{user}} for the user. Use {{char}} for the Character. If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.</source>
-        <translation type="unfinished" />
+        <translation>Beschreiben Sie, was in dieser Szene passiert. Fügen Sie relevante Details zur Situation und Vorgeschichte hinzu. Verwenden Sie {{user}} für den Benutzer und {{char}} für den Charakter.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="184" />
@@ -74,17 +73,23 @@ Use {{char}} for the Character.
 
 If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.
 </source>
-        <translation type="unfinished" />
+        <translation>Beschreiben Sie, was in dieser Szene passiert. Fügen Sie relevante Details zur Situation und Vorgeschichte hinzu.
+
+Verwenden Sie {{user}} für den Benutzer.
+Verwenden Sie {{char}} für den Charakter.
+
+Vermeiden Sie geschlechtsspezifische Pronomen für universelle Szenen.
+</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="197" />
         <source>What's the player's goal in this Scene?</source>
-        <translation type="unfinished" />
+        <translation>Was ist das Ziel des Spielers in dieser Szene?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="201" />
         <source>Define a goal that is the next logical story beat, tells the player what to try, and make the goal achievable with a clear, detectable moment of success.Keep it specific and concrete. A good goal = verb that implies effort + challenges or constraints. E.g. Unmask the stranger before the final waltz ends.</source>
-        <translation type="unfinished" />
+        <translation>Definieren Sie ein klares Ziel für den Spieler. Ein gutes Ziel = Handlungsverb + Herausforderung.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="212" />
@@ -93,23 +98,27 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
 A good goal = verb that implies effort + challenges or constraints
 E.g. Unmask the stranger before the final waltz ends.
 </source>
-        <translation type="unfinished" />
+        <translation>Definieren Sie ein klares Ziel für den Spieler.
+
+Ein gutes Ziel = Handlungsverb + Herausforderung
+Z.B. Entlarven Sie den Fremden vor Ende des Walzers.
+</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="223" />
         <source>Introduce this Scene to your audience</source>
-        <translation type="unfinished" />
+        <translation>Stellen Sie diese Szene Ihrem Publikum vor</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="238" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="227" />
         <source>This is the starting screen of your Scene. Your audience will see this intro before entering the Scene. Help them understand what’s happening and get excited to start playing the Scene. Use {{user}} for the user. Use {{char}} for the Character.</source>
-        <translation type="unfinished" />
+        <translation>Dies ist der Startbildschirm Ihrer Szene. Verwenden Sie {{user}} für den Benutzer und {{char}} für den Charakter.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="246" />
         <source>Character greeting</source>
-        <translation type="unfinished" />
+        <translation>Charakter-Begrüßung</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="253" />
@@ -149,22 +158,22 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="264" />
         <source>Bold</source>
-        <translation type="unfinished" />
+        <translation>Fett</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="269" />
         <source>Italic</source>
-        <translation type="unfinished" />
+        <translation>Kursiv</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="274" />
         <source>Code</source>
-        <translation type="unfinished" />
+        <translation>Code</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="282" />
         <source>This is the first Character message your audience will see after entering the Scene. Make it your hook with what they will see, hear, and feel.</source>
-        <translation type="unfinished" />
+        <translation>Dies ist die erste Nachricht des Charakters, die Ihr Publikum sieht.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="294" />
@@ -174,17 +183,17 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="303" />
         <source>Give your Scene a memorable name. e.g. "Her Last Secret"</source>
-        <translation type="unfinished" />
+        <translation>Geben Sie Ihrer Szene einen einprägsamen Namen, z.B. "Ihr letztes Geheimnis"</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="307" />
         <source>Cover Image</source>
-        <translation type="unfinished" />
+        <translation>Titelbild</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="319" />
         <source>Upload</source>
-        <translation type="unfinished" />
+        <translation>Hochladen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="328" />
@@ -215,7 +224,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="345" />
         <source>Create Scene</source>
-        <translation type="unfinished" />
+        <translation>Szene erstellen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="351" />
@@ -232,24 +241,24 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="416" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="389" />
         <source>You haven't filled out everything.</source>
-        <translation type="unfinished" />
+        <translation>Sie haben nicht alles ausgefüllt.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="425" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="398" />
         <source>The scene has been saved successfully!</source>
-        <translation type="unfinished" />
+        <translation>Die Szene wurde erfolgreich gespeichert!</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="438" />
         <source>The scene has been successfully created!</source>
-        <translation type="unfinished" />
+        <translation>Die Szene wurde erfolgreich erstellt!</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="560" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="493" />
         <source>Error downloading image</source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Herunterladen des Bildes</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="603" />
@@ -261,12 +270,12 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="30" />
         <source>Create my own</source>
-        <translation type="unfinished" />
+        <translation>Eigene erstellen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="31" />
         <source>You write the story, your audience pick the Character</source>
-        <translation type="unfinished" />
+        <translation>Du schreibst die Geschichte, dein Publikum wählt den Charakter</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="202" />
@@ -278,151 +287,137 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="60" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="37" />
         <source>Template</source>
-        <translation type="unfinished" />
+        <translation>Vorlage</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="38" />
         <source>The Mysteriously Vanishing Fortune</source>
-        <translation type="unfinished" />
+        <translation>Das geheimnisvoll verschwundene Vermögen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="39" />
         <source>Mystery</source>
-        <translation type="unfinished" />
+        <translation>Krimi/Mysterium</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="61" />
         <source>The Shapeshifter’s Genome: A Sci-Fi Scene</source>
-        <translation type="unfinished" />
+        <translation>Das Genom des Gestaltwandlers: Sci-Fi-Szene</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="62" />
         <source>Sci-Fi</source>
-        <translation type="unfinished" />
+        <translation>Sci-Fi</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="86" />
         <source>Ride the Dragon</source>
-        <translation type="unfinished" />
+        <translation>Auf dem Drachen reiten</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="87" />
         <source>Fantasy</source>
-        <translation type="unfinished" />
+        <translation>Fantasy</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="109" />
         <source>The Romantic Ball: Ask Them To Dance</source>
-        <translation type="unfinished" />
+        <translation>Der romantische Ball: Bitte zum Tanz</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="110" />
         <source>Romance</source>
-        <translation type="unfinished" />
+        <translation>Romantik</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="132" />
         <source>They Cheated on Me</source>
-        <translation type="unfinished" />
+        <translation>Sie haben mich betrogen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="133" />
         <source>Drama</source>
-        <translation type="unfinished" />
+        <translation>Drama</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="157" />
         <source>Plane Crashed: Stranded on an Island</source>
-        <translation type="unfinished" />
+        <translation>Flugzeugabsturz: Gestrandet auf einer Insel</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="158" />
         <source>Survival/Adventure</source>
-        <translation type="unfinished" />
+        <translation>Überleben/Abenteuer</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="180" />
         <source>The Freshman College Party</source>
-        <translation type="unfinished" />
+        <translation>Die Erstsemester-Party</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="181" />
         <source>Coming-of-age</source>
-        <translation type="unfinished" />
+        <translation>Heranwachsen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="203" />
         <source>Coffee Shop AU: Latte Hearts</source>
-        <translation type="unfinished" />
+        <translation>Café-AU: Latte-Herzen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="204" />
         <source>Slice-of-life</source>
-        <translation type="unfinished" />
+        <translation>Alltagsleben</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="261" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation type="unfinished" />
+        <translation>Willkommen bei Szenen. Bereit zu erstellen?</translation>
     </message>
 </context><context>
     <name>CharMainCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/CharMainCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Hier ist leer ...</translation>
-    </message>
-</context><context>
-    <name>CharacterCards.MainCard</name>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Autor: @</translation>
-    </message>
-    <message>
-        <source> chats</source>
-        <translation type="vanished"> chats</translation>
-    </message>
-    <message>
-        <source> likes</source>
-        <translation type="vanished"> mag</translation>
+        <translation>Und hier ist es leer...</translation>
     </message>
 </context><context>
     <name>ChatInterface</name>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="296" />
         <source>Bold</source>
-        <translation type="unfinished" />
+        <translation>Fett</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="301" />
         <source>Italic</source>
-        <translation type="unfinished" />
+        <translation>Kursiv</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="306" />
         <source>Code</source>
-        <translation type="unfinished" />
+        <translation>Code</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1818" />
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="344" />
         <source>Call limit exceeded</source>
-        <translation type="unfinished" />
+        <translation>Anruflimit überschritten</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="358" />
         <source>Attached message limit exceeded</source>
-        <translation type="unfinished" />
+        <translation>Limit für angehängte Nachrichten überschritten</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="542" />
         <source>Downloading background...</source>
-        <translation type="unfinished" />
+        <translation>Hintergrund wird heruntergeladen...</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="555" />
         <source>Error downloading image</source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Herunterladen des Bildes</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="719" />
@@ -458,28 +453,28 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1069" />
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="765" />
         <source>Show VModel</source>
-        <translation type="unfinished" />
+        <translation>VModel anzeigen</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1000" />
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="772" />
         <source>Detach Chat</source>
-        <translation type="unfinished" />
+        <translation>Chat trennen</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="966" />
         <source>Attach Chat</source>
-        <translation type="unfinished" />
+        <translation>Chat anhängen</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="970" />
         <source>Chat with %%char%%</source>
-        <translation type="unfinished" />
+        <translation>Chat mit %%char%%</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1076" />
         <source>Hide VModel</source>
-        <translation type="unfinished" />
+        <translation>VModel ausblenden</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1101" />
@@ -489,7 +484,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1123" />
         <source>Successfully updated your persona</source>
-        <translation>Aktualisieren Sie Ihre Persona erfolgreich</translation>
+        <translation>Persona erfolgreich aktualisiert</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1153" />
@@ -530,7 +525,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1527" />
         <source>Background Image:</source>
-        <translation type="unfinished" />
+        <translation>Hintergrundbild:</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1530" />
@@ -540,7 +535,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1534" />
         <source>Clear</source>
-        <translation type="unfinished" />
+        <translation>Löschen</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1541" />
@@ -657,38 +652,6 @@ E.g. Unmask the stranger before the final waltz ends.
         <source>Edit message</source>
         <translation>Nachricht bearbeiten</translation>
     </message>
-    <message>
-        <source>Meow</source>
-        <translation type="vanished">Miau</translation>
-    </message>
-    <message>
-        <source>Quick wits, faster words</source>
-        <translation type="vanished">Scharfer Verstand, schnelle Worte</translation>
-    </message>
-    <message>
-        <source>Roar</source>
-        <translation type="vanished">Brüllen</translation>
-    </message>
-    <message>
-        <source>Mix of speed &amp; smarts</source>
-        <translation type="vanished">Geschwindigkeits- und Intelligenzkombination</translation>
-    </message>
-    <message>
-        <source>Nyan</source>
-        <translation type="vanished">Nyan</translation>
-    </message>
-    <message>
-        <source>Smart and more thoughtful</source>
-        <translation type="vanished">Intellektuell und nachdenklicher</translation>
-    </message>
-    <message>
-        <source>Goro</source>
-        <translation type="vanished">Goro</translation>
-    </message>
-    <message>
-        <source>Less spicy</source>
-        <translation type="vanished">Weniger würzig</translation>
-    </message>
 </context><context>
     <name>ChatThread</name>
     <message>
@@ -704,44 +667,44 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/logic/QThreads/ChatThread.py" line="198" />
         <source>Attached message limit exceeded</source>
-        <translation type="unfinished" />
+        <translation>Limit für angehängte Nachrichten überschritten</translation>
     </message>
 </context><context>
     <name>ChoiceStep</name>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="30" />
         <source>Scenes are instant roleplay setups you create, where anyone can drop into a specific setting with their favorite Character. They are like side stories branching from the core chat, perfect for anyone to start roleplaying right away. Create a Scene to bring your story to life.</source>
-        <translation type="unfinished" />
+        <translation>Szenen sind sofortige Rollenspiel-Setups, in die jeder mit seinem Lieblingscharakter einsteigen kann. Erstelle eine Szene, um deine Geschichte zum Leben zu erwecken.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="41" />
         <source>Tips and best practices</source>
-        <translation type="unfinished" />
+        <translation>Tipps und Best Practices</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="59" />
         <source>Any Character Scene</source>
-        <translation type="unfinished" />
+        <translation>Beliebige Charakterszene</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="66" />
         <source>A Scene that works with any Character. Perfect for general scenarios where any Character can jump in and interact.</source>
-        <translation type="unfinished" />
+        <translation>Eine Szene, die mit jedem Charakter funktioniert. Perfekt für allgemeine Szenarien.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="83" />
         <source>Main Character Scene</source>
-        <translation type="unfinished" />
+        <translation>Hauptcharakter-Szene</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="90" />
         <source>A Scene designed for a specific Character you have in mind, tailored to their personality and backstory.</source>
-        <translation type="unfinished" />
+        <translation>Eine Szene, die für einen bestimmten Charakter entwickelt wurde.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="115" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation type="unfinished" />
+        <translation>Willkommen bei Szenen. Bereit zu erstellen?</translation>
     </message>
 </context><context>
     <name>EditCard</name>
@@ -792,40 +755,6 @@ E.g. Unmask the stranger before the final waltz ends.
         <translation>Mit einer Rückkehr, </translation>
     </message>
 </context><context>
-    <name>EditOverlay</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Anzeigenamen</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Hintergrund</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Standard für neue Chats festlegen</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Speichern</translation>
-    </message>
-    <message>
-        <source>Username</source>
-        <translation type="vanished">Benutzernamen</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="vanished">Stornierung</translation>
-    </message>
-    <message>
-        <source>Welcome back, </source>
-        <translation type="vanished">Mit einer Rückkehr, </translation>
-    </message>
-</context><context>
     <name>EditPage</name>
     <message>
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="70" />
@@ -835,7 +764,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="80" />
         <source>e.g. Albert Einstein</source>
-        <translation />
+        <translation>z.B. Albert Einstein</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="84" />
@@ -906,21 +835,21 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="173" />
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="121" />
         <source>Bold</source>
-        <translation type="unfinished" />
+        <translation>Fett</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="240" />
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="178" />
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="126" />
         <source>Italic</source>
-        <translation type="unfinished" />
+        <translation>Kursiv</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="245" />
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="183" />
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="131" />
         <source>Code</source>
-        <translation type="unfinished" />
+        <translation>Code</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/CharacterPages/EditPage.py" line="139" />
@@ -1035,218 +964,6 @@ E.g. Unmask the stranger before the final waltz ends.
         <translation>Die Begrüßung eines Charakters darf nicht kürzer als 3 Zeichen sein.</translation>
     </message>
 </context><context>
-    <name>EmiliaNext</name>
-    <message>
-        <source>Emilia | Happy New Year</source>
-        <translation type="vanished">Emilia | Glückliches neues Jahr</translation>
-    </message>
-    <message>
-        <source>Happy birthday Emilia!</source>
-        <translation type="vanished">Alles Gute zum Geburtstag Emilia!</translation>
-    </message>
-    <message>
-        <source>Emilia | Happy birthday Kajitsy!</source>
-        <translation type="vanished">Emilia | Alles Gute zum Geburtstag Kajitsy!</translation>
-    </message>
-    <message>
-        <source>Emilia | Happy birthday CAI!</source>
-        <translation type="vanished">Emilia | Alles Gute zum Geburtstag CAI!</translation>
-    </message>
-    <message>
-        <source>User</source>
-        <translation type="vanished">Benutzer</translation>
-    </message>
-    <message>
-        <source>Please re-enter (the login data has expired)</source>
-        <translation type="vanished">Bitte melden Sie sich an (der Datenzeitraum ist abgelaufen)</translation>
-    </message>
-    <message>
-        <source>Remove from Recent Chats</source>
-        <translation type="vanished">Aus den letzten entfernen</translation>
-    </message>
-    <message>
-        <source>Downloading...</source>
-        <translation type="vanished">Herunterladen...</translation>
-    </message>
-    <message>
-        <source>Looking at the main page</source>
-        <translation type="vanished">Schaut auf die Mainpage</translation>
-    </message>
-    <message>
-        <source>For You</source>
-        <translation type="vanished">Für dich</translation>
-    </message>
-    <message>
-        <source>Scenes</source>
-        <translation type="vanished">Szenen</translation>
-    </message>
-    <message>
-        <source>Recommended</source>
-        <translation type="vanished">Empfohlen</translation>
-    </message>
-    <message>
-        <source>Popular</source>
-        <translation type="vanished">Beliebtes</translation>
-    </message>
-    <message>
-        <source>Trending</source>
-        <translation type="vanished">Im Trend</translation>
-    </message>
-    <message>
-        <source>Try This</source>
-        <translation type="vanished">Versuchen Sie diese</translation>
-    </message>
-    <message>
-        <source>Welcome back, User</source>
-        <translation type="vanished">Mit der Rückgabe, Benutzer</translation>
-    </message>
-    <message>
-        <source>Update</source>
-        <translation type="vanished">Aktualisieren</translation>
-    </message>
-    <message>
-        <source>Voices</source>
-        <translation type="vanished">Abstimmung</translation>
-    </message>
-    <message>
-        <source>Assistants</source>
-        <translation type="vanished">Assistenten</translation>
-    </message>
-    <message>
-        <source>Anime</source>
-        <translation type="vanished">Anime</translation>
-    </message>
-    <message>
-        <source>Creativity and Writing</source>
-        <translation type="vanished">Kreativität und Schreiben</translation>
-    </message>
-    <message>
-        <source>Entertainment and Gaming</source>
-        <translation type="vanished">Unterhaltung und Spiele</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation type="vanished">Geschichte</translation>
-    </message>
-    <message>
-        <source>Humor</source>
-        <translation type="vanished">Humor</translation>
-    </message>
-    <message>
-        <source>Learning</source>
-        <translation type="vanished">Ausbildung</translation>
-    </message>
-    <message>
-        <source>Lifestyle</source>
-        <translation type="vanished">Lebensstil</translation>
-    </message>
-    <message>
-        <source>Parody</source>
-        <translation type="vanished">Parodie</translation>
-    </message>
-    <message>
-        <source>RPG and Puzzles</source>
-        <translation type="vanished">Rollenspiele und Rätsel</translation>
-    </message>
-    <message>
-        <source>Welcome back, </source>
-        <translation type="vanished">Mit einer Rückkehr, </translation>
-    </message>
-    <message>
-        <source>Character Search</source>
-        <translation type="vanished">Suche nach Zeichen</translation>
-    </message>
-    <message>
-        <source>A new version is available: </source>
-        <translation type="vanished">Die neue Version ist verfügbar: </translation>
-    </message>
-    <message>
-        <source>Download complete. Running installer...</source>
-        <translation type="vanished">Das Herunterladen ist abgeschlossen. Start des Installationsprogramms ...</translation>
-    </message>
-    <message>
-        <source>Download failed.</source>
-        <translation type="vanished">Download -Fehler.</translation>
-    </message>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Autor: @</translation>
-    </message>
-    <message>
-        <source> chats</source>
-        <translation type="vanished"> chats</translation>
-    </message>
-    <message>
-        <source> likes</source>
-        <translation type="vanished"> mag</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation type="vanished">Einstellungen</translation>
-    </message>
-    <message>
-        <source>My Profile</source>
-        <translation type="vanished">Profil</translation>
-    </message>
-    <message>
-        <source>To Main Page</source>
-        <translation type="vanished">Am wichtigsten</translation>
-    </message>
-    <message>
-        <source>Recent Chats</source>
-        <translation type="vanished">Neuere Chats</translation>
-    </message>
-    <message>
-        <source>Profile</source>
-        <translation type="vanished">Profil</translation>
-    </message>
-    <message>
-        <source>The token has been updated</source>
-        <translation type="vanished">Das Token wird aktualisiert</translation>
-    </message>
-    <message>
-        <source>The token has been successfully updated. You may need to restart for full application.</source>
-        <translation type="vanished">Das Token wird erfolgreich aktualisiert. Wiedergutmachung kann benötigt werden.</translation>
-    </message>
-    <message>
-        <source>Token error</source>
-        <translation type="vanished">Fehler</translation>
-    </message>
-    <message>
-        <source>Failed to update token: </source>
-        <translation type="vanished">Token -Update -Fehler:</translation>
-    </message>
-    <message>
-        <source>The token is missing</source>
-        <translation type="vanished">Token wurde nicht gefunden</translation>
-    </message>
-    <message>
-        <source>The token is not installed.</source>
-        <translation type="vanished">Das Token ist nicht festgelegt.</translation>
-    </message>
-    <message>
-        <source>English</source>
-        <translation type="vanished">Englisch</translation>
-    </message>
-    <message>
-        <source>Russian</source>
-        <translation type="vanished">Russisch</translation>
-    </message>
-</context><context>
-    <name>GetCookies</name>
-    <message>
-        <source>You can also insert a link from the email</source>
-        <translation type="vanished">Sie können auch einen Link aus einer E-Mail einfügen</translation>
-    </message>
-    <message>
-        <source>Please log in to your account</source>
-        <translation type="vanished">Bitte gehen Sie in Ihr Konto</translation>
-    </message>
-    <message>
-        <source>(To log in via Apple/Google, specify the email address of your Apple/Google account.)</source>
-        <translation type="vanished">Um sich über Apple/Google anzumelden, geben Sie die E-Mail Ihres Apple/Google-Kontos an</translation>
-    </message>
-</context><context>
     <name>LeftSidebar</name>
     <message>
         <location filename="../modules/ui/Elements.py" line="521" />
@@ -1256,7 +973,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/Elements.py" line="530" />
         <source>Create</source>
-        <translation type="unfinished" />
+        <translation>Erstellen</translation>
     </message>
     <message>
         <location filename="../modules/ui/Elements.py" line="613" />
@@ -1267,21 +984,17 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/Elements.py" line="592" />
         <source>Character</source>
-        <translation type="unfinished" />
+        <translation>Charakter</translation>
     </message>
     <message>
         <location filename="../modules/ui/Elements.py" line="596" />
         <source>Scene</source>
-        <translation type="unfinished" />
+        <translation>Szene</translation>
     </message>
     <message>
         <location filename="../modules/ui/Elements.py" line="617" />
         <source>Settings</source>
         <translation>Einstellungen</translation>
-    </message>
-    <message>
-        <source>Create Character</source>
-        <translation type="vanished">Charakter erstellen</translation>
     </message>
 </context><context>
     <name>ListCard</name>
@@ -1308,36 +1021,12 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/cards/UserCards/ListCard.py" line="59" />
         <source> Chats</source>
-        <translation type="unfinished" />
+        <translation> Chats</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/UserCards/ListCard.py" line="80" />
         <source> Characters</source>
-        <translation type="unfinished" />
-    </message>
-    <message>
-        <source>Default</source>
-        <translation type="vanished">Standard</translation>
-    </message>
-    <message>
-        <source>Active</source>
-        <translation type="vanished">Aktiv</translation>
-    </message>
-    <message>
-        <source>Successfully updated your persona</source>
-        <translation type="vanished">Aktualisieren Sie Ihre Persona erfolgreich</translation>
-    </message>
-    <message>
-        <source>Clear default</source>
-        <translation type="vanished">Standard löschen</translation>
-    </message>
-    <message>
-        <source>Make default</source>
-        <translation type="vanished">Standardmäßig verwenden</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
+        <translation> Charaktere</translation>
     </message>
 </context><context>
     <name>MainCard</name>
@@ -1395,7 +1084,7 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="119" />
         <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="106" />
         <source>Successfully updated your persona</source>
-        <translation>Aktualisieren Sie Ihre Persona erfolgreich</translation>
+        <translation>Persona erfolgreich aktualisiert</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="150" />
@@ -1405,7 +1094,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/cards/PersonaCards/MainCard.py" line="154" />
         <source>Make default</source>
-        <translation>Standardmäßig verwenden</translation>
+        <translation>Als Standard festlegen</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="86" />
@@ -1416,12 +1105,12 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="40" />
         <source>Install and Select</source>
-        <translation type="unfinished" />
+        <translation>Installieren und auswählen</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="43" />
         <source>Install</source>
-        <translation type="unfinished" />
+        <translation>Installieren</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="83" />
@@ -1432,37 +1121,37 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="49" />
         <source>Uninstall</source>
-        <translation type="unfinished" />
+        <translation>Deinstallieren</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="52" />
         <source>Update on server</source>
-        <translation type="unfinished" />
+        <translation>Auf Server aktualisieren</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="55" />
         <source>Delete from server</source>
-        <translation type="unfinished" />
+        <translation>Vom Server löschen</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="117" />
         <source>Error updating theme: </source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Aktualisieren des Designs: </translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="120" />
         <source>Theme updated successfully!</source>
-        <translation type="unfinished" />
+        <translation>Design erfolgreich aktualisiert!</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="132" />
         <source>Error deleting theme: </source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Löschen des Designs: </translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/MainCard.py" line="135" />
         <source>Theme deleted successfully!</source>
-        <translation type="unfinished" />
+        <translation>Design erfolgreich gelöscht!</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/MainCard.py" line="97" />
@@ -1479,69 +1168,69 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="99" />
         <source>Main Character of the Scenes</source>
-        <translation type="unfinished" />
+        <translation>Hauptcharakter der Szene</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="117" />
         <source>Scenes genre</source>
-        <translation type="unfinished" />
+        <translation>Szenen-Genre</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="120" />
         <source>Select the genre. This guides the Character's style and tone.</source>
-        <translation type="unfinished" />
+        <translation>Wählen Sie das Genre. Dies bestimmt Stil und Ton des Charakters.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="128" />
         <source>Select the genre. This guides the Character’s style and tone.</source>
-        <translation type="unfinished" />
+        <translation>Wählen Sie das Genre. Dies bestimmt Stil und Ton des Charakters.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="133" />
         <source>When is this Scenes set?</source>
-        <translation type="unfinished" />
+        <translation>Wann spielt diese Szene?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="147" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="136" />
         <source>Set the time. This guides the Character contextually when the Scenes is taking place.</source>
-        <translation type="unfinished" />
+        <translation>Legen Sie die Zeit fest. Dies gibt dem Charakter zeitlichen Kontext.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="153" />
         <source>Where does this Scenes happen?</source>
-        <translation type="unfinished" />
+        <translation>Wo findet diese Szene statt?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="167" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="156" />
         <source>Set the location. This grounds the Character where the Scenes is taking place.</source>
-        <translation type="unfinished" />
+        <translation>Legen Sie den Ort fest. Dies verankert den Charakter am Ort des Geschehens.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="173" />
         <source>Tone of this Scenes</source>
-        <translation type="unfinished" />
+        <translation>Ton dieser Szene</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="176" />
         <source>What's the mood of the Scenes? The defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished" />
+        <translation>Wie ist die Stimmung der Szene? Dies definiert die Atmosphäre und den emotionalen Ton.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="187" />
         <source>What’s the mood of the Scenes? This defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="unfinished" />
+        <translation>Wie ist die Stimmung der Szene? Dies definiert die Atmosphäre und den emotionalen Ton.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="193" />
         <source>What’s the backstory of this Scenes?</source>
-        <translation type="unfinished" />
+        <translation>Was ist die Hintergrundgeschichte dieser Szene?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="196" />
         <source>Describe what is happening in this Scenes. Include relevant details about the situation and backstory. This will help shape how the Scenes unfolds and how the Character responds. Use {{user}} for the user. Use {{char}} for the Character. If you are building an Any-Character Scenes we recommend that you avoid the following pronouns: he, she, his, her, so your Scenes can work for any character.</source>
-        <translation type="unfinished" />
+        <translation>Beschreiben Sie, was in dieser Szene passiert. Fügen Sie relevante Details zur Situation und Vorgeschichte hinzu. Verwenden Sie {{user}} für den Benutzer und {{char}} für den Charakter.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="207" />
@@ -1552,17 +1241,23 @@ Use {{char}} for the Character.
 
 If you are building an Any-Character Scenes we recommend that you avoid the following pronouns: he, she, his, her, so your Scenes can work for any character.
 </source>
-        <translation type="unfinished" />
+        <translation>Beschreiben Sie, was in dieser Szene passiert. Fügen Sie relevante Details zur Situation und Vorgeschichte hinzu.
+
+Verwenden Sie {{user}} für den Benutzer.
+Verwenden Sie {{char}} für den Charakter.
+
+Vermeiden Sie geschlechtsspezifische Pronomen für universelle Szenen.
+</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="220" />
         <source>What's the player's goal in this Scenes?</source>
-        <translation type="unfinished" />
+        <translation>Was ist das Ziel des Spielers in dieser Szene?</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="224" />
         <source>Define a goal that is the next logical story beat, tells the player what to try, and make the goal achievable with a clear, detectable moment of success.Keep it specific and concrete. A good goal = verb that implies effort + challenges or constraints. E.g. Unmask the stranger before the final waltz ends.</source>
-        <translation type="unfinished" />
+        <translation>Definieren Sie ein klares Ziel für den Spieler. Ein gutes Ziel = Handlungsverb + Herausforderung.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="235" />
@@ -1571,23 +1266,27 @@ If you are building an Any-Character Scenes we recommend that you avoid the foll
 A good goal = verb that implies effort + challenges or constraints
 E.g. Unmask the stranger before the final waltz ends.
 </source>
-        <translation type="unfinished" />
+        <translation>Definieren Sie ein klares Ziel für den Spieler.
+
+Ein gutes Ziel = Handlungsverb + Herausforderung
+Z.B. Entlarven Sie den Fremden vor Ende des Walzers.
+</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="246" />
         <source>Introduce this Scenes to your audience</source>
-        <translation type="unfinished" />
+        <translation>Stellen Sie diese Szene Ihrem Publikum vor</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="261" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="250" />
         <source>This is the starting screen of your Scenes. Your audience will see this intro before entering the Scenes. Help them understand what’s happening and get excited to start playing the Scenes. Use {{user}} for the user. Use {{char}} for the Character.</source>
-        <translation type="unfinished" />
+        <translation>Dies ist der Startbildschirm Ihrer Szene. Verwenden Sie {{user}} für den Benutzer und {{char}} für den Charakter.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="269" />
         <source>Character greeting</source>
-        <translation type="unfinished" />
+        <translation>Charakter-Begrüßung</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="276" />
@@ -1627,22 +1326,22 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="287" />
         <source>Bold</source>
-        <translation type="unfinished" />
+        <translation>Fett</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="292" />
         <source>Italic</source>
-        <translation type="unfinished" />
+        <translation>Kursiv</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="297" />
         <source>Code</source>
-        <translation type="unfinished" />
+        <translation>Code</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="305" />
         <source>This is the first Character message your audience will see after entering the Scenes. Make it your hook with what they will see, hear, and feel.</source>
-        <translation type="unfinished" />
+        <translation>Dies ist die erste Nachricht des Charakters, die Ihr Publikum sieht.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="317" />
@@ -1652,17 +1351,17 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="326" />
         <source>Give your Scenes a memorable name. e.g. "Her Last Secret"</source>
-        <translation type="unfinished" />
+        <translation>Geben Sie Ihrer Szene einen einprägsamen Namen, z.B. "Ihr letztes Geheimnis"</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="330" />
         <source>Cover Image</source>
-        <translation type="unfinished" />
+        <translation>Titelbild</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="342" />
         <source>Upload</source>
-        <translation type="unfinished" />
+        <translation>Hochladen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="351" />
@@ -1693,7 +1392,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="368" />
         <source>Create Scenes</source>
-        <translation type="unfinished" />
+        <translation>Szene erstellen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="374" />
@@ -1710,34 +1409,34 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="540" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="413" />
         <source>You haven't filled out everything.</source>
-        <translation type="unfinished" />
+        <translation>Sie haben nicht alles ausgefüllt.</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="451" />
         <source>Your Characters</source>
-        <translation type="unfinished" />
+        <translation>Deine Charaktere</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="456" />
         <source>Recent</source>
-        <translation type="unfinished" />
+        <translation>Kürzlich</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="549" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="521" />
         <source>The scene has been saved successfully!</source>
-        <translation type="unfinished" />
+        <translation>Die Szene wurde erfolgreich gespeichert!</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="562" />
         <source>The scene has been successfully created!</source>
-        <translation type="unfinished" />
+        <translation>Die Szene wurde erfolgreich erstellt!</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="686" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="619" />
         <source>Error downloading image</source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Herunterladen des Bildes</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="729" />
@@ -1749,12 +1448,12 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="30" />
         <source>Create my own</source>
-        <translation type="unfinished" />
+        <translation>Eigene erstellen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="31" />
         <source>You write the story, your audience pick the Character</source>
-        <translation type="unfinished" />
+        <translation>Du schreibst die Geschichte, dein Publikum wählt den Charakter</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="202" />
@@ -1766,88 +1465,88 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="60" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="37" />
         <source>Template</source>
-        <translation type="unfinished" />
+        <translation>Vorlage</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="38" />
         <source>The Vanishing Headstone</source>
-        <translation type="unfinished" />
+        <translation>Der verschwindende Grabstein</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="39" />
         <source>Mystery</source>
-        <translation type="unfinished" />
+        <translation>Krimi/Mysterium</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="61" />
         <source>The Jungle on Pluto</source>
-        <translation type="unfinished" />
+        <translation>Der Dschungel auf Pluto</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="62" />
         <source>Sci-Fi</source>
-        <translation type="unfinished" />
+        <translation>Sci-Fi</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="86" />
         <source>Zixie’s Path to the Elven Village</source>
-        <translation type="unfinished" />
+        <translation>Zixies Weg zum Elfendorf</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="87" />
         <source>Fantasy</source>
-        <translation type="unfinished" />
+        <translation>Fantasy</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="109" />
         <source>A Date at the Garlic Coffee Shop</source>
-        <translation type="unfinished" />
+        <translation>Ein Date im Knoblauch-Café</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="110" />
         <source>Romance</source>
-        <translation type="unfinished" />
+        <translation>Romantik</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="132" />
         <source>They Cheated on Me</source>
-        <translation type="unfinished" />
+        <translation>Sie haben mich betrogen</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="133" />
         <source>Drama</source>
-        <translation type="unfinished" />
+        <translation>Drama</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="157" />
         <source>Brown Butter Cookies Vlog</source>
-        <translation type="unfinished" />
+        <translation>Vlog über braune Butterkekse</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="204" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="158" />
         <source>Slice-of-life</source>
-        <translation type="unfinished" />
+        <translation>Alltagsleben</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="180" />
         <source>The Secrets of the Moonveil Sea</source>
-        <translation type="unfinished" />
+        <translation>Die Geheimnisse des Mondschleiermeeres</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="181" />
         <source>Adventure</source>
-        <translation type="unfinished" />
+        <translation>Abenteuer</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="203" />
         <source>Candlelight and Silverware</source>
-        <translation type="unfinished" />
+        <translation>Kerzenlicht und Tafelsilber</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="261" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation type="unfinished" />
+        <translation>Willkommen bei Szenen. Bereit zu erstellen?</translation>
     </message>
 </context><context>
     <name>MainPage</name>
@@ -1890,7 +1589,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/MainPage.py" line="493" />
         <source>An update is available</source>
-        <translation type="unfinished" />
+        <translation>Ein Update ist verfügbar</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/MainPage.py" line="508" />
@@ -2002,7 +1701,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/MainPage.py" line="912" />
         <source>There should be a chat here...</source>
-        <translation type="unfinished" />
+        <translation>Hier sollte ein Chat sein...</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/MainPage.py" line="1183" />
@@ -2098,7 +1797,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="257" />
         <source>Themes</source>
-        <translation type="unfinished" />
+        <translation>Designs</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="624" />
@@ -2123,7 +1822,7 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="459" />
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="444" />
         <source>'s profile </source>
-        <translation> an</translation>
+        <translation>Profil von </translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="468" />
@@ -2155,90 +1854,12 @@ E.g. Unmask the stranger before the final waltz ends.
         <source>Following</source>
         <translation>Abonnements</translation>
     </message>
-    <message>
-        <source>And it's empty here...</source>
-        <translation type="vanished">Hier ist leer ...</translation>
-    </message>
-</context><context>
-    <name>OverlayCard</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Anzeigenamen</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Hintergrund</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Standard für neue Chats festlegen</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Speichern</translation>
-    </message>
-</context><context>
-    <name>PersonaCards.ListCard</name>
-    <message>
-        <source>Default</source>
-        <translation type="vanished">Standard</translation>
-    </message>
-    <message>
-        <source>Active</source>
-        <translation type="vanished">Aktiv</translation>
-    </message>
-    <message>
-        <source>Edit</source>
-        <translation type="vanished">Ändern</translation>
-    </message>
-    <message>
-        <source>Successfully updated your persona</source>
-        <translation type="vanished">Aktualisieren Sie Ihre Persona erfolgreich</translation>
-    </message>
-    <message>
-        <source>Clear default</source>
-        <translation type="vanished">Standard löschen</translation>
-    </message>
-    <message>
-        <source>Make default</source>
-        <translation type="vanished">Standardmäßig verwenden</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
-    </message>
-</context><context>
-    <name>PersonaCards.OverlayCard</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Anzeigenamen</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Hintergrund</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Standard für neue Chats festlegen</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Speichern</translation>
-    </message>
 </context><context>
     <name>SceneListCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/SceneListCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Hier ist leer ...</translation>
+        <translation>Und hier ist es leer...</translation>
     </message>
 </context><context>
     <name>SearchCard</name>
@@ -2251,27 +1872,27 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="43" />
         <source>Upload Theme</source>
-        <translation type="unfinished" />
+        <translation>Design hochladen</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="71" />
         <source>No custom themes found</source>
-        <translation type="unfinished" />
+        <translation>Keine benutzerdefinierten Designs gefunden</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="90" />
         <source>Error uploading theme: </source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Hochladen des Designs: </translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="92" />
         <source>Theme uploaded successfully!</source>
-        <translation type="unfinished" />
+        <translation>Design erfolgreich hochgeladen!</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/ThemeCards/SearchCard.py" line="103" />
         <source>Themes not found</source>
-        <translation type="unfinished" />
+        <translation>Designs nicht gefunden</translation>
     </message>
     <message>
         <location filename="../modules/ui/cards/VoiceCards/SearchCard.py" line="97" />
@@ -2305,12 +1926,12 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SearchPage.py" line="150" />
         <source>Scenes not found</source>
-        <translation type="unfinished" />
+        <translation>Szenen nicht gefunden</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SearchPage.py" line="183" />
         <source>Users not found</source>
-        <translation type="unfinished" />
+        <translation>Benutzer nicht gefunden</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SearchPage.py" line="203" />
@@ -2325,16 +1946,12 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SearchPage.py" line="223" />
         <source>Users</source>
-        <translation type="unfinished" />
+        <translation>Benutzer</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SearchPage.py" line="232" />
         <source>Scenes</source>
         <translation>Szenen</translation>
-    </message>
-    <message>
-        <source>Character Search</source>
-        <translation type="vanished">Suche nach Zeichen</translation>
     </message>
 </context><context>
     <name>SettingsPage</name>
@@ -2724,22 +2341,22 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="420" />
         <source>App theme</source>
-        <translation type="unfinished" />
+        <translation>App-Design</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="426" />
         <source>Theme Catalog</source>
-        <translation type="unfinished" />
+        <translation>Design-Katalog</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="433" />
         <source>Sync theme with system theme</source>
-        <translation type="unfinished" />
+        <translation>Design mit Systemdesign synchronisieren</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
         <source>Text animation speed (ms)</source>
-        <translation type="unfinished" />
+        <translation>Textanimationsgeschwindigkeit (ms)</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="445" />
@@ -2759,7 +2376,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="464" />
         <source>Update Server</source>
-        <translation type="unfinished" />
+        <translation>Update-Server</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="471" />
@@ -2779,7 +2396,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="489" />
         <source>Use the old implementation of voice chat</source>
-        <translation type="unfinished" />
+        <translation>Alte Sprachchat-Implementierung verwenden</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="495" />
@@ -2794,7 +2411,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="505" />
         <source>VTube Studio Address</source>
-        <translation type="unfinished" />
+        <translation>VTube Studio Adresse</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="512" />
@@ -2819,48 +2436,48 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="535" />
         <source>Virtual Model Plugin (VModel)</source>
-        <translation type="unfinished" />
+        <translation>Virtuelles Modell-Plugin (VModel)</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="539" />
         <source>Use VModel</source>
-        <translation type="unfinished" />
+        <translation>VModel verwenden</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="545" />
         <source>Models folder</source>
-        <translation type="unfinished" />
+        <translation>Modellordner</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="546" />
         <source>Change</source>
-        <translation type="unfinished" />
+        <translation>Ändern</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="552" />
         <source>FPS</source>
-        <translation type="unfinished" />
+        <translation>FPS</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="559" />
         <source>Cursor Tracking</source>
-        <translation type="unfinished" />
+        <translation>Cursor-Tracking</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="565" />
         <source>Auto Blink</source>
-        <translation type="unfinished" />
+        <translation>Automatisches Blinzeln</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="571" />
         <source>Volume Smoothing</source>
-        <translation type="unfinished" />
+        <translation>Lautstärkeglättung</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="579" />
         <source>Discord Rich Presence</source>
         <translatorcomment>I do not know how to translate this without losing its meaning.</translatorcomment>
-        <translation />
+        <translation>Discord Rich Presence</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="583" />
@@ -2960,7 +2577,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="746" />
         <source>$mc models found</source>
-        <translation type="unfinished" />
+        <translation>$mc Modelle gefunden</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="817" />
@@ -3037,7 +2654,7 @@ E.g. Unmask the stranger before the final waltz ends.
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1176" />
         <source>Germany</source>
-        <translation type="unfinished" />
+        <translation>Deutschland</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="1208" />
@@ -3049,130 +2666,24 @@ E.g. Unmask the stranger before the final waltz ends.
         <source>Settings saved successfully</source>
         <translation>Die Einstellungen werden erfolgreich aktualisiert</translation>
     </message>
-    <message>
-        <source>Automatically hide the sidebar when the window is narrow</source>
-        <translation type="vanished">Automatisches Verstecken des Seitenfeldes in einem schmalen Fenster</translation>
-    </message>
-    <message>
-        <source>The settings are saved</source>
-        <translation type="vanished">Die Einstellungen werden gespeichert</translation>
-    </message>
-    <message>
-        <source>Language</source>
-        <translation type="vanished">Sprache</translation>
-    </message>
-    <message>
-        <source>Settings Page</source>
-        <translation type="vanished">Die Einstellungsseite</translation>
-    </message>
 </context><context>
     <name>ThemeListCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/ThemeListCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Hier ist leer ...</translation>
+        <translation>Und hier ist es leer...</translation>
     </message>
 </context><context>
     <name>UpdateThread</name>
     <message>
         <location filename="../modules/logic/QThreads/UpdateThread.py" line="72" />
         <source>File upload error. Check the internet.</source>
-        <translation type="unfinished" />
+        <translation>Fehler beim Hochladen der Datei. Überprüfen Sie das Internet.</translation>
     </message>
     <message>
         <location filename="../modules/logic/QThreads/UpdateThread.py" line="80" />
         <source>Some files could not be downloaded. Cancel the update.</source>
-        <translation type="unfinished" />
-    </message>
-</context><context>
-    <name>UserProfile</name>
-    <message>
-        <source>0 followers</source>
-        <translation type="vanished">0 Abonnenten</translation>
-    </message>
-    <message>
-        <source>0 following</source>
-        <translation type="vanished">0 Abonnements</translation>
-    </message>
-    <message>
-        <source>0 chats</source>
-        <translation type="vanished">0 Chats</translation>
-    </message>
-    <message>
-        <source>Follow</source>
-        <translation type="vanished">Abonnieren</translation>
-    </message>
-    <message>
-        <source>Characters</source>
-        <translation type="vanished">Charaktere</translation>
-    </message>
-    <message>
-        <source>Voices</source>
-        <translation type="vanished">Abstimmung</translation>
-    </message>
-    <message>
-        <source>Scenes</source>
-        <translation type="vanished">Szenen</translation>
-    </message>
-    <message>
-        <source>Liked</source>
-        <translation type="vanished">Gefallen</translation>
-    </message>
-    <message>
-        <source>Personas</source>
-        <translation type="vanished">Personen</translation>
-    </message>
-    <message>
-        <source>Unfollow</source>
-        <translation type="vanished">Abbestellen</translation>
-    </message>
-    <message>
-        <source>And it's empty here...</source>
-        <translation type="vanished">Hier ist leer ...</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="vanished">Neu</translation>
-    </message>
-    <message>
-        <source>Looks at </source>
-        <translation type="vanished">Schaut sich das Profil von </translation>
-    </message>
-    <message>
-        <source>'s profile </source>
-        <translation type="vanished"> an</translation>
-    </message>
-    <message>
-        <source>Looks at user profile</source>
-        <translation type="vanished">Schaut auf das Profil des Benutzers</translation>
-    </message>
-    <message>
-        <source>followers</source>
-        <translation type="vanished">Abonnenten</translation>
-    </message>
-    <message>
-        <source>following</source>
-        <translation type="vanished">Abonnements</translation>
-    </message>
-    <message>
-        <source>chats</source>
-        <translation type="vanished">Chat</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">Der Link wird kopiert</translation>
-    </message>
-    <message>
-        <source>Followers</source>
-        <translation type="vanished">Abonnenten</translation>
-    </message>
-    <message>
-        <source>Following</source>
-        <translation type="vanished">Abonnements</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Name</translation>
+        <translation>Einige Dateien konnten nicht heruntergeladen werden. Update abbrechen.</translation>
     </message>
 </context><context>
     <name>ViewerCard</name>
@@ -3180,67 +2691,13 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="82" />
         <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="26" />
         <source>Select folder</source>
-        <translation type="unfinished" />
-    </message>
-</context><context>
-    <name>VoiceCard</name>
-    <message>
-        <source>Select</source>
-        <translation type="vanished">Wählen</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
-    </message>
-    <message>
-        <source>Try with latest chat</source>
-        <translation type="vanished">Versuchen Sie es mit den letzten Chats</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">Der Link wird kopiert</translation>
-    </message>
-    <message>
-        <source>Share</source>
-        <translation type="vanished">Aktie</translation>
-    </message>
-</context><context>
-    <name>VoiceCards.VoiceCard</name>
-    <message>
-        <source>Select</source>
-        <translation type="vanished">Wählen</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Löschen</translation>
-    </message>
-    <message>
-        <source>Try with latest chat</source>
-        <translation type="vanished">Versuchen Sie es mit den letzten Chats</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">Der Link wird kopiert</translation>
+        <translation>Ordner auswählen</translation>
     </message>
 </context><context>
     <name>VoiceHorizontalMiniCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/VoiceHorizontalMiniCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Hier ist leer ...</translation>
-    </message>
-</context><context>
-    <name>VoiceSearch</name>
-    <message>
-        <source>Search</source>
-        <translation type="vanished">Suche</translation>
-    </message>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Autor: @</translation>
-    </message>
-    <message>
-        <source>Voices not found</source>
-        <translation type="vanished">Stimmen werden nicht gefunden</translation>
+        <translation>Und hier ist es leer...</translation>
     </message>
 </context></TS>

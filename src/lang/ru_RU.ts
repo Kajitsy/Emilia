@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ru_RU">
 <context>
     <name>AnyCharCreatePage</name>
@@ -249,34 +248,24 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="560" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="493" />
         <source>Error downloading image</source>
-        <translation>Ошибка при загрузке изображения</translation>
+        <translation>Ошибка загрузки изображения</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharCreatePage.py" line="603" />
         <source>Uploading...</source>
         <translation>Выгрузка...</translation>
     </message>
-    <message>
-        <source>Describe what is happening in this Scene. Include relevant details about the situation and backstory. This will help shape how the Scene unfolds and how the Character responds.
-        
-Use {{user}} for the user.
-Use {{char}} for the Character.
-
-If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.
-</source>
-        <translation type="vanished">Опишите, что происходит в этом сценарии. Включите соответствующие подробности о ситуации и предыстории. Это поможет определить, как разворачивается сцена и как реагирует персонаж. Используйте {{user}} для пользователя. Используйте {{character}} для персонажа. Если вы создаете сценарий с любым персонажем, мы рекомендуем вам избегать следующих местоимений: он, она, его, ей, чтобы ваш сценарий подходил для любого персонажа.</translation>
-    </message>
 </context><context>
     <name>AnyCharFirstPage</name>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="30" />
         <source>Create my own</source>
-        <translation>Создать собственный</translation>
+        <translation>Создать свою</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="31" />
         <source>You write the story, your audience pick the Character</source>
-        <translation>Вы пишете историю, ваша аудитория выбирает персонажа</translation>
+        <translation>Вы пишете историю, ваша аудитория выбирает Персонажа</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="202" />
@@ -293,108 +282,94 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="38" />
         <source>The Mysteriously Vanishing Fortune</source>
-        <translation type="unfinished" />
+        <translation>Таинственно исчезнувшее состояние</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="39" />
         <source>Mystery</source>
-        <translation type="unfinished" />
+        <translation>Детектив</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="61" />
         <source>The Shapeshifter’s Genome: A Sci-Fi Scene</source>
-        <translation type="unfinished" />
+        <translation>Геном оборотня: Sci-Fi сцена</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="62" />
         <source>Sci-Fi</source>
-        <translation type="unfinished" />
+        <translation>Научная фантастика</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="86" />
         <source>Ride the Dragon</source>
-        <translation type="unfinished" />
+        <translation>Оседлать дракона</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="87" />
         <source>Fantasy</source>
-        <translation type="unfinished" />
+        <translation>Фэнтези</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="109" />
         <source>The Romantic Ball: Ask Them To Dance</source>
-        <translation type="unfinished" />
+        <translation>Романтический бал: Пригласи на танец</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="110" />
         <source>Romance</source>
-        <translation type="unfinished" />
+        <translation>Романтика</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="132" />
         <source>They Cheated on Me</source>
-        <translation type="unfinished" />
+        <translation>Мне изменили</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="133" />
         <source>Drama</source>
-        <translation type="unfinished" />
+        <translation>Драма</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="157" />
         <source>Plane Crashed: Stranded on an Island</source>
-        <translation type="unfinished" />
+        <translation>Авиакатастрофа: На необитаемом острове</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="158" />
         <source>Survival/Adventure</source>
-        <translation type="unfinished" />
+        <translation>Выживание/Приключения</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="180" />
         <source>The Freshman College Party</source>
-        <translation type="unfinished" />
+        <translation>Вечеринка первокурсников</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="181" />
         <source>Coming-of-age</source>
-        <translation type="unfinished" />
+        <translation>Взросление</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="203" />
         <source>Coffee Shop AU: Latte Hearts</source>
-        <translation type="unfinished" />
+        <translation>Кофейня AU: Латте-арт</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="204" />
         <source>Slice-of-life</source>
-        <translation type="unfinished" />
+        <translation>Повседневность</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/AnyCharFirstPage.py" line="261" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation>Добро пожаловать в сценарии. Готовы творить?</translation>
+        <translation>Добро пожаловать в Сцены. Готовы творить?</translation>
     </message>
 </context><context>
     <name>CharMainCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/CharMainCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Здесь пустовато...</translation>
-    </message>
-</context><context>
-    <name>CharacterCards.MainCard</name>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Автор: @</translation>
-    </message>
-    <message>
-        <source> chats</source>
-        <translation type="vanished"> чатов</translation>
-    </message>
-    <message>
-        <source> likes</source>
-        <translation type="vanished"> лайков</translation>
+        <translation>А здесь пусто...</translation>
     </message>
 </context><context>
     <name>ChatInterface</name>
@@ -417,12 +392,12 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1818" />
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="344" />
         <source>Call limit exceeded</source>
-        <translation type="unfinished" />
+        <translation>Превышен лимит звонков</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="358" />
         <source>Attached message limit exceeded</source>
-        <translation type="unfinished" />
+        <translation>Превышен лимит прикреплённых сообщений</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="542" />
@@ -432,7 +407,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="555" />
         <source>Error downloading image</source>
-        <translation>Ошибка при загрузке фона</translation>
+        <translation>Ошибка загрузки изображения</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="719" />
@@ -474,12 +449,12 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1000" />
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="772" />
         <source>Detach Chat</source>
-        <translation>Отделить чат</translation>
+        <translation>Открепить чат</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="966" />
         <source>Attach Chat</source>
-        <translation type="unfinished" />
+        <translation>Прикрепить чат</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="970" />
@@ -540,7 +515,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1527" />
         <source>Background Image:</source>
-        <translation>Обои чата</translation>
+        <translation>Фоновое изображение:</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1530" />
@@ -667,38 +642,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <source>Edit message</source>
         <translation>Редактировать сообщение</translation>
     </message>
-    <message>
-        <source>Meow</source>
-        <translation type="vanished">Meow</translation>
-    </message>
-    <message>
-        <source>Quick wits, faster words</source>
-        <translation type="vanished">Острый ум, быстрые слова</translation>
-    </message>
-    <message>
-        <source>Roar</source>
-        <translation type="vanished">Roar</translation>
-    </message>
-    <message>
-        <source>Mix of speed &amp; smarts</source>
-        <translation type="vanished">Сочетание скорости и интелекта</translation>
-    </message>
-    <message>
-        <source>Nyan</source>
-        <translation type="vanished">Nyan</translation>
-    </message>
-    <message>
-        <source>Smart and more thoughtful</source>
-        <translation type="vanished">Интеллектуальный и более вдумчивый</translation>
-    </message>
-    <message>
-        <source>Goro</source>
-        <translation type="vanished">Goro</translation>
-    </message>
-    <message>
-        <source>Less spicy</source>
-        <translation type="vanished">Менее острый</translation>
-    </message>
 </context><context>
     <name>ChatThread</name>
     <message>
@@ -714,7 +657,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/logic/QThreads/ChatThread.py" line="198" />
         <source>Attached message limit exceeded</source>
-        <translation type="unfinished" />
+        <translation>Превышен лимит прикреплённых сообщений</translation>
     </message>
 </context><context>
     <name>ChoiceStep</name>
@@ -751,7 +694,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/ChoiceStep.py" line="115" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation>Добро пожаловать в сценарии. Готовы творить?</translation>
+        <translation>Добро пожаловать в Сцены. Готовы творить?</translation>
     </message>
 </context><context>
     <name>EditCard</name>
@@ -800,40 +743,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/cards/UserCards/EditCard.py" line="170" />
         <source>Welcome back, </source>
         <translation>С возвращением, </translation>
-    </message>
-</context><context>
-    <name>EditOverlay</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Отображаемое имя</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Фон</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Использовать для всех новых чатов</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Сохранить</translation>
-    </message>
-    <message>
-        <source>Username</source>
-        <translation type="vanished">Имя пользователя</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="vanished">Отмена</translation>
-    </message>
-    <message>
-        <source>Welcome back, </source>
-        <translation type="vanished">С возвращением, </translation>
     </message>
 </context><context>
     <name>EditPage</name>
@@ -1045,222 +954,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <translation>Приветствие персонажа не может быть короче 3 символов.</translation>
     </message>
 </context><context>
-    <name>EmiliaNext</name>
-    <message>
-        <source>Emilia | Happy New Year</source>
-        <translation type="vanished">Emilia | С Новым Годом</translation>
-    </message>
-    <message>
-        <source>Happy birthday Emilia!</source>
-        <translation type="vanished">С Днём Рождения Emilia!</translation>
-    </message>
-    <message>
-        <source>Emilia | Happy birthday Kajitsy!</source>
-        <translation type="vanished">Emilia | С Днём Рождения Kajitsy!</translation>
-    </message>
-    <message>
-        <source>Emilia | Happy birthday CAI!</source>
-        <translation type="vanished">Emilia | С днем рождения, CAI!</translation>
-    </message>
-    <message>
-        <source>User</source>
-        <translation type="vanished">Пользователь</translation>
-    </message>
-    <message>
-        <source>Please re-enter (the login data has expired)</source>
-        <translation type="vanished">Пожалуйста, войдите повторно (срок действия данных истек)</translation>
-    </message>
-    <message>
-        <source>Remove from Recent Chats</source>
-        <translation type="vanished">Удалить из недавних</translation>
-    </message>
-    <message>
-        <source>An update is available</source>
-        <translation type="vanished">Доступно обновление</translation>
-    </message>
-    <message>
-        <source>Downloading...</source>
-        <translation type="vanished">Скачивание...</translation>
-    </message>
-    <message>
-        <source>Looking at the main page</source>
-        <translation type="vanished">Смотрит на главую страницу</translation>
-    </message>
-    <message>
-        <source>For You</source>
-        <translation type="vanished">Для вас</translation>
-    </message>
-    <message>
-        <source>Scenes</source>
-        <translation type="vanished">Сценарии</translation>
-    </message>
-    <message>
-        <source>Recommended</source>
-        <translation type="vanished">Рекомендуемые</translation>
-    </message>
-    <message>
-        <source>Popular</source>
-        <translation type="vanished">Популярное</translation>
-    </message>
-    <message>
-        <source>Trending</source>
-        <translation type="vanished">В Тренде</translation>
-    </message>
-    <message>
-        <source>Try This</source>
-        <translation type="vanished">Попробуйте эти</translation>
-    </message>
-    <message>
-        <source>Welcome back, User</source>
-        <translation type="vanished">С возвращением, Пользователь</translation>
-    </message>
-    <message>
-        <source>Update</source>
-        <translation type="vanished">Обновить</translation>
-    </message>
-    <message>
-        <source>Voices</source>
-        <translation type="vanished">Голоса</translation>
-    </message>
-    <message>
-        <source>Assistants</source>
-        <translation type="vanished">Ассистенты</translation>
-    </message>
-    <message>
-        <source>Anime</source>
-        <translation type="vanished">Аниме</translation>
-    </message>
-    <message>
-        <source>Creativity and Writing</source>
-        <translation type="vanished">Творчество и писательство</translation>
-    </message>
-    <message>
-        <source>Entertainment and Gaming</source>
-        <translation type="vanished">Развлечение и игры</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation type="vanished">История</translation>
-    </message>
-    <message>
-        <source>Humor</source>
-        <translation type="vanished">Юмор</translation>
-    </message>
-    <message>
-        <source>Learning</source>
-        <translation type="vanished">Обучение</translation>
-    </message>
-    <message>
-        <source>Lifestyle</source>
-        <translation type="vanished">Стиль жизни</translation>
-    </message>
-    <message>
-        <source>Parody</source>
-        <translation type="vanished">Пародия</translation>
-    </message>
-    <message>
-        <source>RPG and Puzzles</source>
-        <translation type="vanished">Ролевые игры и головоломки</translation>
-    </message>
-    <message>
-        <source>Welcome back, </source>
-        <translation type="vanished">С возвращением, </translation>
-    </message>
-    <message>
-        <source>Character Search</source>
-        <translation type="vanished">Поиск персонажей</translation>
-    </message>
-    <message>
-        <source>A new version is available: </source>
-        <translation type="vanished">Новая версия доступна: </translation>
-    </message>
-    <message>
-        <source>Download complete. Running installer...</source>
-        <translation type="vanished">Скачивание завершено. Запуск установщика...</translation>
-    </message>
-    <message>
-        <source>Download failed.</source>
-        <translation type="vanished">Ошибка скачивания.</translation>
-    </message>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Автор: @</translation>
-    </message>
-    <message>
-        <source> chats</source>
-        <translation type="vanished"> чатов</translation>
-    </message>
-    <message>
-        <source> likes</source>
-        <translation type="vanished"> лайков</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation type="vanished">Настройки</translation>
-    </message>
-    <message>
-        <source>My Profile</source>
-        <translation type="vanished">Профиль</translation>
-    </message>
-    <message>
-        <source>To Main Page</source>
-        <translation type="vanished">На главную</translation>
-    </message>
-    <message>
-        <source>Recent Chats</source>
-        <translation type="vanished">Недавние чаты</translation>
-    </message>
-    <message>
-        <source>Profile</source>
-        <translation type="vanished">Профиль</translation>
-    </message>
-    <message>
-        <source>The token has been updated</source>
-        <translation type="vanished">Токен обновлён</translation>
-    </message>
-    <message>
-        <source>The token has been successfully updated. You may need to restart for full application.</source>
-        <translation type="vanished">Токен успешно обновлён. Может понадобиться перезапуск.</translation>
-    </message>
-    <message>
-        <source>Token error</source>
-        <translation type="vanished">Ошибка</translation>
-    </message>
-    <message>
-        <source>Failed to update token: </source>
-        <translation type="vanished">Ошибка обновления токена: </translation>
-    </message>
-    <message>
-        <source>The token is missing</source>
-        <translation type="vanished">Токен не найден</translation>
-    </message>
-    <message>
-        <source>The token is not installed.</source>
-        <translation type="vanished">Токен не установлен.</translation>
-    </message>
-    <message>
-        <source>English</source>
-        <translation type="vanished">Английский</translation>
-    </message>
-    <message>
-        <source>Russian</source>
-        <translation type="vanished">Русский</translation>
-    </message>
-</context><context>
-    <name>GetCookies</name>
-    <message>
-        <source>You can also insert a link from the email</source>
-        <translation type="vanished">Вы также можете вставить ссылку из письма</translation>
-    </message>
-    <message>
-        <source>Please log in to your account</source>
-        <translation type="vanished">Пожалуйста, войдите в свой аккаунт</translation>
-    </message>
-    <message>
-        <source>(To log in via Apple/Google, specify the email address of your Apple/Google account.)</source>
-        <translation type="vanished">Для входа через Apple/Google указывайте почту аккаунта Apple/Google</translation>
-    </message>
-</context><context>
     <name>LeftSidebar</name>
     <message>
         <location filename="../modules/ui/Elements.py" line="521" />
@@ -1293,10 +986,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
-    <message>
-        <source>Create Character</source>
-        <translation type="vanished">Создать персонажа</translation>
-    </message>
 </context><context>
     <name>ListCard</name>
     <message>
@@ -1328,30 +1017,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/cards/UserCards/ListCard.py" line="80" />
         <source> Characters</source>
         <translation> персонажей</translation>
-    </message>
-    <message>
-        <source>Default</source>
-        <translation type="vanished">По умолчанию</translation>
-    </message>
-    <message>
-        <source>Active</source>
-        <translation type="vanished">Активный</translation>
-    </message>
-    <message>
-        <source>Successfully updated your persona</source>
-        <translation type="vanished">Вы успешно обновили свою персону</translation>
-    </message>
-    <message>
-        <source>Clear default</source>
-        <translation type="vanished">Очистить по умолчанию</translation>
-    </message>
-    <message>
-        <source>Make default</source>
-        <translation type="vanished">Использовать по умолчанию</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
     </message>
 </context><context>
     <name>MainCard</name>
@@ -1751,102 +1416,24 @@ E.g. Unmask the stranger before the final waltz ends.
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="686" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="619" />
         <source>Error downloading image</source>
-        <translation>Ошибка при загрузке изображения</translation>
+        <translation>Ошибка загрузки изображения</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharCreatePage.py" line="729" />
         <source>Uploading...</source>
         <translation>Выгрузка...</translation>
     </message>
-    <message>
-        <source>Main Character of the Scene</source>
-        <translation type="vanished">Главный персонаж сценария</translation>
-    </message>
-    <message>
-        <source>Scene genre</source>
-        <translation type="vanished">Жанр сценария</translation>
-    </message>
-    <message>
-        <source>When is this Scene set?</source>
-        <translation type="vanished">Когда происходит ваш сценарий?</translation>
-    </message>
-    <message>
-        <source>Set the time. This guides the Character contextually when the Scene is taking place.</source>
-        <translation type="vanished">Установите время. Это позволяет персонажу ориентироваться в контексте происходящего в сценарии.</translation>
-    </message>
-    <message>
-        <source>Where does this Scene happen?</source>
-        <translation type="vanished">Где происходит этот сценарий?</translation>
-    </message>
-    <message>
-        <source>Set the location. This grounds the Character where the Scene is taking place.</source>
-        <translation type="vanished">Укажите местоположение. Это указывает персонажу, где происходит действие.</translation>
-    </message>
-    <message>
-        <source>Tone of this Scene</source>
-        <translation type="vanished">Тон этого сценария</translation>
-    </message>
-    <message>
-        <source>What's the mood of the Scene? The defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="vanished">Каково настроение сценарии? Это определяет атмосферу и эмоциональный тон, которые помогут вашей аудитории погрузиться в атмосферу.</translation>
-    </message>
-    <message>
-        <source>What’s the mood of the Scene? This defines the atmosphere and emotional tone to help your audience immerse.</source>
-        <translation type="vanished">Каково настроение сценарии? Это определяет атмосферу и эмоциональный тон, которые помогут вашей аудитории погрузиться в атмосферу.</translation>
-    </message>
-    <message>
-        <source>What’s the backstory of this Scene?</source>
-        <translation type="vanished">Какова предыстория этого сценария?</translation>
-    </message>
-    <message>
-        <source>Describe what is happening in this Scene. Include relevant details about the situation and backstory. This will help shape how the Scene unfolds and how the Character responds. Use {{user}} for the user. Use {{char}} for the Character. If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.</source>
-        <translation type="vanished">Опишите, что происходит в этом сценарии. Включите соответствующие подробности о ситуации и предыстории. Это поможет определить, как разворачивается сценарий и как реагирует персонаж. Используйте {{user}} для пользователя. Используйте {{character}} для персонажа. Если вы создаете сценарий с любым персонажем, мы рекомендуем вам избегать следующих местоимений: он, она, его, ей, чтобы ваш сценарий подходила для любого персонажа.</translation>
-    </message>
-    <message>
-        <source>Describe what is happening in this Scene. Include relevant details about the situation and backstory. This will help shape how the Scene unfolds and how the Character responds.
-
-Use {{user}} for the user.
-Use {{char}} for the Character.
-
-If you are building an Any-Character Scene we recommend that you avoid the following pronouns: he, she, his, her, so your Scene can work for any character.
-</source>
-        <translation type="vanished">Опишите, что происходит в этом сценарии. Включите соответствующие подробности о ситуации и предыстории. Это поможет определить, как разворачивается сценарий и как реагирует персонаж. Используйте {{user}} для пользователя. Используйте {{character}} для персонажа. Если вы создаете сценарий с любым персонажем, мы рекомендуем вам избегать следующих местоимений: он, она, его, ей, чтобы ваш сценарий подходила для любого персонажа.</translation>
-    </message>
-    <message>
-        <source>What's the player's goal in this Scene?</source>
-        <translation type="vanished">Какова цель пользователя в этой сценарии?</translation>
-    </message>
-    <message>
-        <source>Introduce this Scene to your audience</source>
-        <translation type="vanished">Представьте этот сценарий своей аудитории</translation>
-    </message>
-    <message>
-        <source>This is the starting screen of your Scene. Your audience will see this intro before entering the Scene. Help them understand what’s happening and get excited to start playing the Scene. Use {{user}} for the user. Use {{char}} for the Character.</source>
-        <translation type="vanished">Это начальный экран вашего сценария. Ваша аудитория увидит это вступление перед входом в сценарий. Помогите ей понять, что происходит, и вдохновиться, чтобы начать проигрывать сценарий. Используйте {{user}} для пользователя. Используйте {{character}} для персонажа.</translation>
-    </message>
-    <message>
-        <source>This is the first Character message your audience will see after entering the Scene. Make it your hook with what they will see, hear, and feel.</source>
-        <translation type="vanished">Это первое сообщение персонажа, которое увидит ваша аудитория после выхода на сценарий. Сделайте так, чтобы вас зацепило то, что они увидят, услышат и почувствуют.</translation>
-    </message>
-    <message>
-        <source>Give your Scene a memorable name. e.g. "Her Last Secret"</source>
-        <translation type="vanished">Дайте своему сценарию запоминающееся название, например "Ее последний секрет".</translation>
-    </message>
-    <message>
-        <source>Create Scene</source>
-        <translation type="vanished">Создать сценарий</translation>
-    </message>
 </context><context>
     <name>MainCharFirstPage</name>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="30" />
         <source>Create my own</source>
-        <translation>Создать собственный</translation>
+        <translation>Создать свою</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="31" />
         <source>You write the story, your audience pick the Character</source>
-        <translation>Вы пишете историю, а ваша аудитория выбирает персонажа</translation>
+        <translation>Вы пишете историю, ваша аудитория выбирает Персонажа</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="202" />
@@ -1863,83 +1450,83 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="38" />
         <source>The Vanishing Headstone</source>
-        <translation type="unfinished" />
+        <translation>Исчезающее надгробие</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="39" />
         <source>Mystery</source>
-        <translation type="unfinished" />
+        <translation>Детектив</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="61" />
         <source>The Jungle on Pluto</source>
-        <translation type="unfinished" />
+        <translation>Джунгли на Плутоне</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="62" />
         <source>Sci-Fi</source>
-        <translation type="unfinished" />
+        <translation>Научная фантастика</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="86" />
         <source>Zixie’s Path to the Elven Village</source>
-        <translation type="unfinished" />
+        <translation>Путь Зикси к эльфийской деревне</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="87" />
         <source>Fantasy</source>
-        <translation type="unfinished" />
+        <translation>Фэнтези</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="109" />
         <source>A Date at the Garlic Coffee Shop</source>
-        <translation type="unfinished" />
+        <translation>Свидание в чесночной кофейне</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="110" />
         <source>Romance</source>
-        <translation type="unfinished" />
+        <translation>Романтика</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="132" />
         <source>They Cheated on Me</source>
-        <translation type="unfinished" />
+        <translation>Мне изменили</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="133" />
         <source>Drama</source>
-        <translation type="unfinished" />
+        <translation>Драма</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="157" />
         <source>Brown Butter Cookies Vlog</source>
-        <translation type="unfinished" />
+        <translation>Влог: Печенье с карамельным маслом</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="204" />
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="158" />
         <source>Slice-of-life</source>
-        <translation type="unfinished" />
+        <translation>Повседневность</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="180" />
         <source>The Secrets of the Moonveil Sea</source>
-        <translation type="unfinished" />
+        <translation>Тайны моря Лунной Вуали</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="181" />
         <source>Adventure</source>
-        <translation type="unfinished" />
+        <translation>Приключения</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="203" />
         <source>Candlelight and Silverware</source>
-        <translation type="unfinished" />
+        <translation>Свет свечей и столовое серебро</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/ScenePages/CreatePages/MainCharFirstPage.py" line="261" />
         <source>Welcome to Scenes. Ready to create?</source>
-        <translation>Добро пожаловать в сценарии. Готовы творить?</translation>
+        <translation>Добро пожаловать в Сцены. Готовы творить?</translation>
     </message>
 </context><context>
     <name>MainPage</name>
@@ -2094,7 +1681,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/mainwindow/MainPage.py" line="912" />
         <source>There should be a chat here...</source>
-        <translation type="unfinished" />
+        <translation>Здесь должен быть чат...</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/MainPage.py" line="1183" />
@@ -2190,7 +1777,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="257" />
         <source>Themes</source>
-        <translation type="unfinished" />
+        <translation>Темы</translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="624" />
@@ -2215,7 +1802,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="459" />
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="444" />
         <source>'s profile </source>
-        <translation type="unfinished" />
+        <translation>профиль </translation>
     </message>
     <message>
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="468" />
@@ -2247,90 +1834,12 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <source>Following</source>
         <translation>Подписок</translation>
     </message>
-    <message>
-        <source>And it's empty here...</source>
-        <translation type="vanished">Здесь пустовато...</translation>
-    </message>
-</context><context>
-    <name>OverlayCard</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Отображаемое имя</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Фон</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Использовать для всех новых чатов</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Сохранить</translation>
-    </message>
-</context><context>
-    <name>PersonaCards.ListCard</name>
-    <message>
-        <source>Default</source>
-        <translation type="vanished">По умолчанию</translation>
-    </message>
-    <message>
-        <source>Active</source>
-        <translation type="vanished">Активный</translation>
-    </message>
-    <message>
-        <source>Edit</source>
-        <translation type="vanished">Изменить</translation>
-    </message>
-    <message>
-        <source>Successfully updated your persona</source>
-        <translation type="vanished">Вы успешно обновили свою персону</translation>
-    </message>
-    <message>
-        <source>Clear default</source>
-        <translation type="vanished">Очистить по умолчанию</translation>
-    </message>
-    <message>
-        <source>Make default</source>
-        <translation type="vanished">Использовать по умолчанию</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
-    </message>
-</context><context>
-    <name>PersonaCards.OverlayCard</name>
-    <message>
-        <source>Display Name</source>
-        <translation type="vanished">Отображаемое имя</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Фон</translation>
-    </message>
-    <message>
-        <source>Make default for new chats</source>
-        <translation type="vanished">Использовать для всех новых чатов</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Сохранить</translation>
-    </message>
 </context><context>
     <name>SceneListCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/SceneListCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Здесь пустовато...</translation>
+        <translation>А здесь пусто...</translation>
     </message>
 </context><context>
     <name>SearchCard</name>
@@ -2423,10 +1932,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/mainwindow/SearchPage.py" line="232" />
         <source>Scenes</source>
         <translation>Сценарии</translation>
-    </message>
-    <message>
-        <source>Character Search</source>
-        <translation type="vanished">Поиск персонажей</translation>
     </message>
 </context><context>
     <name>SettingsPage</name>
@@ -2831,7 +2336,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="438" />
         <source>Text animation speed (ms)</source>
-        <translation type="unfinished" />
+        <translation>Скорость анимации текста (мс)</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="445" />
@@ -2952,7 +2457,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="579" />
         <source>Discord Rich Presence</source>
         <translatorcomment>Я не знаю как это перевести без потери смысла</translatorcomment>
-        <translation />
+        <translation>Discord Rich Presence</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="583" />
@@ -3052,7 +2557,7 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="746" />
         <source>$mc models found</source>
-        <translation type="unfinished" />
+        <translation>Найдено моделей: $mc</translation>
     </message>
     <message>
         <location filename="../modules/ui/mainwindow/SettingsPage.py" line="817" />
@@ -3141,36 +2646,12 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <source>Settings saved successfully</source>
         <translation>Настройки успешно обновлёны</translation>
     </message>
-    <message>
-        <source>Automatically hide the sidebar when the window is narrow</source>
-        <translation type="vanished">Автоматическое скрытие боковой панели при узком окне</translation>
-    </message>
-    <message>
-        <source>(mc) models found</source>
-        <translation type="vanished">(мд) моделей найдено</translation>
-    </message>
-    <message>
-        <source>Russia</source>
-        <translation type="vanished">Россия</translation>
-    </message>
-    <message>
-        <source>The settings are saved</source>
-        <translation type="vanished">Настройки сохранены</translation>
-    </message>
-    <message>
-        <source>Language</source>
-        <translation type="vanished">Язык</translation>
-    </message>
-    <message>
-        <source>Settings Page</source>
-        <translation type="vanished">Страница настроек</translation>
-    </message>
 </context><context>
     <name>ThemeListCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/ThemeListCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Здесь пустовато...</translation>
+        <translation>А здесь пусто...</translation>
     </message>
 </context><context>
     <name>UpdateThread</name>
@@ -3185,92 +2666,6 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <translation>Не удалось загрузить некоторые файлы. Отмена обновление.</translation>
     </message>
 </context><context>
-    <name>UserProfile</name>
-    <message>
-        <source>0 followers</source>
-        <translation type="vanished">0 подписчиков</translation>
-    </message>
-    <message>
-        <source>0 following</source>
-        <translation type="vanished">0 подписок</translation>
-    </message>
-    <message>
-        <source>0 chats</source>
-        <translation type="vanished">0 чатов</translation>
-    </message>
-    <message>
-        <source>Follow</source>
-        <translation type="vanished">Подписаться</translation>
-    </message>
-    <message>
-        <source>Characters</source>
-        <translation type="vanished">Персонажи</translation>
-    </message>
-    <message>
-        <source>Voices</source>
-        <translation type="vanished">Голоса</translation>
-    </message>
-    <message>
-        <source>Scenes</source>
-        <translation type="vanished">Сценарии</translation>
-    </message>
-    <message>
-        <source>Liked</source>
-        <translation type="vanished">Понравившиеся</translation>
-    </message>
-    <message>
-        <source>Personas</source>
-        <translation type="vanished">Персоны</translation>
-    </message>
-    <message>
-        <source>Unfollow</source>
-        <translation type="vanished">Отписаться</translation>
-    </message>
-    <message>
-        <source>And it's empty here...</source>
-        <translation type="vanished">Здесь пустовато...</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="vanished">Создать</translation>
-    </message>
-    <message>
-        <source>Looks at </source>
-        <translation type="vanished">Смотрит на профиль </translation>
-    </message>
-    <message>
-        <source>Looks at user profile</source>
-        <translation type="vanished">Смотрит на профиль пользователя</translation>
-    </message>
-    <message>
-        <source>followers</source>
-        <translation type="vanished">подписчиков</translation>
-    </message>
-    <message>
-        <source>following</source>
-        <translation type="vanished">подписок</translation>
-    </message>
-    <message>
-        <source>chats</source>
-        <translation type="vanished">чатов</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">Ссылка скопирована</translation>
-    </message>
-    <message>
-        <source>Followers</source>
-        <translation type="vanished">Подписчики</translation>
-    </message>
-    <message>
-        <source>Following</source>
-        <translation type="vanished">Подписок</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Имя</translation>
-    </message>
-</context><context>
     <name>ViewerCard</name>
     <message>
         <location filename="../modules/ui/cards/VModelCards/ViewerCard.py" line="82" />
@@ -3279,64 +2674,10 @@ If you are building an Any-Character Scene we recommend that you avoid the follo
         <translation>Выбрать папку</translation>
     </message>
 </context><context>
-    <name>VoiceCard</name>
-    <message>
-        <source>Select</source>
-        <translation type="vanished">Выбрать</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
-    </message>
-    <message>
-        <source>Try with latest chat</source>
-        <translation type="vanished">Попробуйте с недавними чатами</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">Ссылка скопирована</translation>
-    </message>
-    <message>
-        <source>Share</source>
-        <translation type="vanished">Поделиться</translation>
-    </message>
-</context><context>
-    <name>VoiceCards.VoiceCard</name>
-    <message>
-        <source>Select</source>
-        <translation type="vanished">Выбрать</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation type="vanished">Удалить</translation>
-    </message>
-    <message>
-        <source>Try with latest chat</source>
-        <translation type="vanished">Попробуйте с недавними чатами</translation>
-    </message>
-    <message>
-        <source>Link copied to clipboard</source>
-        <translation type="vanished">Ссылка скопирована</translation>
-    </message>
-</context><context>
     <name>VoiceHorizontalMiniCard</name>
     <message>
         <location filename="../modules/ui/cards/EmptyCards/VoiceHorizontalMiniCard.py" line="14" />
         <source>And it's empty here...</source>
-        <translation type="unfinished">Здесь пустовато...</translation>
-    </message>
-</context><context>
-    <name>VoiceSearch</name>
-    <message>
-        <source>Search</source>
-        <translation type="vanished">Поиск</translation>
-    </message>
-    <message>
-        <source>Author: @</source>
-        <translation type="vanished">Автор: @</translation>
-    </message>
-    <message>
-        <source>Voices not found</source>
-        <translation type="vanished">Голоса не найдены</translation>
+        <translation>А здесь пусто...</translation>
     </message>
 </context></TS>
