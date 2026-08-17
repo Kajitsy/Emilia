@@ -14,6 +14,7 @@ from .Inputs import (
     KeySequenceEdit,
     LineEdit,
     SearchLineEdit,
+    SortComboBox,
 )
 from .Menus import Menu, PushButtonMenu
 from .ScrollAreas import (
@@ -32,6 +33,7 @@ __all__ = [
     "CheckBox",
     "KeySequenceEdit",
     "ComboBox",
+    "SortComboBox",
     "CustomTextEdit",
     "CardFrame",
     "ClickableFrame",

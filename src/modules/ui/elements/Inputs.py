@@ -57,6 +57,32 @@ class ComboBox(QComboBox):
         self.setStyleSheet(TM.get_style("ComboBox"))
 
 
+class SortComboBox(ComboBox):
+    def __init__(self, parent=None, include_likes=True):
+        self.include_likes = include_likes
+        super().__init__(parent)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.populate_options()
+
+    def populate_options(self):
+        current_data = self.currentData()
+        self.blockSignals(True)
+        self.clear()
+        self.addItem(self.tr("Default"), "default")
+        self.addItem(self.tr("Chats (High to Low)"), "chats_desc")
+        self.addItem(self.tr("Chats (Low to High)"), "chats_asc")
+        self.addItem(self.tr("Name (A-Z)"), "name_asc")
+        self.addItem(self.tr("Name (Z-A)"), "name_desc")
+        if self.include_likes:
+            self.addItem(self.tr("Likes (High to Low)"), "likes_desc")
+
+        if current_data:
+            idx = self.findData(current_data)
+            if idx >= 0:
+                self.setCurrentIndex(idx)
+        self.blockSignals(False)
+
+
 class CustomTextEdit(QTextEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

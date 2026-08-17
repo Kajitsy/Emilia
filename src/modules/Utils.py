@@ -96,3 +96,65 @@ def color_avatar(avatar_label, avatar_w, avatar_h, name, radius=100):
     rounded_pixmap = round_pixmap(pixmap)
     if not isdeleted(avatar_label):
         avatar_label.setPixmap(rounded_pixmap)
+
+
+def sort_items(items, mode="default"):
+    if not items or not isinstance(items, list):
+        return items
+
+    if mode == "default":
+        return list(items)
+
+    def get_name(item):
+        if not isinstance(item, dict):
+            return ""
+        return (
+            item.get("name")
+            or item.get("participant__name")
+            or item.get("title")
+            or item.get("username")
+            or item.get("user__username")
+            or ""
+        ).lower()
+
+    def get_chats(item):
+        if not isinstance(item, dict):
+            return 0
+        chats = (
+            item.get("participant__num_interactions")
+            or item.get("chats")
+            or item.get("num_interactions")
+            or item.get("interaction_count")
+            or 0
+        )
+        try:
+            return int(chats)
+        except (ValueError, TypeError):
+            return 0
+
+    def get_likes(item):
+        if not isinstance(item, dict):
+            return 0
+        likes = (
+            item.get("voted")
+            or item.get("upvotes")
+            or item.get("likes")
+            or 0
+        )
+        try:
+            return int(likes)
+        except (ValueError, TypeError):
+            return 0
+
+    if mode == "name_asc":
+        return sorted(items, key=get_name)
+    elif mode == "name_desc":
+        return sorted(items, key=get_name, reverse=True)
+    elif mode == "chats_desc":
+        return sorted(items, key=get_chats, reverse=True)
+    elif mode == "chats_asc":
+        return sorted(items, key=get_chats)
+    elif mode == "likes_desc":
+        return sorted(items, key=get_likes, reverse=True)
+    else:
+        return list(items)

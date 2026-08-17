@@ -2,8 +2,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QHBoxLayout, QLabel, QWidget
 
 from modules.ui.cards.CharacterCards import ListCard
-from modules.ui.Elements import PushButton, VerticalScrollPage
-from modules.Utils import color_avatar, format_number
+from modules.ui.Elements import PushButton, SortComboBox, VerticalScrollPage
+from modules.Utils import color_avatar, format_number, sort_items
 
 
 class MainPage(QWidget):
@@ -17,6 +17,7 @@ class MainPage(QWidget):
         self.character_id = character_id
         self.character_name = None
         self.data = {}
+        self.raw_simchars_data = []
 
         self.top_bar, self.top_bar_layout = self.createTopBar()
         self.initUI()
@@ -107,9 +108,17 @@ class MainPage(QWidget):
         shs_page.setFixedWidth(400)
         shs_layout = shs_page.layout
 
+        simchars_header_layout = QHBoxLayout()
         self.simchars_label = QLabel(self.tr("Similar characters"))
         self.simchars_label.setFont(hg_font)
-        shs_layout.addWidget(self.simchars_label)
+        simchars_header_layout.addWidget(self.simchars_label)
+
+        self.sort_box = SortComboBox(self, include_likes=False)
+        self.sort_box.setFixedWidth(160)
+        self.sort_box.currentIndexChanged.connect(self._renderSimChars)
+        simchars_header_layout.addWidget(self.sort_box, alignment=Qt.AlignmentFlag.AlignRight)
+
+        shs_layout.addLayout(simchars_header_layout)
 
         simchars_page = VerticalScrollPage()
         self.simchars_layout = simchars_page.layout
@@ -130,7 +139,19 @@ class MainPage(QWidget):
 
     def _getSimChars(self, data):
         self.chat_thread.get_recommend_chars_by_id_signal.disconnect()
-        for char in data:
+        self.raw_simchars_data = data or []
+        self._renderSimChars()
+
+    def _renderSimChars(self):
+        while self.simchars_layout.count():
+            item = self.simchars_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_simchars_data, sort_mode)
+
+        for char in sorted_data:
             card = ListCard(self.mw, char)
             card.setFixedHeight(88)
             self.simchars_layout.addWidget(card)

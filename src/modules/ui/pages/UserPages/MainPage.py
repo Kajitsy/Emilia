@@ -19,8 +19,14 @@ from modules.ui.cards import (
     UserCards,
     VoiceCards,
 )
-from modules.ui.Elements import CardFrame, PushButton, TabButton, VerticalScrollPage
-from modules.Utils import color_avatar, format_number
+from modules.ui.Elements import (
+    CardFrame,
+    PushButton,
+    SortComboBox,
+    TabButton,
+    VerticalScrollPage,
+)
+from modules.Utils import color_avatar, format_number, sort_items
 
 
 class MainPage(QWidget):
@@ -30,6 +36,12 @@ class MainPage(QWidget):
         self.is_me = False
         self.data = {}
         self.me_following = []
+        self.raw_characters = []
+        self.raw_upvoted_characters = []
+        self.raw_scenes = []
+        self.raw_voices = []
+        self.raw_personas = []
+        self.raw_themes = []
         self.mw = main_window
         self.chat_thread = self.mw.chat_thread
         self.discord_thread = self.mw.discord_thread
@@ -142,9 +154,12 @@ class MainPage(QWidget):
         but_layout.addWidget(self.share_button)
 
         content_layout = QVBoxLayout()
+        content_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        content_layout.setSpacing(10)
 
         buttons_frame = QFrame()
         buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
         buttons_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         buttons_frame.setLayout(buttons_layout)
         content_layout.addWidget(buttons_frame)
@@ -281,6 +296,20 @@ class MainPage(QWidget):
         buttons_layout.addWidget(self.scenes_button)
         buttons_layout.addWidget(self.themes_button)
 
+        sort_frame = QFrame()
+        sort_frame.setFixedWidth(700)
+        sort_layout = QHBoxLayout()
+        sort_layout.setContentsMargins(0, 0, 0, 0)
+        sort_frame.setLayout(sort_layout)
+
+        sort_layout.addStretch()
+        self.sort_box = SortComboBox(self, include_likes=True)
+        self.sort_box.setFixedWidth(160)
+        self.sort_box.currentIndexChanged.connect(self._renderAllLists)
+        sort_layout.addWidget(self.sort_box)
+
+        content_layout.addWidget(sort_frame, alignment=Qt.AlignmentFlag.AlignHCenter)
+
         self.character_list, self.character_list_layout = self.scroll_page()
         self.scenes_list, self.scenes_list_layout = self.scroll_page()
         self.upvoted_characters_list, self.upvoted_characters_layout = (
@@ -297,7 +326,7 @@ class MainPage(QWidget):
         self.lists_widget.addWidget(self.voice_list)
         self.lists_widget.addWidget(self.scenes_list)
         self.lists_widget.addWidget(self.theme_list)
-        self.lists_widget.setFixedWidth(600)
+        self.lists_widget.setFixedWidth(700)
         self.lists_widget.setCurrentWidget(self.character_list)
         content_layout.addWidget(
             self.lists_widget, alignment=Qt.AlignmentFlag.AlignHCenter
@@ -306,6 +335,26 @@ class MainPage(QWidget):
         layout.addLayout(content_layout)
 
         self.setLayout(layout)
+
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+    def _renderAllLists(self):
+        if self.raw_characters:
+            self._renderCharacters()
+        if self.raw_upvoted_characters:
+            self._renderUpCharacters()
+        if self.raw_scenes:
+            self._renderScenes()
+        if self.raw_voices:
+            self._renderVoices()
+        if self.raw_personas:
+            self._renderPersonas()
+        if self.raw_themes:
+            self._renderThemes()
 
     def openUserSettings(self):
         overlay = UserCards.EditCard(self.mw)
@@ -338,10 +387,16 @@ class MainPage(QWidget):
 
     def _getVoices(self, data):
         self.chat_thread.voices_search_username_signal.disconnect()
-        self.voice_data = data
+        self.raw_voices = data or []
+        self._renderVoices()
 
-        if self.voice_data:
-            for voice in self.voice_data:
+    def _renderVoices(self):
+        self._clear_layout(self.voice_list_layout)
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_voices, sort_mode)
+
+        if sorted_data:
+            for voice in sorted_data:
                 card = VoiceCards.HorizontalMiniCard(self.mw, voice)
                 self.voice_list_layout.addWidget(card)
         else:
@@ -350,10 +405,16 @@ class MainPage(QWidget):
 
     def _getUpCharacters(self, data):
         self.chat_thread.get_upvoted_characters_signal.disconnect()
-        self.upvoted_characters = data
+        self.raw_upvoted_characters = data or []
+        self._renderUpCharacters()
 
-        if self.upvoted_characters:
-            for character in self.upvoted_characters:
+    def _renderUpCharacters(self):
+        self._clear_layout(self.upvoted_characters_layout)
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_upvoted_characters, sort_mode)
+
+        if sorted_data:
+            for character in sorted_data:
                 card = CharacterCards.MainCard(
                     self.mw,
                     character["participant__name"],
@@ -375,10 +436,16 @@ class MainPage(QWidget):
 
     def _getScenes(self, data):
         self.chat_thread.get_scenes_by_user_signal.disconnect()
-        self.scenes = data
+        self.raw_scenes = data or []
+        self._renderScenes()
 
-        if self.scenes:
-            for scene in self.scenes:
+    def _renderScenes(self):
+        self._clear_layout(self.scenes_list_layout)
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_scenes, sort_mode)
+
+        if sorted_data:
+            for scene in sorted_data:
                 card = SceneCards.ListCard(self.mw, scene)
                 self.scenes_list_layout.addWidget(card)
         else:
@@ -387,10 +454,16 @@ class MainPage(QWidget):
 
     def _getThemes(self, data):
         self.chat_thread.get_user_themes_signal.disconnect()
-        self.themes = data
+        self.raw_themes = data or []
+        self._renderThemes()
 
-        if self.themes:
-            for theme in self.themes:
+    def _renderThemes(self):
+        self._clear_layout(self.theme_list_layout)
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_themes, sort_mode)
+
+        if sorted_data:
+            for theme in sorted_data:
                 card = ThemeCards.ListCard(self.mw, theme)
                 self.theme_list_layout.addWidget(card)
         else:
@@ -399,10 +472,16 @@ class MainPage(QWidget):
 
     def _getUserPersonas(self, data):
         self.chat_thread.get_user_personas_signal.disconnect()
-        self.user_personas = data
+        self.raw_personas = data or []
+        self._renderPersonas()
 
-        if self.user_personas:
-            for persona in self.user_personas:
+    def _renderPersonas(self):
+        self._clear_layout(self.personas_layout)
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_personas, sort_mode)
+
+        if sorted_data:
+            for persona in sorted_data:
                 card = PersonaCards.MainCard(self.mw, persona)
                 card.setFixedHeight(87)
                 self.personas_layout.addWidget(card)
@@ -418,6 +497,7 @@ class MainPage(QWidget):
         self.getFollowing()
         self.data = data
         self.username = self.data.get("username")
+        self.raw_characters = self.data.get("characters", []) or []
 
         if self.data.get("avatar_file_name"):
             self.mw.image_loader.load(
@@ -468,7 +548,7 @@ class MainPage(QWidget):
                 self.discord_thread.update(details=self.tr("Looks at user profile"))
 
         chats_count = 0
-        for character in self.data.get("characters", []):
+        for character in self.raw_characters:
             chats_count += character.get("participant__num_interactions", 0)
         chats_count = format_number(chats_count)
 
@@ -481,8 +561,15 @@ class MainPage(QWidget):
             format_number(self.data.get("num_following")) + " " + self.tr("following")
         )
         self.chats_label.setText(chats_count + " " + self.tr("chats"))
-        if self.data.get("characters", []):
-            for character in self.data.get("characters", []):
+        self._renderCharacters()
+
+    def _renderCharacters(self):
+        self._clear_layout(self.character_list_layout)
+        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sorted_data = sort_items(self.raw_characters, sort_mode)
+
+        if sorted_data:
+            for character in sorted_data:
                 card = CharacterCards.MainCard(
                     self.mw,
                     character["participant__name"],
