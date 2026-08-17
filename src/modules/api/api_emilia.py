@@ -7,8 +7,8 @@ import requests
 
 
 class EmiliaAPI:
-    def __init__(self, client):
-        self.url = "https://apiemilia.kajitsy.xyz/"
+    def __init__(self, client, url: str = "https://apiemilia.kajitsy.xyz/"):
+        self.url = url
         self.client = client
 
     async def get_update_servers(self):

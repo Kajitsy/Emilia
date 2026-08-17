@@ -123,7 +123,12 @@ class ChatThread(QThread):
         self.client = WSClient()
         self.api_chars = CharacterAPI(self.client)
         self.api_chats = ChatsAPI(self.client)
-        self.api_emilia = EmiliaAPI(self.client)
+        self.api_emilia = EmiliaAPI(
+            self.client,
+            self.mw.settings.value(
+                "api_server", "https://apiemilia.kajitsy.xyz/", type=str
+            ),
+        )
         self.api_cai_limit = CAILimitAPI(self.client)
         self.api_users = UsersAPI(self.client)
         self.api_voices = VoicesAPI(self.client)
