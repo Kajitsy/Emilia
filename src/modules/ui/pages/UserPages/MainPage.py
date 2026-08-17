@@ -19,10 +19,10 @@ from modules.ui.cards import (
     UserCards,
     VoiceCards,
 )
-from modules.ui.Elements import (
+from modules.ui.elements import (
     CardFrame,
     PushButton,
-    SortComboBox,
+    SortTabButton,
     TabButton,
     VerticalScrollPage,
 )
@@ -164,7 +164,9 @@ class MainPage(QWidget):
         buttons_frame.setLayout(buttons_layout)
         content_layout.addWidget(buttons_frame)
 
-        self.characters_button = TabButton(self.tr("Characters"))
+        self.characters_button = SortTabButton(
+            self.tr("Characters"), include_likes=True
+        )
         self.characters_button.setChecked(True)
         self.characters_button.clicked.connect(
             lambda event: self.lists_widget.setCurrentWidget(self.character_list)
@@ -184,8 +186,9 @@ class MainPage(QWidget):
         self.characters_button.clicked.connect(
             lambda event: self.themes_button.setChecked(False)
         )
+        self.characters_button.sort_changed.connect(lambda _: self._renderCharacters())
 
-        self.voices_button = TabButton(self.tr("Voices"))
+        self.voices_button = SortTabButton(self.tr("Voices"), include_likes=False)
         self.voices_button.clicked.connect(
             lambda event: self.lists_widget.setCurrentWidget(self.voice_list)
         )
@@ -204,8 +207,9 @@ class MainPage(QWidget):
         self.voices_button.clicked.connect(
             lambda event: self.themes_button.setChecked(False)
         )
+        self.voices_button.sort_changed.connect(lambda _: self._renderVoices())
 
-        self.scenes_button = TabButton(self.tr("Scenes"))
+        self.scenes_button = SortTabButton(self.tr("Scenes"), include_likes=False)
         self.scenes_button.clicked.connect(
             lambda event: self.lists_widget.setCurrentWidget(self.scenes_list)
         )
@@ -224,8 +228,11 @@ class MainPage(QWidget):
         self.scenes_button.clicked.connect(
             lambda event: self.themes_button.setChecked(False)
         )
+        self.scenes_button.sort_changed.connect(lambda _: self._renderScenes())
 
-        self.up_characters_button = TabButton(self.tr("Liked"))
+        self.up_characters_button = SortTabButton(
+            self.tr("Liked"), include_likes=True
+        )
         self.up_characters_button.clicked.connect(
             lambda event: self.lists_widget.setCurrentWidget(
                 self.upvoted_characters_list
@@ -246,9 +253,14 @@ class MainPage(QWidget):
         self.up_characters_button.clicked.connect(
             lambda event: self.themes_button.setChecked(False)
         )
+        self.up_characters_button.sort_changed.connect(
+            lambda _: self._renderUpCharacters()
+        )
         self.up_characters_button.setVisible(False)
 
-        self.personas_button = TabButton(self.tr("Personas"))
+        self.personas_button = SortTabButton(
+            self.tr("Personas"), include_likes=False
+        )
         self.personas_button.clicked.connect(
             lambda event: self.lists_widget.setCurrentWidget(self.personas_list)
         )
@@ -267,9 +279,10 @@ class MainPage(QWidget):
         self.personas_button.clicked.connect(
             lambda event: self.themes_button.setChecked(False)
         )
+        self.personas_button.sort_changed.connect(lambda _: self._renderPersonas())
         self.personas_button.setVisible(False)
 
-        self.themes_button = TabButton(self.tr("Themes"))
+        self.themes_button = SortTabButton(self.tr("Themes"), include_likes=False)
         self.themes_button.clicked.connect(
             lambda event: self.lists_widget.setCurrentWidget(self.theme_list)
         )
@@ -288,6 +301,7 @@ class MainPage(QWidget):
         self.themes_button.clicked.connect(
             lambda event: self.personas_button.setChecked(False)
         )
+        self.themes_button.sort_changed.connect(lambda _: self._renderThemes())
 
         buttons_layout.addWidget(self.characters_button)
         buttons_layout.addWidget(self.up_characters_button)
@@ -295,20 +309,6 @@ class MainPage(QWidget):
         buttons_layout.addWidget(self.voices_button)
         buttons_layout.addWidget(self.scenes_button)
         buttons_layout.addWidget(self.themes_button)
-
-        sort_frame = QFrame()
-        sort_frame.setFixedWidth(700)
-        sort_layout = QHBoxLayout()
-        sort_layout.setContentsMargins(0, 0, 0, 0)
-        sort_frame.setLayout(sort_layout)
-
-        sort_layout.addStretch()
-        self.sort_box = SortComboBox(self, include_likes=True)
-        self.sort_box.setFixedWidth(160)
-        self.sort_box.currentIndexChanged.connect(self._renderAllLists)
-        sort_layout.addWidget(self.sort_box)
-
-        content_layout.addWidget(sort_frame, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.character_list, self.character_list_layout = self.scroll_page()
         self.scenes_list, self.scenes_list_layout = self.scroll_page()
@@ -392,7 +392,7 @@ class MainPage(QWidget):
 
     def _renderVoices(self):
         self._clear_layout(self.voice_list_layout)
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.voices_button.get_sort_mode()
         sorted_data = sort_items(self.raw_voices, sort_mode)
 
         if sorted_data:
@@ -410,7 +410,7 @@ class MainPage(QWidget):
 
     def _renderUpCharacters(self):
         self._clear_layout(self.upvoted_characters_layout)
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.up_characters_button.get_sort_mode()
         sorted_data = sort_items(self.raw_upvoted_characters, sort_mode)
 
         if sorted_data:
@@ -441,7 +441,7 @@ class MainPage(QWidget):
 
     def _renderScenes(self):
         self._clear_layout(self.scenes_list_layout)
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.scenes_button.get_sort_mode()
         sorted_data = sort_items(self.raw_scenes, sort_mode)
 
         if sorted_data:
@@ -459,7 +459,7 @@ class MainPage(QWidget):
 
     def _renderThemes(self):
         self._clear_layout(self.theme_list_layout)
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.themes_button.get_sort_mode()
         sorted_data = sort_items(self.raw_themes, sort_mode)
 
         if sorted_data:
@@ -477,7 +477,7 @@ class MainPage(QWidget):
 
     def _renderPersonas(self):
         self._clear_layout(self.personas_layout)
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.personas_button.get_sort_mode()
         sorted_data = sort_items(self.raw_personas, sort_mode)
 
         if sorted_data:
@@ -565,7 +565,7 @@ class MainPage(QWidget):
 
     def _renderCharacters(self):
         self._clear_layout(self.character_list_layout)
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.characters_button.get_sort_mode()
         sorted_data = sort_items(self.raw_characters, sort_mode)
 
         if sorted_data:

@@ -5,7 +5,7 @@ from .AnimatedBackground import (
     VideoBackgroundThread,
     extract_media_palette,
 )
-from .Buttons import PushButton, TabButton
+from .Buttons import PushButton, SortTabButton, TabButton
 from .Frames import CardFrame, ClickableFrame
 from .Inputs import (
     CheckBox,
@@ -28,6 +28,7 @@ from .Sidebar import LeftSidebar
 __all__ = [
     "PushButton",
     "TabButton",
+    "SortTabButton",
     "LineEdit",
     "SearchLineEdit",
     "CheckBox",

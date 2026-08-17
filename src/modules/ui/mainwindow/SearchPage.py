@@ -6,10 +6,9 @@ from modules import ChatThread, Svg
 from modules.logic.QThreads import DiscordRPCThread
 from modules.ui import TM
 from modules.ui.cards import CharacterCards, SceneCards, UserCards
-from modules.ui.Elements import (
+from modules.ui.elements import (
     SearchLineEdit,
-    SortComboBox,
-    TabButton,
+    SortTabButton,
     VerticalScrollPage,
 )
 from modules.Utils import sort_items
@@ -122,7 +121,7 @@ class SearchPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.character_tab_button.get_sort_mode()
         sorted_data = sort_items(data, sort_mode)
 
         if sorted_data:
@@ -177,7 +176,7 @@ class SearchPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.scene_tab_button.get_sort_mode()
         sorted_data = sort_items(data, sort_mode)
 
         if sorted_data:
@@ -221,7 +220,7 @@ class SearchPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        sort_mode = self.sort_box.currentData() if hasattr(self, "sort_box") else "default"
+        sort_mode = self.user_tab_button.get_sort_mode()
         sorted_data = sort_items(data, sort_mode)
 
         if sorted_data:
@@ -255,12 +254,13 @@ class SearchPage(QWidget):
         top_bar_layout.addWidget(self.search_bar, alignment=Qt.AlignmentFlag.AlignTop)
         self.search_bar.blockSignals(False)
 
-        tab_frame = QWidget()
-        tab_frame.setFixedWidth(700)
-        self.tab_layout = QHBoxLayout(tab_frame)
+        self.tab_layout = QHBoxLayout()
         self.tab_layout.setContentsMargins(0, 0, 0, 0)
+        self.tab_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        self.character_tab_button = TabButton(self.tr("Characters"))
+        self.character_tab_button = SortTabButton(
+            self.tr("Characters"), include_likes=False
+        )
         self.character_tab_button.clicked.connect(
             lambda: self.scene_tab_button.setChecked(False)
         )
@@ -270,8 +270,12 @@ class SearchPage(QWidget):
         self.character_tab_button.clicked.connect(
             lambda: self.changeSearch("character")
         )
+        self.character_tab_button.sort_changed.connect(
+            lambda _: self.renderCharacters(self.raw_char_data)
+        )
         self.tab_layout.addWidget(self.character_tab_button)
-        self.user_tab_button = TabButton(self.tr("Users"))
+
+        self.user_tab_button = SortTabButton(self.tr("Users"), include_likes=False)
         self.user_tab_button.clicked.connect(
             lambda: self.character_tab_button.setChecked(False)
         )
@@ -279,8 +283,14 @@ class SearchPage(QWidget):
             lambda: self.scene_tab_button.setChecked(False)
         )
         self.user_tab_button.clicked.connect(lambda: self.changeSearch("user"))
+        self.user_tab_button.sort_changed.connect(
+            lambda _: self.renderUsers(self.raw_user_data)
+        )
         self.tab_layout.addWidget(self.user_tab_button)
-        self.scene_tab_button = TabButton(self.tr("Scenes"))
+
+        self.scene_tab_button = SortTabButton(
+            self.tr("Scenes"), include_likes=False
+        )
         self.scene_tab_button.clicked.connect(
             lambda: self.character_tab_button.setChecked(False)
         )
@@ -288,14 +298,10 @@ class SearchPage(QWidget):
             lambda: self.user_tab_button.setChecked(False)
         )
         self.scene_tab_button.clicked.connect(lambda: self.changeSearch("scene"))
+        self.scene_tab_button.sort_changed.connect(
+            lambda _: self.renderScenes(self.raw_scene_data)
+        )
         self.tab_layout.addWidget(self.scene_tab_button)
-
-        self.tab_layout.addStretch()
-
-        self.sort_box = SortComboBox(self, include_likes=False)
-        self.sort_box.setFixedWidth(160)
-        self.sort_box.currentIndexChanged.connect(self.on_sort_changed)
-        self.tab_layout.addWidget(self.sort_box)
 
         if self.search == "character":
             self.character_tab_button.setChecked(True)
@@ -307,7 +313,7 @@ class SearchPage(QWidget):
             self.user_tab_button.setChecked(True)
             self.stacked_widget.setCurrentWidget(self.users_scroll_area)
 
-        top_bar_layout.addWidget(tab_frame, alignment=Qt.AlignmentFlag.AlignHCenter)
+        top_bar_layout.addLayout(self.tab_layout)
 
         return top_bar, top_bar_layout
 
