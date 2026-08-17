@@ -16,7 +16,7 @@ from PyQt6.QtCore import (
     QTimer,
     pyqtSignal,
 )
-from PyQt6.QtGui import QAction, QColor, QMouseEvent, QPixmap
+from PyQt6.QtGui import QAction, QColor, QKeyEvent, QMouseEvent, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QColorDialog,
@@ -31,6 +31,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QSpacerItem,
     QStackedWidget,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -60,7 +61,15 @@ from modules.Utils import color_avatar, format_number, format_text
 
 class MessageBubble(QFrame):
     def __init__(
-        self, main_window, parent, text, avatar_url, name, is_user=False, attachments=None
+        self,
+        main_window,
+        parent,
+        text,
+        avatar_url,
+        name,
+        is_user=False,
+        attachments=None,
+        raw_text=None,
     ):
         super().__init__()
         if attachments is None:
@@ -68,11 +77,14 @@ class MessageBubble(QFrame):
         self.mw = main_window
         self.parent = parent
         self.text = text
+        self.raw_text = raw_text if raw_text is not None else text
         self.url = avatar_url
         self.name = name
         self.is_user = is_user
         self.turn_id = None
         self.attachments = attachments
+        self.is_editing = False
+        self.edit_container = None
         self.setObjectName("user_message" if self.is_user else "char_message")
 
         self.initUI()
@@ -131,14 +143,14 @@ class MessageBubble(QFrame):
         shadow.setOffset(0, 4)
         shadow.setColor(QColor(0, 0, 0, 60))
         self.m_frame.setGraphicsEffect(shadow)
-        m_layout = QVBoxLayout()
-        self.m_frame.setLayout(m_layout)
+        self.m_layout = QVBoxLayout()
+        self.m_frame.setLayout(self.m_layout)
 
         self.message_label = QLabel(self.text)
         self.message_label.setWordWrap(True)
         self.message_label.setMaximumWidth(int(self.parent.width() / 2.25))
         self.message_label.setContentsMargins(0, 2, 0, 2)
-        m_layout.addWidget(self.message_label)
+        self.m_layout.addWidget(self.message_label)
 
         if self.is_user:
             self.message_label.setStyleSheet(f"color: {self.parent.user_text_message};")
@@ -164,6 +176,107 @@ class MessageBubble(QFrame):
         self.setMinimumHeight(self.height())
 
         self.animate_entry()
+
+    def startEdit(self):
+        if self.is_editing:
+            return
+        self.is_editing = True
+        self.message_label.setVisible(False)
+
+        if self.edit_container is None:
+            self.edit_container = QWidget()
+            edit_layout = QVBoxLayout(self.edit_container)
+            edit_layout.setContentsMargins(0, 0, 0, 0)
+            edit_layout.setSpacing(6)
+
+            self.edit_input = QTextEdit()
+            self.edit_input.setStyleSheet(f"""
+                QTextEdit {{
+                    background-color: {TM.c('element_bg')};
+                    color: {TM.c('text')};
+                    border-radius: 4px;
+                    padding: 6px;
+                    font-size: 14px;
+                }}
+            """)
+            min_w = max(260, min(self.message_label.width() + 40, int(self.parent.width() / 1.8)))
+            self.edit_input.setMinimumWidth(min_w)
+            self.edit_input.setMaximumWidth(int(self.parent.width() / 1.8))
+
+            def key_press(event: QKeyEvent):
+                if (
+                    event.key() in {Qt.Key.Key_Return, Qt.Key.Key_Enter}
+                    and not (event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+                ):
+                    self.saveEdit()
+                elif event.key() == Qt.Key.Key_Escape:
+                    self.cancelEdit()
+                else:
+                    QTextEdit.keyPressEvent(self.edit_input, event)
+                    doc_h = int(self.edit_input.document().size().height())
+                    self.edit_input.setFixedHeight(max(60, min(300, doc_h + 20)))
+                    self.setMinimumHeight(0)
+                    self.adjustSize()
+
+            self.edit_input.keyPressEvent = key_press
+
+            buttons_layout = QHBoxLayout()
+            buttons_layout.setContentsMargins(0, 0, 0, 0)
+            buttons_layout.setSpacing(6)
+            buttons_layout.addStretch()
+
+            self.cancel_edit_button = PushButton(self.tr("Cancel"))
+            self.cancel_edit_button.setFixedHeight(28)
+            self.cancel_edit_button.clicked.connect(self.cancelEdit)
+
+            self.save_edit_button = PushButton(self.tr("Save"))
+            self.save_edit_button.setFixedHeight(28)
+            self.save_edit_button.clicked.connect(self.saveEdit)
+
+            buttons_layout.addWidget(self.cancel_edit_button)
+            buttons_layout.addWidget(self.save_edit_button)
+
+            edit_layout.addWidget(self.edit_input)
+            edit_layout.addLayout(buttons_layout)
+
+            self.m_layout.addWidget(self.edit_container)
+
+        raw = self.raw_text if self.raw_text is not None else self.text
+        self.edit_input.setPlainText(raw)
+        doc_h = int(self.edit_input.document().size().height())
+        self.edit_input.setFixedHeight(max(60, min(300, doc_h + 20)))
+
+        self.edit_container.setVisible(True)
+        if hasattr(self, "save_edit_button"):
+            self.save_edit_button.setEnabled(True)
+            self.cancel_edit_button.setEnabled(True)
+
+        self.edit_input.setFocus()
+        cursor = self.edit_input.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.edit_input.setTextCursor(cursor)
+
+        self.setMinimumHeight(0)
+        self.adjustSize()
+
+    def cancelEdit(self):
+        self.is_editing = False
+        if self.edit_container is not None:
+            self.edit_container.setVisible(False)
+        self.message_label.setVisible(True)
+        self.setMinimumHeight(0)
+        self.adjustSize()
+        self.setMinimumHeight(self.height())
+
+    def saveEdit(self):
+        if not hasattr(self, "edit_input"):
+            return
+        new_text = self.edit_input.toPlainText().strip()
+        if not new_text:
+            return
+        self.save_edit_button.setEnabled(False)
+        self.cancel_edit_button.setEnabled(False)
+        self.parent.saveEditedMessage(self, new_text)
 
     def animate_entry(self):
         self.opacity_effect = QGraphicsOpacityEffect(self)
@@ -2153,6 +2266,7 @@ class ChatInterface(QWidget):
                 self.mw.name,
                 True,
                 attachments,
+                raw_text=text,
             )
         else:
             message_bubble = MessageBubble(
@@ -2163,6 +2277,7 @@ class ChatInterface(QWidget):
                 self.character_name,
                 False,
                 attachments,
+                raw_text=text,
             )
         message_bubble.turn_id = turn_id
 
@@ -2360,10 +2475,33 @@ class ChatInterface(QWidget):
             elif item and item.spacerItem():
                 pass
 
-    def _editMessage(self, turn_id):
-        self.chat_thread.edit_message_signal.connect(self.__editMessage)
+    def saveEditedMessage(self, message_bubble, new_text):
+        if not message_bubble.turn_id:
+            message_bubble.cancelEdit()
+            return
+
+        def handle_edited(response):
+            try:
+                self.chat_thread.edit_message_signal.disconnect(handle_edited)
+            except (TypeError, RuntimeError):
+                pass
+
+            pci = response.get("turn", {}).get("primary_candidate_id")
+            candidate_text = new_text
+            for candidate in response.get("turn", {}).get("candidates", []):
+                if candidate.get("candidate_id", pci) == pci:
+                    candidate_text = candidate.get("raw_content", new_text)
+                    break
+
+            formatted = format_text(candidate_text, self.mw.username)
+            message_bubble.raw_text = candidate_text
+            message_bubble.text = formatted
+            message_bubble.message_label.setText(formatted)
+            message_bubble.cancelEdit()
+
+        self.chat_thread.edit_message_signal.connect(handle_edited)
         self.chat_thread.edit_message(
-            self.chat_id, turn_id, self.message_input.toPlainText()
+            self.chat_id, message_bubble.turn_id, new_text
         )
 
     def editMessage(self, turn_id):
@@ -2371,40 +2509,10 @@ class ChatInterface(QWidget):
             item = self.messages_layout.itemAt(i)
             widget = item.widget()
             if hasattr(widget, "turn_id") and widget.turn_id == turn_id:
-                message_stacked = widget
+                message = widget.currentWidget()
+                if hasattr(message, "startEdit"):
+                    message.startEdit()
                 break
-
-        message = message_stacked.currentWidget()
-        self.message_input.setText(message.text)
-        self.message_input.keyPress = lambda: self._editMessage(turn_id)
-
-    def __editMessage(self, response):
-        self.chat_thread.edit_message_signal.disconnect()
-        self.message_input.setText(None)
-        self.message_input.keyPress = lambda: self.sendMessage()
-        for i in reversed(range(self.messages_layout.count())):
-            item = self.messages_layout.itemAt(i)
-            widget = item.widget()
-            if (
-                hasattr(widget, "turn_id")
-                and widget.turn_id == response["turn"]["turn_key"]["turn_id"]
-            ):
-                message_stacked = widget
-                break
-
-        message = message_stacked.currentWidget()
-
-        pci = response.get("turn", {}).get("primary_candidate_id")
-        for candidate in response.get("turn", {}).get("candidates", []):
-            if candidate.get("candidate_id", pci) == pci:
-                new_text = format_text(
-                    candidate.get("raw_content", ""), self.mw.username
-                )
-                message.text = new_text
-                message.message_label.setText(new_text)
-
-        message.setMinimumHeight(0)
-        message.adjustSize()
 
     def showContextMenu(self, pos, message_bubble):
         def copy(text):
@@ -2447,7 +2555,7 @@ class ChatInterface(QWidget):
 
             edit_message_action = QAction(self.tr("Edit message"), self)
             edit_message_action.triggered.connect(
-                lambda event: self.editMessage(message_bubble.turn_id)
+                lambda event, mb=message_bubble: mb.startEdit()
             )
             context_menu.addAction(edit_message_action)
 
