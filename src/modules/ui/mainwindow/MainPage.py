@@ -875,6 +875,8 @@ class MainPage(QMainWindow):
     def showMainPage(self, widget: QWidget = None):
         if widget:
             widget.setVisible(False)
+        if self.current_chat_interface and hasattr(self.current_chat_interface, "cleanup"):
+            self.current_chat_interface.cleanup()
         self.main_content_area.setCurrentWidget(self.main_page)
         self.current_chat_interface = None
         self.top_widget.setVisible(True)
@@ -895,6 +897,8 @@ class MainPage(QMainWindow):
         self, character_id, character_name, chat_id="", card=None, scene_id=""
     ):
         if self.current_chat_interface:
+            if hasattr(self.current_chat_interface, "cleanup"):
+                self.current_chat_interface.cleanup()
             self.main_content_area.removeWidget(self.current_chat_interface)
             self.current_chat_interface.deleteLater()
             self.chat_thread.message_signal.disconnect()

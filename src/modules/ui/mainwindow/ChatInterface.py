@@ -1,12 +1,10 @@
 import ctypes
 import hashlib
-import math
 import os
 import platform
 from datetime import datetime
 
 from curl_cffi import CurlMime
-from PIL import Image
 from PyQt6.QtCore import (
     QEasingCurve,
     QPropertyAnimation,
@@ -16,7 +14,13 @@ from PyQt6.QtCore import (
     QTimer,
     pyqtSignal,
 )
-from PyQt6.QtGui import QAction, QColor, QKeyEvent, QMouseEvent, QPixmap
+from PyQt6.QtGui import (
+    QAction,
+    QColor,
+    QKeyEvent,
+    QMouseEvent,
+    QPixmap,
+)
 from PyQt6.QtWidgets import (
     QApplication,
     QColorDialog,
@@ -47,13 +51,16 @@ from modules.ui import TM
 from modules.ui.cards import PersonaCards
 from modules.ui.cards.VModelCards import ViewerCard
 from modules.ui.cards.VoiceCards import ModeCard, SearchCard
-from modules.ui.Elements import (
+from modules.ui.elements import (
     CardFrame,
+    ChatBackgroundWidget,
     ClickableFrame,
+    ComboBox,
     CustomTextEdit,
     Menu,
     PushButton,
     VerticalScrollPage,
+    extract_media_palette,
 )
 from modules.ui.Icons import Svg
 from modules.Utils import color_avatar, format_number, format_text
@@ -352,9 +359,21 @@ class ChatInterface(QWidget):
             "colors/user_text_message", TM.c("user_text_message")
         )
         self.background_image = self.chat_settings.value("background_image", "")
+        self.background_scale_mode = self.chat_settings.value(
+            "background_scale_mode", "cover"
+        )
+        self.background_fps = self.chat_settings.value("background_fps", "auto")
+        self.background_quality = self.chat_settings.value(
+            "background_quality", "original"
+        )
 
         self.initUI()
-        self.applyBackground(self.background_image)
+        self.applyBackground(
+            self.background_image,
+            self.background_scale_mode,
+            self.background_fps,
+            self.background_quality,
+        )
         self.createRightSidebar()
 
         TM.theme_changed.connect(self.updateTheme)
@@ -391,6 +410,8 @@ class ChatInterface(QWidget):
         self.messages_overlay_layout = QGridLayout(self.messages_overlay_container)
         self.messages_overlay_layout.setContentsMargins(0, 0, 0, 0)
 
+        self.background_widget = ChatBackgroundWidget(self)
+        self.messages_overlay_layout.addWidget(self.background_widget, 0, 0)
         self.messages_overlay_layout.addWidget(self.messages_area, 0, 0)
 
         self.chat_container_layout.addWidget(self.messages_overlay_container)
@@ -580,75 +601,39 @@ class ChatInterface(QWidget):
         scrollbar.valueChanged.connect(self.on_scroll)
         scrollbar.rangeChanged.connect(self.scrollToBottomIfNeeded)
 
-    def applyBackground(self, path):
+    def applyBackground(self, path, scale_mode=None, fps=None, quality=None):
+        if scale_mode is None:
+            scale_mode = self.background_scale_mode
+        if fps is None:
+            fps = self.background_fps
+        if quality is None:
+            quality = self.background_quality
+
         if path and os.path.exists(path):
-            path = path.replace("\\", "/")
-            self.messages_area.setStyleSheet(f"""
-                #chatScrollArea {{
-                    background-image: url("{path}");
-                    background-repeat: no-repeat;
-                    background-position: center;
-                    background-attachment: fixed;
-                }}
-            """)
+            self.background_widget.set_media(path, scale_mode, fps, quality)
+            self.messages_area.setStyleSheet(
+                "#chatScrollArea { background: transparent; }"
+            )
             self.messages_content.setStyleSheet(
                 "#chatContent { background: transparent; }"
             )
-
         else:
+            self.background_widget.clear()
             self.messages_area.setStyleSheet("#chatScrollArea {}")
             self.messages_content.setStyleSheet("#chatContent {}")
 
-    def extract_theme_colors(self, image_path):
-        try:
-            img = Image.open(image_path)
-            img = img.resize((150, 150))
-            result = img.quantize(colors=5)
-            palette = result.getpalette()
+    def cleanup(self):
+        if hasattr(self, "background_widget") and self.background_widget:
+            self.background_widget.clear()
+        if hasattr(self, "player_thread") and self.player_thread:
+            self.player_thread.stop()
 
-            colors = []
-            for i in range(0, 15, 3):
-                rgb = (palette[i], palette[i + 1], palette[i + 2])
-                colors.append(rgb)
+    def closeEvent(self, event):
+        self.cleanup()
+        super().closeEvent(event)
 
-            def rgb_to_hex(rgb):
-                return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
-
-            def get_brightness(rgb):
-                return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
-
-            valid_colors = [c for c in colors]
-
-            if len(valid_colors) < 2:
-                valid_colors.append(valid_colors[0])
-
-            char_rgb = valid_colors[0]
-
-            user_rgb = valid_colors[1]
-
-            for i in range(1, len(valid_colors)):
-                c = valid_colors[i]
-                dist = math.sqrt(sum([(a - b) ** 2 for a, b in zip(char_rgb, c)]))
-                if dist > 30:
-                    user_rgb = c
-                    break
-
-            char_hex = rgb_to_hex(char_rgb)
-            user_hex = rgb_to_hex(user_rgb)
-
-            char_text = "#ffffff" if get_brightness(char_rgb) < 130 else "#000000"
-            user_text = "#ffffff" if get_brightness(user_rgb) < 130 else "#000000"
-
-            return {
-                "char_back": char_hex,
-                "char_text": char_text,
-                "user_back": user_hex,
-                "user_text": user_text,
-            }
-
-        except Exception as e:
-            print(f"Error extracting colors: {e}")
-            return None
+    def extract_theme_colors(self, media_path):
+        return extract_media_palette(media_path)
 
     def setBackgroundFromUrl(self, url):
         if url:
@@ -1399,7 +1384,14 @@ class ChatInterface(QWidget):
                 "user_back_message": TM.c("user_back_message"),
                 "user_text_message": TM.c("user_text_message"),
             }
+            self.background_image = ""
+            self.background_scale_mode = "cover"
+            self.background_fps = "auto"
+            self.background_quality = "original"
             self.chat_settings.setValue("background_image", "")
+            self.chat_settings.setValue("background_scale_mode", "cover")
+            self.chat_settings.setValue("background_fps", "auto")
+            self.chat_settings.setValue("background_quality", "original")
             self.applyBackground("")
 
             for key, value in data.items():
@@ -1427,68 +1419,80 @@ class ChatInterface(QWidget):
 
         def pickBackgroundImage():
             file_dialog = QFileDialog()
-            file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.webp *.gif *.bmp)")
+            file_dialog.setNameFilter(
+                self.tr(
+                    "Media (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.mp4 *.webm *.mov *.mkv *.avi);;Images (*.png *.jpg *.jpeg *.webp *.bmp);;Videos (*.mp4 *.webm *.mov *.mkv *.avi);;GIF (*.gif)"
+                )
+            )
             if file_dialog.exec():
                 selected_files = file_dialog.selectedFiles()
                 if selected_files:
                     path = selected_files[0]
                     self.background_image = path
                     self.chat_settings.setValue("background_image", path)
-                    self.applyBackground(path)
+                    self.applyBackground(
+                        path,
+                        self.scale_mode_combo.currentData(),
+                        self.fps_combo.currentData(),
+                        self.quality_combo.currentData(),
+                    )
 
-                    theme = self.extract_theme_colors(path)
-                    if theme:
-                        self.char_back_message = theme["char_back"]
-                        self.char_text_message = theme["char_text"]
-                        self.user_back_message = theme["user_back"]
-                        self.user_text_message = theme["user_text"]
+        def autoTuneColors():
+            if not self.background_image or not os.path.exists(self.background_image):
+                return
+            theme = self.extract_theme_colors(self.background_image)
+            if theme:
+                self.char_back_message = theme["char_back"]
+                self.char_text_message = theme["char_text"]
+                self.user_back_message = theme["user_back"]
+                self.user_text_message = theme["user_text"]
 
-                        self.char_back_message_picker.setStyleSheet(
-                            f"background-color: {self.char_back_message};"
-                        )
-                        self.char_text_message_picker.setStyleSheet(
-                            f"background-color: {self.char_text_message};"
-                        )
-                        self.user_back_message_picker.setStyleSheet(
-                            f"background-color: {self.user_back_message};"
-                        )
-                        self.user_text_message_picker.setStyleSheet(
-                            f"background-color: {self.user_text_message};"
-                        )
+                self.char_back_message_picker.setStyleSheet(
+                    f"background-color: {self.char_back_message};"
+                )
+                self.char_text_message_picker.setStyleSheet(
+                    f"background-color: {self.char_text_message};"
+                )
+                self.user_back_message_picker.setStyleSheet(
+                    f"background-color: {self.user_back_message};"
+                )
+                self.user_text_message_picker.setStyleSheet(
+                    f"background-color: {self.user_text_message};"
+                )
 
-                        self.chat_settings.setValue(
-                            "colors/char_back_message", self.char_back_message
-                        )
-                        self.chat_settings.setValue(
-                            "colors/char_text_message", self.char_text_message
-                        )
-                        self.chat_settings.setValue(
-                            "colors/user_back_message", self.user_back_message
-                        )
-                        self.chat_settings.setValue(
-                            "colors/user_text_message", self.user_text_message
-                        )
+                self.chat_settings.setValue(
+                    "colors/char_back_message", self.char_back_message
+                )
+                self.chat_settings.setValue(
+                    "colors/char_text_message", self.char_text_message
+                )
+                self.chat_settings.setValue(
+                    "colors/user_back_message", self.user_back_message
+                )
+                self.chat_settings.setValue(
+                    "colors/user_text_message", self.user_text_message
+                )
 
-                        for i in range(self.messages_layout.count()):
-                            item = self.messages_layout.itemAt(i)
-                            if item.widget():
-                                widget = item.widget()
-                                bubble = widget.currentWidget()
+                for i in range(self.messages_layout.count()):
+                    item = self.messages_layout.itemAt(i)
+                    if item.widget():
+                        widget = item.widget()
+                        bubble = widget.currentWidget()
 
-                                if bubble.objectName() == "user_message":
-                                    self.setBackMessageColor(
-                                        bubble, self.user_back_message
-                                    )
-                                    self.setTextMessageColor(
-                                        bubble, self.user_text_message
-                                    )
-                                elif bubble.objectName() == "char_message":
-                                    self.setBackMessageColor(
-                                        bubble, self.char_back_message
-                                    )
-                                    self.setTextMessageColor(
-                                        bubble, self.char_text_message
-                                    )
+                        if bubble.objectName() == "user_message":
+                            self.setBackMessageColor(
+                                bubble, self.user_back_message
+                            )
+                            self.setTextMessageColor(
+                                bubble, self.user_text_message
+                            )
+                        elif bubble.objectName() == "char_message":
+                            self.setBackMessageColor(
+                                bubble, self.char_back_message
+                            )
+                            self.setTextMessageColor(
+                                bubble, self.char_text_message
+                            )
 
         def clearBackgroundImage():
             self.background_image = ""
@@ -1544,6 +1548,26 @@ class ChatInterface(QWidget):
             }
             for key, value in data.items():
                 self.chat_settings.setValue(f"colors/{key}", value)
+
+            self.background_scale_mode = self.scale_mode_combo.currentData()
+            self.background_fps = self.fps_combo.currentData()
+            self.background_quality = self.quality_combo.currentData()
+
+            self.chat_settings.setValue(
+                "background_scale_mode", self.background_scale_mode
+            )
+            self.chat_settings.setValue("background_fps", self.background_fps)
+            self.chat_settings.setValue(
+                "background_quality", self.background_quality
+            )
+
+            self.applyBackground(
+                self.background_image,
+                self.background_scale_mode,
+                self.background_fps,
+                self.background_quality,
+            )
+
             for i in range(self.messages_layout.count()):
                 item = self.messages_layout.itemAt(i)
                 if item.widget():
@@ -1565,7 +1589,6 @@ class ChatInterface(QWidget):
             self.hideOverlay()
 
         color_picker_widget = QWidget()
-        color_picker_widget.setFixedHeight(300)
         color_picker_layout = QVBoxLayout()
         color_picker_widget.setLayout(color_picker_layout)
 
@@ -1632,6 +1655,58 @@ class ChatInterface(QWidget):
             self.user_back_message_picker, alignment=Qt.AlignmentFlag.AlignRight
         )
         color_pickers_layout.addLayout(user_back_message_layout)
+
+        scale_mode_layout = QHBoxLayout()
+        scale_mode_label = QLabel(self.tr("Stretching:"))
+        self.scale_mode_combo = ComboBox()
+        self.scale_mode_combo.addItem(self.tr("Cover"), "cover")
+        self.scale_mode_combo.addItem(self.tr("Contain"), "contain")
+        self.scale_mode_combo.addItem(self.tr("Stretch"), "stretch")
+        self.scale_mode_combo.addItem(self.tr("Center"), "center")
+        idx_scale = self.scale_mode_combo.findData(self.background_scale_mode)
+        if idx_scale >= 0:
+            self.scale_mode_combo.setCurrentIndex(idx_scale)
+        scale_mode_layout.addWidget(
+            scale_mode_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        scale_mode_layout.addWidget(
+            self.scale_mode_combo, alignment=Qt.AlignmentFlag.AlignRight
+        )
+        color_pickers_layout.addLayout(scale_mode_layout)
+
+        fps_layout = QHBoxLayout()
+        fps_label = QLabel(self.tr("FPS:"))
+        self.fps_combo = ComboBox()
+        self.fps_combo.addItem(self.tr("Auto"), "auto")
+        self.fps_combo.addItem("15 FPS", "15")
+        self.fps_combo.addItem("24 FPS", "24")
+        self.fps_combo.addItem("30 FPS", "30")
+        self.fps_combo.addItem("60 FPS", "60")
+        idx_fps = self.fps_combo.findData(str(self.background_fps))
+        if idx_fps >= 0:
+            self.fps_combo.setCurrentIndex(idx_fps)
+        fps_layout.addWidget(fps_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        fps_layout.addWidget(self.fps_combo, alignment=Qt.AlignmentFlag.AlignRight)
+        color_pickers_layout.addLayout(fps_layout)
+
+        quality_layout = QHBoxLayout()
+        quality_label = QLabel(self.tr("Quality:"))
+        self.quality_combo = ComboBox()
+        self.quality_combo.addItem(self.tr("Original"), "original")
+        self.quality_combo.addItem("720p", "720p")
+        self.quality_combo.addItem("480p", "480p")
+        self.quality_combo.addItem("360p", "360p")
+        idx_quality = self.quality_combo.findData(self.background_quality)
+        if idx_quality >= 0:
+            self.quality_combo.setCurrentIndex(idx_quality)
+        quality_layout.addWidget(
+            quality_label, alignment=Qt.AlignmentFlag.AlignLeft
+        )
+        quality_layout.addWidget(
+            self.quality_combo, alignment=Qt.AlignmentFlag.AlignRight
+        )
+        color_pickers_layout.addLayout(quality_layout)
+
         color_picker_layout.addWidget(
             color_pickers_frame, alignment=Qt.AlignmentFlag.AlignTop
         )
@@ -1643,6 +1718,10 @@ class ChatInterface(QWidget):
         pick_bg_button = PushButton(self.tr("Select"))
         pick_bg_button.clicked.connect(pickBackgroundImage)
         background_layout.addWidget(pick_bg_button)
+
+        auto_tune_button = PushButton(self.tr("Auto-tune Colors"))
+        auto_tune_button.clicked.connect(autoTuneColors)
+        background_layout.addWidget(auto_tune_button)
 
         clear_bg_button = PushButton(self.tr("Clear"))
         clear_bg_button.clicked.connect(clearBackgroundImage)

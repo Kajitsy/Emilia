@@ -1,31 +1,30 @@
-from .ThemeManager import TM, ThemeManager
-from .elements import (
+from .AnimatedBackground import (
     AnimatedBackgroundWidget,
-    CardFrame,
-    CheckBox,
-    ClickableFrame,
-    ComboBox,
-    CustomTextEdit,
-    HorizontalScrollArea,
-    HorizontalScrollPage,
-    KeySequenceEdit,
-    LeftSidebar,
-    LineEdit,
+    ChatBackgroundWidget,
     MediaBackgroundWidget,
-    Menu,
-    PushButton,
-    PushButtonMenu,
-    SearchLineEdit,
-    TabButton,
-    VerticalScrollArea,
-    VerticalScrollPage,
     VideoBackgroundThread,
     extract_media_palette,
 )
+from .Buttons import PushButton, TabButton
+from .Frames import CardFrame, ClickableFrame
+from .Inputs import (
+    CheckBox,
+    ComboBox,
+    CustomTextEdit,
+    KeySequenceEdit,
+    LineEdit,
+    SearchLineEdit,
+)
+from .Menus import Menu, PushButtonMenu
+from .ScrollAreas import (
+    HorizontalScrollArea,
+    HorizontalScrollPage,
+    VerticalScrollArea,
+    VerticalScrollPage,
+)
+from .Sidebar import LeftSidebar
 
 __all__ = [
-    "TM",
-    "ThemeManager",
     "PushButton",
     "TabButton",
     "LineEdit",
@@ -45,6 +44,7 @@ __all__ = [
     "LeftSidebar",
     "AnimatedBackgroundWidget",
     "MediaBackgroundWidget",
+    "ChatBackgroundWidget",
     "VideoBackgroundThread",
     "extract_media_palette",
 ]

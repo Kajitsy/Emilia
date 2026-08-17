@@ -384,271 +384,326 @@ Z.B. Entlarven Sie den Fremden vor Ende des Walzers.
 </context><context>
     <name>ChatInterface</name>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="296" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="612" />
         <source>Bold</source>
         <translation>Fett</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="301" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="617" />
         <source>Italic</source>
         <translation>Kursiv</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="306" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="622" />
         <source>Code</source>
         <translation>Code</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1818" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="344" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2243" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="660" />
         <source>Call limit exceeded</source>
         <translation>Anruflimit überschritten</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="358" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="674" />
         <source>Attached message limit exceeded</source>
         <translation>Limit für angehängte Nachrichten überschritten</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="542" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="873" />
         <source>Downloading background...</source>
         <translation>Hintergrund wird heruntergeladen...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="555" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="886" />
         <source>Error downloading image</source>
         <translation>Fehler beim Herunterladen des Bildes</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="719" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1050" />
         <source>New Chat</source>
         <translation>Neuer Chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="732" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1063" />
         <source>Voice</source>
         <translation>Stimme</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="741" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1072" />
         <source>History</source>
         <translation>Geschichte</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="747" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1078" />
         <source>Chat Theme</source>
         <translation>Melodie</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="753" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1084" />
         <source>Persona</source>
         <translation>Person</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="759" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1090" />
         <source>Chat Style</source>
         <translation>Stil</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1069" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="765" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1400" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1096" />
         <source>Show VModel</source>
         <translation>VModel anzeigen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1000" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="772" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1331" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1103" />
         <source>Detach Chat</source>
         <translation>Chat trennen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="966" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1297" />
         <source>Attach Chat</source>
         <translation>Chat anhängen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="970" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1301" />
         <source>Chat with %%char%%</source>
         <translation>Chat mit %%char%%</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1076" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1407" />
         <source>Hide VModel</source>
         <translation>VModel ausblenden</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1101" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1432" />
         <source>Choose a persona</source>
         <translation>Wähle eine Persona</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1123" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1454" />
         <source>Successfully updated your persona</source>
         <translation>Persona erfolgreich aktualisiert</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1153" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1484" />
         <source>Choose a model to influence the style of your chat</source>
         <translation>Wählen Sie ein Modell, um Ihren Chat -Stil zu beeinflussen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1267" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1238" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1598" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1569" />
         <source>Continue chat</source>
         <translation>Setzen Sie den Chat fort</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1240" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1571" />
         <source>Start new chat</source>
         <translation>Starten Sie einen neuen Chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1464" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1656" />
+        <source>Media (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.mp4 *.webm *.mov *.mkv *.avi);;Images (*.png *.jpg *.jpeg *.webp *.bmp);;Videos (*.mp4 *.webm *.mov *.mkv *.avi);;GIF (*.gif)</source>
+        <translation>Mediendateien (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.mp4 *.webm *.mov *.mkv *.avi);;Bilder (*.png *.jpg *.jpeg *.webp *.bmp);;Videos (*.mp4 *.webm *.mov *.mkv *.avi);;GIF (*.gif)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1833" />
         <source>Character Text Color:</source>
         <translation>Die Farbe des Textes des Charakters:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1479" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1848" />
         <source>Character Background Color:</source>
         <translation>Die Farbe des Hintergrunds des Charakters:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1494" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1863" />
         <source>User Text Color:</source>
         <translation>Die Farbe des Benutzertextes:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1509" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1878" />
         <source>User Background Color:</source>
         <translation>Benutzer Hintergrundfarbe:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1527" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1893" />
+        <source>Stretching:</source>
+        <translation>Streckung:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1895" />
+        <source>Cover</source>
+        <translation>Ausfüllen</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1896" />
+        <source>Contain</source>
+        <translation>Einpassen</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1897" />
+        <source>Stretch</source>
+        <translation>Strecken</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1898" />
+        <source>Center</source>
+        <translation>Zentriert</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1911" />
+        <source>FPS:</source>
+        <translation>FPS:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1913" />
+        <source>Auto</source>
+        <translation>Auto</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1926" />
+        <source>Quality:</source>
+        <translation>Qualität:</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1928" />
+        <source>Original</source>
+        <translation>Original</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1948" />
         <source>Background Image:</source>
         <translation>Hintergrundbild:</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1530" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1951" />
         <source>Select</source>
         <translation>Wählen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1534" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1955" />
+        <source>Auto-tune Colors</source>
+        <translation>Farben automatisch anpassen</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1959" />
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1541" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1966" />
         <source>Apply</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1544" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1969" />
         <source>Restore</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1604" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2029" />
         <source>Uploading...</source>
         <translation>Ausgabe...</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1625" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2050" />
         <source>Current Chat</source>
         <translation>Aktueller Chat</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1851" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2276" />
         <source>Search Voice</source>
         <translation>Suche nach einer Stimme</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1917" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2342" />
         <source>Link copied to clipboard</source>
         <translation>Der Link wird kopiert</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1989" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1979" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2414" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2404" />
         <source>Author: @</source>
         <translation>Autor: @</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2013" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1990" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1980" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2438" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2415" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2405" />
         <source>Unknown</source>
         <translation>Unbekannt</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="1999" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2424" />
         <source> chats</source>
         <translation> chats</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2040" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2027" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2465" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2452" />
         <source>Chatting with </source>
         <translation>Chatten mit </translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2043" />
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2033" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2468" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2458" />
         <source>Open character</source>
         <translation>Schalte den Charakter frei</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2049" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2474" />
         <source>Chatting</source>
         <translation>Chatten</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2232" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2659" />
         <source>New chat started</source>
         <translation>Ein neuer Chat hat begonnen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2239" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2666" />
         <source>The message was deleted</source>
         <translation>Die Nachricht wird gelöscht</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2256" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2683" />
         <source>Rewind successfully</source>
         <translation>Erfolgreich zurückgespult</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2412" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2832" />
         <source>Message copied to clipboard</source>
         <translation>Die Nachricht wird kopiert</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2416" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2836" />
         <source>Copy Message</source>
         <translation>Kopie</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2423" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2843" />
         <source>Delete Message</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2429" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2849" />
         <source>Rewind to here</source>
         <translation>Hier zurückspulen</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2435" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2855" />
         <source>New chat from here</source>
         <translation>Neuer Chat von hier aus</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2441" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2861" />
         <source>Regenerate</source>
         <translation>Neu generieren</translation>
     </message>
     <message>
-        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2448" />
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="2868" />
         <source>Edit message</source>
         <translation>Nachricht bearbeiten</translation>
     </message>
@@ -1853,6 +1908,18 @@ Z.B. Entlarven Sie den Fremden vor Ende des Walzers.
         <location filename="../modules/ui/pages/UserPages/MainPage.py" line="648" />
         <source>Following</source>
         <translation>Abonnements</translation>
+    </message>
+</context><context>
+    <name>MessageBubble</name>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="417" />
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/mainwindow/ChatInterface.py" line="421" />
+        <source>Save</source>
+        <translation>Speichern</translation>
     </message>
 </context><context>
     <name>SceneListCard</name>
