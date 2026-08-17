@@ -2767,4 +2767,68 @@ E.g. Unmask the stranger before the final waltz ends.
         <source>And it's empty here...</source>
         <translation>А тут порожньо...</translation>
     </message>
+</context><context>
+    <name>SortComboBox</name>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="69" />
+        <source>Default</source>
+        <translation>За замовчуванням</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="70" />
+        <source>Chats (High to Low)</source>
+        <translation>За чатами (спадання)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="71" />
+        <source>Chats (Low to High)</source>
+        <translation>За чатами (зростання)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="72" />
+        <source>Name (A-Z)</source>
+        <translation>За назвою (А-Я)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="73" />
+        <source>Name (Z-A)</source>
+        <translation>За назвою (Я-А)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="75" />
+        <source>Likes (High to Low)</source>
+        <translation>За лайками (спадання)</translation>
+    </message>
+</context><context>
+    <name>SortTabButton</name>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="81" />
+        <source>Default</source>
+        <translation>За замовчуванням</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="82" />
+        <source>Chats (High to Low)</source>
+        <translation>За чатами (спадання)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="83" />
+        <source>Chats (Low to High)</source>
+        <translation>За чатами (зростання)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="84" />
+        <source>Name (A-Z)</source>
+        <translation>За назвою (А-Я)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="85" />
+        <source>Name (Z-A)</source>
+        <translation>За назвою (Я-А)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="88" />
+        <source>Likes (High to Low)</source>
+        <translation>За лайками (спадання)</translation>
+    </message>
 </context></TS>

@@ -2767,4 +2767,68 @@ Ej. Desenmascara al extraño antes de que termine el vals.
         <source>And it's empty here...</source>
         <translation>Y aquí está vacío...</translation>
     </message>
+</context><context>
+    <name>SortComboBox</name>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="69" />
+        <source>Default</source>
+        <translation>Por defecto</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="70" />
+        <source>Chats (High to Low)</source>
+        <translation>Chats (de mayor a menor)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="71" />
+        <source>Chats (Low to High)</source>
+        <translation>Chats (de menor a mayor)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="72" />
+        <source>Name (A-Z)</source>
+        <translation>Nombre (A-Z)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="73" />
+        <source>Name (Z-A)</source>
+        <translation>Nombre (Z-A)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Inputs.py" line="75" />
+        <source>Likes (High to Low)</source>
+        <translation>Me gusta (de mayor a menor)</translation>
+    </message>
+</context><context>
+    <name>SortTabButton</name>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="81" />
+        <source>Default</source>
+        <translation>Por defecto</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="82" />
+        <source>Chats (High to Low)</source>
+        <translation>Chats (de mayor a menor)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="83" />
+        <source>Chats (Low to High)</source>
+        <translation>Chats (de menor a mayor)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="84" />
+        <source>Name (A-Z)</source>
+        <translation>Nombre (A-Z)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="85" />
+        <source>Name (Z-A)</source>
+        <translation>Nombre (Z-A)</translation>
+    </message>
+    <message>
+        <location filename="../modules/ui/elements/Buttons.py" line="88" />
+        <source>Likes (High to Low)</source>
+        <translation>Me gusta (de mayor a menor)</translation>
+    </message>
 </context></TS>
