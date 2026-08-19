@@ -62,6 +62,7 @@ jobs:
             --collect-all "livekit" `
             --collect-all "live2d" `
             --collect-all "OpenGL" `
+            --collect-all "scipy" `
             --hidden-import "urllib3.contrib.resolver.system" `
             --hidden-import "urllib3.contrib.hface.protocols.http1" `
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
@@ -71,7 +72,7 @@ jobs:
           copy "src\icon.ico" "dist\main\icon.ico"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           xcopy /E /I /H /Y "src\themes" "dist\main\themes"
-          xcopy /E /I /H /Y "src\data\default_qss" "dist\main\data\default_qss"
+          xcopy /E /I /H /Y "src\data" "dist\main\data"
           
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
@@ -115,6 +116,7 @@ jobs:
 
   Windows-Deploy:
     needs: Windows-Build
+    if: ${{ github.event.release.tag_name != '' || github.event.inputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
@@ -190,6 +192,7 @@ jobs:
             --collect-all "livekit" \
             --collect-all "live2d" \
             --collect-all "OpenGL" \
+            --collect-all "scipy" \
             --hidden-import "urllib3.contrib.resolver.system" \
             --hidden-import "urllib3.contrib.hface.protocols.http1" \
             --hidden-import "urllib3.contrib.hface.protocols.http2" \
@@ -199,8 +202,7 @@ jobs:
           cp "src/icon.ico" "dist/main/icon.ico"
           cp -r "src/lang" "dist/main/lang"
           cp -r "src/themes" "dist/main/themes"
-          mkdir -p "dist/main/data"
-          cp -r "src/data/default_qss" "dist/main/data/default_qss"
+          cp -r "src/data" "dist/main/data"
 
           if [ -f "dist/main/main" ]; then
               mv "dist/main/main" "dist/main/emilia"
@@ -242,6 +244,7 @@ jobs:
 
   Linux-Deploy:
     needs: Linux-Build
+    if: ${{ github.event.release.tag_name != '' || github.event.inputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
