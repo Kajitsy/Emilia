@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -14,6 +15,20 @@ from modules.logic.SystemAccent import (
 
 class ThemeManager(QObject):
     theme_changed = pyqtSignal()
+
+    @staticmethod
+    def _get_resource_dir() -> Path:
+        if getattr(sys, "frozen", False):
+            exe_dir = Path(sys.executable).parent
+            meipass = getattr(sys, "_MEIPASS", None)
+            if meipass and (Path(meipass) / "data" / "default_qss").exists():
+                return Path(meipass)
+            if (exe_dir / "data" / "default_qss").exists() or (exe_dir / "themes").exists():
+                return exe_dir
+        src_dir = Path(__file__).resolve().parent.parent.parent
+        if (src_dir / "data" / "default_qss").exists() or (src_dir / "themes").exists():
+            return src_dir
+        return Path.cwd()
 
     def __init__(self):
         super().__init__()
@@ -45,9 +60,11 @@ class ThemeManager(QObject):
         }
         self.current = ""
         self.use_system_accent = False
-        src_dir = Path(__file__).resolve().parent.parent.parent
+        resource_dir = self._get_resource_dir()
         self.theme_path = (
-            str(src_dir / "themes") if (src_dir / "themes").exists() else "themes"
+            str(resource_dir / "themes")
+            if (resource_dir / "themes").exists()
+            else "themes"
         )
         self.colors_file = {}
         self.styles_file = {}
@@ -118,8 +135,8 @@ class ThemeManager(QObject):
 
     def load_default_qss(self):
         self.default_styles = {}
-        src_dir = Path(__file__).resolve().parent.parent.parent
-        default_qss_dir = src_dir / "data" / "default_qss"
+        resource_dir = self._get_resource_dir()
+        default_qss_dir = resource_dir / "data" / "default_qss"
         if default_qss_dir.exists():
             for qss_file in default_qss_dir.rglob("*.qss"):
                 element = qss_file.stem

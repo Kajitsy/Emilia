@@ -7,8 +7,8 @@ if %errorlevel% == 0 (
 ) else (
     echo Hello Dear User :3
 )
-call src\.venv\Scripts\activate
 @echo on
+call src\.venv\Scripts\activate
 python src\main.py
 @echo off
 call src\.venv\Scripts\deactivate.bat
