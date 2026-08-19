@@ -59,6 +59,7 @@ jobs:
           pyinstaller --noconfirm --onedir --windowed `
             --icon "src\icon.ico" `
             --uac-admin `
+            --add-data "VERSION;." `
             --collect-all "livekit" `
             --collect-all "live2d" `
             --collect-all "OpenGL" `
@@ -70,6 +71,7 @@ jobs:
             "src\main.py"
           
           copy "src\icon.ico" "dist\main\icon.ico"
+          copy "VERSION" "dist\main\VERSION"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           xcopy /E /I /H /Y "src\themes" "dist\main\themes"
           xcopy /E /I /H /Y "src\data" "dist\main\data"
@@ -189,6 +191,7 @@ jobs:
 
           pyinstaller --noconfirm --onedir --windowed \
             --icon "src/icon.ico" \
+            --add-data "VERSION:." \
             --collect-all "livekit" \
             --collect-all "live2d" \
             --collect-all "OpenGL" \
@@ -200,6 +203,7 @@ jobs:
             "src/main.py"
 
           cp "src/icon.ico" "dist/main/icon.ico"
+          cp "VERSION" "dist/main/VERSION"
           cp -r "src/lang" "dist/main/lang"
           cp -r "src/themes" "dist/main/themes"
           cp -r "src/data" "dist/main/data"
