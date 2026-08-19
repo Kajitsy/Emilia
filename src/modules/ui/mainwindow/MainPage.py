@@ -156,7 +156,7 @@ class MainPage(QMainWindow):
         self.threads.append(self.discord_thread)
         self.updater_thread = UpdaterThread(
             self.settings.value(
-                "update_server", "https://germany.emiupd.ateez.ru/", type=str
+                "update_server", "https://nl-emiupd.kajitsy.xyz/", type=str
             )
         )
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
@@ -479,7 +479,6 @@ class MainPage(QMainWindow):
 
             overlay = self.createDownloadOverlay()
             thread = UpdateThread(
-                self,
                 self.updater_thread.remote_url,
                 self.updater_thread.files_to_download,
                 self.updater_thread.files_to_removed,
@@ -1202,8 +1201,15 @@ class MainPage(QMainWindow):
 
     def getUpdateServers(self, data):
         self.update_servers = data
-        for server in self.update_servers:
-            self.settings_page.update_servers[server.get("url")] = server.get("name")
+        try:
+            if (
+                hasattr(self, "settings_page")
+                and self.settings_page is not None
+                and not isdeleted(self.settings_page)
+            ):
+                self.settings_page.setUpdateServers(data)
+        except Exception:
+            pass
 
     def setOutputDevice(self, index):
         device_name = self.output_devices.get(index)
