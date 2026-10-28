@@ -1,3 +1,6 @@
+from .base_client import USER_AGENT
+
+
 class UsersAPI:
     def __init__(self, client):
         self.client = client

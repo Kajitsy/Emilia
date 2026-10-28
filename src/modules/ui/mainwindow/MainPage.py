@@ -299,10 +299,18 @@ class MainPage(QMainWindow):
         if self.drpc_enable:
             self.discord_thread.connect()
 
-        if (
-            QDateTime.fromString(self.settings.value("cai_auth/expiration_date"))
-            < QDateTime.currentDateTime()
-        ):
+        exp_str = self.settings.value("cai_auth/expiration_date", "", type=str)
+        exp_date = (
+            QDateTime.fromString(exp_str, "yyyy.MM.dd HH:mm")
+            if exp_str
+            else QDateTime()
+        )
+        if not exp_date.isValid() or exp_date > QDateTime.currentDateTime():
+            if self.cookie:
+                self.chat_thread.set_cookie(self.cookie)
+                self.chat_thread.get_voice_limit()
+                self.chat_thread.get_chat_image_attachment_limit()
+
             if self.token:
                 self.chat_thread.set_token(self.token)
                 self.chat_thread.create_connect()
@@ -318,11 +326,6 @@ class MainPage(QMainWindow):
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_available_models()
                 self.chat_thread.get_available_models_git()
-
-            if self.cookie:
-                self.chat_thread.set_cookie(self.cookie)
-                self.chat_thread.get_voice_limit()
-                self.chat_thread.get_chat_image_attachment_limit()
 
             if not self.cookie or not self.token:
                 self.openSettings()

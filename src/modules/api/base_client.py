@@ -1,5 +1,6 @@
 import json
 import logging
+import platform
 from collections import defaultdict
 from urllib.parse import urlparse
 
@@ -8,14 +9,19 @@ import curl_cffi
 SERVICE_UNAVAILABLE_STATUS = 503
 SERVICE_UNAVAILABLE_THRESHOLD = 3
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+if platform.system() == "Linux":
+    USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+elif platform.system() == "Darwin":
+    USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+else:
+    USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
 
 
 class BaseClient:
     def __init__(self):
         self.token = None
         self.cookie = None
-        self.session = curl_cffi.AsyncSession()
+        self.session = curl_cffi.AsyncSession(impersonate="chrome")
         self.on_service_unavailable = None
         self._unavailable_streaks = defaultdict(int)
         self._notified_services = set()
