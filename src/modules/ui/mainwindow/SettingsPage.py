@@ -748,7 +748,7 @@ class SettingsPage(QWidget):
         )
         if os.path.exists(folder_path):
             models_count = 0
-            for root, _, files in os.walk(folder_path):
+            for _root, _, files in os.walk(folder_path):
                 for file in files:
                     if file.endswith(".vtube.json"):
                         models_count += 1
@@ -933,8 +933,8 @@ class SettingsPage(QWidget):
                 e_layout.addWidget(param_widget)
             add_button = PushButton(self.tr("Add parameter"))
             add_button.clicked.connect(
-                lambda _, b=add_button, l=e_layout, e=emote_name: createParameter(
-                    b, l, e
+                lambda _, b=add_button, layout=e_layout, e=emote_name: createParameter(
+                    b, layout, e
                 )
             )
             e_layout.addWidget(add_button, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -1075,13 +1075,6 @@ class SettingsPage(QWidget):
         button_layout.addWidget(self.cancel_button)
 
         return button_bar, button_layout
-
-    def createTopBar(self):
-        top_bar = QWidget()
-        top_bar_layout = QHBoxLayout()
-        top_bar.setLayout(top_bar_layout)
-
-        return top_bar, top_bar_layout
 
     def getCookies(self):
         self.cookie_available = False

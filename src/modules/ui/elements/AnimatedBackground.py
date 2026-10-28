@@ -378,7 +378,7 @@ def extract_media_palette(media_path: str):
         user_rgb = colors[1] if len(colors) > 1 else colors[0]
 
         for c in colors[1:]:
-            dist = math.sqrt(sum([(a - b) ** 2 for a, b in zip(char_rgb, c)]))
+            dist = math.sqrt(sum([(a - b) ** 2 for a, b in zip(char_rgb, c, strict=False)]))
             if dist > 30:
                 user_rgb = c
                 break

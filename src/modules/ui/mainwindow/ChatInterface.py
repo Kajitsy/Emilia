@@ -628,10 +628,6 @@ class ChatInterface(QWidget):
         if hasattr(self, "player_thread") and self.player_thread:
             self.player_thread.stop()
 
-    def closeEvent(self, event):
-        self.cleanup()
-        super().closeEvent(event)
-
     def extract_theme_colors(self, media_path):
         return extract_media_palette(media_path)
 
@@ -2079,7 +2075,7 @@ class ChatInterface(QWidget):
 
     def dislikeCharacter(self):
         self.like_button.setIcon(self.svg_icons.like(TM.c("icon")))
-        if self.vote == False:
+        if self.vote is False:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
             self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("icon")))
@@ -2090,7 +2086,7 @@ class ChatInterface(QWidget):
 
     def likeCharacter(self):
         self.dislike_button.setIcon(self.svg_icons.dislike(TM.c("icon")))
-        if self.vote:
+        if self.vote is True:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
             self.like_button.setIcon(self.svg_icons.like(TM.c("icon")))
@@ -2192,9 +2188,9 @@ class ChatInterface(QWidget):
         )
 
         if self.voted:
-            if self.vote == True:
+            if self.vote is True:
                 self.like_button.setIcon(self.svg_icons.liked(TM.c("icon")))
-            elif self.vote == False:
+            elif self.vote is False:
                 self.dislike_button.setIcon(self.svg_icons.disliked(TM.c("icon")))
 
         self.title_label.setText(self.character.get("title"))
@@ -2676,5 +2672,6 @@ class ChatInterface(QWidget):
             self.hideOverlay()
             self.attach_chat()
         else:
+            self.cleanup()
             super().closeEvent(a0)
             self.deleteLater()

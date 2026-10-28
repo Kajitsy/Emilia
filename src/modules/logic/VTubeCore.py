@@ -1,5 +1,4 @@
 import json
-import random
 
 from pyvts import vts
 
@@ -51,7 +50,6 @@ class EEC:
             emotes_data = json.load(f)
 
         emote_data = emotes_data[emote]["params"]
-        rndm = random.randint
         names = []
         values = []
         for parameter_name, parameter_value in emote_data.items():
