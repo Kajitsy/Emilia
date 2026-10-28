@@ -1174,14 +1174,15 @@ class MainPage(QMainWindow):
     def getMe(self, data):
         self.me_full = data
         self.me = self.me_full.get("user", {})
-        self.author_id = self.me["id"]
-        self.name = self.me["account"]["name"]
-        self.username = self.me["username"]
+        self.author_id = self.me.get("id")
+        self.account = self.me.get("account", {})
+        self.name = self.account.get("name", "")
+        self.username = self.me.get("username")
         self.me_has_avatar = bool(
-            self.me.get("account", {}).get("avatar_file_name")
+            self.account.get("avatar_file_name")
         )
         self.me_has_plus = bool(self.me.get("subscription", {}))
-        self.me_avatar = self.me.get("account", {}).get("avatar_file_name")
+        self.me_avatar = self.account.get("avatar_file_name")
 
         if self.me_has_avatar:
             self.left_sidebar.avatarUpdate()
