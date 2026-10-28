@@ -1,4 +1,4 @@
-from .base_client import USER_AGENT
+from .base_client import USER_AGENT, IMPERSONATE_TARGET
 
 
 class UsersAPI:
@@ -95,6 +95,6 @@ class UsersAPI:
             headers=headers,
             multipart=multipart,
             timeout=100,
-            impersonate="chrome",
+            impersonate=IMPERSONATE_TARGET,
         )
         return response.json()

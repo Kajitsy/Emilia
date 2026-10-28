@@ -2,7 +2,7 @@ import json
 import logging
 import uuid
 
-from .base_client import BaseClient, USER_AGENT
+from .base_client import BaseClient, USER_AGENT, IMPERSONATE_TARGET
 
 
 class WSClient(BaseClient):
@@ -42,7 +42,7 @@ class WSClient(BaseClient):
                 "wss://neo.character.ai/ws/",
                 headers=headers,
                 default_headers=False,
-                impersonate="chrome",
+                impersonate=IMPERSONATE_TARGET,
                 autoclose=False,
             )
             return self.ws

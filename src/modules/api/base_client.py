@@ -16,12 +16,14 @@ elif platform.system() == "Darwin":
 else:
     USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
 
+IMPERSONATE_TARGET = "chrome150"
+
 
 class BaseClient:
     def __init__(self):
         self.token = None
         self.cookie = None
-        self.session = curl_cffi.AsyncSession(impersonate="chrome")
+        self.session = curl_cffi.AsyncSession(impersonate=IMPERSONATE_TARGET)
         self.on_service_unavailable = None
         self._unavailable_streaks = defaultdict(int)
         self._notified_services = set()

@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from curl_cffi import requests
+from modules.api.base_client import IMPERSONATE_TARGET
 from platformdirs import user_data_dir
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -51,7 +52,7 @@ class UpdateThread(QThread):
         try:
             r = requests.get(
                 f"{self.remote_url}manifest.json",
-                impersonate="chrome",
+                impersonate=IMPERSONATE_TARGET,
                 timeout=10,
             )
             if r.status_code == 200:
@@ -104,7 +105,7 @@ class UpdateThread(QThread):
 
                 r = requests.get(
                     url,
-                    impersonate="chrome",
+                    impersonate=IMPERSONATE_TARGET,
                     stream=True,
                     timeout=30,
                 )

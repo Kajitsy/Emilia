@@ -5,6 +5,7 @@ import platform
 import sys
 
 from curl_cffi import requests
+from modules.api.base_client import IMPERSONATE_TARGET
 from PyQt6.QtCore import QThread, pyqtSignal
 
 
@@ -108,7 +109,7 @@ class UpdaterThread(QThread):
 
         for url in urls_to_try:
             try:
-                response = requests.get(url, impersonate="chrome", timeout=10)
+                response = requests.get(url, impersonate=IMPERSONATE_TARGET, timeout=10)
                 if response.status_code == 200:
                     data = response.json()
                     if isinstance(data, dict) and "files" in data and isinstance(data["files"], dict):

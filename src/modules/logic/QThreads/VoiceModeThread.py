@@ -12,7 +12,7 @@ import speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from modules.logic.VTubeCore import EEC
-from modules.api.base_client import USER_AGENT
+from modules.api.base_client import USER_AGENT, IMPERSONATE_TARGET
 
 
 class VoiceModeThread(QThread):
@@ -35,7 +35,7 @@ class VoiceModeThread(QThread):
         self.lang = self.mw.current_language
         self.used_emotes = []
 
-        self.session = curl_cffi.AsyncSession(impersonate="chrome")
+        self.session = curl_cffi.AsyncSession(impersonate=IMPERSONATE_TARGET)
         self.ws = None
         self.chat_thread = self.mw.chat_thread
         self.recognizer = speech_recognition.Recognizer()
@@ -199,7 +199,7 @@ class VoiceModeThread(QThread):
                     "wss://neo.character.ai/ws/",
                     headers=headers,
                     default_headers=False,
-                    impersonate="chrome",
+                    impersonate=IMPERSONATE_TARGET,
                     autoclose=False,
                 )
                 self.connected_signal.emit(True)
@@ -210,7 +210,7 @@ class VoiceModeThread(QThread):
             "wss://neo.character.ai/ws/",
             headers=headers,
             default_headers=False,
-            impersonate="chrome",
+            impersonate=IMPERSONATE_TARGET,
             autoclose=False,
         )
         if self.vtube_studio:
