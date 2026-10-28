@@ -1,7 +1,6 @@
 import ctypes
 import datetime
 import platform
-import sys
 
 import sounddevice
 from packaging import version
