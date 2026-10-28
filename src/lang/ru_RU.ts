@@ -2816,4 +2816,26 @@ E.g. Unmask the stranger before the final waltz ends.
         <source>Likes (High to Low)</source>
         <translation>По лайкам (убывание)</translation>
     </message>
+</context><context>
+    <name>ServiceUnavailableDialog</name>
+    <message>
+        <source>Service Unavailable</source>
+        <translation>Сервис недоступен</translation>
+    </message>
+    <message>
+        <source>The service is experiencing heavy load</source>
+        <translation>Сервис испытывает большую нагрузку</translation>
+    </message>
+    <message>
+        <source>All requests to the service are returning error 503. The service is currently not working. Please try again later.</source>
+        <translation>Все запросы к сервису возвращают ошибку 503. Сервис сейчас не работает. Пожалуйста, попробуйте позже.</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Повторить</translation>
+    </message>
 </context></TS>

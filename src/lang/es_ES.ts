@@ -2836,4 +2836,26 @@ Ej. Desenmascara al extraño antes de que termine el vals.
         <source>Likes (High to Low)</source>
         <translation>Me gusta (de mayor a menor)</translation>
     </message>
+</context><context>
+    <name>ServiceUnavailableDialog</name>
+    <message>
+        <source>Service Unavailable</source>
+        <translation>Servicio no disponible</translation>
+    </message>
+    <message>
+        <source>The service is experiencing heavy load</source>
+        <translation>El servicio está experimentando una gran carga</translation>
+    </message>
+    <message>
+        <source>All requests to the service are returning error 503. The service is currently not working. Please try again later.</source>
+        <translation>Todas las solicitudes al servicio devuelven el error 503. El servicio no funciona en este momento. Inténtalo de nuevo más tarde.</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Cerrar</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Reintentar</translation>
+    </message>
 </context></TS>

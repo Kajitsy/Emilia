@@ -30,6 +30,7 @@ def asyncSlot(func):
 class ChatThread(QThread):
     finished = pyqtSignal(object)
     notification_signal = pyqtSignal(str)
+    service_unavailable_signal = pyqtSignal()
 
     connected_signal = pyqtSignal(bool)
     user_message_signal = pyqtSignal(object)
@@ -121,6 +122,7 @@ class ChatThread(QThread):
         self.mw = main_window
 
         self.client = WSClient()
+        self.client.on_service_unavailable = self.service_unavailable_signal.emit
         self.api_chars = CharacterAPI(self.client)
         self.api_chats = ChatsAPI(self.client)
         self.api_emilia = EmiliaAPI(

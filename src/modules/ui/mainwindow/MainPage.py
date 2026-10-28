@@ -52,6 +52,7 @@ from modules.ui.Elements import (
 )
 from modules.ui.mainwindow.ChatInterface import ChatInterface
 from modules.ui.mainwindow.SearchPage import SearchPage
+from modules.ui.mainwindow.ServiceUnavailableDialog import ServiceUnavailableDialog
 from modules.ui.mainwindow.SettingsPage import SettingsPage
 from modules.ui.pages import CharacterPages, ScenePages, UserPages
 from modules.Utils import color_avatar
@@ -129,6 +130,8 @@ class MainPage(QMainWindow):
 
         self.threads = []
         self.overlays = []
+        self.service_unavailable_dialog = None
+        self._service_unavailable_pending = False
         self.recent_chats = []
         self.try_this_chats = []
         self.featured_chats = []
@@ -287,6 +290,9 @@ class MainPage(QMainWindow):
             self.getAvailableModelsGit
         )
         self.chat_thread.get_update_servers_signal.connect(self.getUpdateServers)
+        self.chat_thread.service_unavailable_signal.connect(
+            self.showServiceUnavailable
+        )
 
         self.chat_thread.start()
         self.discord_thread.start()
@@ -848,6 +854,30 @@ class MainPage(QMainWindow):
         self.notification_message_animation.setEndValue(end_rect)
         self.notification_message_animation.start()
 
+    def showServiceUnavailable(self):
+        if not self.isVisible():
+            self._service_unavailable_pending = True
+            return
+        if (
+            self.service_unavailable_dialog is not None
+            and not isdeleted(self.service_unavailable_dialog)
+        ):
+            self.service_unavailable_dialog.show()
+            self.service_unavailable_dialog.raise_()
+            self.service_unavailable_dialog.activateWindow()
+            return
+
+        self.service_unavailable_dialog = ServiceUnavailableDialog(self)
+        self.service_unavailable_dialog.finished.connect(
+            self._serviceUnavailableClosed
+        )
+        self.service_unavailable_dialog.show()
+        self.service_unavailable_dialog.raise_()
+        self.service_unavailable_dialog.activateWindow()
+
+    def _serviceUnavailableClosed(self, _result=0):
+        self.service_unavailable_dialog = None
+
     def hideOverlay(self):
         if (
             hasattr(self, "current_chat_interface")
@@ -1290,6 +1320,9 @@ class MainPage(QMainWindow):
     def showEvent(self, a0):
         super().showEvent(a0)
         self.mw_show_signal.emit()
+        if self._service_unavailable_pending:
+            self._service_unavailable_pending = False
+            QTimer.singleShot(0, self.showServiceUnavailable)
         self.discord_thread.update_wlrpc()
         if platform.system() == "Windows":
             from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect
