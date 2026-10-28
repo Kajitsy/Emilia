@@ -2,7 +2,7 @@ import json
 import logging
 import uuid
 
-from .base_client import BaseClient
+from .base_client import BaseClient, USER_AGENT, IMPERSONATE_TARGET
 
 
 class WSClient(BaseClient):
@@ -10,14 +10,39 @@ class WSClient(BaseClient):
         super().__init__()
         self.ws = None
 
-    async def connect_ws(self):
+    async def connect_ws(self, force: bool = False):
         """Создает и возвращает WebSocket подключение."""
-        if self.ws and not self.ws.closed:
+        if self.ws and not self.ws.closed and not force:
             return self.ws
+        if not self.token:
+            logging.getLogger(__name__).warning("WebSocket connection skipped: token is missing")
+            return None
+        if self.ws:
+            try:
+                await self.ws.close()
+            except Exception:
+                pass
+            self.ws = None
         try:
+            cookie_parts = [f'HTTP_AUTHORIZATION="Token {self.token}"']
+            if self.cookie:
+                cookie_parts.append(f"web-next-auth={self.cookie}")
+
+            headers = {
+                "User-Agent": USER_AGENT,
+                "Origin": "https://character.ai",
+                "Pragma": "no-cache",
+                "Cache-Control": "no-cache",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Accept-Language": "ru,en;q=0.9",
+                "Cookie": "; ".join(cookie_parts),
+            }
+
             self.ws = await self.session.ws_connect(
                 "wss://neo.character.ai/ws/",
-                cookies={"HTTP_AUTHORIZATION": f"Token {self.token}"},
+                headers=headers,
+                default_headers=False,
+                impersonate=IMPERSONATE_TARGET,
                 autoclose=False,
             )
             return self.ws

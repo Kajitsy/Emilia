@@ -47,6 +47,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: ".\dist\main\emilia.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\dist\main\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs
+Source: "VERSION"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\src\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\src\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs
 Source: ".\src\themes\*"; DestDir: "{app}\themes"; Flags: ignoreversion recursesubdirs

@@ -68,25 +68,41 @@ Python Path:  {sys.executable}
 Process ID:   {os.getpid()}"""
 )
 
-from PyQt6.QtCore import QLocale, QSettings, QTranslator
-from PyQt6.QtGui import QAction, QIcon, QPixmap
-from PyQt6.QtWidgets import QApplication, QSplashScreen, QSystemTrayIcon
+from PyQt6.QtCore import QLocale, QSettings, QTranslator, Qt
+from PyQt6.QtGui import QAction, QGuiApplication, QIcon, QPixmap
+from PyQt6.QtWidgets import QApplication, QDialog, QSplashScreen, QSystemTrayIcon
 from qasync import QEventLoop
 
+from modules.api.service_status import is_service_unavailable
+from modules.ui import TM
 from modules.ui.Elements import Menu
-from modules.ui.mainwindow import MainPage
+from modules.ui.mainwindow import MainPage, ServiceUnavailableDialog
 
 if platform.system() == "Windows":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Emilia")
     logger.debug("ctypes SetCurrentProcessExplicitAppUserModelID")
 
 app = QApplication(sys.argv)
+app.setWindowIcon(QIcon("icon.ico"))
 
+settings = QSettings(
+    QSettings.Format.IniFormat, QSettings.Scope.UserScope, "Emilia", "settings"
+)
 translator = QTranslator()
 translator.load(
-    f"lang/{QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, 'Emilia', 'settings').value('emilia_language', QLocale.system().name())}.qm"
+    f"lang/{settings.value('emilia_language', QLocale.system().name())}.qm"
 )
 app.installTranslator(translator)
+
+theme = settings.value("app_theme", "Dark", type=str)
+if settings.value("app_theme_system_sync", False, type=bool):
+    theme = (
+        "Dark"
+        if QGuiApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark
+        else "Light"
+    )
+TM.use_system_accent = settings.value("app_use_system_accent", False, type=bool)
+TM.set_theme(theme)
 
 loop = QEventLoop(app)
 asyncio.set_event_loop(loop)
@@ -95,6 +111,17 @@ mw_show = True
 
 
 async def main(splash=None):
+    while await is_service_unavailable(
+        settings.value("cai_auth/token", "", type=str),
+        settings.value("cai_auth/cookie", "", type=str),
+    ):
+        if splash:
+            splash.hide()
+        dialog = ServiceUnavailableDialog(allow_retry=True)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            app.quit()
+            return
+
     def actions_toggle():
         global mw_show
         mw_show = not mw_show
@@ -116,7 +143,6 @@ async def main(splash=None):
     )
     tray_icon.setContextMenu(tray_menu)
     tray_icon.setToolTip("Emilia")
-    app.setWindowIcon(QIcon("icon.ico"))
     tray_icon.setIcon(QIcon("icon.ico"))
 
     show_action = QAction(tray_icon.tr("Show"))

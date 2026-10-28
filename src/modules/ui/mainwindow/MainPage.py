@@ -1,7 +1,6 @@
 import ctypes
 import datetime
 import platform
-import sys
 
 import sounddevice
 from packaging import version
@@ -52,6 +51,7 @@ from modules.ui.Elements import (
 )
 from modules.ui.mainwindow.ChatInterface import ChatInterface
 from modules.ui.mainwindow.SearchPage import SearchPage
+from modules.ui.mainwindow.ServiceUnavailableDialog import ServiceUnavailableDialog
 from modules.ui.mainwindow.SettingsPage import SettingsPage
 from modules.ui.pages import CharacterPages, ScenePages, UserPages
 from modules.Utils import color_avatar
@@ -129,6 +129,8 @@ class MainPage(QMainWindow):
 
         self.threads = []
         self.overlays = []
+        self.service_unavailable_dialog = None
+        self._service_unavailable_pending = False
         self.recent_chats = []
         self.try_this_chats = []
         self.featured_chats = []
@@ -156,7 +158,7 @@ class MainPage(QMainWindow):
         self.threads.append(self.discord_thread)
         self.updater_thread = UpdaterThread(
             self.settings.value(
-                "update_server", "https://germany.emiupd.ateez.ru/", type=str
+                "update_server", "https://nl-emiupd.kajitsy.xyz/", type=str
             )
         )
         self.updater_thread.has_update_signal.connect(self.checkForUpdates)
@@ -166,8 +168,8 @@ class MainPage(QMainWindow):
         self.image_loader = ImageLoader()
 
         self.setOutputDevice(self.settings.value("output_device", 0, type=int))
-        if getattr(sys, "frozen", False) and platform.system() == "Windows":
-            self.updater_thread.start()
+        #if getattr(sys, "frozen", False) and platform.system() == "Windows":
+        #    self.updater_thread.start()
 
         self.initUI()
         self.loadUI()
@@ -287,16 +289,27 @@ class MainPage(QMainWindow):
             self.getAvailableModelsGit
         )
         self.chat_thread.get_update_servers_signal.connect(self.getUpdateServers)
+        self.chat_thread.service_unavailable_signal.connect(
+            self.showServiceUnavailable
+        )
 
         self.chat_thread.start()
         self.discord_thread.start()
         if self.drpc_enable:
             self.discord_thread.connect()
 
-        if (
-            QDateTime.fromString(self.settings.value("cai_auth/expiration_date"))
-            < QDateTime.currentDateTime()
-        ):
+        exp_str = self.settings.value("cai_auth/expiration_date", "", type=str)
+        exp_date = (
+            QDateTime.fromString(exp_str, "yyyy.MM.dd HH:mm")
+            if exp_str
+            else QDateTime()
+        )
+        if not exp_date.isValid() or exp_date > QDateTime.currentDateTime():
+            if self.cookie:
+                self.chat_thread.set_cookie(self.cookie)
+                self.chat_thread.get_voice_limit()
+                self.chat_thread.get_chat_image_attachment_limit()
+
             if self.token:
                 self.chat_thread.set_token(self.token)
                 self.chat_thread.create_connect()
@@ -312,11 +325,6 @@ class MainPage(QMainWindow):
                 self.chat_thread.get_featured_voices()
                 self.chat_thread.get_available_models()
                 self.chat_thread.get_available_models_git()
-
-            if self.cookie:
-                self.chat_thread.set_cookie(self.cookie)
-                self.chat_thread.get_voice_limit()
-                self.chat_thread.get_chat_image_attachment_limit()
 
             if not self.cookie or not self.token:
                 self.openSettings()
@@ -479,7 +487,6 @@ class MainPage(QMainWindow):
 
             overlay = self.createDownloadOverlay()
             thread = UpdateThread(
-                self,
                 self.updater_thread.remote_url,
                 self.updater_thread.files_to_download,
                 self.updater_thread.files_to_removed,
@@ -849,6 +856,30 @@ class MainPage(QMainWindow):
         self.notification_message_animation.setEndValue(end_rect)
         self.notification_message_animation.start()
 
+    def showServiceUnavailable(self):
+        if not self.isVisible():
+            self._service_unavailable_pending = True
+            return
+        if (
+            self.service_unavailable_dialog is not None
+            and not isdeleted(self.service_unavailable_dialog)
+        ):
+            self.service_unavailable_dialog.show()
+            self.service_unavailable_dialog.raise_()
+            self.service_unavailable_dialog.activateWindow()
+            return
+
+        self.service_unavailable_dialog = ServiceUnavailableDialog(self)
+        self.service_unavailable_dialog.finished.connect(
+            self._serviceUnavailableClosed
+        )
+        self.service_unavailable_dialog.show()
+        self.service_unavailable_dialog.raise_()
+        self.service_unavailable_dialog.activateWindow()
+
+    def _serviceUnavailableClosed(self, _result=0):
+        self.service_unavailable_dialog = None
+
     def hideOverlay(self):
         if (
             hasattr(self, "current_chat_interface")
@@ -1175,14 +1206,15 @@ class MainPage(QMainWindow):
     def getMe(self, data):
         self.me_full = data
         self.me = self.me_full.get("user", {})
-        self.author_id = self.me["id"]
-        self.name = self.me["account"]["name"]
-        self.username = self.me["username"]
+        self.author_id = self.me.get("id")
+        self.account = self.me.get("account", {})
+        self.name = self.account.get("name", "")
+        self.username = self.me.get("username")
         self.me_has_avatar = bool(
-            self.me.get("account", {}).get("avatar_file_name")
+            self.account.get("avatar_file_name")
         )
         self.me_has_plus = bool(self.me.get("subscription", {}))
-        self.me_avatar = self.me.get("account", {}).get("avatar_file_name")
+        self.me_avatar = self.account.get("avatar_file_name")
 
         if self.me_has_avatar:
             self.left_sidebar.avatarUpdate()
@@ -1202,8 +1234,15 @@ class MainPage(QMainWindow):
 
     def getUpdateServers(self, data):
         self.update_servers = data
-        for server in self.update_servers:
-            self.settings_page.update_servers[server.get("url")] = server.get("name")
+        try:
+            if (
+                hasattr(self, "settings_page")
+                and self.settings_page is not None
+                and not isdeleted(self.settings_page)
+            ):
+                self.settings_page.setUpdateServers(data)
+        except Exception:
+            pass
 
     def setOutputDevice(self, index):
         device_name = self.output_devices.get(index)
@@ -1283,6 +1322,9 @@ class MainPage(QMainWindow):
     def showEvent(self, a0):
         super().showEvent(a0)
         self.mw_show_signal.emit()
+        if self._service_unavailable_pending:
+            self._service_unavailable_pending = False
+            QTimer.singleShot(0, self.showServiceUnavailable)
         self.discord_thread.update_wlrpc()
         if platform.system() == "Windows":
             from modules.logic.WinDarkTheme import ChangeDWMAttrib, detect

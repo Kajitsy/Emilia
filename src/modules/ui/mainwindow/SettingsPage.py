@@ -380,7 +380,12 @@ class SettingsPage(QWidget):
             "https://apiemiliacf.kajitsy.xyz/": self.tr("Backup"),
         }
         self.update_servers = {}
-        self.ud_added = False
+        if hasattr(self.mw, "update_servers") and self.mw.update_servers:
+            self.update_servers = {
+                s["url"]: s["name"]
+                for s in self.mw.update_servers
+                if isinstance(s, dict) and "url" in s and "name" in s
+            }
         self.settings_data = [
             {
                 "label": self.tr("Character.AI Settings"),
@@ -470,7 +475,7 @@ class SettingsPage(QWidget):
                         "label": self.tr("Update Server"),
                         "items": list(self.update_servers.values()),
                         "key": "update_server",
-                        "def_value": "https://germany.emiupd.ateez.ru/",
+                        "def_value": "https://nl-emiupd.kajitsy.xyz/",
                     },
                     {
                         "type": "combobox",
@@ -743,7 +748,7 @@ class SettingsPage(QWidget):
         )
         if os.path.exists(folder_path):
             models_count = 0
-            for root, _, files in os.walk(folder_path):
+            for _root, _, files in os.walk(folder_path):
                 for file in files:
                     if file.endswith(".vtube.json"):
                         models_count += 1
@@ -928,8 +933,8 @@ class SettingsPage(QWidget):
                 e_layout.addWidget(param_widget)
             add_button = PushButton(self.tr("Add parameter"))
             add_button.clicked.connect(
-                lambda _, b=add_button, l=e_layout, e=emote_name: createParameter(
-                    b, l, e
+                lambda _, b=add_button, layout=e_layout, e=emote_name: createParameter(
+                    b, layout, e
                 )
             )
             e_layout.addWidget(add_button, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -1071,13 +1076,6 @@ class SettingsPage(QWidget):
 
         return button_bar, button_layout
 
-    def createTopBar(self):
-        top_bar = QWidget()
-        top_bar_layout = QHBoxLayout()
-        top_bar.setLayout(top_bar_layout)
-
-        return top_bar, top_bar_layout
-
     def getCookies(self):
         self.cookie_available = False
         self.token_available = False
@@ -1105,8 +1103,8 @@ class SettingsPage(QWidget):
                     if item and item.widget():
                         item.widget().deleteLater()
 
-            self.chat_thread.token = self.mw.token
-            self.chat_thread.cookie = self.mw.cookie
+            self.chat_thread.set_token(self.mw.token)
+            self.chat_thread.set_cookie(self.mw.cookie)
             self.chat_thread.create_connect()
 
             self.chat_thread.get_recent_chats()
@@ -1138,6 +1136,36 @@ class SettingsPage(QWidget):
     def back(self):
         self.mw.main_content_area.setCurrentWidget(self.mw.main_page)
         self.mw.left_sidebar.setEnabled(True)
+
+    def setUpdateServers(self, servers):
+        if not servers or not isinstance(servers, list):
+            return
+        self.update_servers = {
+            s["url"]: s["name"]
+            for s in servers
+            if isinstance(s, dict) and "url" in s and "name" in s
+        }
+        widget = self.setting_widgets.get("update_server")
+        if widget is None:
+            return
+        try:
+            if isdeleted(widget):
+                return
+            current_value = self.mw.settings.value(
+                "update_server", "https://nl-emiupd.kajitsy.xyz/", type=str
+            )
+            widget.blockSignals(True)
+            widget.clear()
+            for name in self.update_servers.values():
+                widget.addItem(name)
+            current_name = self.update_servers.get(current_value)
+            if current_name:
+                widget.setCurrentText(current_name)
+            elif widget.count() > 0:
+                widget.setCurrentIndex(0)
+            widget.blockSignals(False)
+        except (RuntimeError, Exception):
+            pass
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -1174,13 +1202,23 @@ class SettingsPage(QWidget):
                         self.api_servers.get(value, self.tr("Main"))
                     )
                 elif key == "update_server":
-                    if not self.ud_added:
-                        for server in self.mw.update_servers:
-                            widget.addItem(server["name"])
-                        self.ud_added = True
-                    widget.setCurrentText(
-                        self.update_servers.get(value, self.tr("Germany"))
-                    )
+                    if not self.update_servers and hasattr(self.mw, "update_servers") and self.mw.update_servers:
+                        self.update_servers = {
+                            s["url"]: s["name"]
+                            for s in self.mw.update_servers
+                            if isinstance(s, dict) and "url" in s and "name" in s
+                        }
+                    if widget.count() == 0 and self.update_servers:
+                        widget.blockSignals(True)
+                        widget.clear()
+                        for name in self.update_servers.values():
+                            widget.addItem(name)
+                        widget.blockSignals(False)
+                    current_name = self.update_servers.get(value)
+                    if current_name:
+                        widget.setCurrentText(current_name)
+                    elif widget.count() > 0:
+                        widget.setCurrentIndex(0)
                 elif key in {"tr_char_msg_to", "tr_user_msg_to"}:
                     widget.setCurrentText(
                         self.languages.get(value, {}).get("title", self.tr("English"))
@@ -1287,9 +1325,10 @@ class SettingsPage(QWidget):
                             for k, v in self.update_servers.items()
                             if v == widget.currentText()
                         ),
-                        "https://germany.emiupd.ateez.ru/",
+                        None,
                     )
-                    self.mw.settings.setValue(key, url)
+                    if url:
+                        self.mw.settings.setValue(key, url)
                 elif key in {"tr_char_msg_to", "tr_user_msg_to"}:
                     lang = next(
                         k

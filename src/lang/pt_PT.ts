@@ -2836,4 +2836,26 @@ Ex. Desmascare o estranho antes do baile terminar.
         <source>Likes (High to Low)</source>
         <translation>Gostos (maior para menor)</translation>
     </message>
+</context><context>
+    <name>ServiceUnavailableDialog</name>
+    <message>
+        <source>Service Unavailable</source>
+        <translation>Serviço indisponível</translation>
+    </message>
+    <message>
+        <source>The service is experiencing heavy load</source>
+        <translation>O serviço está a experienciar uma carga elevada</translation>
+    </message>
+    <message>
+        <source>All requests to the service are returning error 503. The service is currently not working. Please try again later.</source>
+        <translation>Todos os pedidos ao serviço devolvem o erro 503. O serviço não está a funcionar de momento. Tente novamente mais tarde.</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Fechar</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Tentar novamente</translation>
+    </message>
 </context></TS>

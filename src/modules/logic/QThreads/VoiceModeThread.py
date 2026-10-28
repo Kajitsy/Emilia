@@ -12,6 +12,7 @@ import speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from modules.logic.VTubeCore import EEC
+from modules.api.base_client import USER_AGENT, IMPERSONATE_TARGET
 
 
 class VoiceModeThread(QThread):
@@ -34,7 +35,7 @@ class VoiceModeThread(QThread):
         self.lang = self.mw.current_language
         self.used_emotes = []
 
-        self.session = curl_cffi.AsyncSession()
+        self.session = curl_cffi.AsyncSession(impersonate=IMPERSONATE_TARGET)
         self.ws = None
         self.chat_thread = self.mw.chat_thread
         self.recognizer = speech_recognition.Recognizer()
@@ -89,7 +90,7 @@ class VoiceModeThread(QThread):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
+            "User-Agent": USER_AGENT,
         }
 
         response = await self.session.request(
@@ -164,6 +165,22 @@ class VoiceModeThread(QThread):
                 raise RuntimeError(response["comment"])
             yield response
 
+    def _get_ws_headers(self):
+        cookie_parts = [f'HTTP_AUTHORIZATION="Token {self.token}"']
+        cookie = getattr(self.mw, "cookie", None)
+        if cookie:
+            cookie_parts.append(f"web-next-auth={cookie}")
+
+        return {
+            "User-Agent": USER_AGENT,
+            "Origin": "https://character.ai",
+            "Pragma": "no-cache",
+            "Cache-Control": "no-cache",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "ru,en;q=0.9",
+            "Cookie": "; ".join(cookie_parts),
+        }
+
     async def send_message(self, text):
         while True:
             try:
@@ -177,17 +194,23 @@ class VoiceModeThread(QThread):
                             return response["turn"]
             except curl_cffi.curl.CurlError:
                 self.connected_signal.emit(False)
+                headers = self._get_ws_headers()
                 self.ws = await self.session.ws_connect(
                     "wss://neo.character.ai/ws/",
-                    cookies={"HTTP_AUTHORIZATION": f"Token {self.token}"},
+                    headers=headers,
+                    default_headers=False,
+                    impersonate=IMPERSONATE_TARGET,
                     autoclose=False,
                 )
                 self.connected_signal.emit(True)
 
     async def process_user_input(self):
+        headers = self._get_ws_headers()
         self.ws = await self.session.ws_connect(
             "wss://neo.character.ai/ws/",
-            cookies={"HTTP_AUTHORIZATION": f"Token {self.token}"},
+            headers=headers,
+            default_headers=False,
+            impersonate=IMPERSONATE_TARGET,
             autoclose=False,
         )
         if self.vtube_studio:

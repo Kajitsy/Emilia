@@ -30,6 +30,7 @@ def asyncSlot(func):
 class ChatThread(QThread):
     finished = pyqtSignal(object)
     notification_signal = pyqtSignal(str)
+    service_unavailable_signal = pyqtSignal()
 
     connected_signal = pyqtSignal(bool)
     user_message_signal = pyqtSignal(object)
@@ -121,6 +122,7 @@ class ChatThread(QThread):
         self.mw = main_window
 
         self.client = WSClient()
+        self.client.on_service_unavailable = self.service_unavailable_signal.emit
         self.api_chars = CharacterAPI(self.client)
         self.api_chats = ChatsAPI(self.client)
         self.api_emilia = EmiliaAPI(
@@ -283,9 +285,10 @@ class ChatThread(QThread):
                                 return
 
                             self.message_signal.emit(response)
-                except curl_cffi.curl.CurlError:
-                    await self.client.connect_ws()
-                    logging.getLogger(__name__).warning("ChatThread: Reconnecting to websockets...")
+                except curl_cffi.curl.CurlError as e:
+                    logging.getLogger(__name__).warning(f"ChatThread: Reconnecting to websockets due to error: {e}")
+                    await asyncio.sleep(1)
+                    await self.client.connect_ws(force=True)
 
     def _append_to_history(self, chat_id, text, turn_id, is_human):
         if chat_id not in self.chat_histories:
@@ -401,9 +404,10 @@ class ChatThread(QThread):
                             )
                             message_bubble_added = True
                             turn_id = response["turn"]["turn_key"]["turn_id"]
-                except curl_cffi.curl.CurlError:
-                    await self.client.connect_ws()
-                    logging.getLogger(__name__).warning("ChatThread: Reconnecting to websockets...")
+                except curl_cffi.curl.CurlError as e:
+                    logging.getLogger(__name__).warning(f"ChatThread: Reconnecting to websockets due to error: {e}")
+                    await asyncio.sleep(1)
+                    await self.client.connect_ws(force=True)
 
     @asyncSlot
     async def new_chat(
@@ -429,8 +433,10 @@ class ChatThread(QThread):
                         del self.chat_histories[new_chat_id]
                     self.new_chat_created_signal.emit(response)
                     break
-                except curl_cffi.curl.CurlError:
-                    await self.client.connect_ws()
+                except curl_cffi.curl.CurlError as e:
+                    logging.getLogger(__name__).warning(f"ChatThread: Reconnecting to websockets due to error: {e}")
+                    await asyncio.sleep(1)
+                    await self.client.connect_ws(force=True)
 
     @asyncSlot
     async def turn_remove(self, chat_id, turn_ids):

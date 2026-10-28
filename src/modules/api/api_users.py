@@ -1,3 +1,6 @@
+from .base_client import USER_AGENT, IMPERSONATE_TARGET
+
+
 class UsersAPI:
     def __init__(self, client):
         self.client = client
@@ -84,7 +87,7 @@ class UsersAPI:
             "Content-Type": "multipart/form-data",
             "Authorization": f"Token {self.client.token}",
             "Cookie": f"web-next-auth={self.client.cookie}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
+            "User-Agent": USER_AGENT,
         }
         response = await self.client.session.request(
             "POST",
@@ -92,6 +95,6 @@ class UsersAPI:
             headers=headers,
             multipart=multipart,
             timeout=100,
-            impersonate="chrome",
+            impersonate=IMPERSONATE_TARGET,
         )
         return response.json()

@@ -203,9 +203,9 @@ class MainPage(QWidget):
         if self.data.get("description"):
             self.description_label.setText(self.data.get("description"))
         if self.voted:
-            if self.vote == True:
+            if self.vote is True:
                 self.like_button.setIcon(self.mw.svg_icons.liked())
-            elif self.vote == False:
+            elif self.vote is False:
                 self.dislike_button.setIcon(self.mw.svg_icons.disliked())
 
     def shareCharacter(self):
@@ -216,7 +216,7 @@ class MainPage(QWidget):
 
     def dislikeCharacter(self):
         self.like_button.setIcon(self.mw.svg_icons.like())
-        if self.vote == False:
+        if self.vote is False:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
             self.dislike_button.setIcon(self.mw.svg_icons.dislike())
@@ -227,7 +227,7 @@ class MainPage(QWidget):
 
     def likeCharacter(self):
         self.dislike_button.setIcon(self.mw.svg_icons.dislike())
-        if self.vote:
+        if self.vote is True:
             self.vote = None
             self.chat_thread.character_vote(self.character_id, None)
             self.like_button.setIcon(self.mw.svg_icons.like())

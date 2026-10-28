@@ -8,6 +8,7 @@ from livekit import rtc
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from modules.logic.VTubeCore import EEC
+from modules.api.base_client import USER_AGENT
 
 
 class VoiceModeThreadV2(QThread):
@@ -81,7 +82,7 @@ class VoiceModeThreadV2(QThread):
         headers = {
             "Authorization": f"Token {self.token}",
             "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
+            "User-Agent": USER_AGENT,
         }
 
         if self.voice_id:

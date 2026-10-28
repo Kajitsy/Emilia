@@ -14,10 +14,10 @@ class EditCard(QFrame):
         self.mw = main_window
 
         self.data = {
-            "avatar_rel_path": self.mw.me.get("account", {}).get("avatar_file_name"),
-            "avatar_type": self.mw.me.get("account", {}).get("avatar_type"),
+            "avatar_rel_path": self.mw.account.get("avatar_file_name"),
+            "avatar_type": self.mw.account.get("avatar_type"),
             "bio": self.mw.me_full.get("bio"),
-            "name": self.mw.me.get("account", {}).get("name"),
+            "name": self.mw.account.get("name"),
             "username": self.mw.me.get("username"),
         }
 

@@ -2836,4 +2836,26 @@ Z.B. Entlarven Sie den Fremden vor Ende des Walzers.
         <source>Likes (High to Low)</source>
         <translation>Likes (absteigend)</translation>
     </message>
+</context><context>
+    <name>ServiceUnavailableDialog</name>
+    <message>
+        <source>Service Unavailable</source>
+        <translation>Dienst nicht verfügbar</translation>
+    </message>
+    <message>
+        <source>The service is experiencing heavy load</source>
+        <translation>Der Dienst ist stark ausgelastet</translation>
+    </message>
+    <message>
+        <source>All requests to the service are returning error 503. The service is currently not working. Please try again later.</source>
+        <translation>Alle Anfragen an den Dienst liefern den Fehler 503. Der Dienst funktioniert derzeit nicht. Bitte versuchen Sie es später erneut.</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Erneut versuchen</translation>
+    </message>
 </context></TS>
