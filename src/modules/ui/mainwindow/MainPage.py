@@ -169,8 +169,8 @@ class MainPage(QMainWindow):
         self.image_loader = ImageLoader()
 
         self.setOutputDevice(self.settings.value("output_device", 0, type=int))
-        if getattr(sys, "frozen", False) and platform.system() == "Windows":
-            self.updater_thread.start()
+        #if getattr(sys, "frozen", False) and platform.system() == "Windows":
+        #    self.updater_thread.start()
 
         self.initUI()
         self.loadUI()

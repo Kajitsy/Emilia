@@ -70,13 +70,13 @@ jobs:
             --hidden-import "livekit.rtc.resources" `
             --exclude-module PIL `
             "src\main.py"
-          
+
           copy "src\icon.ico" "dist\main\icon.ico"
           copy "VERSION" "dist\main\VERSION"
           xcopy /E /I /H /Y "src\lang" "dist\main\lang"
           xcopy /E /I /H /Y "src\themes" "dist\main\themes"
           xcopy /E /I /H /Y "src\data" "dist\main\data"
-          
+
           if (Test-Path "dist\main\main.exe") {
               Rename-Item -Path "dist\main\main.exe" -NewName "emilia.exe"
           } else {
@@ -119,7 +119,8 @@ jobs:
 
   Windows-Deploy:
     needs: Windows-Build
-    if: ${{ github.event.release.tag_name != '' || github.event.inputs.tag != '' }}
+    # if: ${{ github.event.release.tag_name != '' || github.event.inputs.tag != '' }}
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
@@ -188,7 +189,7 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          chmod -R +rx $(python -c "import PyQt6; print(list(PyQt6.__path__)[0])")   
+          chmod -R +rx $(python -c "import PyQt6; print(list(PyQt6.__path__)[0])")
 
           pyinstaller --noconfirm --onedir --windowed \
             --icon "src/icon.ico" \
@@ -250,7 +251,8 @@ jobs:
 
   Linux-Deploy:
     needs: Linux-Build
-    if: ${{ github.event.release.tag_name != '' || github.event.inputs.tag != '' }}
+    # if: ${{ github.event.release.tag_name != '' || github.event.inputs.tag != '' }}
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
