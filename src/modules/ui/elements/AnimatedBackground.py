@@ -3,7 +3,7 @@ import os
 import time
 
 import cv2
-from PIL import Image
+import numpy as np
 from PyQt6.QtCore import (
     QRect,
     Qt,
@@ -12,6 +12,7 @@ from PyQt6.QtCore import (
 )
 from PyQt6.QtGui import (
     QImage,
+    QImageReader,
     QMovie,
     QPainter,
     QPixmap,
@@ -339,6 +340,39 @@ MediaBackgroundWidget = AnimatedBackgroundWidget
 ChatBackgroundWidget = AnimatedBackgroundWidget
 
 
+def _load_image_pixels(path: str):
+    """
+    Reads a static image or the first frame of a GIF via Qt codecs.
+    Returns an (H, W, 3) RGB uint8 array or None.
+    """
+    reader = QImageReader(path)
+    reader.setAutoTransform(True)
+    image = reader.read()
+    if image is None or image.isNull():
+        return None
+    image = image.convertToFormat(QImage.Format.Format_RGB888)
+    h, w = image.height(), image.width()
+    buf = image.constBits().asarray(image.sizeInBytes())
+    arr = np.frombuffer(buf, dtype=np.uint8).reshape(h, image.bytesPerLine())
+    return np.ascontiguousarray(arr[:, : w * 3].reshape(h, w, 3))
+
+
+def _dominant_colors(pixels, count: int = 6):
+    """
+    k-means color quantization; clusters are ordered by size (dominance).
+    Returns a list of (r, g, b) tuples.
+    """
+    data = np.ascontiguousarray(pixels.reshape(-1, 3), dtype=np.float32)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 0.5)
+    cv2.setRNGSeed(7)  # deterministic palette between runs
+    _, labels, centers = cv2.kmeans(
+        data, count, None, criteria, 3, cv2.KMEANS_PP_CENTERS
+    )
+    counts = np.bincount(labels.ravel(), minlength=count)
+    centers = np.rint(centers).astype(int)
+    return [tuple(int(v) for v in centers[i]) for i in np.argsort(counts)[::-1]]
+
+
 def extract_media_palette(media_path: str):
     """
     Extracts a balanced color theme palette from an image, gif, or video file.
@@ -354,19 +388,14 @@ def extract_media_palette(media_path: str):
             cap.release()
             if not ret:
                 return None
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = Image.fromarray(rgb_frame)
+            pixels = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         else:
-            img = Image.open(media_path)
+            pixels = _load_image_pixels(media_path)
+            if pixels is None:
+                return None
 
-        img = img.convert("RGB").resize((150, 150))
-        result = img.quantize(colors=6)
-        palette = result.getpalette()
-
-        colors = []
-        for i in range(0, 18, 3):
-            rgb = (palette[i], palette[i + 1], palette[i + 2])
-            colors.append(rgb)
+        pixels = cv2.resize(pixels, (150, 150), interpolation=cv2.INTER_AREA)
+        colors = _dominant_colors(pixels)
 
         def rgb_to_hex(rgb):
             return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"

@@ -27,7 +27,6 @@ curl_cffi==0.15.0
 livekit==1.1.13
 live2d-py
 numpy==2.5.1
-pillow==12.3.0
 pyopengl==3.1.10
 pyopengl-accelerate==3.1.10
 platformdirs==4.11.0

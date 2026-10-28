@@ -68,6 +68,7 @@ jobs:
             --hidden-import "urllib3.contrib.hface.protocols.http1" `
             --hidden-import "urllib3.contrib.hface.protocols.http2" `
             --hidden-import "livekit.rtc.resources" `
+            --exclude-module PIL `
             "src\main.py"
           
           copy "src\icon.ico" "dist\main\icon.ico"
@@ -200,6 +201,7 @@ jobs:
             --hidden-import "urllib3.contrib.hface.protocols.http1" \
             --hidden-import "urllib3.contrib.hface.protocols.http2" \
             --hidden-import "livekit.rtc.resources" \
+            --exclude-module PIL \
             "src/main.py"
 
           cp "src/icon.ico" "dist/main/icon.ico"
