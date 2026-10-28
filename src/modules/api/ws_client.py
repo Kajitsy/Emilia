@@ -2,7 +2,7 @@ import json
 import logging
 import uuid
 
-from .base_client import BaseClient
+from .base_client import BaseClient, USER_AGENT
 
 
 class WSClient(BaseClient):
@@ -17,6 +17,7 @@ class WSClient(BaseClient):
         try:
             self.ws = await self.session.ws_connect(
                 "wss://neo.character.ai/ws/",
+                headers={"User-Agent": USER_AGENT},
                 cookies={"HTTP_AUTHORIZATION": f"Token {self.token}"},
                 autoclose=False,
             )

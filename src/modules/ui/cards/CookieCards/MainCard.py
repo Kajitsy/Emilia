@@ -4,6 +4,7 @@ from PyQt6.QtWebEngineCore import QWebEngineNewWindowRequest, QWebEngineProfile
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
+from modules.api.base_client import USER_AGENT
 from modules.logic import RequestInterceptor
 from modules.ui import TM
 from modules.ui.Elements import LineEdit, PushButton
@@ -19,9 +20,7 @@ class MainCard(QWidget):
         super().__init__()
         self.browser = QWebEngineView()
         self.profile = QWebEngineProfile.defaultProfile()
-        self.profile.setHttpUserAgent(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0"
-        )
+        self.profile.setHttpUserAgent(USER_AGENT)
         self.interceptor = RequestInterceptor()
         self.svg_icons = Svg()
 

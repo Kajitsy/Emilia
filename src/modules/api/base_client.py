@@ -8,6 +8,8 @@ import curl_cffi
 SERVICE_UNAVAILABLE_STATUS = 503
 SERVICE_UNAVAILABLE_THRESHOLD = 3
 
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"
+
 
 class BaseClient:
     def __init__(self):
@@ -50,7 +52,7 @@ class BaseClient:
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
             "Cookie": f"web-next-auth={self.cookie}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
+            "User-Agent": USER_AGENT,
         }
         if additional:
             headers.update(additional)

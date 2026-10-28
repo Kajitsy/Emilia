@@ -51,7 +51,7 @@ class UpdateThread(QThread):
         try:
             r = requests.get(
                 f"{self.remote_url}manifest.json",
-                impersonate="chrome120",
+                impersonate="chrome",
                 timeout=10,
             )
             if r.status_code == 200:
@@ -104,7 +104,7 @@ class UpdateThread(QThread):
 
                 r = requests.get(
                     url,
-                    impersonate="chrome120",
+                    impersonate="chrome",
                     stream=True,
                     timeout=30,
                 )

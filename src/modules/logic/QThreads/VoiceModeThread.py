@@ -12,6 +12,7 @@ import speech_recognition
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from modules.logic.VTubeCore import EEC
+from modules.api.base_client import USER_AGENT
 
 
 class VoiceModeThread(QThread):
@@ -89,7 +90,7 @@ class VoiceModeThread(QThread):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {self.token}",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
+            "User-Agent": USER_AGENT,
         }
 
         response = await self.session.request(
@@ -179,6 +180,7 @@ class VoiceModeThread(QThread):
                 self.connected_signal.emit(False)
                 self.ws = await self.session.ws_connect(
                     "wss://neo.character.ai/ws/",
+                    headers={"User-Agent": USER_AGENT},
                     cookies={"HTTP_AUTHORIZATION": f"Token {self.token}"},
                     autoclose=False,
                 )
@@ -187,6 +189,7 @@ class VoiceModeThread(QThread):
     async def process_user_input(self):
         self.ws = await self.session.ws_connect(
             "wss://neo.character.ai/ws/",
+            headers={"User-Agent": USER_AGENT},
             cookies={"HTTP_AUTHORIZATION": f"Token {self.token}"},
             autoclose=False,
         )

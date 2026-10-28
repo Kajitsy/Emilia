@@ -108,7 +108,7 @@ class UpdaterThread(QThread):
 
         for url in urls_to_try:
             try:
-                response = requests.get(url, impersonate="chrome120", timeout=10)
+                response = requests.get(url, impersonate="chrome", timeout=10)
                 if response.status_code == 200:
                     data = response.json()
                     if isinstance(data, dict) and "files" in data and isinstance(data["files"], dict):

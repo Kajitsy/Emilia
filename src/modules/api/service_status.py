@@ -3,7 +3,7 @@ import logging
 
 import curl_cffi
 
-from modules.api.base_client import SERVICE_UNAVAILABLE_STATUS
+from modules.api.base_client import SERVICE_UNAVAILABLE_STATUS, USER_AGENT
 
 SERVICE_CHECK_URLS = (
     ("GET", "https://neo.character.ai/user/"),
@@ -18,7 +18,7 @@ async def is_service_unavailable(token: str = "", cookie: str = "") -> bool:
         "Content-Type": "application/json",
         "Authorization": f"Token {token}",
         "Cookie": f"web-next-auth={cookie}",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0",
+        "User-Agent": USER_AGENT,
     }
 
     try:
